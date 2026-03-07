@@ -1,124 +1,118 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ShieldAlert, Users, Image as ImageIcon, CheckCircle, XCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Users, Palette, MessageSquareText, TrendingUp, CreditCard } from "lucide-react"
 
-export default async function AdminDashboardPage() {
-    const supabase = await createClient()
-
-    if (!supabase) {
-        return (
-            <div className="container-lg py-20 text-center">
-                <h1 className="text-h2 font-display text-[var(--color-error-base)]">Database Belum Tersedia</h1>
-                <p>Silakan hubungkan Supabase di pengaturan environment.</p>
-            </div>
-        )
-    }
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        redirect("/login")
-    }
-
-    // Role check
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-    // For MVP testing without real users set to admin, we will bypass if profile is null but show a warning
-    // In production, strictly enforce profile?.role === 'admin'
-    const isAdmin = profile?.role === 'admin' || profile?.role === 'owner' // owner is also an admin
-
-    if (!isAdmin) {
-        return (
-            <div className="container-lg py-20 text-center flex flex-col items-center gap-4">
-                <ShieldAlert className="w-16 h-16 text-[var(--color-error-base)]" />
-                <h1 className="text-h3 font-display font-bold text-[var(--color-neutral-900)]">Akses Ditolak</h1>
-                <p className="text-body-md text-[var(--color-neutral-600)]">Halaman ini khusus untuk Admin. Harap login dengan akun yang sesuai.</p>
-                <Button asChild className="mt-4"><a href="/dashboard">Kembali ke Dashboard</a></Button>
-            </div>
-        )
-    }
-
-    // Fetch Admin Data
-    const { data: themes } = await supabase.from('themes').select('*').order('created_at', { ascending: false })
-    const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
-
+export default function AdminOverviewPage() {
     return (
-        <div className="container-lg py-12 flex flex-col gap-8">
+        <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
             <div>
-                <h1 className="text-h2 font-display font-bold text-[var(--color-neutral-900)]">Admin Panel</h1>
-                <p className="text-body-md text-[var(--color-neutral-500)]">Kelola tema dan moderasi konten.</p>
+                <h1 className="text-3xl font-serif font-bold text-[#14213D]">Ringkasan Sistem</h1>
+                <p className="text-gray-500 mt-1 text-lg">Pantau aktivitas platform umuman secara real-time.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Pengguna Aktif</CardTitle>
-                        <Users className="h-4 w-4 text-[var(--color-neutral-500)]" />
+            {/* Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <Card className="border-gray-200 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Total Pengguna</CardTitle>
+                        <Users className="w-4 h-4 text-[#FCA311]" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{usersCount || 0}</div>
-                        <p className="text-xs text-[var(--color-neutral-500)]">Dari seluruh platform</p>
+                        <div className="text-2xl font-bold text-[#14213D]">2,845</div>
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> +124 minggu ini
+                        </p>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Tema</CardTitle>
-                        <ImageIcon className="h-4 w-4 text-[var(--color-neutral-500)]" />
+                <Card className="border-gray-200 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Total Undangan</CardTitle>
+                        <Palette className="w-4 h-4 text-[#FCA311]" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{themes?.length || 0}</div>
-                        <p className="text-xs text-[var(--color-neutral-500)]">Tersedia di gallery</p>
+                        <div className="text-2xl font-bold text-[#14213D]">1,203</div>
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> +56 minggu ini
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card className="border-gray-200 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Ucapan Tertunda</CardTitle>
+                        <MessageSquareText className="w-4 h-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#14213D]">48</div>
+                        <p className="text-xs text-red-500 mt-1 cursor-pointer hover:underline">
+                            Perlu dimoderasi segera
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card className="border-gray-200 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Pendapatan (Bulan Ini)</CardTitle>
+                        <CreditCard className="w-4 h-4 text-[#FCA311]" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-[#14213D]">Rp 14.5M</div>
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> +8.2% dari bulan lalu
+                        </p>
                     </CardContent>
                 </Card>
             </div>
 
-            <h2 className="text-h4 font-display font-bold text-[var(--color-neutral-800)] mt-4">Manajemen Tema</h2>
-            <div className="overflow-x-auto rounded-lg border border-[var(--color-neutral-200)] bg-white">
-                <table className="min-w-full divide-y divide-[var(--color-neutral-200)] text-left text-sm">
-                    <thead className="bg-[var(--color-neutral-50)]">
-                        <tr>
-                            <th className="px-6 py-4 font-semibold text-[var(--color-neutral-700)]">Nama Tema</th>
-                            <th className="px-6 py-4 font-semibold text-[var(--color-neutral-700)]">Kategori</th>
-                            <th className="px-6 py-4 font-semibold text-[var(--color-neutral-700)]">Tipe</th>
-                            <th className="px-6 py-4 font-semibold text-[var(--color-neutral-700)] text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--color-neutral-200)]">
-                        {themes?.map((theme: any) => (
-                            <tr key={theme.id} className="hover:bg-[var(--color-neutral-50)]">
-                                <td className="px-6 py-4 font-medium">{theme.name}</td>
-                                <td className="px-6 py-4 capitalize">{theme.category}</td>
-                                <td className="px-6 py-4">
-                                    {theme.is_premium ? (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-warning-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-warning-700)]">
-                                            Premium
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-success-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-success-700)]">
-                                            Gratis
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <Button variant="ghost" size="sm" className="text-[var(--color-primary-600)]">Edit</Button>
-                                </td>
-                            </tr>
-                        ))}
-                        {(!themes || themes.length === 0) && (
-                            <tr>
-                                <td colSpan={4} className="px-6 py-8 text-center text-[var(--color-neutral-500)] italic">
-                                    Belum ada tema. Coba jalankan skrip seed.sql
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+            {/* Recent Activity (Dummy) */}
+            <div className="grid gap-6 md:grid-cols-2">
+                <Card className="border-gray-200 shadow-sm">
+                    <CardHeader>
+                        <CardTitle className="font-serif">Pendaftaran Terbaru</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            {[
+                                { name: "Andi Wijaya", email: "andi@gmail.com", time: "10 menit yang lalu" },
+                                { name: "Siti Nurhaliza", email: "siti.n@yahoo.com", time: "32 menit yang lalu" },
+                                { name: "Budi Santoso", email: "b.santoso@outlook.com", time: "1 jam yang lalu" },
+                            ].map((user, i) => (
+                                <div key={i} className="flex items-center justify-between border-b border-gray-100 last:border-0 pb-3 last:pb-0">
+                                    <div>
+                                        <p className="text-sm font-medium text-[#14213D]">{user.name}</p>
+                                        <p className="text-xs text-gray-500">{user.email}</p>
+                                    </div>
+                                    <span className="text-xs text-gray-400">{user.time}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-gray-200 shadow-sm">
+                    <CardHeader>
+                        <CardTitle className="font-serif">Transaksi Sukses Terakhir</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            {[
+                                { pkg: "Paket Premium", user: "Rina & Dimas", amount: "Rp 99.000" },
+                                { pkg: "Paket Eksklusif", user: "Maya & Eko", amount: "Rp 249.000" },
+                                { pkg: "Paket Premium", user: "Dina & Reza", amount: "Rp 99.000" },
+                            ].map((tx, i) => (
+                                <div key={i} className="flex items-center justify-between border-b border-gray-100 last:border-0 pb-3 last:pb-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                            <TrendingUp className="w-4 h-4 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-[#14213D]">{tx.user}</p>
+                                            <p className="text-xs text-gray-500">{tx.pkg}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-sm font-bold text-[#14213D]">{tx.amount}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

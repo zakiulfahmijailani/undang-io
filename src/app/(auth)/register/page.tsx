@@ -1,72 +1,119 @@
-import Link from "next/link"
-import { signup } from "../actions"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Mail, Lock, User } from "lucide-react"
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FaGoogle } from "react-icons/fa";
+
+const registerSchema = z.object({
+    name: z.string().min(2, "Nama wajib diisi"),
+    email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
+    password: z.string().min(6, "Minimal 6 karakter"),
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-    return (
-        <div className="flex min-h-screen flex-col items-center justify-center p-4">
-            <div className="text-center mb-8">
-                <h1 className="text-display-lg text-[var(--color-primary-500)] mb-2">NikahKu</h1>
-                <p className="text-body-lg text-[var(--color-neutral-600)]">Mulai Perjalanan Anda</p>
-            </div>
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<RegisterFormValues>({
+        resolver: zodResolver(registerSchema),
+    });
 
-            <Card className="w-full max-w-md">
-                <CardHeader>
-                    <CardTitle>Daftar Akun Baru</CardTitle>
-                    <CardDescription>
-                        Buat akun untuk mulai membuat undangan pernikahan digital Anda.
-                    </CardDescription>
+    const onSubmit = async (data: RegisterFormValues) => {
+        // Dummy submit logic
+        console.log("Register data:", data);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        alert("Proses pendaftaran: " + data.email);
+    };
+
+    return (
+        <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4 py-12 px-4 sm:px-6 lg:px-8">
+            <Card className="w-full max-w-md border-border/50 shadow-xl shadow-primary/5">
+                <CardHeader className="space-y-1 text-center">
+                    <Link href="/" className="font-serif text-2xl font-bold text-primary mb-2 inline-block">
+                        umuman
+                    </Link>
+                    <CardTitle className="text-2xl font-serif">Buat Akun Baru</CardTitle>
+                    <CardDescription>Mulai perjalanan undangan digital Anda bersama kami</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form className="flex flex-col gap-4">
-                        <Input
-                            id="fullName"
-                            name="fullName"
-                            type="text"
-                            label="Nama Lengkap"
-                            placeholder="Rina & Andi"
-                            required
-                            leftAdornment={<User className="w-5 h-5" />}
-                        />
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            label="Alamat Email"
-                            placeholder="nama@email.com"
-                            required
-                            leftAdornment={<Mail className="w-5 h-5" />}
-                        />
-                        <Input
-                            id="password"
-                            name="password"
-                            type="password"
-                            label="Kata Sandi"
-                            placeholder="Minimal 6 karakter"
-                            required
-                            leftAdornment={<Lock className="w-5 h-5" />}
-                        />
-
-                        <Button formAction={signup} variant="primary" fullWidth className="mt-4">
-                            Daftar Akun
+                    <div className="grid gap-6">
+                        <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
+                            <FaGoogle className="w-4 h-4 text-red-500" />
+                            Daftar dengan Google
                         </Button>
-                    </form>
-                </CardContent>
-                <CardFooter className="flex justify-center flex-col gap-3 text-center">
-                    <p className="text-body-sm text-[var(--color-neutral-500)]">
-                        Sudah punya akun?{' '}
-                        <Link href="/login" className="text-[var(--color-primary-600)] hover:underline font-semibold">
-                            Masuk di sini
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-border/50" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-card px-2 text-muted-foreground">Atau daftar dengan email</span>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+                            <div className="grid gap-2">
+                                <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Nama Lengkap
+                                </label>
+                                <input
+                                    id="name"
+                                    type="text"
+                                    placeholder="Budi Santoso"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    {...register("name")}
+                                />
+                                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    placeholder="nama@email.com"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    {...register("email")}
+                                />
+                                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Password
+                                </label>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Minimal 6 karakter"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    {...register("password")}
+                                />
+                                {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+                            </div>
+
+                            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-2" disabled={isSubmitting}>
+                                {isSubmitting ? "Memproses..." : "Daftar Sekarang"}
+                            </Button>
+                        </form>
+                    </div>
+                    <div className="mt-6 text-center text-sm">
+                        Sudah punya akun?{" "}
+                        <Link href="/login" className="text-primary font-medium hover:underline">
+                            Masuk
                         </Link>
-                    </p>
-                    <p className="text-caption text-neutral-400 mt-2">
-                        Dengan mendaftar, Anda menyetujui Syarat dan Ketentuan Layanan kami.
-                    </p>
-                </CardFooter>
+                    </div>
+                </CardContent>
             </Card>
         </div>
-    )
+    );
 }
