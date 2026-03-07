@@ -50,22 +50,28 @@ export default function DashboardPage() {
                 </Card>
                 <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Ucapan & Doa</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            Ucapan Baru
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">5</span>
+                        </CardTitle>
                         <MessageSquareHeart className="w-4 h-4 text-primary" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">32</div>
-                        <p className="text-xs text-muted-foreground mt-1">Belum dibaca: 5</p>
+                        <div className="text-2xl font-bold">5</div>
+                        <p className="text-xs text-muted-foreground mt-1">Dari total 32 ucapan</p>
                     </CardContent>
                 </Card>
-                <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow bg-primary/5 border-primary/20">
+                <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow bg-secondary/30 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-400/20 to-transparent rounded-bl-full" />
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-primary">Status Paket</CardTitle>
-                        <ShieldCheck className="w-4 h-4 text-primary" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Status Paket</CardTitle>
+                        <ShieldCheck className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-primary">Premium</div>
-                        <p className="text-xs text-primary/80 mt-1">Aktif s/d 12 Des 2026</p>
+                    <CardContent className="flex flex-col gap-2">
+                        <div className="text-2xl font-bold text-foreground">Gratis</div>
+                        <Button size="sm" className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 shadow-md">
+                            Upgrade Premium
+                        </Button>
                     </CardContent>
                 </Card>
             </div>

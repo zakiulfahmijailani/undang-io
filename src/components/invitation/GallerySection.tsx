@@ -1,50 +1,33 @@
-"use client"
-
-import { motion } from "framer-motion"
+import Image from "next/image"
 
 export default function GallerySection() {
     const images = [
-        "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1974&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1623087094056-b7ff83af8f13?q=80&w=1970&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop"
-    ];
+        "https://picsum.photos/id/1018/400/500",
+        "https://picsum.photos/id/1019/400/400",
+        "https://picsum.photos/id/1020/400/600",
+        "https://picsum.photos/id/1021/400/600",
+        "https://picsum.photos/id/1022/400/400",
+        "https://picsum.photos/id/1023/400/500",
+    ]
 
     return (
-        <section className="py-24 bg-white px-4 sm:px-6">
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="max-w-6xl mx-auto text-center"
-            >
-                <h2 className="font-serif text-3xl sm:text-4xl text-neutral-800 mb-4 cursor-default">Potret Kebahagiaan</h2>
-                <p className="text-neutral-500 max-w-lg mx-auto mb-12 sm:mb-16 text-sm sm:text-base px-2">
-                    Mengabadikan detik demi detik perjalanan cinta kami hingga sampai pada hari kebahagiaan ini.
-                </p>
+        <section className="py-20 px-6 bg-white text-center">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#14213D] mb-4">Galeri Momen</h2>
+            <p className="text-gray-500 mb-10 max-w-sm mx-auto text-sm">Berbagi kebahagiaan kami dalam setiap potret kenangan indah bersama.</p>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
-                    {images.map((img, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: i * 0.15 }}
-                            className={`rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer border border-neutral-100/50 shadow-sm
-                                ${i === 0 ? "md:col-span-2 md:row-span-2 aspect-square md:aspect-auto" : "aspect-[4/5]"}
-                            `}
-                        >
-                            <img
-                                src={img}
-                                alt={`Gallery Photo ${i + 1}`}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                        </motion.div>
-                    ))}
-                </div>
-            </motion.div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-4xl mx-auto">
+                {images.map((src, index) => (
+                    <div key={index} className="relative aspect-[4/5] overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-shadow group">
+                        <Image
+                            src={src}
+                            alt={`Gallery ${index + 1}`}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                ))}
+            </div>
         </section>
     )
 }

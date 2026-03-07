@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +60,10 @@ export default function LandingPage() {
             {/* Navbar */}
             <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
                 <div className="container mx-auto flex h-16 items-center justify-between px-4">
-                    <Link href="/" className="font-serif text-2xl font-bold text-primary">umuman</Link>
+                    <Link href="/" className="flex items-center gap-4">
+                        <Image src="/logo.png" alt="umuman logo" width={56} height={56} className="w-14 h-14 object-contain" />
+                        <span className="font-serif text-4xl font-bold text-primary tracking-tighter">umuman</span>
+                    </Link>
                     <div className="hidden items-center gap-6 md:flex">
                         <Link href="#fitur" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Fitur</Link>
                         <Link href="#harga" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Harga</Link>
@@ -237,7 +241,10 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4">
                     <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
-                            <h3 className="font-serif text-xl font-bold text-primary">umuman</h3>
+                            <div className="flex items-center gap-4 mb-4">
+                                <Image src="/logo.png" alt="umuman logo" width={48} height={48} className="w-12 h-12 object-contain" />
+                                <h3 className="font-serif text-3xl font-bold text-primary">umuman</h3>
+                            </div>
                             <p className="mt-2 text-sm text-muted-foreground">Platform undangan pernikahan digital terpercaya di Indonesia.</p>
                         </div>
                         <div>

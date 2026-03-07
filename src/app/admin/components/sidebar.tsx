@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { LayoutDashboard, Users, Palette, MessageSquareText, LogOut, CheckCircle, XCircle } from "lucide-react"
 
 export function AdminSidebar({ isOpen }: { isOpen: boolean }) {
     const pathname = usePathname()
 
     const navItems = [
-        { name: "Overview", href: "/admin", icon: LayoutDashboard },
         { name: "Manajemen Pengguna", href: "/admin/users", icon: Users },
         { name: "Kelola Tema", href: "/admin/themes", icon: Palette },
         { name: "Moderasi Ucapan", href: "/admin/messages", icon: MessageSquareText },
@@ -22,11 +22,10 @@ export function AdminSidebar({ isOpen }: { isOpen: boolean }) {
             >
                 {/* Logo Area */}
                 <div className="flex flex-col items-center justify-center p-6 min-h-[100px] w-64 border-b border-[#1e305a]">
-                    <div className="flex items-center gap-2">
-                        <Link href="/admin" className="font-serif text-3xl font-bold text-white">
-                            umuman
-                        </Link>
-                    </div>
+                    <Link href="/admin" className="flex flex-col items-center gap-4 group">
+                        <Image src="/logo.png" alt="umuman logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-105 brightness-0 invert" />
+                        <span className="font-serif text-3xl font-bold text-white tracking-tight">umuman</span>
+                    </Link>
                     <span className="text-[10px] uppercase tracking-widest text-[#FCA311] mt-1 font-bold">Admin Panel</span>
                 </div>
 

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FaGoogle } from "react-icons/fa";
@@ -36,8 +37,9 @@ export default function RegisterPage() {
         <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="w-full max-w-md border-border/50 shadow-xl shadow-primary/5">
                 <CardHeader className="space-y-1 text-center">
-                    <Link href="/" className="font-serif text-2xl font-bold text-primary mb-2 inline-block">
-                        umuman
+                    <Link href="/" className="flex flex-col items-center gap-4 mb-8 group inline-block">
+                        <Image src="/logo.png" alt="umuman logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-110" />
+                        <span className="font-serif text-4xl font-bold text-primary">umuman</span>
                     </Link>
                     <CardTitle className="text-2xl font-serif">Buat Akun Baru</CardTitle>
                     <CardDescription>Mulai perjalanan undangan digital Anda bersama kami</CardDescription>

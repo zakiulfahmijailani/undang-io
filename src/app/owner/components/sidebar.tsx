@@ -2,16 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { LayoutDashboard, Users, CreditCard, Settings, LogOut } from "lucide-react"
 
 export function OwnerSidebar({ isOpen }: { isOpen: boolean }) {
     const pathname = usePathname()
 
     const navItems = [
-        { name: "Dashboard", href: "/owner/dashboard", icon: LayoutDashboard },
-        { name: "Semua Pengguna", href: "/owner/users", icon: Users },
-        { name: "Semua Transaksi", href: "/owner/transactions", icon: CreditCard },
-        { name: "Pengaturan Sistem", href: "/owner/settings", icon: Settings },
+        { name: "Ringkasan (Overview)", href: "/owner/dashboard", icon: LayoutDashboard },
+        { name: "Transaksi & Revenue", href: "/owner/transactions", icon: CreditCard },
+        { name: "Manajemen Pengguna", href: "/owner/users", icon: Users },
+        { name: "Pengaturan Platform", href: "/owner/settings", icon: Settings },
     ]
 
     return (
@@ -22,11 +23,12 @@ export function OwnerSidebar({ isOpen }: { isOpen: boolean }) {
             >
                 {/* Logo Area */}
                 <div className="flex flex-col items-center justify-center p-6 min-h-[100px] w-64 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                        <span className="font-serif text-3xl font-bold text-white tracking-wide">
+                    <Link href="/owner/dashboard" className="flex flex-col items-center gap-4 group">
+                        <Image src="/logo.png" alt="umuman logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-105" />
+                        <span className="font-serif text-3xl font-bold text-white tracking-widest uppercase">
                             umuman
                         </span>
-                    </div>
+                    </Link>
                     <span className="text-[10px] uppercase tracking-widest text-[#10B981] mt-1 font-bold">Owner Dashboard</span>
                 </div>
 

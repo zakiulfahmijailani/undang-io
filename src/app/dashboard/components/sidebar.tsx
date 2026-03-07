@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { Home, Mail, FileText, LayoutTemplate, User, LogOut } from "lucide-react"
 
 export function Sidebar({ isOpen }: { isOpen: boolean }) {
@@ -23,8 +24,9 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
             >
                 {/* Logo Area */}
                 <div className="flex flex-col items-center justify-center p-6 min-h-[100px] w-64 border-b">
-                    <Link href="/dashboard" className="font-serif text-3xl font-bold text-primary">
-                        umuman
+                    <Link href="/dashboard" className="flex flex-col items-center gap-4 group">
+                        <Image src="/logo.png" alt="umuman logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-105" />
+                        <span className="font-serif text-3xl font-bold text-primary tracking-tight">umuman</span>
                     </Link>
                 </div>
 
