@@ -1,0 +1,82 @@
+export const demoData = {
+    coupleShortName: "Ayu & Budi",
+    groom: {
+        fullName: "Budi Santoso, S.T.",
+        father: "Bapak H. Ahmad Santoso",
+        mother: "Ibu Hj. Siti Aminah",
+        photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+    },
+    bride: {
+        fullName: "Ayu Pratiwi, S.Pd.",
+        father: "Bapak H. Surya Pratama",
+        mother: "Ibu Hj. Ratna Dewi",
+        photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
+    },
+    coverPhoto: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop",
+    heroPhoto: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1920&h=1080&fit=crop",
+    quote: {
+        text: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang.",
+        source: "QS. Ar-Rum: 21",
+    },
+    akad: {
+        date: "2026-06-15T08:00:00",
+        venue: "Masjid Agung Al-Azhar",
+        address: "Jl. Sisingamangaraja No.Kav.18, Kebayoran Baru, Jakarta Selatan",
+        mapsUrl: "https://maps.google.com/?q=-6.2415,106.8018",
+    },
+    reception: {
+        date: "2026-06-15T11:00:00",
+        venue: "Balai Kartini",
+        address: "Jl. Gatot Subroto Kav.37, Jakarta Selatan 12950",
+        mapsUrl: "https://maps.google.com/?q=-6.2320,106.8270",
+    },
+    dressCode: {
+        description: "Sage Green & Earth Tones",
+        colors: ["#87986a", "#c8b88a", "#d4c5a9", "#a3b18a"],
+    },
+    loveStory: [
+        {
+            date: "September 2020",
+            title: "Pertama Bertemu",
+            description: "Kami pertama kali bertemu di acara seminar kampus. Senyummu yang hangat membuat hari itu berbeda.",
+            photo: "https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=600&h=400&fit=crop",
+        },
+        {
+            date: "Februari 2021",
+            title: "Mulai Dekat",
+            description: "Setelah berbulan-bulan saling bertukar pesan, kami mulai sering menghabiskan waktu bersama.",
+            photo: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=600&h=400&fit=crop",
+        },
+        {
+            date: "Desember 2022",
+            title: "Lamaran",
+            description: "Di bawah langit malam yang bertabur bintang, aku berlutut dan mengucapkan kata-kata yang telah lama kusimpan.",
+            photo: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=600&h=400&fit=crop",
+        },
+        {
+            date: "Juni 2026",
+            title: "Hari Bahagia",
+            description: "Hari di mana kami memulai babak baru kehidupan bersama, selamanya.",
+            photo: "https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=600&h=400&fit=crop",
+        },
+    ],
+    gallery: [
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=800&h=600&fit=crop",
+    ],
+    bankAccounts: [
+        { bank: "Bank Central Asia (BCA)", number: "1234567890", name: "Budi Santoso" },
+        { bank: "Bank Mandiri", number: "0987654321", name: "Ayu Pratiwi" },
+    ],
+    giftAddress: "Jl. Kebon Jeruk No. 45, RT 03/RW 07, Kebon Jeruk, Jakarta Barat 11530",
+    rsvpMessages: [
+        { name: "Rina Marlina", attendance: "hadir", message: "Selamat menempuh hidup baru! Semoga menjadi keluarga sakinah mawaddah warahmah 🌸", createdAt: "2026-06-01T10:00:00" },
+        { name: "Dimas Prasetyo", attendance: "hadir", message: "Barakallahu lakuma wa baraka 'alaikuma. Semoga bahagia selalu!", createdAt: "2026-06-02T14:30:00" },
+        { name: "Sari Wulandari", attendance: "ragu", message: "Insya Allah hadir ya. Selamat untuk kalian berdua! 💕", createdAt: "2026-06-03T09:15:00" },
+    ],
+    calendarUrl: "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Pernikahan+Ayu+%26+Budi&dates=20260615T010000Z/20260615T070000Z&details=Undangan+Pernikahan+Ayu+%26+Budi&location=Balai+Kartini%2C+Jakarta+Selatan",
+};

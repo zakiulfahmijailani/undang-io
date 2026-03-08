@@ -1,52 +1,103 @@
-import Image from "next/image"
+"use client";
 
-export default function HeroSection() {
+import { useEffect } from "react";
+import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
+import { Calendar } from "lucide-react";
+
+interface HeroSectionProps {
+    coupleShortName: string;
+    groomName: string;
+    brideName: string;
+    heroPhoto: string;
+    weddingDate: string;
+    calendarUrl: string;
+}
+
+const HeroSection = ({ coupleShortName, groomName, brideName, heroPhoto, weddingDate, calendarUrl }: HeroSectionProps) => {
+    useEffect(() => {
+        // Confetti burst
+        const end = Date.now() + 2000;
+        const colors = ["#d4a373", "#ccd5ae", "#e8c8b8", "#fefae0"];
+
+        const frame = () => {
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors,
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors,
+            });
+            if (Date.now() < end) requestAnimationFrame(frame);
+        };
+        frame();
+    }, []);
+
+    const dateObj = new Date(weddingDate);
+    const formattedDate = dateObj.toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+
     return (
-        <section className="relative w-full h-[100svh] flex flex-col items-center justify-center overflow-hidden">
-            {/* Background Image with Overlay */}
-            <div className="absolute inset-0 z-0">
-                <Image
-                    src="https://picsum.photos/id/1015/800/1200"
-                    alt="Wedding Couple"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+        <section
+            id="hero"
+            className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        >
+            {/* Parallax background */}
+            <div
+                className="absolute inset-0 bg-cover bg-center bg-fixed"
+                style={{ backgroundImage: `url(${heroPhoto})` }}
+            >
+                <div className="absolute inset-0 bg-gradient-to-b from-wedding-brown/50 via-wedding-brown/30 to-wedding-brown/60" />
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center text-center text-white px-6 w-full max-w-lg mx-auto">
-                <span className="uppercase tracking-[0.3em] text-xs md:text-sm text-yellow-500 mb-6 font-semibold">
-                    The Wedding Of
-                </span>
-
-                <h1 className="font-serif text-5xl md:text-7xl mb-4 leading-tight text-white drop-shadow-lg">
-                    Andi<br />
-                    <span className="text-4xl md:text-5xl text-yellow-500 font-light">&amp;</span><br />
-                    Rina
-                </h1>
-
-                <p className="text-lg md:text-xl font-light tracking-wide mt-4 mb-10 text-gray-200">
-                    Sabtu, 15 Agustus 2026
+            <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="relative z-10 text-center px-6 py-20"
+            >
+                <p className="font-serif-wedding text-primary-foreground/80 text-base md:text-lg tracking-[0.3em] uppercase mb-6">
+                    Dengan memohon rahmat dan ridho Allah SWT
                 </p>
 
-                {/* Countdown */}
-                <div className="flex gap-4 md:gap-6 justify-center w-full">
-                    <div className="flex flex-col items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                        <span className="text-2xl md:text-3xl font-serif font-bold text-white">45</span>
-                        <span className="text-[10px] md:text-xs uppercase tracking-wider text-gray-300">Hari</span>
-                    </div>
-                    <div className="flex flex-col items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                        <span className="text-2xl md:text-3xl font-serif font-bold text-white">12</span>
-                        <span className="text-[10px] md:text-xs uppercase tracking-wider text-gray-300">Jam</span>
-                    </div>
-                    <div className="flex flex-col items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                        <span className="text-2xl md:text-3xl font-serif font-bold text-white">30</span>
-                        <span className="text-[10px] md:text-xs uppercase tracking-wider text-gray-300">Menit</span>
-                    </div>
-                </div>
-            </div>
+                <h2 className="font-vibes text-primary-foreground text-5xl md:text-7xl mb-2 drop-shadow-lg">
+                    {groomName.split(",")[0]}
+                </h2>
+                <p className="font-vibes text-wedding-gold text-4xl md:text-5xl my-4">&</p>
+                <h2 className="font-vibes text-primary-foreground text-5xl md:text-7xl mb-8 drop-shadow-lg">
+                    {brideName.split(",")[0]}
+                </h2>
+
+                <p className="font-serif-wedding text-primary-foreground/90 text-xl md:text-2xl mt-8 tracking-wide">
+                    {formattedDate}
+                </p>
+
+                <motion.a
+                    href={calendarUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-full bg-accent/90 text-accent-foreground font-serif-wedding text-sm tracking-wide backdrop-blur-sm hover:bg-accent transition-all"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    <Calendar className="w-4 h-4" />
+                    Simpan ke Google Calendar
+                </motion.a>
+            </motion.div>
         </section>
-    )
-}
+    );
+};
+
+export default HeroSection;

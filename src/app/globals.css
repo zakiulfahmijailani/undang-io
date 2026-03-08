@@ -5,9 +5,12 @@
   --font-display: var(--font-display), 'Palatino Linotype', Georgia, serif;
   --font-body: var(--font-body), 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono), 'Fira Code', monospace;
+  --font-script: var(--font-script), 'Dancing Script', cursive;
+  --font-vibes: var(--font-vibes), 'Great Vibes', cursive;
+  --font-serif-wedding: var(--font-serif-wedding), 'Playfair Display', serif;
 
   /* Colors: Brand Primary (Champagne Gold) */
-  --color-primary-50:  #FDFAF0;
+  --color-primary-50: #FDFAF0;
   --color-primary-100: #FAF3D4;
   --color-primary-200: #F4E49A;
   --color-primary-300: #EDD15E;
@@ -19,8 +22,8 @@
   --color-primary-900: #614509;
 
   /* Colors: Neutral (Warm Stone) */
-  --color-neutral-0:   #FFFFFF;
-  --color-neutral-50:  #FAFAF9;
+  --color-neutral-0: #FFFFFF;
+  --color-neutral-50: #FAFAF9;
   --color-neutral-100: #F5F4F2;
   --color-neutral-200: #E8E5E1;
   --color-neutral-300: #D4CFC9;
@@ -32,71 +35,87 @@
   --color-neutral-900: #211E1A;
 
   /* Colors: Accent (Dusty Rose) */
-  --color-accent-50:   #FDF3F4;
-  --color-accent-100:  #FAE2E4;
-  --color-accent-200:  #F5C2C7;
-  --color-accent-300:  #EC99A0;
-  --color-accent-400:  #E0707A;
-  --color-accent-500:  #D4515C;
-  --color-accent-600:  #B83D47;
-  --color-accent-700:  #972E38;
-  --color-accent-800:  #7A2430;
-  --color-accent-900:  #5E1C26;
+  --color-accent-50: #FDF3F4;
+  --color-accent-100: #FAE2E4;
+  --color-accent-200: #F5C2C7;
+  --color-accent-300: #EC99A0;
+  --color-accent-400: #E0707A;
+  --color-accent-500: #D4515C;
+  --color-accent-600: #B83D47;
+  --color-accent-700: #972E38;
+  --color-accent-800: #7A2430;
+  --color-accent-900: #5E1C26;
 
   /* Colors: Deep Forest */
-  --color-forest-50:   #F2F5F0;
-  --color-forest-100:  #E1EAD9;
-  --color-forest-200:  #C0D4B3;
-  --color-forest-300:  #97B889;
-  --color-forest-400:  #6F9B5E;
-  --color-forest-500:  #4E7D42;
-  --color-forest-600:  #3D6433;
-  --color-forest-700:  #2E4D26;
-  --color-forest-800:  #1F361A;
-  --color-forest-900:  #12200F;
+  --color-forest-50: #F2F5F0;
+  --color-forest-100: #E1EAD9;
+  --color-forest-200: #C0D4B3;
+  --color-forest-300: #97B889;
+  --color-forest-400: #6F9B5E;
+  --color-forest-500: #4E7D42;
+  --color-forest-600: #3D6433;
+  --color-forest-700: #2E4D26;
+  --color-forest-800: #1F361A;
+  --color-forest-900: #12200F;
 
   /* Semantic Colors */
-  --color-success-light:  #ECFDF5;
-  --color-success-base:   #059669;
-  --color-success-dark:   #065F46;
+  --color-success-light: #ECFDF5;
+  --color-success-base: #059669;
+  --color-success-dark: #065F46;
   --color-success-border: #A7F3D0;
 
-  --color-error-light:    #FFF1F2;
-  --color-error-base:     #DC2626;
-  --color-error-dark:     #991B1B;
-  --color-error-border:   #FECACA;
+  --color-error-light: #FFF1F2;
+  --color-error-base: #DC2626;
+  --color-error-dark: #991B1B;
+  --color-error-border: #FECACA;
 
-  --color-warning-light:  #FFFBEB;
-  --color-warning-base:   #D97706;
-  --color-warning-dark:   #92400E;
+  --color-warning-light: #FFFBEB;
+  --color-warning-base: #D97706;
+  --color-warning-dark: #92400E;
   --color-warning-border: #FDE68A;
 
-  --color-info-light:     #EFF6FF;
-  --color-info-base:      #2563EB;
-  --color-info-dark:      #1E40AF;
-  --color-info-border:    #BFDBFE;
+  --color-info-light: #EFF6FF;
+  --color-info-base: #2563EB;
+  --color-info-dark: #1E40AF;
+  --color-info-border: #BFDBFE;
 
   /* Surface Colors */
-  --color-surface-page:    #FAFAF9;
-  --color-surface-card:    #FFFFFF;
+  --color-surface-page: #FAFAF9;
+  --color-surface-card: #FFFFFF;
   --color-surface-overlay: rgba(33, 30, 26, 0.5);
   --color-surface-sidebar: #F5F4F2;
-  --color-surface-footer:  #211E1A;
+  --color-surface-footer: #211E1A;
+
+  /* Colors: Wedding Theme (from joy-knot) */
+  --color-wedding-rose: #f43f5e;
+  --color-wedding-rose-light: #fda4af;
+  --color-wedding-sage: #86efac;
+  --color-wedding-sage-dark: #22c55e;
+  --color-wedding-gold: #fbbf24;
+  --color-wedding-gold-light: #fde68a;
+  --color-wedding-cream: #fefce8;
+  --color-wedding-brown: #a16207;
 
   /* Theme Dynamic Colors */
-  --color-theme-bg:         var(--theme-bg, #FFFFFF);
-  --color-theme-bg-alt:     var(--theme-bg-alt, #FAFAF9);
-  --color-theme-primary:    var(--theme-primary, #D4A91C);
-  --color-theme-text:       var(--theme-text, #211E1A);
+  --color-theme-bg: var(--theme-bg, #FFFFFF);
+  --color-theme-bg-alt: var(--theme-bg-alt, #FAFAF9);
+  --color-theme-primary: var(--theme-primary, #D4A91C);
+  --color-theme-text: var(--theme-text, #211E1A);
   --color-theme-text-muted: var(--theme-text-muted, #7A7169);
-  --color-theme-border:     var(--theme-border, #E8E5E1);
-  --color-theme-accent:     var(--theme-accent, #D4A91C);
+  --color-theme-border: var(--theme-border, #E8E5E1);
+  --color-theme-accent: var(--theme-accent, #D4A91C);
 
   /* Shadows */
-  --shadow-1: 0 1px 2px rgba(33, 30, 26, 0.06), 0 1px 3px rgba(33, 30, 26, 0.08); /* sm */
-  --shadow-2: 0 4px 6px rgba(33, 30, 26, 0.05), 0 2px 10px rgba(33, 30, 26, 0.08); /* md */
-  --shadow-3: 0 10px 25px rgba(33, 30, 26, 0.1), 0 4px 12px rgba(33, 30, 26, 0.06); /* lg */
-  --shadow-4: 0 20px 60px rgba(33, 30, 26, 0.15), 0 8px 24px rgba(33, 30, 26, 0.1); /* xl */
+  --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-1: 0 1px 2px rgba(33, 30, 26, 0.06), 0 1px 3px rgba(33, 30, 26, 0.08);
+  /* sm */
+  --shadow-2: 0 4px 6px rgba(33, 30, 26, 0.05), 0 2px 10px rgba(33, 30, 26, 0.08);
+  /* md */
+  --shadow-3: 0 10px 25px rgba(33, 30, 26, 0.1), 0 4px 12px rgba(33, 30, 26, 0.06);
+  /* lg */
+  --shadow-4: 0 20px 60px rgba(33, 30, 26, 0.15), 0 8px 24px rgba(33, 30, 26, 0.1);
+  /* xl */
   --shadow-gold: 0 4px 16px rgba(212, 169, 28, 0.35);
   --shadow-inner: inset 0 2px 4px rgba(33, 30, 26, 0.06);
 
@@ -108,12 +127,12 @@
 
   /* Border Radius */
   --radius-none: 0px;
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-2xl:  24px;
-  --radius-3xl:  32px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
   --radius-full: 9999px;
 
   /* Typography Sizes/Styles via Text configuration if needed */
@@ -131,6 +150,58 @@
   --text-body-md: 16px;
   --text-body-sm: 14px;
   --text-body-xs: 12px;
+
+  /* Animations (from joy-knot) */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  --animate-float: float 3s ease-in-out infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes pulse-soft {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
 }
 
 /* Layer utilities manually mapped */
@@ -142,92 +213,107 @@
     letter-spacing: -0.03em;
     font-family: var(--font-display);
   }
+
   .text-display-xl {
     font-size: var(--text-display-xl);
     line-height: 1.1;
     letter-spacing: -0.02em;
     font-family: var(--font-display);
   }
+
   .text-display-lg {
     font-size: var(--text-display-lg);
     line-height: 1.15;
     letter-spacing: -0.02em;
     font-family: var(--font-display);
   }
+
   .text-h1 {
     font-size: var(--text-h1);
     line-height: 1.2;
     letter-spacing: -0.01em;
     font-family: var(--font-display);
   }
+
   .text-h2 {
     font-size: var(--text-h2);
     line-height: 1.25;
     letter-spacing: -0.01em;
     font-family: var(--font-display);
   }
+
   .text-h3 {
     font-size: var(--text-h3);
     line-height: 1.3;
     letter-spacing: -0.005em;
     font-family: var(--font-display);
   }
+
   .text-h4 {
     font-size: var(--text-h4);
     line-height: 1.4;
     letter-spacing: 0;
     font-family: var(--font-body);
   }
+
   .text-h5 {
     font-size: var(--text-h5);
     line-height: 1.4;
     letter-spacing: 0;
     font-family: var(--font-body);
   }
+
   .text-h6 {
     font-size: var(--text-h6);
     line-height: 1.5;
     letter-spacing: 0.01em;
     font-family: var(--font-body);
   }
-  
+
   .text-body-lg {
     font-size: var(--text-body-lg);
     line-height: 1.6;
     font-family: var(--font-body);
   }
+
   .text-body-md {
     font-size: var(--text-body-md);
     line-height: 1.6;
     font-family: var(--font-body);
   }
+
   .text-body-sm {
     font-size: var(--text-body-sm);
     line-height: 1.5;
     font-family: var(--font-body);
   }
+
   .text-body-xs {
     font-size: var(--text-body-xs);
     line-height: 1.4;
     font-family: var(--font-body);
   }
+
   .text-label-lg {
     font-size: 14px;
     line-height: 1;
     letter-spacing: 0.01em;
     font-weight: 600;
   }
+
   .text-label-sm {
     font-size: 12px;
     line-height: 1;
     letter-spacing: 0.02em;
     font-weight: 600;
   }
+
   .text-caption {
     font-size: 11px;
     line-height: 1.4;
     letter-spacing: 0.02em;
   }
+
   .text-overline {
     font-size: 11px;
     line-height: 1;
@@ -237,10 +323,34 @@
   }
 
   /* Container Sizes */
-  .container-xs { max-width: 480px; margin-left: auto; margin-right: auto; }
-  .container-sm { max-width: 640px; margin-left: auto; margin-right: auto; }
-  .container-md { max-width: 768px; margin-left: auto; margin-right: auto; }
-  .container-lg { max-width: 1024px; margin-left: auto; margin-right: auto; }
-  .container-xl { max-width: 1200px; margin-left: auto; margin-right: auto; }
+  .container-xs {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-sm {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-md {
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-lg {
+    max-width: 1024px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container-xl {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
 }
