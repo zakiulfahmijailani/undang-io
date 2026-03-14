@@ -67,7 +67,7 @@ function InvitationContent({ invitationData }: { invitationData: InvitationData 
                 groomName={invitationData.groom.fullName}
                 brideName={invitationData.bride.fullName}
                 weddingDate={invitationData.akad.date}
-                calendarUrl={invitationData.calendarUrl}
+                calendarUrl={invitationData.calendarUrl ?? ''}
               />
             </InvitationErrorBoundary>
             
