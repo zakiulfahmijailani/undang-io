@@ -15,6 +15,8 @@ import RsvpSection from "@/components/invitation/RsvpSection";
 import BottomNavbar from "@/components/invitation/BottomNavbar";
 import MusicButton from "@/components/invitation/MusicButton";
 import { RsvpMessage } from "@/components/invitation/RsvpSection";
+import { Theme } from "@/types/theme";
+import MasterInvitationRenderer from "@/components/invitation/MasterInvitationRenderer";
 
 // Kita mendefinisikan tipe data sesuai dengan demoData agar aman
 interface InvitationData {
@@ -35,7 +37,19 @@ interface InvitationData {
     calendarUrl: string;
 }
 
-export default function InvitationClientWrapper({ data }: { data: InvitationData }) {
+interface WrapperProps {
+    data: InvitationData;
+    theme?: Theme;
+    invitationId?: string;
+}
+
+export default function InvitationClientWrapper({ data, theme, invitationId }: WrapperProps) {
+    // If a theme is provided, use the MasterInvitationRenderer (themed engine)
+    if (theme) {
+        return <MasterInvitationRenderer theme={theme} invitationData={data as any} />;
+    }
+
+    // Otherwise, fall back to the original hardcoded section-based rendering
     const [isOpened, setIsOpened] = useState(false);
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);

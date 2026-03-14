@@ -1,74 +1,159 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { LayoutTemplate, Plus, CheckCircle, Edit, CircleSlash } from "lucide-react"
+"use client";
+
+import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Plus, Eye, Pencil, Copy, Trash2, Search, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { dummyThemes } from '@/data/dummyThemes';
+import { Theme, ThemeStatus, CULTURAL_LABELS, CulturalCategory } from '@/types/theme';
+import { THEME_SLOT_DEFINITIONS, REQUIRED_SLOTS_FOR_ACTIVATION } from '@/data/themeSlots';
+
+const statusLabels: Record<ThemeStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' }> = {
+    draft: { label: 'Draft', variant: 'secondary' },
+    active: { label: 'Aktif', variant: 'default' },
+    archived: { label: 'Diarsipkan', variant: 'destructive' },
+};
 
 export default function AdminThemesPage() {
-    const dummyThemes = [
-        { id: 1, name: "Classic Gold", category: "Pernikahan", price: "Rp 99.000", published: true },
-        { id: 2, name: "Rustic Floral", category: "Pernikahan", price: "Gratis", published: true },
-        { id: 3, name: "Modern Minimalist", category: "Umum", price: "Rp 99.000", published: false },
-        { id: 4, name: "Traditional Javanese", category: "Pernikahan", price: "Rp 249.000", published: true },
-        { id: 5, name: "Ocean Blue", category: "Khitanan", price: "Gratis", published: false },
-        { id: 6, name: "Luxury Black", category: "Pernikahan", price: "Rp 249.000", published: true },
-    ];
+    const router = useRouter();
+    const [themes, setThemes] = useState<Theme[]>(dummyThemes);
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+    const filtered = useMemo(() => {
+        return themes.filter((t) => {
+            if (search && !t.name.toLowerCase().includes(search.toLowerCase())) return false;
+            if (statusFilter !== 'all' && t.status !== statusFilter) return false;
+            if (categoryFilter !== 'all' && t.culturalCategory !== categoryFilter) return false;
+            return true;
+        });
+    }, [themes, search, statusFilter, categoryFilter]);
+
+    const getFilledSlotCount = (theme: Theme) => {
+        return theme.assetSlots.filter((s) => s.assetUrl !== null).length;
+    };
+
+    const handleDuplicate = (theme: Theme) => {
+        const newTheme: Theme = {
+            ...theme,
+            id: `theme-copy-${Date.now()}`,
+            name: `${theme.name} (Salinan)`,
+            slug: `${theme.slug}-copy-${Math.random().toString(36).substring(2, 6)}`,
+            status: 'draft',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        setThemes((prev) => [newTheme, ...prev]);
+    };
+
+    const handleDelete = (id: string) => {
+        setThemes((prev) => prev.filter((t) => t.id !== id));
+    };
 
     return (
         <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-serif font-bold text-[#14213D]">Kelola Tema</h1>
-                    <p className="text-gray-500 mt-1">Atur ketersediaan tema undangan di platform umuman.</p>
+                    <h1 className="text-2xl font-bold text-[#14213D]">Kelola Tema</h1>
+                    <p className="text-sm text-gray-500">Buat dan kelola tema undangan untuk semua pengguna</p>
                 </div>
-                <Button className="bg-[#14213D] hover:bg-[#1a2b50] text-white gap-2 shadow-lg">
-                    <Plus className="w-4 h-4" /> Tambah Tema Baru
+                <Button onClick={() => router.push('/admin/themes/new')} className="gap-2 bg-[#14213D] hover:bg-[#1a2b50] text-white">
+                    <Plus className="w-4 h-4" /> Buat Tema Baru
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-                {dummyThemes.map((theme) => (
-                    <Card key={theme.id} className="overflow-hidden border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="aspect-[4/3] bg-gray-100 relative group border-b border-gray-100 flex flex-col items-center justify-center">
-                            <LayoutTemplate className="w-16 h-16 text-gray-300 mb-2" />
-                            <span className="text-sm font-medium text-gray-400">Thumbnail Preview</span>
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                        placeholder="Cari tema..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#14213D]/30"
+                    />
+                </div>
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-3 py-2 border rounded-lg text-sm min-w-[140px] focus:outline-none focus:ring-2 focus:ring-[#14213D]/30"
+                >
+                    <option value="all">Semua Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="active">Aktif</option>
+                    <option value="archived">Diarsipkan</option>
+                </select>
+                <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="px-3 py-2 border rounded-lg text-sm min-w-[160px] focus:outline-none focus:ring-2 focus:ring-[#14213D]/30"
+                >
+                    <option value="all">Semua Kategori</option>
+                    {Object.entries(CULTURAL_LABELS).map(([key, label]) => (
+                        <option key={key} value={key}>{label}</option>
+                    ))}
+                </select>
+            </div>
 
-                            <div className="absolute top-3 left-3 flex flex-col gap-2">
-                                <Badge className="bg-primary hover:bg-primary/90">
-                                    {theme.category}
-                                </Badge>
-                            </div>
-
-                            <div className="absolute top-3 right-3 font-bold text-[#14213D] bg-white/90 backdrop-blur px-2.5 py-1 rounded-sm shadow-sm text-sm border border-gray-200">
-                                {theme.price}
-                            </div>
-                        </div>
-                        <CardContent className="p-5">
-                            <div className="mb-4">
-                                <h3 className="font-serif text-xl font-bold text-[#14213D] leading-tight mb-1">{theme.name}</h3>
-                                <div className="flex items-center gap-1.5 text-xs font-semibold">
-                                    <span className={theme.published ? "text-green-600 flex items-center gap-1" : "text-gray-500 flex items-center gap-1"}>
-                                        {theme.published ? <CheckCircle className="w-3.5 h-3.5" /> : <CircleSlash className="w-3.5 h-3.5" />}
-                                        {theme.published ? "Published" : "Draft"}
-                                    </span>
+            {/* Grid */}
+            {filtered.length === 0 ? (
+                <div className="text-center py-20">
+                    <Filter className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                    <p className="text-lg font-medium text-gray-700">Tidak ada tema ditemukan</p>
+                    <p className="text-sm text-gray-500">Coba ubah filter atau buat tema baru.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filtered.map((theme) => {
+                        const filled = getFilledSlotCount(theme);
+                        const total = THEME_SLOT_DEFINITIONS.length;
+                        const st = statusLabels[theme.status];
+                        return (
+                            <div key={theme.id} className="rounded-xl border bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                {/* Thumbnail */}
+                                <div className="aspect-[9/16] max-h-48 overflow-hidden bg-gray-100 relative">
+                                    {theme.thumbnailUrl ? (
+                                        <img src={theme.thumbnailUrl} alt={theme.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">Belum ada thumbnail</div>
+                                    )}
+                                    <Badge variant={st.variant} className="absolute top-2 right-2">{st.label}</Badge>
+                                </div>
+                                {/* Info */}
+                                <div className="p-4">
+                                    <h3 className="font-semibold text-[#14213D] mb-1">{theme.name}</h3>
+                                    <p className="text-xs text-gray-500 mb-2">{CULTURAL_LABELS[theme.culturalCategory]}</p>
+                                    <p className="text-xs text-gray-500 mb-3 line-clamp-2">{theme.description}</p>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                                        <span>Slot: {filled}/{total}</span>
+                                        <div className="flex-1 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                                            <div className="h-full rounded-full bg-[#14213D] transition-all" style={{ width: `${(filled / total) * 100}%` }} />
+                                        </div>
+                                    </div>
+                                    {/* Actions */}
+                                    <div className="flex gap-2">
+                                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/themes/${theme.id}/preview`)} className="gap-1 flex-1 text-xs">
+                                            <Eye className="w-3 h-3" /> Preview
+                                        </Button>
+                                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/themes/${theme.id}/edit`)} className="gap-1 flex-1 text-xs">
+                                            <Pencil className="w-3 h-3" /> Edit
+                                        </Button>
+                                        <Button variant="secondary" size="sm" onClick={() => handleDuplicate(theme)} className="px-2">
+                                            <Copy className="w-3 h-3" />
+                                        </Button>
+                                        <Button variant="secondary" size="sm" onClick={() => handleDelete(theme.id)} className="px-2 text-red-600 hover:text-red-700">
+                                            <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="flex items-center gap-3 mt-5 border-t border-gray-100 pt-5">
-                                <Button
-                                    variant="secondary"
-                                    className={`flex-1 text-xs gap-1.5 border ${theme.published ? 'text-gray-600 border-gray-200 bg-white' : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800'}`}
-                                >
-                                    {theme.published ? 'Set as Draft' : 'Publish Tema'}
-                                </Button>
-                                <Button variant="secondary" className="flex-1 text-xs gap-1.5 bg-[#14213D]/5 text-[#14213D] hover:bg-[#14213D]/10">
-                                    <Edit className="w-3.5 h-3.5" /> Edit
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
-    )
+    );
 }
-
