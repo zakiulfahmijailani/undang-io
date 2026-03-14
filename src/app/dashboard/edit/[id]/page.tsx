@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,9 +18,9 @@ const STEPS = [
     "Preview & Publish"
 ]
 
-export default function EditInvitationWizard({ params }: { params: { id: string } }) {
+export default function EditInvitationWizard({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter()
-    const { id } = params
+    const { id } = use(params)
 
     const [currentStep, setCurrentStep] = useState(0)
     const [isSubmitting, setIsSubmitting] = useState(false)
