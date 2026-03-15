@@ -7,8 +7,8 @@ import { cookies } from 'next/headers'
 export async function login(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
+    const guestSessionToken = formData.get('guestSessionToken') as string | null
 
-    // SIMPLE LOGIN BYPASS (Requested by user)
     if (email === 'admin' && password === 'admin') {
         const cookieStore = await cookies()
         cookieStore.set('nikahku-mock-session', 'true', { path: '/' })
@@ -18,20 +18,29 @@ export async function login(formData: FormData) {
     const supabase = await createServerSupabaseClient()
     if (!supabase) redirect('/login?message=Supabase is not configured')
 
-    // Use string inputs
-    const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
-    }
-
-    const { error } = await supabase.auth.signInWithPassword(data)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
         redirect('/login?message=Could not authenticate user')
     }
 
+    // If there's a guest session token, call the claim API
+    if (guestSessionToken) {
+        try {
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+            await fetch(`${siteUrl}/api/guest-sessions/${guestSessionToken}/claim`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+            })
+        } catch (e) {
+            console.error('Failed to claim guest session after login:', e)
+        }
+        redirect(`/u/${guestSessionToken}?claimed=true`)
+    }
+
     redirect('/dashboard')
 }
+
 
 export async function signup(formData: FormData) {
     const supabase = await createServerSupabaseClient()

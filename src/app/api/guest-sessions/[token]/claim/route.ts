@@ -66,8 +66,8 @@ export async function PATCH(
     }
 
     // Extend timer by 10 minutes from now, but cap at original expires_at + 10 min
-    const originalExpiry = new Date(session.expires_at).getTime()
-    const extendedExpiry = new Date(originalExpiry + 10 * 60 * 1000).toISOString()
+    const extendedExpiry = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+
 
     // Update: attach user_id, extend timer, set status to 'claimed'
     const { data: updatedSession, error: updateError } = await supabaseAdmin
