@@ -1,121 +1,99 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { Heart, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaGoogle } from "react-icons/fa";
-
-const registerSchema = z.object({
-    name: z.string().min(2, "Nama wajib diisi"),
-    email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
-    password: z.string().min(6, "Minimal 6 karakter"),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useSearchParams } from "next/navigation";
+import { signup } from "../actions";
 
 export default function RegisterPage() {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-    } = useForm<RegisterFormValues>({
-        resolver: zodResolver(registerSchema),
-    });
+  const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
 
-    const onSubmit = async (data: RegisterFormValues) => {
-        // Dummy submit logic
-        console.log("Register data:", data);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        alert("Proses pendaftaran: " + data.email);
-    };
+  const handleSubmit = async (formData: FormData) => {
+    setLoading(true);
+    await signup(formData);
+    setLoading(false);
+  };
 
-    return (
-        <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4 py-12 px-4 sm:px-6 lg:px-8">
-            <Card className="w-full max-w-md border-border/50 shadow-xl shadow-primary/5">
-                <CardHeader className="space-y-1 text-center">
-                    <Link href="/" className="flex flex-col items-center gap-4 mb-8 group inline-block">
-                        <Image src="/logo.png" alt="umuman logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-110" />
-                        <span className="font-serif text-4xl font-bold text-primary">umuman</span>
-                    </Link>
-                    <CardTitle className="text-2xl font-serif">Buat Akun Baru</CardTitle>
-                    <CardDescription>Mulai perjalanan undangan digital Anda bersama kami</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid gap-6">
-                        <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
-                            <FaGoogle className="w-4 h-4 text-red-500" />
-                            Daftar dengan Google
-                        </Button>
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-sm shadow-lg border-border/50">
+        <CardContent className="p-8">
+          <Link href="/" className="mb-6 flex items-center justify-center gap-2">
+            <Heart className="h-6 w-6 text-accent" fill="currentColor" />
+            <span className="text-xl font-bold text-foreground">
+              undang<span className="text-accent">.io</span>
+            </span>
+          </Link>
+          <h1 className="mb-6 text-center text-xl font-bold text-foreground">Daftar Akun Baru</h1>
+          
+          {message && (
+            <p className="mb-4 text-center text-sm font-medium text-destructive bg-destructive/10 p-2 rounded-md">
+              {message}
+            </p>
+          )}
 
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-border/50" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-card px-2 text-muted-foreground">Atau daftar dengan email</span>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-                            <div className="grid gap-2">
-                                <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Nama Lengkap
-                                </label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    placeholder="Budi Santoso"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    {...register("name")}
-                                />
-                                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-                            </div>
-
-                            <div className="grid gap-2">
-                                <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Email
-                                </label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    placeholder="nama@email.com"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    {...register("email")}
-                                />
-                                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                            </div>
-
-                            <div className="grid gap-2">
-                                <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Password
-                                </label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    placeholder="Minimal 6 karakter"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    {...register("password")}
-                                />
-                                {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
-                            </div>
-
-                            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-2" disabled={isSubmitting}>
-                                {isSubmitting ? "Memproses..." : "Daftar Sekarang"}
-                            </Button>
-                        </form>
-                    </div>
-                    <div className="mt-6 text-center text-sm">
-                        Sudah punya akun?{" "}
-                        <Link href="/login" className="text-primary font-medium hover:underline">
-                            Masuk
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
+          <form action={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="fullName">Nama Lengkap</Label>
+              <div className="relative mt-1">
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  className="pl-9"
+                  placeholder="Nama kamu"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <div className="relative mt-1">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  className="pl-9"
+                  placeholder="nama@email.com"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="password">Kata Sandi</Label>
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  className="pl-9"
+                  placeholder="Minimal 6 karakter"
+                  required
+                  minLength={6}
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full mt-6 cursor-pointer" disabled={loading}>
+              {loading ? "Memproses..." : "Daftar Gratis"}
+            </Button>
+          </form>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Sudah punya akun?{" "}
+            <Link href="/login" className="font-semibold text-accent hover:underline">
+              Masuk
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
