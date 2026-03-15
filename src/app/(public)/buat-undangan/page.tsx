@@ -20,28 +20,28 @@ const QUOTE_PRESETS = [
 ];
 
 const activeThemes = [
-    {
-      id: "th-01",
-      name: "Jawa Klasik",
-      description: "Tema undangan dengan nuansa Jawa klasik, ornamen batik, dan warna emas-cokelat.",
-      culturalCategory: "jawa",
-      thumbnailUrl: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=338&h=600&fit=crop"
-    },
-    {
-      id: "th-02",
-      name: "Bali Tropis",
-      description: "Nuansa tropis Bali dengan hijau daun, bunga frangipani, dan suasana pantai.",
-      culturalCategory: "bali",
-      thumbnailUrl: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=338&h=600&fit=crop"
-    },
-    {
-      id: "th-03",
-      name: "Modern Minimalis",
-      description: "Desain bersih dan modern dengan tipografi elegan dan palet netral.",
-      culturalCategory: "minimalis",
-      thumbnailUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=338&h=600&fit=crop"
-    }
-  ];
+  {
+    id: "theme-jawa-klasik",
+    name: "Jawa Klasik",
+    description: "Tema undangan dengan nuansa Jawa klasik, ornamen batik, dan warna emas-cokelat.",
+    culturalCategory: "jawa",
+    thumbnailUrl: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=338&h=600&fit=crop"
+  },
+  {
+    id: "theme-bali-tropis",
+    name: "Bali Tropis",
+    description: "Nuansa tropis Bali dengan hijau daun, bunga frangipani, dan suasana pantai.",
+    culturalCategory: "bali",
+    thumbnailUrl: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=338&h=600&fit=crop"
+  },
+  {
+    id: "theme-modern-minimalis",
+    name: "Modern Minimalis",
+    description: "Desain bersih dan modern dengan tipografi elegan dan palet netral.",
+    culturalCategory: "minimalis",
+    thumbnailUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=338&h=600&fit=crop"
+  }
+];
 
 function generateSlug(groomNick: string, brideNick: string) {
   const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
@@ -106,7 +106,7 @@ export default function BuatUndangan() {
       toast.success("🚀 Undangan berhasil dipublikasikan!", {
         description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya!",
       });
-      
+
       router.push(`/u/${slug}`);
     } catch (error: any) {
       console.error("Publish Error:", error);
@@ -131,13 +131,12 @@ export default function BuatUndangan() {
             {[1, 2, 3].map((s) => (
               <div key={s} className={`flex items-center gap-1 ${s === step ? "font-semibold text-foreground" : ""}`}>
                 <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-                    s < step
-                      ? "bg-accent text-accent-foreground"
-                      : s === step
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${s < step
+                    ? "bg-accent text-accent-foreground"
+                    : s === step
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground"
-                  }`}
+                    }`}
                 >
                   {s < step ? <Check className="h-3 w-3" /> : s}
                 </span>
@@ -159,9 +158,8 @@ export default function BuatUndangan() {
               {activeThemes.map((theme) => (
                 <Card
                   key={theme.id}
-                  className={`cursor-pointer overflow-hidden transition-all ${
-                    selectedThemeId === theme.id ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"
-                  }`}
+                  className={`cursor-pointer overflow-hidden transition-all ${selectedThemeId === theme.id ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"
+                    }`}
                   onClick={() => setSelectedThemeId(theme.id)}
                 >
                   <div className="aspect-[9/16] max-h-52 overflow-hidden">
