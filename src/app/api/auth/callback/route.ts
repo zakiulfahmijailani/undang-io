@@ -39,7 +39,8 @@ export async function GET(request: Request) {
               })
               .eq('id', guestSession.id)
 
-            next = `/u/${guestSession.slug}?claimed=true`
+            // Redirect to dashboard so user can see their invitation list
+            next = '/dashboard'
           }
         }
       }
