@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSearchParams } from "next/navigation";
 import { signup } from "../actions";
+import { createClient } from "@/lib/supabase/client";
+import { FaGoogle } from "react-icons/fa";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,26 @@ export default function RegisterPage() {
     setLoading(true);
     await signup(formData);
     setLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        console.error("Error signing up with Google:", error);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      // Intentionally not setting loading to false, as the redirect handles it
+    }
   };
 
   return (
@@ -38,6 +60,26 @@ export default function RegisterPage() {
               {message}
             </p>
           )}
+
+          <Button 
+            variant="secondary" 
+            className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer" 
+            onClick={handleGoogleLogin} 
+            disabled={loading}
+            type="button"
+          >
+            <FaGoogle className="w-4 h-4 text-red-500" />
+            Daftar dengan Google
+          </Button>
+
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border/50" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Atau daftar dengan email</span>
+            </div>
+          </div>
 
           <form action={handleSubmit} className="space-y-4">
             <div>

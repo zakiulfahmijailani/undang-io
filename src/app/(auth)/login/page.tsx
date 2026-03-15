@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSearchParams } from "next/navigation";
 import { login } from "../actions";
+import { createClient } from "@/lib/supabase/client";
+import { FaGoogle } from "react-icons/fa";
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,26 @@ export default function Login() {
     setLoading(true);
     await login(formData);
     setLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        console.error("Error logging in with Google:", error);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      // Don't set loading false immediately as the redirect happens
+    }
   };
 
   return (
@@ -38,6 +60,26 @@ export default function Login() {
               {message}
             </p>
           )}
+
+          <Button 
+            variant="secondary" 
+            className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer" 
+            onClick={handleGoogleLogin} 
+            disabled={loading}
+            type="button"
+          >
+            <FaGoogle className="w-4 h-4 text-red-500" />
+            Masuk dengan Google
+          </Button>
+
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border/50" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Atau dengan email</span>
+            </div>
+          </div>
 
           <form action={handleSubmit} className="space-y-4">
             <div>
