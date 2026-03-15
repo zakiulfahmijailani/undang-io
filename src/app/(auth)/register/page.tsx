@@ -7,56 +7,96 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSearchParams } from "next/navigation";
-import { signup } from "../actions";
+import { useSearchParams, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { FaGoogle } from "react-icons/fa";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const message = searchParams.get("message");
 
   useEffect(() => {
-    const guestSessionRaw = localStorage.getItem("guest_session");
-    if (guestSessionRaw) {
+    const raw = localStorage.getItem("guest_session");
+    if (raw) {
       try {
-        const guestSession = JSON.parse(guestSessionRaw);
-        if (guestSession.sessionToken) {
-          setGuestSessionToken(guestSession.sessionToken);
-        }
-      } catch (e) {
-        console.error("Failed to parse guest session from localStorage", e);
-      }
+        const parsed = JSON.parse(raw);
+        if (parsed.sessionToken) setGuestSessionToken(parsed.sessionToken);
+      } catch (e) {}
     }
   }, []);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleEmailRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    await signup(formData);
+
+    const supabase = createBrowserSupabaseClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName },
+      },
+    });
+
+    if (error) {
+      toast.error("Registrasi gagal", { description: error.message });
+      setLoading(false);
+      return;
+    }
+
+    // If user is immediately confirmed (no email verification)
+    if (data.session) {
+      if (guestSessionToken) {
+        try {
+          const res = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
+            method: "PATCH",
+          });
+          const json = await res.json();
+          if (json.data) {
+            toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
+          }
+        } catch (e) {
+          console.error("Claim failed:", e);
+        }
+        localStorage.removeItem("guest_session");
+        localStorage.removeItem("guest_return_slug");
+      }
+      router.push("/dashboard");
+    } else {
+      // Email verification required
+      toast.success("Cek email kamu untuk verifikasi akun.");
+      router.push("/login?message=Cek email untuk melanjutkan proses daftar");
+    }
+
     setLoading(false);
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleRegister = async () => {
     try {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
-      
-      let redirectTo = `${window.location.origin}/auth/callback`;
+
+      // Always use /api/auth/callback
+      let redirectTo = `${window.location.origin}/api/auth/callback`;
       if (guestSessionToken) {
         redirectTo += `?guest_session_token=${guestSessionToken}`;
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-        },
+        provider: "google",
+        options: { redirectTo },
       });
+
       if (error) {
-        console.error("Error signing up with Google:", error);
-        setLoading(false); // only stop loading if there is an immediate error
+        console.error("Google register error:", error);
+        setLoading(false);
       }
     } catch (e) {
       console.error(e);
@@ -75,17 +115,23 @@ export default function RegisterPage() {
             </span>
           </Link>
           <h1 className="mb-6 text-center text-xl font-bold text-foreground">Daftar Akun Baru</h1>
-          
+
           {message && (
             <p className="mb-4 text-center text-sm font-medium text-destructive bg-destructive/10 p-2 rounded-md">
               {message}
             </p>
           )}
 
-          <Button 
-            variant="secondary" 
-            className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer" 
-            onClick={handleGoogleLogin} 
+          {guestSessionToken && (
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+              ⏳ Daftar untuk menyimpan undanganmu dan perpanjang timer 10 menit.
+            </div>
+          )}
+
+          <Button
+            variant="secondary"
+            className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer"
+            onClick={handleGoogleRegister}
             disabled={loading}
             type="button"
           >
@@ -102,19 +148,17 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <form action={handleSubmit} className="space-y-4">
-            {guestSessionToken && (
-                <input type="hidden" name="guestSessionToken" value={guestSessionToken} />
-            )}
+          <form onSubmit={handleEmailRegister} className="space-y-4">
             <div>
               <Label htmlFor="fullName">Nama Lengkap</Label>
               <div className="relative mt-1">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="fullName"
-                  name="fullName"
                   className="pl-9"
                   placeholder="Nama kamu"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   required
                 />
               </div>
@@ -125,10 +169,11 @@ export default function RegisterPage() {
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
-                  name="email"
                   type="email"
                   className="pl-9"
                   placeholder="nama@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -139,10 +184,11 @@ export default function RegisterPage() {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
-                  name="password"
                   type="password"
                   className="pl-9"
                   placeholder="Minimal 6 karakter"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
                 />
@@ -152,6 +198,7 @@ export default function RegisterPage() {
               {loading ? "Memproses..." : "Daftar Gratis"}
             </Button>
           </form>
+
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Sudah punya akun?{" "}
             <Link href="/login" className="font-semibold text-accent hover:underline">

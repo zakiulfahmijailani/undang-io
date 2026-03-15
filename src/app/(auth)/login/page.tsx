@@ -27,25 +27,9 @@ export default function Login() {
       try {
         const parsed = JSON.parse(raw);
         if (parsed.sessionToken) setGuestSessionToken(parsed.sessionToken);
-      } catch (e) { }
+      } catch (e) {}
     }
   }, []);
-
-  const claimAndRedirect = async (token: string) => {
-    try {
-      const res = await fetch(`/api/guest-sessions/${token}/claim`, {
-        method: "PATCH",
-      });
-      const json = await res.json();
-      if (json.data) {
-        toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
-      }
-    } catch (e) {
-      console.error("Claim failed:", e);
-    }
-    // Always redirect to dashboard after claim
-    router.push("/dashboard");
-  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,11 +44,24 @@ export default function Login() {
       return;
     }
 
+    // Claim guest session if exists — client side so cookie is available
     if (guestSessionToken) {
-      await claimAndRedirect(guestSessionToken);
-    } else {
-      router.push("/dashboard");
+      try {
+        const res = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
+          method: "PATCH",
+        });
+        const json = await res.json();
+        if (json.data) {
+          toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
+        }
+      } catch (e) {
+        console.error("Claim failed:", e);
+      }
+      localStorage.removeItem("guest_session");
+      localStorage.removeItem("guest_return_slug");
     }
+
+    router.push("/dashboard");
     setLoading(false);
   };
 
