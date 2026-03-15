@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from './InvitationClientWrapper';
 import ViewTracker from './ViewTracker';
@@ -39,7 +39,7 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         notFound();
     }
 
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     // Fetch real data
     const { data: invitation } = await supabase

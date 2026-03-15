@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import EditorClient from "../EditorClient";
 
 export default async function PreviewSplitViewPage({ params }: { params: Promise<{ id: string }> }) {
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
     const resolvedParams = await params;
     const { id } = resolvedParams;
 

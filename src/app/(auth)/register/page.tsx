@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSearchParams } from "next/navigation";
 import { signup } from "../actions";
-import { createClient } from "@/lib/supabase/client";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { FaGoogle } from "react-icons/fa";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
+  const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
+
+  useEffect(() => {
+    const guestSessionRaw = localStorage.getItem("guest_session");
+    if (guestSessionRaw) {
+      try {
+        const guestSession = JSON.parse(guestSessionRaw);
+        if (guestSession.sessionToken) {
+          setGuestSessionToken(guestSession.sessionToken);
+        }
+      } catch (e) {
+        console.error("Failed to parse guest session from localStorage", e);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);
@@ -26,20 +41,26 @@ export default function RegisterPage() {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      const supabase = createClient();
+      const supabase = createBrowserSupabaseClient();
+      
+      let redirectTo = `${window.location.origin}/auth/callback`;
+      if (guestSessionToken) {
+        redirectTo += `?guest_session_token=${guestSessionToken}`;
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
         },
       });
       if (error) {
         console.error("Error signing up with Google:", error);
+        setLoading(false); // only stop loading if there is an immediate error
       }
     } catch (e) {
       console.error(e);
-    } finally {
-      // Intentionally not setting loading to false, as the redirect handles it
+      setLoading(false);
     }
   };
 
@@ -82,6 +103,9 @@ export default function RegisterPage() {
           </div>
 
           <form action={handleSubmit} className="space-y-4">
+            {guestSessionToken && (
+                <input type="hidden" name="guestSessionToken" value={guestSessionToken} />
+            )}
             <div>
               <Label htmlFor="fullName">Nama Lengkap</Label>
               <div className="relative mt-1">

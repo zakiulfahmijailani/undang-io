@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function GET(
     request: Request,
@@ -13,7 +13,7 @@ export async function GET(
             return NextResponse.json({ error: 'Token diperlukan' }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        const supabase = await createServerSupabaseClient();
 
         const { data, error } = await supabase
             .from('guest_sessions')

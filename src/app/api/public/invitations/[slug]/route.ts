@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 // Helper to check user ownership
 async function verifyOwnership(supabase: any, user_id: string, invitation_id: string) {
@@ -17,7 +17,7 @@ async function verifyOwnership(supabase: any, user_id: string, invitation_id: st
 export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
     const params = await props.params;
     const id = params.slug // We map slug from the URL back to our internal 'id' variable
-    const supabase = await createClient()
+    const supabase = await createServerSupabaseClient()
 
     if (!supabase) {
         return NextResponse.json(
@@ -74,7 +74,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
 export async function PATCH(request: Request, props: { params: Promise<{ slug: string }> }) {
     const params = await props.params;
     const id = params.slug
-    const supabase = await createClient()
+    const supabase = await createServerSupabaseClient()
 
     if (!supabase) {
         return NextResponse.json(
@@ -147,7 +147,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ slug: s
 export async function DELETE(request: Request, props: { params: Promise<{ slug: string }> }) {
     const params = await props.params;
     const id = params.slug
-    const supabase = await createClient()
+    const supabase = await createServerSupabaseClient()
 
     if (!supabase) {
         return NextResponse.json(

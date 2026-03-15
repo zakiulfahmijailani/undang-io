@@ -3,20 +3,16 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Heart, Clock, Lock, ExternalLink } from "lucide-react";
+import { Clock, Lock, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { demoData } from "@/data/demoInvitation";
-// In a real scenario we might use InvitationClientWrapper or MasterInvitationRenderer
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
-
-// Dummy themes identical to buat-undangan
-const QUOTE_PRESETS = [
-    { text: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya.", source: "QS. Ar-Rum: 21" },
-];
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import GuestCountdownBanner from "@/components/invitation/GuestCountdownBanner";
 
 function formatTimeLeft(ms: number) {
     if (ms <= 0) return "00:00";
@@ -30,7 +26,8 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
     const { slug } = params;
     const router = useRouter();
 
-    const [session, setSession] = useState<any>(null);
+    const [sessionData, setSessionData] = useState<any>(null);
+    const [isPermanent, setIsPermanent] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [isExpired, setIsExpired] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
@@ -42,30 +39,69 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
     const [rsvpMessage, setRsvpMessage] = useState("");
 
     useEffect(() => {
-        const raw = localStorage.getItem("guest_session");
-        if (raw) {
-            try {
-                const parsed = JSON.parse(raw);
-                if (parsed.slug === slug) {
-                    setSession(parsed);
-                    setIsCreator(true);
-                } else {
-                    // Not a guest session for this slug, redirect to standard invite view
-                    router.push(`/invite/${slug}`);
-                }
-            } catch (e) {
+        const fetchInvitation = async () => {
+            const supabase = createBrowserSupabaseClient();
+            
+            // 1. Try to load from authentic invitations table first (permanent)
+            const { data: permInv, error: permError } = await supabase
+                .from('invitations')
+                .select('*')
+                .eq('slug', slug)
+                .single();
+
+            if (permInv && !permError) {
+                // Formatting data for permInv omitted setup for brevity; assuming details exist
+                setIsPermanent(true);
+                // For this demo, we'll just redirect to the real invite viewer if it's permanent
+                // since the real invite viewer is typically the source of truth for permanent links.
                 router.push(`/invite/${slug}`);
+                return;
             }
-        } else {
-            router.push(`/invite/${slug}`);
-        }
-        setIsLoading(false);
+
+            // 2. Try guest_sessions
+            const { data: guestInv, error: guestError } = await supabase
+                .from('guest_sessions')
+                .select('*')
+                .eq('slug', slug)
+                .single();
+
+            if (guestError || !guestInv) {
+                // Neither found
+                setIsLoading(false);
+                return; 
+            }
+
+            // Found guest session
+            const expiresTime = new Date(guestInv.expires_at).getTime();
+            if (expiresTime <= Date.now() && guestInv.status !== 'converted') {
+                setIsExpired(true);
+            } else {
+                setTimeLeft(Math.max(0, expiresTime - Date.now()));
+            }
+
+            setSessionData(guestInv);
+
+            // Check if current user is the creator (by local token match)
+            const rawLocal = localStorage.getItem("guest_session");
+            if (rawLocal) {
+                try {
+                    const parsed = JSON.parse(rawLocal);
+                    if (parsed.sessionToken === guestInv.session_token) {
+                        setIsCreator(true);
+                    }
+                } catch (e) {}
+            }
+
+            setIsLoading(false);
+        };
+
+        fetchInvitation();
     }, [slug, router]);
 
     useEffect(() => {
-        if (!session) return;
+        if (!sessionData || isPermanent || isExpired) return;
         const interval = setInterval(() => {
-            const remaining = new Date(session.expiresAt).getTime() - Date.now();
+            const remaining = new Date(sessionData.expires_at).getTime() - Date.now();
             setTimeLeft(Math.max(0, remaining));
             if (remaining <= 0) {
                 setIsExpired(true);
@@ -73,7 +109,7 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [session]);
+    }, [sessionData, isPermanent, isExpired]);
 
     const handleRsvp = (e: React.FormEvent) => {
         e.preventDefault();
@@ -92,26 +128,37 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
         return <div className="min-h-screen bg-stone-50" />;
     }
 
-    if (!session) {
-        return null; // Will redirect
+    if (!sessionData) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-stone-50">
+                <Card className="max-w-md p-6 text-center shadow-lg">
+                    <h2 className="text-xl font-bold text-stone-800">Undangan Tidak Ditemukan</h2>
+                    <p className="mt-2 text-stone-600">Undangan yang Anda cari tidak ada atau masa berlakunya sudah habis.</p>
+                    <Button className="mt-6" asChild>
+                        <Link href="/">Kembali ke Beranda</Link>
+                    </Button>
+                </Card>
+            </div>
+        );
     }
 
     // Map session data to Invitation shape
-    const invData = session.invitationData;
+    const invData = sessionData.invitation_data;
     const dataDisplay = {
         ...demoData,
         coupleShortName: `${invData.groomNickname} & ${invData.brideNickname}`,
+        theme: sessionData.theme_id,
         groom: {
             ...demoData.groom,
-            fullName: invData.groomFullName,
-            nickname: invData.groomNickname,
+            fullName: invData.groomFullName || "Mempelai Pria",
+            nickname: invData.groomNickname || "Pria",
             father: invData.groomFather ? `Bapak ${invData.groomFather}` : "",
             mother: invData.groomMother ? `Ibu ${invData.groomMother}` : "",
         },
         bride: {
             ...demoData.bride,
-            fullName: invData.brideFullName,
-            nickname: invData.brideNickname,
+            fullName: invData.brideFullName || "Mempelai Wanita",
+            nickname: invData.brideNickname || "Wanita",
             father: invData.brideFather ? `Bapak ${invData.brideFather}` : "",
             mother: invData.brideMother ? `Ibu ${invData.brideMother}` : "",
         },
@@ -135,7 +182,7 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
         }
     };
 
-    if (isExpired) {
+    if (isExpired && sessionData.status !== 'converted') {
         return (
             <div className="relative min-h-screen">
                 <div className="pointer-events-none select-none blur-md opacity-60">
@@ -148,46 +195,14 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
                             <Lock className="mx-auto mb-4 h-12 w-12 text-stone-400" />
 
                             <h2 className="mb-2 font-serif text-2xl font-bold text-stone-800">
-                                💍 Undangan sedang dalam proses pembuatan
+                                💍 Masa Berlaku Habis (Expired)
                             </h2>
-                            <p className="mb-6 text-stone-500">Silakan kembali lagi nanti.</p>
+                            <p className="mb-6 text-stone-500">Undangan ini belum dipublikasikan permanen sehingga terhapus dari sistem sementara.</p>
 
                             <p className="mb-4 font-serif text-lg text-stone-800">
                                 {invData.groomNickname || invData.groomFullName} &{" "}
                                 {invData.brideNickname || invData.brideFullName}
                             </p>
-
-                            <div className="mb-6 rounded-lg border border-stone-200 bg-stone-50 p-4 text-left">
-                                <h3 className="mb-3 text-sm font-semibold text-stone-800">
-                                    Sudah diundang? Konfirmasi kehadiran
-                                </h3>
-                                <form onSubmit={handleRsvp} className="space-y-3">
-                                    <Input
-                                        placeholder="Nama kamu"
-                                        value={rsvpName}
-                                        onChange={(e) => setRsvpName(e.target.value)}
-                                        required
-                                    />
-                                    <select
-                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                        value={rsvpAttendance}
-                                        onChange={(e) => setRsvpAttendance(e.target.value as any)}
-                                    >
-                                        <option value="hadir">✅ Hadir</option>
-                                        <option value="tidak_hadir">❌ Tidak Hadir</option>
-                                        <option value="masih_ragu">🤔 Masih Ragu</option>
-                                    </select>
-                                    <Textarea
-                                        placeholder="Ucapan untuk mempelai..."
-                                        value={rsvpMessage}
-                                        onChange={(e) => setRsvpMessage(e.target.value)}
-                                        rows={2}
-                                    />
-                                    <Button type="submit" size="sm" className="w-full cursor-pointer">
-                                        Kirim RSVP
-                                    </Button>
-                                </form>
-                            </div>
 
                             {/* Creator-only action */}
                             {isCreator && (
@@ -196,17 +211,10 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
                                         <p className="mb-2 text-sm font-semibold text-stone-800">Mau langsung live selamanya?</p>
                                         <p className="mb-3 text-xs text-stone-600">Aktifkan undangan ini sekarang.</p>
                                         <Button className="w-full gap-1 cursor-pointer bg-gradient-to-r from-gold-500 to-amber-600 border-0 text-white shadow-md hover:shadow-lg" asChild>
-                                            <Link href="/register">
-                                                Aktifkan Sekarang — Rp 49.000{" "}
-                                                <span className="text-xs line-through opacity-60 ml-1">Rp 99.000</span>
+                                            <Link href={`/login?guest_token=${sessionData.session_token}`}>
+                                                Login untuk Mengaktifkan
                                             </Link>
                                         </Button>
-                                        <ul className="mt-3 space-y-1 text-xs text-stone-600">
-                                            <li>✅ Undangan live selamanya</li>
-                                            <li>✅ Tersimpan di akun kamu</li>
-                                            <li>✅ Link undangan permanen</li>
-                                            <li>✅ Bebas edit kapan saja</li>
-                                        </ul>
                                     </CardContent>
                                 </Card>
                             )}
@@ -218,19 +226,14 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
     }
 
     return (
-        <div className="relative">
-            {isCreator && !isExpired && (
-                <div className="fixed right-4 top-4 z-50 flex flex-col items-center gap-2 rounded-xl border border-amber-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-md sm:flex-row">
-                    <div className="flex items-center gap-2 text-amber-600">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-sm font-bold">
-                            Tersisa {formatTimeLeft(timeLeft)}
-                        </span>
-                    </div>
-                    <Button size="sm" className="h-8 text-xs cursor-pointer bg-stone-900 border-0" asChild>
-                        <Link href="/register">Simpan Selamanya &rarr;</Link>
-                    </Button>
-                </div>
+        <div className="relative pt-[56px] min-h-screen">
+            {!isPermanent && !isExpired && (
+                <GuestCountdownBanner 
+                    expiresAt={sessionData.expires_at}
+                    sessionToken={sessionData.session_token}
+                    slug={sessionData.slug}
+                    status={sessionData.status}
+                />
             )}
 
             {isCreator && !isExpired && (

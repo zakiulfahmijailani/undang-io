@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
     const resolvedParams = await params;
+
+    if (!supabase) {
+        return NextResponse.json({ data: null, error: { code: 'DATABASE_ERROR', message: 'Database not initialized' } }, { status: 500 });
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -38,13 +42,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        await new Promise(r => setTimeout(r, 800)); // Simulate mock delay
-        return NextResponse.json({ data: { success: true }, error: null });
-    }
-
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
     const resolvedParams = await params;
+
+    if (!supabase) {
+        return NextResponse.json({ data: null, error: { code: 'DATABASE_ERROR', message: 'Database not initialized' } }, { status: 500 });
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -56,50 +59,55 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const { id } = resolvedParams;
         const body = await request.json();
 
-        // Basic split of body into invitations fields vs invitation_details fields
-        const { status, slug, ...detailsUpdates } = body;
+        // 1. Ownership check
+        const { data: inv, error: checkError } = await supabase
+            .from('invitations')
+            .select('id')
+            .eq('id', id)
+            .eq('user_id', user.id)
+            .single();
 
-        // 1. Update invitations table if needed
-        if (status || slug) {
-            const updates: any = {};
-            if (status) updates.status = status;
-
-            // If updating slug, check uniqueness first
-            if (slug) {
-                const { data: existing } = await supabase
-                    .from('invitations')
-                    .select('id')
-                    .eq('slug', slug)
-                    .neq('id', id)
-                    .single();
-
-                if (existing) {
-                    return NextResponse.json({ data: null, error: { code: 'SLUG_TAKEN', message: 'URL/Slug sudah digunakan.' } }, { status: 409 });
-                }
-                updates.slug = slug;
-            }
-
-            const { error: invError } = await supabase
-                .from('invitations')
-                .update(updates)
-                .eq('id', id)
-                .eq('user_id', user.id);
-
-            if (invError) throw invError;
+        if (checkError || !inv) {
+            return NextResponse.json({ data: null, error: { code: 'FORBIDDEN', message: 'Akses ditolak' } }, { status: 403 });
         }
 
-        // 2. Update invitation_details
-        if (Object.keys(detailsUpdates).length > 0) {
-            // Ensure ownership before updating details (though policy covers it if properly configured)
-            const { data: inv } = await supabase.from('invitations').select('id').eq('id', id).eq('user_id', user.id).single();
-            if (!inv) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
+        // 2. Separate updates
+        const { status, slug, theme_id, ...detailsUpdates } = body;
 
-            const { error: detError } = await supabase
+        // Update invitations table
+        const invUpdates: any = {};
+        if (status) invUpdates.status = status;
+        if (slug) {
+            // Check slug uniqueness
+            const { data: existing } = await supabase
+                .from('invitations')
+                .select('id')
+                .eq('slug', slug)
+                .neq('id', id)
+                .single();
+            if (existing) {
+                return NextResponse.json({ data: null, error: { code: 'SLUG_TAKEN', message: 'URL/Slug sudah digunakan.' } }, { status: 409 });
+            }
+            invUpdates.slug = slug;
+        }
+        if (theme_id) invUpdates.theme_id = theme_id;
+
+        if (Object.keys(invUpdates).length > 0) {
+            const { error: updateInvError } = await supabase
+                .from('invitations')
+                .update(invUpdates)
+                .eq('id', id);
+            if (updateInvError) throw updateInvError;
+        }
+
+        // Update invitation_details table
+        if (Object.keys(detailsUpdates).length > 0) {
+            // Some fields might need cleaning if they come from EditorClient flattened
+            const { error: updateDetError } = await supabase
                 .from('invitation_details')
                 .update(detailsUpdates)
                 .eq('invitation_id', id);
-
-            if (detError) throw detError;
+            if (updateDetError) throw updateDetError;
         }
 
         return NextResponse.json({ data: { success: true }, error: null });
@@ -111,8 +119,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
     const resolvedParams = await params;
+
+    if (!supabase) {
+        return NextResponse.json({ data: null, error: { code: 'DATABASE_ERROR', message: 'Database not initialized' } }, { status: 500 });
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -121,10 +133,9 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     try {
         const { id } = resolvedParams;
 
-        // Soft delete - set status to expired
         const { error } = await supabase
             .from('invitations')
-            .update({ status: 'expired' })
+            .delete()
             .eq('id', id)
             .eq('user_id', user.id);
 

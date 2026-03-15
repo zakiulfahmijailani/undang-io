@@ -44,16 +44,16 @@ interface WrapperProps {
 }
 
 export default function InvitationClientWrapper({ data, theme, invitationId }: WrapperProps) {
+    const [isOpened, setIsOpened] = useState(false);
+    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+    const audioRef = useRef<HTMLAudioElement>(null);
+
     // If a theme is provided, use the MasterInvitationRenderer (themed engine)
     if (theme) {
         return <MasterInvitationRenderer theme={theme} invitationData={data as any} />;
     }
 
     // Otherwise, fall back to the original hardcoded section-based rendering
-    const [isOpened, setIsOpened] = useState(false);
-    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-    const audioRef = useRef<HTMLAudioElement>(null);
-
     const handleOpen = () => {
         setIsOpened(true);
         if (audioRef.current) {

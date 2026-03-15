@@ -21,21 +21,21 @@ const QUOTE_PRESETS = [
 
 const activeThemes = [
     {
-      id: "theme-jawa-klasik",
+      id: "th-01",
       name: "Jawa Klasik",
       description: "Tema undangan dengan nuansa Jawa klasik, ornamen batik, dan warna emas-cokelat.",
       culturalCategory: "jawa",
       thumbnailUrl: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=338&h=600&fit=crop"
     },
     {
-      id: "theme-bali-tropis",
+      id: "th-02",
       name: "Bali Tropis",
       description: "Nuansa tropis Bali dengan hijau daun, bunga frangipani, dan suasana pantai.",
       culturalCategory: "bali",
       thumbnailUrl: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=338&h=600&fit=crop"
     },
     {
-      id: "theme-modern-minimalis",
+      id: "th-03",
       name: "Modern Minimalis",
       description: "Desain bersih dan modern dengan tipografi elegan dan palet netral.",
       culturalCategory: "minimalis",
@@ -65,28 +65,55 @@ export default function BuatUndangan() {
 
   const update = (key: string, val: string) => setForm((prev) => ({ ...prev, [key]: val }));
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
 
-    // Simulate saving to guest_sessions with 15-min expiry
+    // Metadata for the guest session (25-minute trial)
     const sessionToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + 25 * 60 * 1000).toISOString();
 
-    localStorage.setItem(
-      "guest_session",
-      JSON.stringify({
-        sessionToken,
-        slug,
-        themeId: selectedThemeId,
-        expiresAt,
-        invitationData: form,
-      })
-    );
+    try {
+      // ✅ FIX: Using fetch() to call our secure API route instead of direct Supabase call
+      const response = await fetch("/api/invitations/guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionToken,
+          slug,
+          themeId: selectedThemeId,
+          expiresAt,
+          invitationData: form,
+        }),
+      });
 
-    toast("🚀 Undangan berhasil dipublikasikan!", {
-      description: "Undangan kamu live selama 15 menit.",
-    });
-    router.push(`/u/${slug}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Gagal mempublikasikan undangan.");
+      }
+
+      // Save session info locally for the conversion flow after login
+      localStorage.setItem(
+        "guest_session",
+        JSON.stringify({
+          sessionToken,
+          slug,
+          themeId: selectedThemeId,
+          expiresAt,
+          invitationData: form,
+        })
+      );
+
+      toast.success("🚀 Undangan berhasil dipublikasikan!", {
+        description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya!",
+      });
+      
+      router.push(`/u/${slug}`);
+    } catch (error: any) {
+      console.error("Publish Error:", error);
+      toast.error("Gagal publikasi", {
+        description: error.message || "Terjadi kesalahan sistem.",
+      });
+    }
   };
 
   return (

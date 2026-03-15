@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { v4 as uuidv4 } from 'uuid'
 
 // GET /api/invitations
 export async function GET(request: Request) {
-    const supabase = await createClient()
+    const supabase = await createServerSupabaseClient()
 
     if (!supabase) {
         return NextResponse.json(
@@ -84,10 +84,32 @@ import { z } from 'zod'
 const createInvitationSchema = z.object({
     groom_name: z.string().min(1).max(100),
     bride_name: z.string().min(1).max(100),
+    theme_id: z.string().optional(),
+    slug: z.string().optional(),
+    details: z.object({
+        groom_full_name: z.string().optional(),
+        groom_nickname: z.string().optional(),
+        groom_father: z.string().optional(),
+        groom_mother: z.string().optional(),
+        bride_full_name: z.string().optional(),
+        bride_nickname: z.string().optional(),
+        bride_father: z.string().optional(),
+        bride_mother: z.string().optional(),
+        akad_date: z.string().optional(),
+        akad_time: z.string().optional(),
+        akad_venue: z.string().optional(),
+        akad_address: z.string().optional(),
+        reception_date: z.string().optional(),
+        reception_time: z.string().optional(),
+        reception_venue: z.string().optional(),
+        reception_address: z.string().optional(),
+        quote_text: z.string().optional(),
+        quote_source: z.string().optional(),
+    }).optional()
 })
 
 export async function POST(request: Request) {
-    const supabase = await createClient()
+    const supabase = await createServerSupabaseClient()
 
     if (!supabase) {
         return NextResponse.json(
@@ -116,18 +138,36 @@ export async function POST(request: Request) {
             )
         }
 
-        const { groom_name, bride_name } = parsed.data
+        const { groom_name, bride_name, theme_id, slug, details } = parsed.data
 
-        // Generate slug
-        const cleanStr = (str: string) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
-        const baseSlug = `${cleanStr(groom_name)}-dan-${cleanStr(bride_name)}`
+        // Theme ID mapping
+        let themeUuid: string | null = null;
+        if (theme_id) {
+            const { data: themeData } = await supabase
+                .from('themes')
+                .select('id')
+                .eq('slug', theme_id)
+                .single();
+            
+            if (themeData) {
+                themeUuid = themeData.id;
+            } else if (theme_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
+                themeUuid = theme_id;
+            }
+        }
 
-        let finalSlug = `${baseSlug}-${uuidv4().substring(0, 4)}`
-
-        // Check uniqueness and retry once if needed (Supabase constraint will handle final check)
-        const { count } = await supabase.from('invitations').select('*', { count: 'exact', head: true }).eq('slug', finalSlug)
-        if (count && count > 0) {
-            finalSlug = `${baseSlug}-${uuidv4().substring(0, 6)}`
+        // Generate slug if not provided
+        let finalSlug = slug;
+        if (!finalSlug) {
+            const cleanStr = (str: string) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+            const baseSlug = `${cleanStr(groom_name)}-dan-${cleanStr(bride_name)}`
+            finalSlug = `${baseSlug}-${uuidv4().substring(0, 4)}`
+            
+            // Basic uniqueness check
+            const { count } = await supabase.from('invitations').select('*', { count: 'exact', head: true }).eq('slug', finalSlug)
+            if (count && count > 0) {
+                finalSlug = `${baseSlug}-${uuidv4().substring(0, 6)}`
+            }
         }
 
         // 1. Insert into invitations
@@ -136,7 +176,8 @@ export async function POST(request: Request) {
             .insert({
                 user_id: user.id,
                 slug: finalSlug,
-                status: 'unpaid'
+                theme_id: themeUuid,
+                status: 'draft'
             })
             .select()
             .single()
@@ -152,16 +193,19 @@ export async function POST(request: Request) {
         }
 
         // 2. Insert into invitation_details
+        const detailsPayload = {
+            invitation_id: invitation.id,
+            groom_name: groom_name,
+            bride_name: bride_name,
+            ...(details || {})
+        };
+
         const { error: detailsError } = await supabase
             .from('invitation_details')
-            .insert({
-                invitation_id: invitation.id,
-                groom_name: groom_name,
-                bride_name: bride_name
-            })
+            .insert(detailsPayload)
 
         if (detailsError) {
-            // Rollback (best effort cleanup)
+            // Best effort cleanup: attempt to delete the invitation if details insertion fails
             await supabase.from('invitations').delete().eq('id', invitation.id)
             throw detailsError
         }

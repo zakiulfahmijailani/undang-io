@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import EditorClient from "./EditorClient";
 
 export default async function EditInvitationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -34,7 +34,7 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
             }
         }
     } else {
-        const supabase = await createClient();
+        const supabase = await createServerSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {

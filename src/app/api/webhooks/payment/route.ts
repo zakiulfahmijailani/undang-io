@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 // MOCK WEBHOOK HANDLER
 // In a real app, this would be called by Midtrans servers (e.g. POST /api/webhooks/payment)
 // For the MVP, we can simulate it by sending a POST request directly from the frontend
 // when they click a "Simulate Payment Success" button.
 export async function POST(request: Request) {
-    const supabase = await createClient()
+    const supabase = await createServerSupabaseClient();
 
     if (!supabase) {
         return NextResponse.json(

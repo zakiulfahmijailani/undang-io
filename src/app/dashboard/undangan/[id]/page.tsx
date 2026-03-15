@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ArrowLeft, Users, MailOpen, MessageCircle, Eye, Pencil } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import RsvpClientTable from "./RsvpClientTable";
+import { GuestSessionClearer } from "./GuestSessionClearer";
+import { Suspense } from "react";
 
 export default async function UndanganDashboardPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
@@ -31,7 +33,7 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
             { id: '2', guest_name: 'Riska', attendance: 'tidak_hadir', message: 'Maaf ngga bisa dateng 🙏', created_at: new Date(Date.now() - 3600000).toISOString(), is_read: true }
         ];
     } else {
-        const supabase = await createClient();
+        const supabase = await createServerSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
@@ -89,6 +91,7 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
 
     return (
         <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
+            <Suspense fallback={null}><GuestSessionClearer /></Suspense>
             {/* Header / Actions */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex flex-col gap-3">

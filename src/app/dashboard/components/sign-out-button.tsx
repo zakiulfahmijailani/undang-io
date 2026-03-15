@@ -2,11 +2,11 @@
 import { LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
 export function SignOutButton() {
     const router = useRouter()
-    const supabase = createClient()
+    const supabase = createBrowserSupabaseClient()
 
     async function handleSignOut() {
         if (supabase) {

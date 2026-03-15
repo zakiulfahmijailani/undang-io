@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MailOpen, MessageSquareHeart, ShieldCheck, HeartPulse } from "lucide-react";
 import InvitationCard, { InvitationCardProps } from "@/components/dashboard/InvitationCard";
 import NewInvitationDialog from "@/components/dashboard/NewInvitationDialog";
+import GuestConversion from "./components/GuestConversion";
 
 export default async function DashboardPage() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -45,7 +46,7 @@ export default async function DashboardPage() {
         mockTotalRsvps = 450;
         mockNewMessages = 12;
     } else {
-        const supabase = await createClient();
+        const supabase = await createServerSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
@@ -78,7 +79,9 @@ export default async function DashboardPage() {
     const totalInvitations = typedInvitations.length;
 
     return (
-        <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
+        <>
+            <GuestConversion />
+            <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
             {/* Header Content */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
@@ -177,5 +180,6 @@ export default async function DashboardPage() {
                 </>
             )}
         </div>
+    </>
     );
 }
