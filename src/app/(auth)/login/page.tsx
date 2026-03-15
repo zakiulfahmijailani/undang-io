@@ -17,7 +17,6 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
-  const [returnSlug, setReturnSlug] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
@@ -28,12 +27,11 @@ export default function Login() {
       try {
         const parsed = JSON.parse(raw);
         if (parsed.sessionToken) setGuestSessionToken(parsed.sessionToken);
-        if (parsed.slug) setReturnSlug(parsed.slug);
       } catch (e) { }
     }
   }, []);
 
-  const claimAndRedirect = async (token: string, slug: string) => {
+  const claimAndRedirect = async (token: string) => {
     try {
       const res = await fetch(`/api/guest-sessions/${token}/claim`, {
         method: "PATCH",
@@ -45,7 +43,8 @@ export default function Login() {
     } catch (e) {
       console.error("Claim failed:", e);
     }
-    router.push(`/u/${slug}`);
+    // Always redirect to dashboard after claim
+    router.push("/dashboard");
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -61,8 +60,8 @@ export default function Login() {
       return;
     }
 
-    if (guestSessionToken && returnSlug) {
-      await claimAndRedirect(guestSessionToken, returnSlug);
+    if (guestSessionToken) {
+      await claimAndRedirect(guestSessionToken);
     } else {
       router.push("/dashboard");
     }
