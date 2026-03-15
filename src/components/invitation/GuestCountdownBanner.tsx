@@ -15,18 +15,18 @@ interface GuestCountdownBannerProps {
 
 function formatTimeDisplay(timeLeftMs: number) {
   if (timeLeftMs <= 0) return "00:00";
-  
+
   const totalSeconds = Math.floor(timeLeftMs / 1000);
   const totalMinutes = Math.floor(totalSeconds / 60);
-  
+
   // Requirement: If >= 60 minutes: show "59:59"
   if (totalMinutes >= 60) {
     return "59:59";
   }
-  
+
   const minutes = totalMinutes;
   const seconds = totalSeconds % 60;
-  
+
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
@@ -73,7 +73,7 @@ export default function GuestCountdownBanner({
   // Claimed by authenticated user — show publish CTA
   if (status === "claimed") {
     return (
-      <div className="fixed top-0 left-0 right-0 z-50 border-b border-emerald-200 bg-emerald-50/95 backdrop-blur-md px-4 py-3 shadow-sm">
+      <div className="fixed top-0 left-0 right-0 z-[9999] border-b border-emerald-200 bg-emerald-50/95 backdrop-blur-md px-4 py-3 shadow-sm">
         <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2 text-emerald-700">
             <CheckCircle className="h-4 w-4" />
@@ -101,7 +101,7 @@ export default function GuestCountdownBanner({
   // Expired
   if (isExpired || status === "expired") {
     return (
-      <div className="fixed top-0 left-0 right-0 z-50 border-b border-red-200 bg-red-50/95 backdrop-blur-md px-4 py-3 shadow-md">
+      <div className="fixed top-0 left-0 right-0 z-[9999] border-b border-red-200 bg-red-50/95 backdrop-blur-md px-4 py-3 shadow-md">
         <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-2">
           <div className="flex items-center gap-2 text-red-700">
             <AlertTriangle className="h-4 w-4" />
@@ -118,7 +118,7 @@ export default function GuestCountdownBanner({
   return (
     <div
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-md px-4 py-3 transition-all duration-500 shadow-sm",
+        "fixed top-0 left-0 right-0 z-[9999] border-b backdrop-blur-md px-4 py-3 transition-all duration-500 shadow-sm",
         isUrgent
           ? "border-red-200 bg-red-50/95 animate-pulse-subtle"
           : "border-amber-200 bg-amber-50/95"
