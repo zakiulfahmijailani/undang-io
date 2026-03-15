@@ -74,7 +74,7 @@ export default function Login() {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
 
-      let redirectTo = `${window.location.origin}/auth/callback`;
+      let redirectTo = `${window.location.origin}/api/auth/callback`;
       if (guestSessionToken) {
         redirectTo += `?guest_session_token=${guestSessionToken}`;
       }
