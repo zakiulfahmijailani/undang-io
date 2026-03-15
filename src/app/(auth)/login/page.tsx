@@ -7,34 +7,65 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSearchParams } from "next/navigation";
-import { login } from "../actions";
+import { useSearchParams, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { FaGoogle } from "react-icons/fa";
+import { toast } from "sonner";
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
+  const [returnSlug, setReturnSlug] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const message = searchParams.get("message");
 
   useEffect(() => {
-    const guestSessionRaw = localStorage.getItem("guest_session");
-    if (guestSessionRaw) {
+    const raw = localStorage.getItem("guest_session");
+    if (raw) {
       try {
-        const guestSession = JSON.parse(guestSessionRaw);
-        if (guestSession.sessionToken) {
-          setGuestSessionToken(guestSession.sessionToken);
-        }
-      } catch (e) {
-        console.error("Failed to parse guest session from localStorage", e);
-      }
+        const parsed = JSON.parse(raw);
+        if (parsed.sessionToken) setGuestSessionToken(parsed.sessionToken);
+        if (parsed.slug) setReturnSlug(parsed.slug);
+      } catch (e) { }
     }
   }, []);
 
-  const handleSubmit = async (formData: FormData) => {
+  const claimAndRedirect = async (token: string, slug: string) => {
+    try {
+      const res = await fetch(`/api/guest-sessions/${token}/claim`, {
+        method: "PATCH",
+      });
+      const json = await res.json();
+      if (json.data) {
+        toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
+      }
+    } catch (e) {
+      console.error("Claim failed:", e);
+    }
+    router.push(`/u/${slug}`);
+  };
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    await login(formData);
+
+    const supabase = createBrowserSupabaseClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      toast.error("Login gagal", { description: "Email atau kata sandi salah." });
+      setLoading(false);
+      return;
+    }
+
+    if (guestSessionToken && returnSlug) {
+      await claimAndRedirect(guestSessionToken, returnSlug);
+    } else {
+      router.push("/dashboard");
+    }
     setLoading(false);
   };
 
@@ -42,20 +73,19 @@ export default function Login() {
     try {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
-      
+
       let redirectTo = `${window.location.origin}/auth/callback`;
       if (guestSessionToken) {
         redirectTo += `?guest_session_token=${guestSessionToken}`;
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-        },
+        provider: "google",
+        options: { redirectTo },
       });
+
       if (error) {
-        console.error("Error logging in with Google:", error);
+        console.error("Google login error:", error);
         setLoading(false);
       }
     } catch (e) {
@@ -75,17 +105,23 @@ export default function Login() {
             </span>
           </Link>
           <h1 className="mb-6 text-center text-xl font-bold text-foreground">Masuk ke Akun</h1>
-          
+
           {message && (
             <p className="mb-4 text-center text-sm font-medium text-destructive bg-destructive/10 p-2 rounded-md">
               {message}
             </p>
           )}
 
-          <Button 
-            variant="secondary" 
-            className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer" 
-            onClick={handleGoogleLogin} 
+          {guestSessionToken && (
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+              ⏳ Login untuk menyimpan undanganmu dan perpanjang timer 10 menit.
+            </div>
+          )}
+
+          <Button
+            variant="secondary"
+            className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer"
+            onClick={handleGoogleLogin}
             disabled={loading}
             type="button"
           >
@@ -102,20 +138,18 @@ export default function Login() {
             </div>
           </div>
 
-          <form action={handleSubmit} className="space-y-4">
-            {guestSessionToken && (
-               <input type="hidden" name="guestSessionToken" value={guestSessionToken} />
-            )}
+          <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
-                  name="email"
                   type="email"
                   className="pl-9"
                   placeholder="nama@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -126,10 +160,11 @@ export default function Login() {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
-                  name="password"
                   type="password"
                   className="pl-9"
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
@@ -138,6 +173,7 @@ export default function Login() {
               {loading ? "Memproses..." : "Masuk"}
             </Button>
           </form>
+
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Belum punya akun?{" "}
             <Link href="/register" className="font-semibold text-accent hover:underline">

@@ -70,7 +70,7 @@ export default function BuatUndangan() {
 
     // Metadata for the guest session (25-minute trial)
     const sessionToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 25 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     try {
       // ✅ FIX: Using fetch() to call our secure API route instead of direct Supabase call
@@ -102,7 +102,7 @@ export default function BuatUndangan() {
           invitationData: form,
         })
       );
-
+      localStorage.setItem("guest_return_slug", slug); // ← TAMBAH BARIS INI SAJA
       toast.success("🚀 Undangan berhasil dipublikasikan!", {
         description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya!",
       });
