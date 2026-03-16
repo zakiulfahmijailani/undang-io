@@ -12,48 +12,43 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { FaGoogle } from "react-icons/fa";
 import { toast } from "sonner";
 
+// Helper: read guest token from localStorage (ignores expired sessions)
+function getGuestTokenFromStorage(searchParams: URLSearchParams): string | null {
+  try {
+    const raw = localStorage.getItem('guest_session');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.sessionToken) {
+        // Check not expired
+        if (parsed.expiresAt && new Date(parsed.expiresAt) < new Date()) {
+          // Expired — clean up
+          localStorage.removeItem('guest_session');
+        } else {
+          return parsed.sessionToken;
+        }
+      }
+    }
+  } catch (e) {}
+
+  const pending = localStorage.getItem('pending_claim_token');
+  if (pending) return pending;
+
+  return searchParams.get('guest_token');
+}
+
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
 
-  // Step 1: mark mounted (client-only)
   useEffect(() => {
-    setMounted(true);
+    const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
+    setGuestSessionToken(token);
   }, []);
-
-  // Step 2: read token only after mounted
-  useEffect(() => {
-    if (!mounted) return;
-
-    // Priority 1: active guest session in localStorage
-    try {
-      const raw = localStorage.getItem('guest_session');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.sessionToken) {
-          setGuestSessionToken(parsed.sessionToken);
-          return;
-        }
-      }
-    } catch (e) {}
-
-    // Priority 2: pending token from email-verify register flow
-    const pending = localStorage.getItem('pending_claim_token');
-    if (pending) {
-      setGuestSessionToken(pending);
-      return;
-    }
-
-    // Priority 3: token from URL query param (from GuestCountdownBanner)
-    const urlToken = searchParams.get('guest_token');
-    if (urlToken) setGuestSessionToken(urlToken);
-  }, [mounted, searchParams]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,10 +63,10 @@ export default function Login() {
       return;
     }
 
-    // Claim guest session using Bearer token — avoids cookie timing issue
-    if (guestSessionToken && data.session) {
+    const token = guestSessionToken;
+    if (token && data.session) {
       try {
-        const claimRes = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
+        const claimRes = await fetch(`/api/guest-sessions/${token}/claim`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${data.session.access_token}`,
@@ -109,9 +104,12 @@ export default function Login() {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
 
+      // Always read directly from localStorage at click time — don't rely on state
+      const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
+
       let redirectTo = `${window.location.origin}/api/auth/callback`;
-      if (guestSessionToken) {
-        redirectTo += `?guest_session_token=${guestSessionToken}`;
+      if (token) {
+        redirectTo += `?guest_session_token=${token}`;
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
