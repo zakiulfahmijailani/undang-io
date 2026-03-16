@@ -17,32 +17,43 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
 
+  // Step 1: mark mounted (client-only)
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Step 2: read token only after mounted
+  useEffect(() => {
+    if (!mounted) return;
+
     // Priority 1: active guest session in localStorage
-    const raw = localStorage.getItem('guest_session');
-    if (raw) {
-      try {
+    try {
+      const raw = localStorage.getItem('guest_session');
+      if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed.sessionToken) {
+        if (parsed?.sessionToken) {
           setGuestSessionToken(parsed.sessionToken);
           return;
         }
-      } catch (e) {}
-    }
+      }
+    } catch (e) {}
+
     // Priority 2: pending token from email-verify register flow
     const pending = localStorage.getItem('pending_claim_token');
     if (pending) {
       setGuestSessionToken(pending);
       return;
     }
+
     // Priority 3: token from URL query param (from GuestCountdownBanner)
     const urlToken = searchParams.get('guest_token');
     if (urlToken) setGuestSessionToken(urlToken);
-  }, [searchParams]);
+  }, [mounted, searchParams]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
