@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 import { Sidebar } from "./components/sidebar"
 import { Monitor, Menu } from "lucide-react"
 
@@ -42,12 +43,20 @@ export default function DashboardLayout({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button className="w-10 h-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm">
+                        <Link 
+                            href="/dashboard" 
+                            className="w-10 h-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm cursor-pointer relative z-50 inline-flex"
+                            title="Dashboard"
+                        >
                             <Monitor className="w-5 h-5" />
-                        </button>
-                        <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground font-semibold flex items-center justify-center shadow-md">
+                        </Link>
+                        <Link 
+                            href="/dashboard/akun" 
+                            className="w-10 h-10 rounded-full bg-primary text-primary-foreground font-semibold flex items-center justify-center shadow-md cursor-pointer relative z-50 inline-flex"
+                            title="Akun & Langganan"
+                        >
                             BS
-                        </div>
+                        </Link>
                     </div>
                 </header>
                 <div className="p-4 md:p-8 pt-6">

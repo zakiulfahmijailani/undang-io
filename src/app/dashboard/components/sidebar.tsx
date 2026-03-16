@@ -4,9 +4,23 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
 import { Home, Mail, FileText, LayoutTemplate, User, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
 export function Sidebar({ isOpen }: { isOpen: boolean }) {
     const pathname = usePathname()
+    const router = useRouter()
+
+    const handleLogout = async () => {
+        try {
+            const supabase = createBrowserSupabaseClient()
+            await supabase.auth.signOut()
+            router.push("/")
+            router.refresh()
+        } catch (error) {
+            console.error("Logout error:", error)
+        }
+    }
 
     const navItems = [
         { name: "Beranda Dashboard", href: "/dashboard", icon: Home },
@@ -52,7 +66,10 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
 
                 {/* Bottom Actions */}
                 <div className="p-4 mt-auto border-t w-64">
-                    <button className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 w-full">
+                    <button 
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 w-full cursor-pointer relative z-50"
+                    >
                         <LogOut className="w-5 h-5 shrink-0" />
                         <span className="text-sm font-medium">Keluar</span>
                     </button>
