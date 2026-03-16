@@ -114,17 +114,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         if (body.bride_father !== undefined)    updates.bride_father_name = body.bride_father;
         if (body.bride_mother !== undefined)    updates.bride_mother_name = body.bride_mother;
 
-        // Akad
+        // Akad (maps URL skipped - column not yet in DB)
         if (body.akad_date !== undefined)    updates.akad_datetime         = body.akad_date || null;
         if (body.akad_venue !== undefined)   updates.akad_location_name    = body.akad_venue;
         if (body.akad_address !== undefined) updates.akad_location_address = body.akad_address;
-        if (body.akad_maps !== undefined)    updates.akad_maps_url         = body.akad_maps;
 
-        // Resepsi
+        // Resepsi (maps URL skipped - column not yet in DB)
         if (body.reception_date !== undefined)    updates.resepsi_datetime         = body.reception_date || null;
         if (body.reception_venue !== undefined)   updates.resepsi_location_name    = body.reception_venue;
         if (body.reception_address !== undefined) updates.resepsi_location_address = body.reception_address;
-        if (body.reception_maps !== undefined)    updates.resepsi_maps_url         = body.reception_maps;
 
         // Quote / greeting
         if (body.greeting_text !== undefined) updates.quote_text = body.greeting_text;
@@ -136,9 +134,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         if (body.gift_shipping_address !== undefined)  updates.gift_shipping_address  = body.gift_shipping_address;
 
         // Visibility toggles
-        if (body.show_couple_photos !== undefined) updates.show_couple_photos = body.show_couple_photos;
-        if (body.show_prewed_gallery !== undefined) updates.show_prewed_gallery = body.show_prewed_gallery;
-        if (body.show_gift_section !== undefined)   updates.show_gift_section   = body.show_gift_section;
+        if (body.show_couple_photos !== undefined)  updates.show_couple_photos  = body.show_couple_photos;
+        if (body.show_prewed_gallery !== undefined)  updates.show_prewed_gallery = body.show_prewed_gallery;
+        if (body.show_gift_section !== undefined)    updates.show_gift_section   = body.show_gift_section;
 
         if (Object.keys(updates).length === 0) {
             return NextResponse.json({ data: { success: true }, error: null });
