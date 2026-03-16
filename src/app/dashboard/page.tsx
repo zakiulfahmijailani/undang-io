@@ -25,32 +25,59 @@ export default async function DashboardPage() {
 
     const userName = profile?.full_name?.split(' ')[0] || 'Kak';
 
-    // 1. Fetch permanent invitations
-    const { data: invitations } = await supabase
+    // 1. Fetch permanent invitations — query flat columns (no invitation_details relation)
+    const { data: invitationsRaw, error: invitationsError } = await supabase
         .from('invitations')
         .select(`
-            id, slug, status, created_at,
-            invitation_details (
-                groom_name, bride_name,
-                couple_photo_url, akad_date, reception_date
-            )
+            id,
+            slug,
+            status,
+            created_at,
+            groom_full_name,
+            groom_nickname,
+            bride_full_name,
+            bride_nickname,
+            akad_datetime,
+            resepsi_datetime
         `)
         .eq('user_id', user.id)
+        .is('soft_delete_at', null)
         .order('created_at', { ascending: false });
 
-    const typedInvitations = (invitations || []) as any[];
+    if (invitationsError) {
+        console.error('[dashboard] invitations query error:', invitationsError);
+    }
+
+    // Map flat columns → shape that InvitationCard expects
+    const typedInvitations = (invitationsRaw || []).map((inv: any) => ({
+        id: inv.id,
+        slug: inv.slug,
+        status: inv.status,
+        created_at: inv.created_at,
+        invitation_details: {
+            groom_name: inv.groom_nickname || inv.groom_full_name || null,
+            bride_name: inv.bride_nickname || inv.bride_full_name || null,
+            couple_photo_url: null,
+            akad_date: inv.akad_datetime || null,
+            reception_date: inv.resepsi_datetime || null,
+        },
+    }));
 
     // 2. Fetch claimed guest sessions (belum bayar, belum jadi permanent)
     let claimedGuestSessions: any[] = [];
     const adminClient = getAdminClient();
     if (adminClient) {
-        const { data: guestSessions } = await adminClient
+        const { data: guestSessions, error: gsError } = await adminClient
             .from('guest_sessions')
             .select('*')
             .eq('user_id', user.id)
             .eq('status', 'claimed')
             .gt('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false });
+
+        if (gsError) {
+            console.error('[dashboard] guest_sessions query error:', gsError);
+        }
 
         claimedGuestSessions = (guestSessions || []) as any[];
     }
@@ -167,4 +194,3 @@ export default async function DashboardPage() {
     </>
     );
 }
-
