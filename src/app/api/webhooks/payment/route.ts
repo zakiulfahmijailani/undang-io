@@ -1,63 +1,131 @@
 import { NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { getAdminClient } from '@/lib/supabase/admin';
 
-// MOCK WEBHOOK HANDLER
-// In a real app, this would be called by Midtrans servers (e.g. POST /api/webhooks/payment)
-// For the MVP, we can simulate it by sending a POST request directly from the frontend
-// when they click a "Simulate Payment Success" button.
+// WEBHOOK HANDLER — dipanggil Midtrans setelah pembayaran dikonfirmasi
+// Endpoint: POST /api/webhooks/payment
+// Untuk MVP/testing: bisa dipanggil manual dari Postman atau frontend "Simulate Payment"
 export async function POST(request: Request) {
-    const supabase = await createServerSupabaseClient();
+  const adminClient = getAdminClient();
 
-    if (!supabase) {
-        return NextResponse.json(
-            { data: null, error: { code: 'DATABASE_ERROR', message: 'Database client not initialized.' } },
-            { status: 500 }
-        )
-    }
+  if (!adminClient) {
+    return NextResponse.json(
+      { data: null, error: { code: 'DATABASE_ERROR', message: 'Admin client tidak tersedia.' } },
+      { status: 500 }
+    )
+  }
 
-    try {
-        const body = await request.json()
-        const { transaction_id, status } = body
+  try {
+    const body = await request.json()
+    // Midtrans mengirim transaction_status, order_id, dll.
+    // Untuk MVP kita terima { slug, user_id } atau { transaction_id, status }
+    const { slug, user_id, transaction_id, transaction_status } = body
 
-        if (!transaction_id || status !== 'success') {
-            return NextResponse.json({ received: true })
-        }
+    // === FLOW 1: Convert via slug + user_id (dipanggil manual / internal) ===
+    if (slug && user_id) {
+      const { data: guestSession, error: gsError } = await adminClient
+        .from('guest_sessions')
+        .select('*')
+        .eq('slug', slug)
+        .eq('user_id', user_id)
+        .eq('status', 'claimed')
+        .single()
 
-        // 1. Get payment details
-        // Note: Webhooks usually run outside user sessions, so ideally we'd use a service_role key
-        // For MVP, if it fails due to RLS, make sure payments table has no RLS block for reads if testing via Postman,
-        // or ensure the testing user is authenticated. We'll use the user auth context provided by cookies here.
-        const { data: payment, error: fetchError } = await supabase
-            .from('payments')
-            .select('*')
-            .eq('transaction_id', transaction_id)
-            .single()
+      if (gsError || !guestSession) {
+        console.error('[webhook] guest_session not found:', gsError)
+        return NextResponse.json({ received: true })
+      }
 
-        if (fetchError || !payment) {
-            console.error('Payment not found:', fetchError)
-            return NextResponse.json({ received: true })
-        }
+      // Idempotent: cek apakah sudah pernah diconvert
+      const { data: existing } = await adminClient
+        .from('invitations')
+        .select('id, slug')
+        .eq('slug', slug)
+        .single()
 
-        // 2. Update payment status
-        await supabase
-            .from('payments')
-            .update({ status: 'success', paid_at: new Date().toISOString() })
-            .eq('id', payment.id)
+      if (existing) {
+        console.log('[webhook] Already converted:', existing.slug)
+        return NextResponse.json({ received: true, data: { slug: existing.slug } })
+      }
 
-        // 3. Upgrade user's invitation plan
-        await supabase
-            .from('invitations')
-            .update({ plan_id: payment.plan_id })
-            .eq('id', payment.invitation_id)
+      const inv = guestSession.invitation_data || {}
+      const groomNick = inv.groomNickname || inv.groomFullName || 'Mempelai Pria'
+      const brideNick = inv.brideNickname || inv.brideFullName || 'Mempelai Wanita'
 
-        return NextResponse.json({
-            data: { message: 'Pembayaran berhasil diproses dan status di-upgrade', success: true },
-            error: null
+      const { data: newInvitation, error: insertError } = await adminClient
+        .from('invitations')
+        .insert({
+          user_id: guestSession.user_id,
+          theme_id: guestSession.theme_id || null,
+          slug: guestSession.slug,
+          title: `Pernikahan ${groomNick} & ${brideNick}`,
+          groom_full_name: inv.groomFullName || null,
+          groom_nickname: inv.groomNickname || null,
+          groom_father_name: inv.groomFatherName || null,
+          groom_mother_name: inv.groomMotherName || null,
+          bride_full_name: inv.brideFullName || null,
+          bride_nickname: inv.brideNickname || null,
+          bride_father_name: inv.brideFatherName || null,
+          bride_mother_name: inv.brideMotherName || null,
+          akad_datetime: inv.akadDatetime || inv.akadDate || null,
+          akad_location_name: inv.akadLocationName || null,
+          akad_location_address: inv.akadLocationAddress || null,
+          resepsi_datetime: inv.resepsiDatetime || inv.resepsiDate || null,
+          resepsi_location_name: inv.resepsiLocationName || null,
+          resepsi_location_address: inv.resepsiLocationAddress || null,
+          quote_text: inv.quoteText || null,
+          gift_bank_name: inv.giftBankName || null,
+          gift_bank_account: inv.giftBankAccount || null,
+          gift_bank_account_name: inv.giftBankAccountName || null,
+          gift_shipping_address: inv.giftShippingAddress || null,
+          status: 'active',
+          is_paid: true,
+          paid_at: new Date().toISOString(),
+          converted_from_guest_session_id: guestSession.id,
         })
+        .select('id, slug')
+        .single()
 
-    } catch (error: any) {
-        console.error('Webhook error:', error)
-        // Always return 200 for webhooks so Midtrans doesn't retry infinitely
-        return NextResponse.json({ received: true, error: error.message })
+      if (insertError || !newInvitation) {
+        console.error('[webhook] Failed to insert invitation:', insertError)
+        return NextResponse.json({ received: true })
+      }
+
+      await adminClient
+        .from('guest_sessions')
+        .update({
+          status: 'converted',
+          converted_to_invitation_id: newInvitation.id,
+        })
+        .eq('id', guestSession.id)
+
+      console.log('[webhook] Converted guest_session', guestSession.id, '→ invitation', newInvitation.id)
+      return NextResponse.json({ received: true, data: { slug: newInvitation.slug } })
     }
+
+    // === FLOW 2: Midtrans webhook standar (transaction_id + status) ===
+    if (transaction_id && (transaction_status === 'settlement' || transaction_status === 'capture')) {
+      const { data: payment } = await adminClient
+        .from('payments')
+        .select('*')
+        .eq('transaction_id', transaction_id)
+        .single()
+
+      if (payment) {
+        await adminClient
+          .from('payments')
+          .update({ status: 'success', paid_at: new Date().toISOString() })
+          .eq('id', payment.id)
+
+        console.log('[webhook] Payment updated to success:', transaction_id)
+      }
+      return NextResponse.json({ received: true })
+    }
+
+    return NextResponse.json({ received: true })
+
+  } catch (error: any) {
+    console.error('[webhook] Unexpected error:', error)
+    // Selalu return 200 supaya Midtrans tidak retry
+    return NextResponse.json({ received: true, error: error.message })
+  }
 }

@@ -1,23 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Heart, ExternalLink, Copy, PartyPopper } from "lucide-react";
+import { ExternalLink, Copy, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 
-export default function PaymentSuccess() {
+function PaymentSuccessContent() {
+  const searchParams = useSearchParams();
+  const slug = searchParams.get('slug');
+  const [invitationLink, setInvitationLink] = useState("");
   const [showConfetti, setShowConfetti] = useState(true);
-  
-  // Use a generic logic for window location that works in Next.js safely
-  const [demoLink, setDemoLink] = useState("");
 
   useEffect(() => {
-    setDemoLink(`${window.location.origin}/u/demo-couple-2026`);
+    const origin = window.location.origin;
+    setInvitationLink(slug ? `${origin}/u/${slug}` : `${origin}/dashboard`);
     const timer = setTimeout(() => setShowConfetti(false), 5000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [slug]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-stone-50 px-4">
@@ -36,16 +38,19 @@ export default function PaymentSuccess() {
             Undangan pernikahan digitalmu sudah aktif dan bisa diakses kapan saja.
           </p>
 
-          <div className="mb-6 rounded-lg border border-stone-200 bg-stone-100/50 p-3">
-            <p className="mb-1 text-xs text-stone-500">Link undangan kamu:</p>
-            <p className="break-all text-sm font-semibold text-stone-900">{demoLink}</p>
-          </div>
+          {invitationLink && (
+            <div className="mb-6 rounded-lg border border-stone-200 bg-stone-100/50 p-3">
+              <p className="mb-1 text-xs text-stone-500">Link undangan kamu:</p>
+              <p className="break-all text-sm font-semibold text-stone-900">{invitationLink}</p>
+            </div>
+          )}
 
           <div className="flex gap-2">
             <Button
               className="flex-1 gap-1 cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => {
-                const text = `Kamu diundang! Buka undangan pernikahan kami: ${demoLink}`;
+                if (!invitationLink) return;
+                const text = `Kamu diundang! Buka undangan pernikahan kami: ${invitationLink}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
               }}
             >
@@ -55,7 +60,8 @@ export default function PaymentSuccess() {
               variant="secondary"
               className="flex-1 gap-1 cursor-pointer"
               onClick={() => {
-                navigator.clipboard.writeText(demoLink);
+                if (!invitationLink) return;
+                navigator.clipboard.writeText(invitationLink);
                 toast("Link disalin!");
               }}
             >
@@ -76,5 +82,13 @@ export default function PaymentSuccess() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Memuat...</div>}>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
