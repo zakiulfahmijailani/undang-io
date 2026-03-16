@@ -1,18 +1,53 @@
+import { redirect } from "next/navigation";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Eye, Edit, Trash2, Calendar, Users, MailOpen, MessageSquareHeart, LayoutTemplate } from "lucide-react"
 import Link from "next/link"
 
-export default function MyInvitationsPage() {
-    // Dummy Data
-    const invitations = [
-        { id: 1, title: "Rina & Budi", date: "15 Agustus 2026", status: "Tayang", views: 245, rsvps: 120, messages: 85, slug: "rina-budi" },
-        { id: 2, title: "Siska & Didi", date: "22 September 2026", status: "Draft", views: 0, rsvps: 0, messages: 0, slug: "siska-didi" },
-        { id: 3, title: "Ani & Anton", date: "10 Januari 2025", status: "Arsip", views: 1540, rsvps: 450, messages: 320, slug: "ani-anton" },
-    ];
+export default async function MyInvitationsPage() {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // const invitations: any[] = []; // Toggle this for empty state preview
+    if (!user) {
+        redirect("/login");
+    }
+
+    // Fetch real invitations from Supabase
+    const { data: invitations } = await supabase
+        .from('invitations')
+        .select(`
+            id, slug, status, created_at,
+            invitation_details (
+                groom_name, bride_name,
+                akad_date, reception_date
+            )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+    const typedInvitations = (invitations || []).map((inv: any) => {
+        const details = inv.invitation_details;
+        const groomName = details?.groom_name || 'Mempelai Pria';
+        const brideName = details?.bride_name || 'Mempelai Wanita';
+        const title = `${brideName} & ${groomName}`;
+        const date = details?.akad_date
+            ? new Date(details.akad_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+            : '-';
+        const statusLabel = inv.status === 'active' ? 'Tayang' : inv.status === 'archived' ? 'Arsip' : 'Draft';
+
+        return {
+            id: inv.id,
+            title,
+            date,
+            status: statusLabel,
+            views: 0,
+            rsvps: 0,
+            messages: 0,
+            slug: inv.slug,
+        };
+    });
 
     return (
         <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-10">
@@ -29,7 +64,7 @@ export default function MyInvitationsPage() {
                 </Link>
             </div>
 
-            {invitations.length === 0 ? (
+            {typedInvitations.length === 0 ? (
                 // Empty State
                 <div className="mt-8 flex flex-col items-center justify-center p-12 text-center bg-secondary/30 rounded-2xl border border-dashed border-border/60">
                     <div className="w-24 h-24 mb-6 rounded-full bg-primary/10 flex items-center justify-center">
@@ -48,11 +83,11 @@ export default function MyInvitationsPage() {
             ) : (
                 // Grid Kartu Undangan
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-                    {invitations.map((inv) => (
+                    {typedInvitations.map((inv: { id: string; title: string; date: string; status: string; views: number; rsvps: number; messages: number; slug: string }) => (
                         <Card key={inv.id} className="overflow-hidden border-border/50 shadow-sm hover:shadow-md transition-shadow flex flex-col bg-card">
                             {/* Header Status & Tanggal */}
                             <div className="p-5 pb-0 flex justify-between items-start">
-                                <Badge variant="outline" className={`
+                                <Badge variant="secondary" className={`
                                     ${inv.status === 'Tayang' ? 'bg-green-50 text-green-700 border-green-200' :
                                         inv.status === 'Draft' ? 'bg-gray-100 text-gray-600 border-gray-200' :
                                             'bg-red-50 text-red-700 border-red-200'}
@@ -113,3 +148,4 @@ export default function MyInvitationsPage() {
         </div>
     )
 }
+

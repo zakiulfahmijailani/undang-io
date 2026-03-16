@@ -9,79 +9,56 @@ import GuestConversion from "./components/GuestConversion";
 import GuestSessionCard from "./components/GuestSessionCard";
 
 export default async function DashboardPage() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    let userName = 'Kak';
-    let typedInvitations: any[] = [];
+    if (!user) {
+        redirect("/login");
+    }
+
+    // Fetch user profile
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    const userName = profile?.full_name?.split(' ')[0] || 'Kak';
+
+    // 1. Fetch permanent invitations
+    const { data: invitations } = await supabase
+        .from('invitations')
+        .select(`
+            id, slug, status, created_at,
+            invitation_details (
+                groom_name, bride_name,
+                couple_photo_url, akad_date, reception_date
+            )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+    const typedInvitations = (invitations || []) as any[];
+
+    // 2. Fetch claimed guest sessions (belum bayar, belum jadi permanent)
     let claimedGuestSessions: any[] = [];
-    let mockTotalViews = 0;
-    let mockTotalRsvps = 0;
-    let mockNewMessages = 0;
-
-    if (!supabaseUrl) {
-        userName = 'Budi (Developer Mode)';
-        typedInvitations = [
-            {
-                id: 'dummy-1',
-                slug: 'demo',
-                status: 'active',
-                created_at: new Date(Date.now() - 86400000).toISOString(),
-                invitation_details: {
-                    groom_name: "Budi",
-                    bride_name: "Ayu",
-                    akad_date: "2026-06-15T08:00:00",
-                    reception_date: "2026-06-15T11:00:00"
-                }
-            }
-        ];
-        mockTotalViews = 1250;
-        mockTotalRsvps = 450;
-        mockNewMessages = 12;
-    } else {
-        const supabase = await createServerSupabaseClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-            redirect("/login");
-        }
-
-        const { data: profile } = await supabase
-            .from('profiles')
+    const adminClient = getAdminClient();
+    if (adminClient) {
+        const { data: guestSessions } = await adminClient
+            .from('guest_sessions')
             .select('*')
-            .eq('id', user.id)
-            .single();
-
-        userName = profile?.full_name?.split(' ')[0] || 'Kak';
-
-        // 1. Fetch permanent invitations
-        const { data: invitations } = await supabase
-            .from('invitations')
-            .select(`
-                id, slug, status, created_at,
-                invitation_details (
-                    groom_name, bride_name,
-                    couple_photo_url, akad_date, reception_date
-                )
-            `)
             .eq('user_id', user.id)
+            .eq('status', 'claimed')
+            .gt('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false });
 
-        typedInvitations = (invitations || []) as any[];
-
-        // 2. Fetch claimed guest sessions (belum bayar, belum jadi permanent)
-        const adminClient = getAdminClient();
-        if (adminClient) {
-            const { data: guestSessions } = await adminClient
-                .from('guest_sessions')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('status', 'claimed')
-                .gt('expires_at', new Date().toISOString())
-                .order('created_at', { ascending: false });
-
-            claimedGuestSessions = (guestSessions || []) as any[];
-        }
+        claimedGuestSessions = (guestSessions || []) as any[];
     }
+
+    // Real stats — will show 0 until analytics tables are created
+    const totalViews = 0;
+    const totalRsvps = 0;
+    const newMessages = 0;
 
     const totalInvitations = typedInvitations.length + claimedGuestSessions.length;
 
@@ -123,7 +100,7 @@ export default async function DashboardPage() {
                                 <Users className="w-4 h-4 text-primary" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">{mockTotalViews}</div>
+                                <div className="text-2xl font-bold">{totalViews}</div>
                                 <p className="text-xs text-muted-foreground mt-1">Total di semua undangan</p>
                             </CardContent>
                         </Card>
@@ -133,7 +110,7 @@ export default async function DashboardPage() {
                                 <MailOpen className="w-4 h-4 text-primary" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">{mockTotalRsvps}</div>
+                                <div className="text-2xl font-bold">{totalRsvps}</div>
                                 <p className="text-xs text-muted-foreground mt-1">Konfirmasi kehadiran</p>
                             </CardContent>
                         </Card>
@@ -141,14 +118,14 @@ export default async function DashboardPage() {
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                                     Ucapan Baru
-                                    {mockNewMessages > 0 && (
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{mockNewMessages}</span>
+                                    {newMessages > 0 && (
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{newMessages}</span>
                                     )}
                                 </CardTitle>
                                 <MessageSquareHeart className="w-4 h-4 text-primary" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">{mockNewMessages}</div>
+                                <div className="text-2xl font-bold">{newMessages}</div>
                                 <p className="text-xs text-muted-foreground mt-1">Belum dibaca</p>
                             </CardContent>
                         </Card>
@@ -190,3 +167,4 @@ export default async function DashboardPage() {
     </>
     );
 }
+

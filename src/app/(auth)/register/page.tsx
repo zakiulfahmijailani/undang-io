@@ -71,6 +71,11 @@ export default function RegisterPage() {
       router.push("/dashboard");
     } else {
       // Email verification required
+      if (guestSessionToken) {
+        localStorage.setItem('pending_claim_token', guestSessionToken)
+        localStorage.removeItem('guest_session')
+        localStorage.removeItem('guest_return_slug')
+      }
       toast.success("Cek email kamu untuk verifikasi akun.");
       router.push("/login?message=Cek email untuk melanjutkan proses daftar");
     }

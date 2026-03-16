@@ -15,32 +15,20 @@ export async function GET(request: Request) {
 
         if (!sessionError) {
             if (guestSessionToken) {
-                const supabaseAdmin = getAdminClient()
                 const { data: { user } } = await supabase.auth.getUser()
 
-                if (supabaseAdmin && user) {
-                    const { data: guestSession } = await supabaseAdmin
-                        .from('guest_sessions')
-                        .select('*')
-                        .eq('session_token', guestSessionToken)
-                        .in('status', ['preview', 'claimed'])
-                        .single()
-
-                    if (guestSession) {
-                        const extendedExpiry = new Date(Date.now() + 10 * 60 * 1000).toISOString()
-
-                        await supabaseAdmin
-                            .from('guest_sessions')
-                            .update({
-                                user_id: user.id,
-                                status: 'claimed',
-                                expires_at: extendedExpiry,
-                                updated_at: new Date().toISOString(),
-                            })
-                            .eq('id', guestSession.id)
-
-                        next = '/dashboard'
+                if (user) {
+                    try {
+                        await fetch(`${origin}/api/guest-sessions/${guestSessionToken}/claim`, {
+                            method: 'PATCH',
+                            headers: {
+                                cookie: request.headers.get('cookie') || ''
+                            }
+                        })
+                    } catch (error) {
+                        console.error('Claim failed in callback:', error)
                     }
+                    next = '/dashboard'
                 }
             }
 

@@ -22,13 +22,20 @@ export default function Login() {
   const message = searchParams.get("message");
 
   useEffect(() => {
-    const raw = localStorage.getItem("guest_session");
+    // Priority 1: active guest session (user never registered before)
+    const raw = localStorage.getItem('guest_session')
     if (raw) {
       try {
-        const parsed = JSON.parse(raw);
-        if (parsed.sessionToken) setGuestSessionToken(parsed.sessionToken);
+        const parsed = JSON.parse(raw)
+        if (parsed.sessionToken) {
+          setGuestSessionToken(parsed.sessionToken)
+          return
+        }
       } catch (e) {}
     }
+    // Priority 2: pending token from email verification register flow
+    const pending = localStorage.getItem('pending_claim_token')
+    if (pending) setGuestSessionToken(pending)
   }, []);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -59,6 +66,7 @@ export default function Login() {
       }
       localStorage.removeItem("guest_session");
       localStorage.removeItem("guest_return_slug");
+      localStorage.removeItem("pending_claim_token");
     }
 
     router.push("/dashboard");

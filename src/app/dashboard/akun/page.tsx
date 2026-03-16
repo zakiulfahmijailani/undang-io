@@ -1,10 +1,32 @@
 import { redirect } from 'next/navigation';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-export default function AkunPage() {
+export default async function AkunPage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  const fullName = profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Pengguna';
+  const email = user.email || '-';
+  const joinedDate = new Date(user.created_at).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Akun & Langganan</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Akun &amp; Langganan</h1>
         <p className="text-muted-foreground mt-1">
           Kelola informasi profil dan paket langganan Anda.
         </p>
@@ -20,15 +42,15 @@ export default function AkunPage() {
           <div className="p-6 pt-0 space-y-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Nama Lengkap</label>
-              <p className="mt-1 font-medium">Budi Santoso (Dummy User)</p>
+              <p className="mt-1 font-medium">{fullName}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Email</label>
-              <p className="mt-1 font-medium">budi@example.com</p>
+              <p className="mt-1 font-medium">{email}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Bergabung Sejak</label>
-              <p className="mt-1 font-medium">10 Maret 2026</p>
+              <p className="mt-1 font-medium">{joinedDate}</p>
             </div>
           </div>
         </div>
@@ -53,8 +75,8 @@ export default function AkunPage() {
               <p className="mt-1 font-medium">1 / 1 Undangan</p>
             </div>
             <div className="pt-2">
-              <a 
-                href="/dashboard/transaksi" 
+              <a
+                href="/dashboard/transaksi"
                 className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto"
               >
                 Upgrade Paket
