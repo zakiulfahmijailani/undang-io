@@ -5,6 +5,9 @@ import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from './InvitationClientWrapper';
 import ViewTracker from './ViewTracker';
 
+// Disable Next.js full-route cache — edits in Supabase reflect immediately
+export const revalidate = 0;
+
 interface InvitePageProps {
     params: Promise<{ slug: string }>;
     searchParams: Promise<{ preview?: string }>;
@@ -54,7 +57,6 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
 
     const supabase = await createServerSupabaseClient();
 
-    // Fetch using flat columns — no invitation_details relation
     const { data: invitation, error } = await supabase
         .from('invitations')
         .select(`
@@ -93,8 +95,10 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         notFound();
     }
 
-    // Guard: inactive invitation
-    if (invitation.status !== 'active' && !isPreview) {
+    // Status guard: only block if truly not publishable
+    // 'active' and 'paid' = live; everything else needs ?preview=true
+    const isLive = invitation.status === 'active' || invitation.status === 'paid';
+    if (!isLive && !isPreview) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-stone-50 p-4 font-sans">
                 <div className="text-center p-8 bg-white rounded-3xl shadow-xl border border-stone-200 max-w-md w-full animate-in zoom-in-95 duration-500">
@@ -109,38 +113,32 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     // Map flat DB columns -> InvitationClientWrapper data shape
     const data: any = { ...demoData };
 
-    // Couple names
     const groomNick = invitation.groom_nickname || 'Mempelai Pria';
     const brideNick = invitation.bride_nickname || 'Mempelai Wanita';
     data.coupleShortName = `${groomNick} & ${brideNick}`;
 
-    // Groom
     data.groom = { ...demoData.groom };
     data.groom.nickname = groomNick;
     if (invitation.groom_full_name)   data.groom.fullName = invitation.groom_full_name;
     if (invitation.groom_father_name) data.groom.father   = `Bapak ${invitation.groom_father_name}`;
     if (invitation.groom_mother_name) data.groom.mother   = `Ibu ${invitation.groom_mother_name}`;
 
-    // Bride
     data.bride = { ...demoData.bride };
     data.bride.nickname = brideNick;
     if (invitation.bride_full_name)   data.bride.fullName = invitation.bride_full_name;
     if (invitation.bride_father_name) data.bride.father   = `Bapak ${invitation.bride_father_name}`;
     if (invitation.bride_mother_name) data.bride.mother   = `Ibu ${invitation.bride_mother_name}`;
 
-    // Akad
     data.akad = { ...demoData.akad };
-    if (invitation.akad_datetime)          data.akad.date    = invitation.akad_datetime;
-    if (invitation.akad_location_name)     data.akad.venue   = invitation.akad_location_name;
-    if (invitation.akad_location_address)  data.akad.address = invitation.akad_location_address;
+    if (invitation.akad_datetime)         data.akad.date    = invitation.akad_datetime;
+    if (invitation.akad_location_name)    data.akad.venue   = invitation.akad_location_name;
+    if (invitation.akad_location_address) data.akad.address = invitation.akad_location_address;
 
-    // Resepsi
     data.reception = { ...demoData.reception };
     if (invitation.resepsi_datetime)           data.reception.date    = invitation.resepsi_datetime;
     if (invitation.resepsi_location_name)      data.reception.venue   = invitation.resepsi_location_name;
     if (invitation.resepsi_location_address)   data.reception.address = invitation.resepsi_location_address;
 
-    // Quote / greeting
     if (invitation.quote_text) {
         data.quote = { text: invitation.quote_text, source: 'Mempelai' };
     }

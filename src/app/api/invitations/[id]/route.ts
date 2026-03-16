@@ -85,11 +85,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             return NextResponse.json({ data: null, error: { code: 'FORBIDDEN', message: 'Akses ditolak' } }, { status: 403 });
         }
 
-        // Map EditorClient field names -> flat DB column names in invitations table
         const updates: Record<string, any> = {};
 
-        // Core fields
-        if (body.status !== undefined)           updates.status = body.status;
+        // Status
+        if (body.status !== undefined) updates.status = body.status;
 
         // Slug with uniqueness check
         if (body.slug !== undefined && body.slug !== '') {
@@ -106,44 +105,40 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         }
 
         // Mempelai
-        if (body.groom_name !== undefined)       updates.groom_nickname = body.groom_name;
-        if (body.bride_name !== undefined)        updates.bride_nickname = body.bride_name;
-        if (body.groom_full_name !== undefined)   updates.groom_full_name = body.groom_full_name;
-        if (body.bride_full_name !== undefined)   updates.bride_full_name = body.bride_full_name;
-        if (body.groom_father !== undefined)      updates.groom_father_name = body.groom_father;
-        if (body.groom_mother !== undefined)      updates.groom_mother_name = body.groom_mother;
-        if (body.bride_father !== undefined)      updates.bride_father_name = body.bride_father;
-        if (body.bride_mother !== undefined)      updates.bride_mother_name = body.bride_mother;
+        if (body.groom_name !== undefined)     updates.groom_nickname    = body.groom_name;
+        if (body.bride_name !== undefined)      updates.bride_nickname    = body.bride_name;
+        if (body.groom_full_name !== undefined) updates.groom_full_name   = body.groom_full_name;
+        if (body.bride_full_name !== undefined) updates.bride_full_name   = body.bride_full_name;
+        if (body.groom_father !== undefined)    updates.groom_father_name = body.groom_father;
+        if (body.groom_mother !== undefined)    updates.groom_mother_name = body.groom_mother;
+        if (body.bride_father !== undefined)    updates.bride_father_name = body.bride_father;
+        if (body.bride_mother !== undefined)    updates.bride_mother_name = body.bride_mother;
 
         // Akad
-        if (body.akad_date !== undefined)         updates.akad_datetime = body.akad_date || null;
-        if (body.akad_venue !== undefined)        updates.akad_location_name = body.akad_venue;
-        if (body.akad_address !== undefined)      updates.akad_location_address = body.akad_address;
+        if (body.akad_date !== undefined)    updates.akad_datetime         = body.akad_date || null;
+        if (body.akad_venue !== undefined)   updates.akad_location_name    = body.akad_venue;
+        if (body.akad_address !== undefined) updates.akad_location_address = body.akad_address;
+        if (body.akad_maps !== undefined)    updates.akad_maps_url         = body.akad_maps;
 
         // Resepsi
-        if (body.reception_date !== undefined)    updates.resepsi_datetime = body.reception_date || null;
-        if (body.reception_venue !== undefined)   updates.resepsi_location_name = body.reception_venue;
+        if (body.reception_date !== undefined)    updates.resepsi_datetime         = body.reception_date || null;
+        if (body.reception_venue !== undefined)   updates.resepsi_location_name    = body.reception_venue;
         if (body.reception_address !== undefined) updates.resepsi_location_address = body.reception_address;
+        if (body.reception_maps !== undefined)    updates.resepsi_maps_url         = body.reception_maps;
 
-        // Lain-lain
-        if (body.greeting_text !== undefined)     updates.quote_text = body.greeting_text;
-        if (body.gift_bank_name !== undefined)    updates.gift_bank_name = body.gift_bank_name;
-        if (body.gift_bank_account !== undefined) updates.gift_bank_account = body.gift_bank_account;
+        // Quote / greeting
+        if (body.greeting_text !== undefined) updates.quote_text = body.greeting_text;
+
+        // Gift
+        if (body.gift_bank_name !== undefined)         updates.gift_bank_name         = body.gift_bank_name;
+        if (body.gift_bank_account !== undefined)      updates.gift_bank_account      = body.gift_bank_account;
         if (body.gift_bank_account_name !== undefined) updates.gift_bank_account_name = body.gift_bank_account_name;
-        if (body.gift_shipping_address !== undefined)  updates.gift_shipping_address = body.gift_shipping_address;
+        if (body.gift_shipping_address !== undefined)  updates.gift_shipping_address  = body.gift_shipping_address;
 
         // Visibility toggles
         if (body.show_couple_photos !== undefined) updates.show_couple_photos = body.show_couple_photos;
         if (body.show_prewed_gallery !== undefined) updates.show_prewed_gallery = body.show_prewed_gallery;
-        if (body.show_gift_section !== undefined)  updates.show_gift_section = body.show_gift_section;
-
-        // NOTE: couple_photo_url is updated by /api/upload directly after Storage upload.
-        // No need to handle it here unless user clears it manually.
-        if (body.couple_photo_url === '') {
-            // Allow clearing the photo
-            // Only uncomment after adding couple_photo_url column via SQL:
-            // updates.couple_photo_url = null;
-        }
+        if (body.show_gift_section !== undefined)   updates.show_gift_section   = body.show_gift_section;
 
         if (Object.keys(updates).length === 0) {
             return NextResponse.json({ data: { success: true }, error: null });
