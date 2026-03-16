@@ -16,9 +16,13 @@ export async function PATCH(
       )
     }
 
+    console.log('[CLAIM API] Received token:', token)
+
     // Verify the user is authenticated
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
+
+    console.log('[CLAIM API] getUser result:', user?.id || 'null')
 
     if (!user) {
       return NextResponse.json(
@@ -41,6 +45,8 @@ export async function PATCH(
       .select('*')
       .eq('session_token', token)
       .single()
+
+    console.log('[CLAIM API] Target session:', session?.id || 'null', 'Status:', session?.status)
 
     if (fetchError || !session) {
       return NextResponse.json(
@@ -81,6 +87,8 @@ export async function PATCH(
       .eq('id', session.id)
       .select('id, session_token, slug, status, expires_at, user_id')
       .single()
+
+    console.log('[CLAIM API] Update success for row:', updatedSession?.id)
 
     if (updateError) {
       console.error('[PATCH /api/guest-sessions/[token]/claim] Update error:', updateError)

@@ -15,18 +15,28 @@ export async function GET(request: Request) {
 
         if (!sessionError) {
             if (guestSessionToken) {
+                console.log('[CALLBACK] Exchanged code for session. Found guest token:', guestSessionToken.slice(0, 8) + '...')
                 const { data: { user } } = await supabase.auth.getUser()
 
                 if (user) {
                     try {
-                        await fetch(`${origin}/api/guest-sessions/${guestSessionToken}/claim`, {
+                        console.log('[CALLBACK] Calling claim endpoint via fetch...')
+                        const res = await fetch(`${origin}/api/guest-sessions/${guestSessionToken}/claim`, {
                             method: 'PATCH',
                             headers: {
                                 cookie: request.headers.get('cookie') || ''
                             }
                         })
+                        const json = await res.json()
+                        console.log('[CALLBACK] Claim response status:', res.status, 'body:', json)
+
+                        if (!res.ok || !json.data) {
+                            console.error('[CALLBACK] Claim failed. Redirecting to login with error.')
+                            return NextResponse.redirect(`${origin}/login?message=Gagal menyimpan undangan sementara setelah login Google. Silakan coba lagi.`)
+                        }
                     } catch (error) {
-                        console.error('Claim failed in callback:', error)
+                        console.error('[CALLBACK] Claim fetch exception:', error)
+                        return NextResponse.redirect(`${origin}/login?message=Terjadi kesalahan sistem saat menyimpan undangan sementara.`)
                     }
                     next = '/dashboard'
                 }
