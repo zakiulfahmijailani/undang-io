@@ -59,6 +59,9 @@ Detail lengkap: lihat `.claude/skills/lazy-registration/SKILL.md`
 - ❌ Panggil claim API dari server action — harus dari client side
 - ❌ Auto-convert guest_session ke invitations sebelum payment
 - ❌ Redirect ke `/u/[slug]` setelah login — selalu ke `/dashboard`
+- ❌ Tambahkan field `updated_at` ke query UPDATE tabel `guest_sessions` — kolom tidak ada di schema!
+- ❌ Baca `localStorage` di luar `useEffect` — akan crash di SSR (Next.js App Router)
+- ❌ Andalkan React state untuk nilai yang dibutuhkan saat klik tombol OAuth — baca langsung dari sumbernya
 
 ### SELALU dilakukan:
 - ✅ Gunakan `getAdminClient()` untuk operasi yang bypass RLS
@@ -67,6 +70,9 @@ Detail lengkap: lihat `.claude/skills/lazy-registration/SKILL.md`
 - ✅ Sertakan RLS policy di setiap tabel baru
 - ✅ Panggil `router.refresh()` di dashboard setelah redirect dari login
 - ✅ Test di localhost dulu sebelum push ke main
+- ✅ Tambahkan `console.log` di server route LEBIH AWAL saat debugging — server logs ada di terminal `pnpm dev`, BUKAN browser console
+- ✅ Cek `expiresAt` saat membaca `guest_session` dari localStorage — skip dan hapus jika sudah expired
+- ✅ Gunakan helper `getGuestTokenFromStorage()` (di `login/page.tsx`) untuk baca guest token — jangan baca raw localStorage langsung
 
 ---
 
@@ -77,14 +83,14 @@ src/
 ├── app/
 │   ├── (auth)/           # Login, Register — client-side auth + claim
 │   ├── api/
-│   │   ├── auth/callback/ # Google OAuth callback
+│   │   ├── auth/callback/ # Google OAuth callback — exchange code + claim
 │   │   ├── guest-sessions/ # CRUD guest sessions
 │   │   └── payment/       # Midtrans create-transaction + notification webhook
 │   ├── dashboard/         # Private user workspace
 │   │   ├── page.tsx       # Server component — fetch invitations + guest_sessions
 │   │   └── components/
 │   │       ├── GuestConversion.tsx   # router.refresh() trigger
-│   │       └── GuestSessionCard.tsx  # Card dengan countdown timer
+│   │       └── GuestSessionCard.tsx  # Card dengan countdown timer live
 │   └── u/[slug]/          # Public invitation preview page
 ├── lib/
 │   ├── supabase/
@@ -97,13 +103,24 @@ supabase/
 .claude/
 ├── AGENTS.md              # File ini
 └── skills/
-    ├── lazy-registration/      # Pattern inti undang-io
+    ├── lazy-registration/      # Pattern inti undang-io ← BACA INI DULU
     ├── payment-midtrans/       # Payment flow
     ├── migrating-supabase-schema/ # Database migrations
     ├── managing-theme-assets/  # Manajemen aset tema
     ├── demo-mode-setup/        # Mode demo tanpa Supabase
     └── integrating-lovable-repo/ # Integrasi dari Lovable
 ```
+
+---
+
+## Schema Tabel Penting
+
+### guest_sessions — kolom yang ADA:
+```
+id, session_token, slug, invitation_data, theme_id,
+user_id, status, expires_at, converted_to_invitation_id, created_at
+```
+> ⚠️ **TIDAK ADA** kolom `updated_at` — jangan pernah include di query UPDATE!
 
 ---
 
@@ -123,6 +140,16 @@ MIDTRANS_IS_PRODUCTION=false     # true di production Vercel
 # App
 NEXT_PUBLIC_SITE_URL=https://undang.io
 ```
+
+---
+
+## Debugging Guide — Server-Side Routes
+
+Kalau ada bug di `/api/auth/callback` atau API routes lain:
+1. **Tambahkan `console.log` di setiap step** — jangan tebak-tebak
+2. **Lihat terminal `pnpm dev`** — bukan browser console (server logs tidak muncul di browser)
+3. Cari pattern: `[NAMA_ROUTE] variabel: nilai`
+4. Setelah bug ketemu dan fixed, **hapus debug logs** sebelum commit final
 
 ---
 
