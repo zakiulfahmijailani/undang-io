@@ -103,7 +103,7 @@ export default function GuestSessionCard({ guestSession }: GuestSessionCardProps
                                     Bayar Rp 45.000
                                 </Link>
                             </Button>
-                            <Button size="sm" variant="outline" className="gap-1 cursor-pointer" asChild>
+                            <Button size="sm" variant="secondary" className="gap-1 cursor-pointer" asChild>
                                 <Link href={`/u/${guestSession.slug}`}>
                                     <Eye className="h-3.5 w-3.5" />
                                     Lihat Preview
@@ -112,7 +112,7 @@ export default function GuestSessionCard({ guestSession }: GuestSessionCardProps
                         </>
                     )}
                     {isExpired && (
-                        <Button size="sm" variant="outline" className="cursor-pointer" asChild>
+                        <Button size="sm" variant="secondary" className="cursor-pointer" asChild>
                             <Link href="/buat-undangan">Buat Ulang</Link>
                         </Button>
                     )}

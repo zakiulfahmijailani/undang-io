@@ -73,8 +73,7 @@ export default function BuatUndangan() {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     try {
-      // ✅ FIX: Using fetch() to call our secure API route instead of direct Supabase call
-      const response = await fetch("/api/invitations/guest", {
+      const response = await fetch("/api/guest-sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -91,20 +90,15 @@ export default function BuatUndangan() {
         throw new Error(errorData.error?.message || "Gagal mempublikasikan undangan.");
       }
 
-      // Save session info locally for the conversion flow after login
+      // Save to localStorage — only the keys needed for claim flow
       localStorage.setItem(
         "guest_session",
-        JSON.stringify({
-          sessionToken,
-          slug,
-          themeId: selectedThemeId,
-          expiresAt,
-          invitationData: form,
-        })
+        JSON.stringify({ sessionToken, slug, expiresAt })
       );
-      localStorage.setItem("guest_return_slug", slug); // ← TAMBAH BARIS INI SAJA
+      localStorage.setItem("guest_return_slug", slug);
+
       toast.success("🚀 Undangan berhasil dipublikasikan!", {
-        description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya!",
+        description: "Undangan kamu live selama 15 menit. Daftar untuk simpan selamanya!",
       });
 
       router.push(`/u/${slug}`);

@@ -23,7 +23,7 @@ export async function GET(request: Request) {
                         .from('guest_sessions')
                         .select('*')
                         .eq('session_token', guestSessionToken)
-                        .eq('status', 'preview')
+                        .in('status', ['preview', 'claimed'])
                         .single()
 
                     if (guestSession) {
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
                             })
                             .eq('id', guestSession.id)
 
-                        next = `/u/${guestSession.slug}?claimed=true`
+                        next = '/dashboard'
                     }
                 }
             }

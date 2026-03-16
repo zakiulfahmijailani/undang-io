@@ -39,7 +39,7 @@ export async function GET(request: Request) {
                             })
                             .eq('id', guestSession.id)
 
-                        next = `/u/${guestSession.slug}?claimed=true`
+                        next = '/dashboard'
                     }
                 }
             }
