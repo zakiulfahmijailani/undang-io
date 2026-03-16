@@ -10,22 +10,27 @@ interface InvitePageProps {
     searchParams: Promise<{ preview?: string }>;
 }
 
-export async function generateMetadata(
-    { params }: InvitePageProps
-): Promise<Metadata> {
+export async function generateMetadata({ params }: InvitePageProps): Promise<Metadata> {
     const resolvedParams = await params;
     const slug = resolvedParams.slug;
 
-    if (slug === '404') {
-        return { title: 'Not Found' };
-    }
+    if (slug === '404') return { title: 'Not Found' };
+
+    const supabase = await createServerSupabaseClient();
+    const { data: inv } = await supabase
+        .from('invitations')
+        .select('groom_nickname, bride_nickname')
+        .eq('slug', slug)
+        .single();
+
+    const coupleName = inv
+        ? `${inv.groom_nickname || 'Mempelai Pria'} & ${inv.bride_nickname || 'Mempelai Wanita'}`
+        : demoData.coupleShortName;
 
     return {
-        title: `Undangan Pernikahan | ${demoData.coupleShortName}`,
+        title: `Undangan Pernikahan | ${coupleName}`,
         description: `Kami mengundang Anda untuk hadir di acara pernikahan kami.`,
-        openGraph: {
-            images: [demoData.coverPhoto],
-        },
+        openGraph: { images: [demoData.coverPhoto] },
     };
 }
 
@@ -35,35 +40,60 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     const { slug } = resolvedParams;
     const isPreview = resolvedSearch.preview === 'true';
 
-    if (slug === '404') {
-        notFound();
+    if (slug === '404') notFound();
+
+    // Demo mode
+    if (slug === 'demo') {
+        return (
+            <>
+                <InvitationClientWrapper data={demoData} />
+                <ViewTracker slug={slug} isPreview={isPreview} />
+            </>
+        );
     }
 
     const supabase = await createServerSupabaseClient();
 
-    // Fetch real data
-    const { data: invitation } = await supabase
+    // Fetch using flat columns — no invitation_details relation
+    const { data: invitation, error } = await supabase
         .from('invitations')
         .select(`
-            id, slug, status, created_at,
-            invitation_details (*)
+            id,
+            slug,
+            status,
+            created_at,
+            groom_full_name,
+            groom_nickname,
+            groom_father_name,
+            groom_mother_name,
+            bride_full_name,
+            bride_nickname,
+            bride_father_name,
+            bride_mother_name,
+            akad_datetime,
+            akad_location_name,
+            akad_location_address,
+            resepsi_datetime,
+            resepsi_location_name,
+            resepsi_location_address,
+            quote_text,
+            gift_bank_name,
+            gift_bank_account,
+            gift_bank_account_name,
+            gift_shipping_address,
+            show_couple_photos,
+            show_prewed_gallery,
+            show_gift_section
         `)
         .eq('slug', slug)
         .single();
 
-    if (!invitation) {
-        if (slug === 'demo') {
-            return (
-                <>
-                    <InvitationClientWrapper data={demoData} />
-                    <ViewTracker slug={slug} isPreview={isPreview} />
-                </>
-            );
-        }
+    if (error || !invitation) {
+        console.error('[invite/[slug]] fetch error:', error?.code, error?.message);
         notFound();
     }
 
-    // Protection for inactive invitations
+    // Guard: inactive invitation
     if (invitation.status !== 'active' && !isPreview) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-stone-50 p-4 font-sans">
@@ -76,44 +106,48 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         );
     }
 
-    // Map actual DB data to the shape required by InvitationClientWrapper (using demoData as base for unmapped legacy components)
-    const data = { ...demoData } as any;
-    if (invitation.invitation_details) {
-        const details = invitation.invitation_details;
-        data.coupleShortName = `${details.groom_name} & ${details.bride_name}`;
+    // Map flat DB columns -> InvitationClientWrapper data shape
+    const data: any = { ...demoData };
 
-        if (details.groom_full_name) data.groom.fullName = details.groom_full_name;
-        if (details.bride_full_name) data.bride.fullName = details.bride_full_name;
-        if (details.groom_father) data.groom.father = `Bapak ${details.groom_father}`;
-        if (details.groom_mother) data.groom.mother = `Ibu ${details.groom_mother}`;
-        if (details.bride_father) data.bride.father = `Bapak ${details.bride_father}`;
-        if (details.bride_mother) data.bride.mother = `Ibu ${details.bride_mother}`;
+    // Couple names
+    const groomNick = invitation.groom_nickname || 'Mempelai Pria';
+    const brideNick = invitation.bride_nickname || 'Mempelai Wanita';
+    data.coupleShortName = `${groomNick} & ${brideNick}`;
 
-        if (details.akad_date) data.akad.date = details.akad_date;
-        if (details.akad_venue) data.akad.venue = details.akad_venue;
-        if (details.akad_address) data.akad.address = details.akad_address;
-        if (details.akad_maps) data.akad.mapsUrl = details.akad_maps;
+    // Groom
+    data.groom = { ...demoData.groom };
+    data.groom.nickname = groomNick;
+    if (invitation.groom_full_name)   data.groom.fullName = invitation.groom_full_name;
+    if (invitation.groom_father_name) data.groom.father   = `Bapak ${invitation.groom_father_name}`;
+    if (invitation.groom_mother_name) data.groom.mother   = `Ibu ${invitation.groom_mother_name}`;
 
-        if (details.reception_date) data.reception.date = details.reception_date;
-        if (details.reception_venue) data.reception.venue = details.reception_venue;
-        if (details.reception_address) data.reception.address = details.reception_address;
-        if (details.reception_maps) data.reception.mapsUrl = details.reception_maps;
+    // Bride
+    data.bride = { ...demoData.bride };
+    data.bride.nickname = brideNick;
+    if (invitation.bride_full_name)   data.bride.fullName = invitation.bride_full_name;
+    if (invitation.bride_father_name) data.bride.father   = `Bapak ${invitation.bride_father_name}`;
+    if (invitation.bride_mother_name) data.bride.mother   = `Ibu ${invitation.bride_mother_name}`;
 
-        if (details.couple_photo_url) {
-            data.coverPhoto = details.couple_photo_url;
-            data.groom.photo = details.couple_photo_url;
-            data.bride.photo = details.couple_photo_url;
-        }
+    // Akad
+    data.akad = { ...demoData.akad };
+    if (invitation.akad_datetime)          data.akad.date    = invitation.akad_datetime;
+    if (invitation.akad_location_name)     data.akad.venue   = invitation.akad_location_name;
+    if (invitation.akad_location_address)  data.akad.address = invitation.akad_location_address;
 
-        if (details.greeting_text) data.quote = { text: details.greeting_text, source: "Mempelai" };
-        if (details.music_url) data.musicUrl = details.music_url;
+    // Resepsi
+    data.reception = { ...demoData.reception };
+    if (invitation.resepsi_datetime)           data.reception.date    = invitation.resepsi_datetime;
+    if (invitation.resepsi_location_name)      data.reception.venue   = invitation.resepsi_location_name;
+    if (invitation.resepsi_location_address)   data.reception.address = invitation.resepsi_location_address;
+
+    // Quote / greeting
+    if (invitation.quote_text) {
+        data.quote = { text: invitation.quote_text, source: 'Mempelai' };
     }
 
-    // Pass invitation.id into the wrapper so RSVP actions bind to the correct invitation
     return (
         <>
-            {/* Provide invitation.id if the component was updated to take it */}
-            <InvitationClientWrapper data={data} {...(invitation ? { invitationId: invitation.id } : {})} />
+            <InvitationClientWrapper data={data} invitationId={invitation.id} />
             <ViewTracker slug={slug} isPreview={isPreview} />
         </>
     );
