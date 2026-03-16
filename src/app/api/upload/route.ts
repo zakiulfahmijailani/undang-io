@@ -1,117 +1,110 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 
-// Allowed file extensions by category
-const ALLOWED_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
-const ALLOWED_AUDIO_EXTS = ['.mp3', '.wav', '.ogg', '.m4a', '.aac'];
-const ALLOWED_VIDEO_EXTS = ['.mp4', '.webm', '.mov'];
+const ALLOWED_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const BUCKET = 'invitation-media';
 
-// Size limits
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;  // 5MB
-const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_VIDEO_SIZE = 20 * 1024 * 1024; // 20MB
-
-function getFileExtension(filename: string): string {
+function getExt(filename: string): string {
     return filename.substring(filename.lastIndexOf('.')).toLowerCase();
 }
 
-function validateFile(file: File, type: string): { valid: boolean; error?: string } {
-    const ext = getFileExtension(file.name);
-
-    if (type === 'themes' || type === 'invitations' || type === 'avatars') {
-        // Images
-        if (!ALLOWED_IMAGE_EXTS.includes(ext)) {
-            return { valid: false, error: `Tipe file tidak didukung. Gunakan: ${ALLOWED_IMAGE_EXTS.join(', ')}` };
-        }
-        if (file.size > MAX_IMAGE_SIZE) {
-            return { valid: false, error: `Ukuran file terlalu besar. Maksimal ${MAX_IMAGE_SIZE / 1024 / 1024}MB` };
-        }
-    } else if (type === 'themes/music') {
-        if (!ALLOWED_AUDIO_EXTS.includes(ext)) {
-            return { valid: false, error: `Tipe file audio tidak didukung. Gunakan: ${ALLOWED_AUDIO_EXTS.join(', ')}` };
-        }
-        if (file.size > MAX_AUDIO_SIZE) {
-            return { valid: false, error: `Ukuran file audio terlalu besar. Maksimal ${MAX_AUDIO_SIZE / 1024 / 1024}MB` };
-        }
-    } else if (type === 'themes/videos') {
-        if (!ALLOWED_VIDEO_EXTS.includes(ext)) {
-            return { valid: false, error: `Tipe file video tidak didukung. Gunakan: ${ALLOWED_VIDEO_EXTS.join(', ')}` };
-        }
-        if (file.size > MAX_VIDEO_SIZE) {
-            return { valid: false, error: `Ukuran file video terlalu besar. Maksimal ${MAX_VIDEO_SIZE / 1024 / 1024}MB` };
-        }
-    }
-
-    return { valid: true };
-}
-
 // POST /api/upload
-// Endpoint API lokal untuk development. JANGAN gunakan ini di production
+// Uploads a cover/couple photo to Supabase Storage and updates
+// the invitation's couple_photo_url column.
 export async function POST(request: NextRequest) {
     try {
+        // 1. Auth check
+        const supabase = await createServerSupabaseClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            return NextResponse.json({ data: null, error: { code: 'UNAUTHORIZED', message: 'Login diperlukan' } }, { status: 401 });
+        }
+
+        // 2. Parse form data
         const formData = await request.formData();
-        const file = formData.get("file") as File;
-        const type = formData.get("type") as string;
-        const slug = formData.get("slug") as string | null;
+        const file = formData.get('file') as File | null;
+        const invitationId = formData.get('invitation_id') as string | null;
+        const type = (formData.get('type') as string | null) || 'cover';
 
         if (!file) {
-            return NextResponse.json({ data: null, error: { code: "NO_FILE", message: "File tidak ditemukan" } }, { status: 400 });
+            return NextResponse.json({ data: null, error: { code: 'NO_FILE', message: 'File tidak ditemukan' } }, { status: 400 });
+        }
+        if (!invitationId) {
+            return NextResponse.json({ data: null, error: { code: 'NO_INVITATION_ID', message: 'invitation_id diperlukan' } }, { status: 400 });
         }
 
-        if (!type) {
-            return NextResponse.json({ data: null, error: { code: "NO_TYPE", message: "Type upload tidak disertakan" } }, { status: 400 });
+        // 3. Validate file
+        const ext = getExt(file.name);
+        if (!ALLOWED_IMAGE_EXTS.includes(ext)) {
+            return NextResponse.json({ data: null, error: { code: 'INVALID_TYPE', message: `Format tidak didukung. Gunakan: ${ALLOWED_IMAGE_EXTS.join(', ')}` } }, { status: 400 });
+        }
+        if (file.size > MAX_IMAGE_SIZE) {
+            return NextResponse.json({ data: null, error: { code: 'FILE_TOO_LARGE', message: 'Ukuran file maksimal 5MB' } }, { status: 400 });
         }
 
-        // Validate file
-        const validation = validateFile(file, type);
-        if (!validation.valid) {
-            return NextResponse.json({ data: null, error: { code: "VALIDATION_ERROR", message: validation.error! } }, { status: 400 });
+        // 4. Ownership check — user must own this invitation
+        const { data: invitation, error: invError } = await supabase
+            .from('invitations')
+            .select('id')
+            .eq('id', invitationId)
+            .eq('user_id', user.id)
+            .single();
+        if (invError || !invitation) {
+            return NextResponse.json({ data: null, error: { code: 'FORBIDDEN', message: 'Undangan tidak ditemukan atau bukan milik Anda' } }, { status: 403 });
+        }
+
+        // 5. Upload to Supabase Storage via admin client
+        const adminClient = getAdminClient();
+        if (!adminClient) {
+            return NextResponse.json({ data: null, error: { code: 'CONFIG_ERROR', message: 'Storage tidak terkonfigurasi' } }, { status: 500 });
         }
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const timestamp = Date.now();
+        const storageKey = `${invitationId}/${type}-${timestamp}${ext}`;
 
-        // Tentukan folder penyimpanan berdasarkan type dan opsional slug
-        let relativePath = type;
-        if (type === "invitations" && slug) {
-            relativePath = path.join(type, slug);
-        } else if (type === "themes") {
-            relativePath = path.join(type, "images");
-        } else if (type === "themes/music") {
-            relativePath = path.join("themes", "music");
-        } else if (type === "themes/videos") {
-            relativePath = path.join("themes", "videos");
+        const { error: uploadError } = await adminClient.storage
+            .from(BUCKET)
+            .upload(storageKey, buffer, {
+                contentType: file.type,
+                upsert: true,
+            });
+
+        if (uploadError) {
+            console.error('[upload] storage upload error:', uploadError);
+            return NextResponse.json({ data: null, error: { code: 'UPLOAD_FAILED', message: 'Gagal mengupload ke storage: ' + uploadError.message } }, { status: 500 });
         }
 
-        const publicPath = path.join(process.cwd(), "public", "uploads", relativePath);
+        // 6. Get public URL
+        const { data: publicUrlData } = adminClient.storage
+            .from(BUCKET)
+            .getPublicUrl(storageKey);
 
-        // Ensure directory exists
-        await mkdir(publicPath, { recursive: true });
+        const publicUrl = publicUrlData.publicUrl;
 
-        // Sanitasi nama file dan tambahkan timestamp
-        const ext = file.name.substring(file.name.lastIndexOf('.'));
-        const safeBaseName = file.name.substring(0, file.name.lastIndexOf('.')).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
-        const filename = `${Date.now()}-${safeBaseName}${ext}`;
-        const savePath = path.join(publicPath, filename);
+        // 7. Update couple_photo_url in invitations table
+        const columnToUpdate = type === 'cover' ? 'couple_photo_url' : 'couple_photo_url';
+        const { error: updateError } = await supabase
+            .from('invitations')
+            .update({ [columnToUpdate]: publicUrl })
+            .eq('id', invitationId)
+            .eq('user_id', user.id);
 
-        // Tulis ke filesystem
-        await writeFile(savePath, buffer);
-
-        // Return relative URL untuk di-load client - replace Windows separators to URL slashes
-        const fileUrl = `/uploads/${relativePath.replace(/\\/g, '/')}/${filename}`;
+        if (updateError) {
+            console.error('[upload] db update error:', updateError);
+            // Still return the URL even if DB update fails — client can retry
+        }
 
         return NextResponse.json({
-            data: {
-                url: fileUrl,
-                filename: filename,
-                size: file.size,
-                type: file.type,
-            },
-            error: null
+            data: { url: publicUrl, key: storageKey },
+            error: null,
         });
+
     } catch (error) {
-        console.error("Upload error:", error);
-        return NextResponse.json({ data: null, error: { code: "INTERNAL_ERROR", message: "Gagal mengupload file" } }, { status: 500 });
+        console.error('[upload] unexpected error:', error);
+        return NextResponse.json({ data: null, error: { code: 'INTERNAL_ERROR', message: 'Gagal mengupload file' } }, { status: 500 });
     }
 }
