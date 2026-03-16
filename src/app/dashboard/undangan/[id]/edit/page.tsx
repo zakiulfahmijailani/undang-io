@@ -13,7 +13,6 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
         redirect("/login");
     }
 
-    // Fetch invitation using flat columns (no invitation_details relation)
     const { data: invitation, error } = await supabase
         .from('invitations')
         .select(`
@@ -36,18 +35,21 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
             resepsi_location_name,
             resepsi_location_address,
             quote_text,
-            couple_photo_url,
             gift_bank_name,
             gift_bank_account,
             gift_bank_account_name,
-            gift_shipping_address
+            gift_shipping_address,
+            show_couple_photos,
+            show_prewed_gallery,
+            show_gift_section
         `)
         .eq('id', id)
         .eq('user_id', user.id)
         .single();
 
     if (error || !invitation) {
-        console.error('[edit/page] invitation fetch error:', error);
+        // Log full error detail so we can see exactly which column is missing
+        console.error('[edit/page] fetch failed - code:', error?.code, '| message:', error?.message, '| details:', error?.details, '| hint:', error?.hint);
         redirect("/dashboard");
     }
 
