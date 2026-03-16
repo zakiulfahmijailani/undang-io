@@ -23,14 +23,21 @@ export default function RegisterPage() {
   const message = searchParams.get("message");
 
   useEffect(() => {
+    // Priority 1: active guest session in localStorage
     const raw = localStorage.getItem("guest_session");
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
-        if (parsed.sessionToken) setGuestSessionToken(parsed.sessionToken);
+        if (parsed.sessionToken) {
+          setGuestSessionToken(parsed.sessionToken);
+          return;
+        }
       } catch (e) {}
     }
-  }, []);
+    // Priority 2: token from URL query param (from GuestCountdownBanner)
+    const urlToken = searchParams.get("guest_token");
+    if (urlToken) setGuestSessionToken(urlToken);
+  }, [searchParams]);
 
   const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,24 +61,40 @@ export default function RegisterPage() {
     // If user is immediately confirmed (no email verification)
     if (data.session) {
       if (guestSessionToken) {
+        console.log('[REGISTER] Got session, starting claim for token:', guestSessionToken.slice(0, 8) + '...')
         try {
           const res = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
             method: "PATCH",
           });
           const json = await res.json();
+          console.log('[REGISTER] Claim response status:', res.status, 'body:', json)
+
+          if (!res.ok || !json.data) {
+            toast.error("Gagal menyimpan undangan sementara.", {
+              description: json?.error?.message || `Claim failed with status ${res.status}`
+            });
+            setLoading(false);
+            return;
+          }
+
           if (json.data) {
             toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
+            localStorage.removeItem("guest_session");
+            localStorage.removeItem("guest_return_slug");
+            localStorage.removeItem("pending_claim_token");
           }
-        } catch (e) {
-          console.error("Claim failed:", e);
+        } catch (e: any) {
+          console.error("[REGISTER] Claim fetch exception:", e);
+          toast.error("Sistem sedang sibuk. Gagal mengklaim undangan.");
+          setLoading(false);
+          return;
         }
-        localStorage.removeItem("guest_session");
-        localStorage.removeItem("guest_return_slug");
       }
       router.push("/dashboard");
     } else {
       // Email verification required
       if (guestSessionToken) {
+        console.log('[REGISTER] No session yet (email verification). Saving pending token:', guestSessionToken.slice(0, 8) + '...')
         localStorage.setItem('pending_claim_token', guestSessionToken)
         localStorage.removeItem('guest_session')
         localStorage.removeItem('guest_return_slug')
@@ -88,9 +111,9 @@ export default function RegisterPage() {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
 
-      // Always use /api/auth/callback
       let redirectTo = `${window.location.origin}/api/auth/callback`;
       if (guestSessionToken) {
+        console.log('[REGISTER OAUTH] Preserving guest token in callback URL:', guestSessionToken.slice(0, 8) + '...')
         redirectTo += `?guest_session_token=${guestSessionToken}`;
       }
 
