@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     // Priority 1: active guest session in localStorage
-    const raw = localStorage.getItem("guest_session");
+    const raw = localStorage.getItem('guest_session');
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
@@ -35,7 +35,7 @@ export default function RegisterPage() {
       } catch (e) {}
     }
     // Priority 2: token from URL query param (from GuestCountdownBanner)
-    const urlToken = searchParams.get("guest_token");
+    const urlToken = searchParams.get('guest_token');
     if (urlToken) setGuestSessionToken(urlToken);
   }, [searchParams]);
 
@@ -61,46 +61,45 @@ export default function RegisterPage() {
     // If user is immediately confirmed (no email verification)
     if (data.session) {
       if (guestSessionToken) {
-        console.log('[REGISTER] Got session, starting claim for token:', guestSessionToken.slice(0, 8) + '...')
         try {
-          const res = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
-            method: "PATCH",
+          const claimRes = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${data.session.access_token}`,
+              'Content-Type': 'application/json',
+            },
           });
-          const json = await res.json();
-          console.log('[REGISTER] Claim response status:', res.status, 'body:', json)
+          const json = await claimRes.json();
 
-          if (!res.ok || !json.data) {
-            toast.error("Gagal menyimpan undangan sementara.", {
-              description: json?.error?.message || `Claim failed with status ${res.status}`
+          if (!claimRes.ok || !json.data) {
+            toast.error('Gagal menyimpan undangan.', {
+              description: json?.error?.message || `Status: ${claimRes.status}`,
             });
             setLoading(false);
             return;
           }
 
-          if (json.data) {
-            toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
-            localStorage.removeItem("guest_session");
-            localStorage.removeItem("guest_return_slug");
-            localStorage.removeItem("pending_claim_token");
-          }
+          localStorage.removeItem('guest_session');
+          localStorage.removeItem('guest_return_slug');
+          localStorage.removeItem('pending_claim_token');
+          toast.success('Undangan tersimpan!');
         } catch (e: any) {
-          console.error("[REGISTER] Claim fetch exception:", e);
-          toast.error("Sistem sedang sibuk. Gagal mengklaim undangan.");
+          console.error('[REGISTER] Claim fetch exception:', e);
+          toast.error('Sistem sedang sibuk. Gagal mengklaim undangan.');
           setLoading(false);
           return;
         }
       }
-      router.push("/dashboard");
+      router.push('/dashboard');
     } else {
-      // Email verification required
+      // Email verification required — save token for after verification
       if (guestSessionToken) {
-        console.log('[REGISTER] No session yet (email verification). Saving pending token:', guestSessionToken.slice(0, 8) + '...')
-        localStorage.setItem('pending_claim_token', guestSessionToken)
-        localStorage.removeItem('guest_session')
-        localStorage.removeItem('guest_return_slug')
+        localStorage.setItem('pending_claim_token', guestSessionToken);
+        localStorage.removeItem('guest_session');
+        localStorage.removeItem('guest_return_slug');
       }
-      toast.success("Cek email kamu untuk verifikasi akun.");
-      router.push("/login?message=Cek email untuk melanjutkan proses daftar");
+      toast.success('Cek email kamu untuk verifikasi akun.');
+      router.push('/login?message=Cek email untuk melanjutkan proses daftar');
     }
 
     setLoading(false);
@@ -113,7 +112,6 @@ export default function RegisterPage() {
 
       let redirectTo = `${window.location.origin}/api/auth/callback`;
       if (guestSessionToken) {
-        console.log('[REGISTER OAUTH] Preserving guest token in callback URL:', guestSessionToken.slice(0, 8) + '...')
         redirectTo += `?guest_session_token=${guestSessionToken}`;
       }
 

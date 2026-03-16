@@ -23,25 +23,25 @@ export default function Login() {
 
   useEffect(() => {
     // Priority 1: active guest session in localStorage
-    const raw = localStorage.getItem('guest_session')
+    const raw = localStorage.getItem('guest_session');
     if (raw) {
       try {
-        const parsed = JSON.parse(raw)
+        const parsed = JSON.parse(raw);
         if (parsed.sessionToken) {
-          setGuestSessionToken(parsed.sessionToken)
-          return
+          setGuestSessionToken(parsed.sessionToken);
+          return;
         }
       } catch (e) {}
     }
     // Priority 2: pending token from email-verify register flow
-    const pending = localStorage.getItem('pending_claim_token')
+    const pending = localStorage.getItem('pending_claim_token');
     if (pending) {
-      setGuestSessionToken(pending)
-      return
+      setGuestSessionToken(pending);
+      return;
     }
     // Priority 3: token from URL query param (from GuestCountdownBanner)
-    const urlToken = searchParams.get('guest_token')
-    if (urlToken) setGuestSessionToken(urlToken)
+    const urlToken = searchParams.get('guest_token');
+    if (urlToken) setGuestSessionToken(urlToken);
   }, [searchParams]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -49,7 +49,7 @@ export default function Login() {
     setLoading(true);
 
     const supabase = createBrowserSupabaseClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       toast.error("Login gagal", { description: "Email atau kata sandi salah." });
@@ -57,40 +57,39 @@ export default function Login() {
       return;
     }
 
-    // Claim guest session if exists — client side so cookie is available
-    if (guestSessionToken) {
-      console.log('[LOGIN] Found token, starting claim:', guestSessionToken.slice(0, 8) + '...')
+    // Claim guest session using Bearer token — avoids cookie timing issue
+    if (guestSessionToken && data.session) {
       try {
-        const url_to_fetch = `/api/guest-sessions/${guestSessionToken}/claim`
-        console.log('[LOGIN] Calling fetch:', url_to_fetch)
+        const claimRes = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${data.session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        const json = await claimRes.json();
 
-        const res = await fetch(url_to_fetch, { method: "PATCH" });
-        const json = await res.json();
-        console.log('[LOGIN] Claim response status:', res.status, 'body:', json)
-
-        if (!res.ok || !json.data) {
-          toast.error("Gagal mengklaim sesi undangan.", {
-             description: json?.error?.message || `Claim failed with status ${res.status}`
-          })
-          setLoading(false)
-          return
+        if (!claimRes.ok || !json.data) {
+          toast.error('Gagal menyimpan undangan sementara.', {
+            description: json?.error?.message || `Status: ${claimRes.status}`,
+          });
+          setLoading(false);
+          return;
         }
 
-        if (json.data) {
-          toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
-          localStorage.removeItem("guest_session");
-          localStorage.removeItem("guest_return_slug");
-          localStorage.removeItem("pending_claim_token");
-        }
+        localStorage.removeItem('guest_session');
+        localStorage.removeItem('guest_return_slug');
+        localStorage.removeItem('pending_claim_token');
+        toast.success('Undangan tersimpan! Timer diperpanjang 10 menit.');
       } catch (e: any) {
-        console.error("[LOGIN] Claim fetch exception:", e);
-        toast.error("Sistem sedang sibuk. Gagal mengklaim undangan.");
+        console.error('[LOGIN] Claim fetch exception:', e);
+        toast.error('Sistem sedang sibuk. Gagal mengklaim undangan.');
         setLoading(false);
         return;
       }
     }
 
-    router.push("/dashboard");
+    router.push('/dashboard');
     setLoading(false);
   };
 
@@ -101,7 +100,6 @@ export default function Login() {
 
       let redirectTo = `${window.location.origin}/api/auth/callback`;
       if (guestSessionToken) {
-        console.log('[LOGIN OAUTH] Preserving guest token in callback URL:', guestSessionToken.slice(0, 8) + '...')
         redirectTo += `?guest_session_token=${guestSessionToken}`;
       }
 

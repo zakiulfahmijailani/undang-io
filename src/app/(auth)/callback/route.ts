@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { getAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
@@ -15,30 +14,27 @@ export async function GET(request: Request) {
 
         if (!sessionError) {
             if (guestSessionToken) {
-                console.log('[CALLBACK] Exchanged code for session. Found guest token:', guestSessionToken.slice(0, 8) + '...')
-                const { data: { user } } = await supabase.auth.getUser()
+                const { data: { session } } = await supabase.auth.getSession()
 
-                if (user) {
+                if (session) {
                     try {
-                        console.log('[CALLBACK] Calling claim endpoint via fetch...')
                         const res = await fetch(`${origin}/api/guest-sessions/${guestSessionToken}/claim`, {
                             method: 'PATCH',
                             headers: {
-                                cookie: request.headers.get('cookie') || ''
-                            }
+                                'Authorization': `Bearer ${session.access_token}`,
+                                'Content-Type': 'application/json',
+                            },
                         })
                         const json = await res.json()
-                        console.log('[CALLBACK] Claim response status:', res.status, 'body:', json)
 
                         if (!res.ok || !json.data) {
-                            console.error('[CALLBACK] Claim failed. Redirecting to login with error.')
-                            return NextResponse.redirect(`${origin}/login?message=Gagal menyimpan undangan sementara setelah login Google. Silakan coba lagi.`)
+                            console.error('[CALLBACK] Claim failed:', json)
+                            return NextResponse.redirect(`${origin}/login?message=Gagal menyimpan undangan sementara. Silakan coba lagi.`)
                         }
                     } catch (error) {
                         console.error('[CALLBACK] Claim fetch exception:', error)
                         return NextResponse.redirect(`${origin}/login?message=Terjadi kesalahan sistem saat menyimpan undangan sementara.`)
                     }
-                    next = '/dashboard'
                 }
             }
 

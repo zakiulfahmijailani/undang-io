@@ -16,13 +16,26 @@ export async function PATCH(
       )
     }
 
-    console.log('[CLAIM API] Received token:', token)
+    // Try cookie-based auth first, then fall back to Bearer token
+    let user = null
 
-    // Verify the user is authenticated
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user: cookieUser } } = await supabase.auth.getUser()
 
-    console.log('[CLAIM API] getUser result:', user?.id || 'null')
+    if (cookieUser) {
+      user = cookieUser
+    } else {
+      // Fall back to Authorization: Bearer <access_token>
+      const authHeader = request.headers.get('Authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        const accessToken = authHeader.slice(7)
+        const adminClient = getAdminClient()
+        if (adminClient) {
+          const { data: { user: tokenUser } } = await adminClient.auth.getUser(accessToken)
+          if (tokenUser) user = tokenUser
+        }
+      }
+    }
 
     if (!user) {
       return NextResponse.json(
@@ -45,8 +58,6 @@ export async function PATCH(
       .select('*')
       .eq('session_token', token)
       .single()
-
-    console.log('[CLAIM API] Target session:', session?.id || 'null', 'Status:', session?.status)
 
     if (fetchError || !session) {
       return NextResponse.json(
@@ -71,9 +82,8 @@ export async function PATCH(
       )
     }
 
-    // Extend timer by 10 minutes from now, but cap at original expires_at + 10 min
+    // Extend timer by 10 minutes from now
     const extendedExpiry = new Date(Date.now() + 10 * 60 * 1000).toISOString()
-
 
     // Update: attach user_id, extend timer, set status to 'claimed'
     const { data: updatedSession, error: updateError } = await supabaseAdmin
@@ -87,8 +97,6 @@ export async function PATCH(
       .eq('id', session.id)
       .select('id, session_token, slug, status, expires_at, user_id')
       .single()
-
-    console.log('[CLAIM API] Update success for row:', updatedSession?.id)
 
     if (updateError) {
       console.error('[PATCH /api/guest-sessions/[token]/claim] Update error:', updateError)
