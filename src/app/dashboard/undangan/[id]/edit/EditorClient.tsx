@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
+import MusicPickerTab from "@/components/dashboard/MusicPickerTab";
 
 interface EditorClientProps {
     initialData: any;
@@ -49,14 +50,14 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         reception_maps: "",
         dresscode: "",
         greeting_text: initialData.quote_text || "",
-        music_url: "",
+        music_url: initialData.music_url || "",
         love_story: [],
         gallery_photos: [],
         bank_accounts: [],
         enable_rsvp: true,
     });
 
-    // ─── Live preview data — rebuilt on every formData change ───────────────
+    // Live preview data
     const liveData = {
         ...demoData,
         coupleShortName: `${formData.groom_name || demoData.coupleShortName.split(' & ')[0]} & ${formData.bride_name || demoData.coupleShortName.split(' & ')[1]}`,
@@ -93,6 +94,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             text: formData.greeting_text || demoData.quote.text,
             source: formData.greeting_text ? 'Mempelai' : demoData.quote.source,
         },
+        musicUrl: formData.music_url || null,
     };
 
     const handleSaveAll = async () => {
@@ -144,12 +146,12 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         { id: "fotocover", label: "Foto & Cover", icon: ImageIcon },
         { id: "mempelai", label: "Data Mempelai", icon: Users },
         { id: "acara", label: "Acara", icon: MapPin },
-        { id: "lovestory", label: "Kisah Cinta", icon: Heart },
-        { id: "galeri", label: "Galeri Foto", icon: Camera },
-        { id: "amplop", label: "Amplop Digital", icon: Gift },
-        { id: "ayat", label: "Ayat & Quote", icon: Type },
+        { id: "lovestory", label: "Kisah Cinta", icon: Heart, soon: true },
+        { id: "galeri", label: "Galeri Foto", icon: Camera, soon: true },
+        { id: "amplop", label: "Amplop Digital", icon: Gift, soon: true },
+        { id: "ayat", label: "Ayat & Quote", icon: Type, soon: true },
         { id: "musik", label: "Musik", icon: Music },
-        { id: "pengaturan", label: "Pengaturan", icon: Settings },
+        { id: "pengaturan", label: "Pengaturan", icon: Settings, soon: true },
     ];
 
     const coupleName = `${formData.groom_name || 'Mempelai Pria'} & ${formData.bride_name || 'Mempelai Wanita'}`;
@@ -157,7 +159,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
     return (
         <div className="flex flex-col h-full bg-stone-50 min-h-screen">
 
-            {/* ── Sticky Header ─────────────────────────────────────────────── */}
+            {/* Sticky Header */}
             <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200 px-4 py-3 shadow-sm">
                 <div className="max-w-full mx-auto flex flex-col sm:flex-row gap-3 items-center justify-between">
                     <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -172,12 +174,10 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                         </div>
                     </div>
                     <div className="flex w-full sm:w-auto items-center gap-2">
-                        {/* Toggle preview button */}
                         <Button
                             variant="secondary"
                             className="h-9 border-stone-200 text-stone-700 bg-white hover:bg-stone-50"
                             onClick={() => setShowPreview(p => !p)}
-                            title={showPreview ? 'Sembunyikan preview' : 'Tampilkan preview'}
                         >
                             {showPreview ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
                             {showPreview ? 'Sembunyikan Preview' : 'Tampilkan Preview'}
@@ -195,7 +195,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                 </div>
             </div>
 
-            {/* ── Split Pane Body ───────────────────────────────────────────── */}
+            {/* Split Pane Body */}
             <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
 
                 {/* LEFT — Editor Form */}
@@ -204,7 +204,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                 }`}>
                     <div className="flex flex-col gap-4 p-4">
 
-                        {/* Sidebar Tab Nav */}
+                        {/* Tab Nav */}
                         <nav className="flex md:flex-col overflow-x-auto gap-1 pb-1 scrollbar-hide">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
@@ -221,7 +221,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                     >
                                         <Icon className={`w-4 h-4 ${isActive ? 'text-amber-500' : 'text-stone-400'}`} />
                                         {tab.label}
-                                        {['amplop', 'ayat', 'musik', 'pengaturan'].includes(tab.id) && (
+                                        {(tab as any).soon && (
                                             <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-500">
                                                 🔒 Soon
                                             </span>
@@ -349,15 +349,23 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 </div>
                             )}
 
+                            {/* MUSIK — ENABLED */}
+                            {activeTab === 'musik' && (
+                                <MusicPickerTab
+                                    invitationId={initialData.id}
+                                    currentMusicUrl={formData.music_url}
+                                    onChange={(url) => handleChange('music_url', url)}
+                                />
+                            )}
+
                             {/* PLACEHOLDER TABS */}
-                            {['lovestory', 'galeri', 'amplop', 'ayat', 'musik', 'pengaturan'].includes(activeTab) && (
+                            {['lovestory', 'galeri', 'amplop', 'ayat', 'pengaturan'].includes(activeTab) && (
                                 <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in">
                                     <div className="w-14 h-14 bg-stone-100 rounded-full flex items-center justify-center mb-4 text-stone-400">
                                         {activeTab === 'lovestory' && <Heart className="w-7 h-7" />}
                                         {activeTab === 'galeri' && <Camera className="w-7 h-7" />}
                                         {activeTab === 'amplop' && <Gift className="w-7 h-7" />}
                                         {activeTab === 'ayat' && <Type className="w-7 h-7" />}
-                                        {activeTab === 'musik' && <Music className="w-7 h-7" />}
                                         {activeTab === 'pengaturan' && <Settings className="w-7 h-7" />}
                                     </div>
                                     <h2 className="text-lg font-serif font-bold text-stone-800 mb-2">Segera Hadir</h2>
@@ -374,10 +382,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     </div>
                 </div>
 
-                {/* RIGHT — Live Preview (hidden on mobile, toggle-able) */}
+                {/* RIGHT — Live Preview */}
                 {showPreview && (
                     <div className="hidden md:flex flex-col flex-1 overflow-hidden border-l border-stone-200 bg-stone-100">
-                        {/* Preview header bar */}
                         <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-stone-200 flex-shrink-0">
                             <div className="flex gap-1.5">
                                 <span className="w-3 h-3 rounded-full bg-red-400" />
@@ -393,16 +400,10 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 ● LIVE
                             </span>
                         </div>
-
-                        {/* Scaled invitation preview */}
                         <div className="flex-1 overflow-y-auto">
                             <div
                                 className="origin-top-left"
-                                style={{
-                                    transform: 'scale(0.6)',
-                                    width: '166.67%',
-                                    transformOrigin: 'top left',
-                                }}
+                                style={{ transform: 'scale(0.6)', width: '166.67%', transformOrigin: 'top left' }}
                             >
                                 <InvitationClientWrapper data={liveData} />
                             </div>

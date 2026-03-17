@@ -35,6 +35,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 resepsi_location_name,
                 resepsi_location_address,
                 quote_text,
+                music_url,
                 gift_bank_name,
                 gift_bank_account,
                 gift_bank_account_name,
@@ -114,18 +115,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         if (body.bride_father !== undefined)    updates.bride_father_name = body.bride_father;
         if (body.bride_mother !== undefined)    updates.bride_mother_name = body.bride_mother;
 
-        // Akad (maps URL skipped - column not yet in DB)
+        // Akad
         if (body.akad_date !== undefined)    updates.akad_datetime         = body.akad_date || null;
         if (body.akad_venue !== undefined)   updates.akad_location_name    = body.akad_venue;
         if (body.akad_address !== undefined) updates.akad_location_address = body.akad_address;
 
-        // Resepsi (maps URL skipped - column not yet in DB)
+        // Resepsi
         if (body.reception_date !== undefined)    updates.resepsi_datetime         = body.reception_date || null;
         if (body.reception_venue !== undefined)   updates.resepsi_location_name    = body.reception_venue;
         if (body.reception_address !== undefined) updates.resepsi_location_address = body.reception_address;
 
         // Quote / greeting
         if (body.greeting_text !== undefined) updates.quote_text = body.greeting_text;
+
+        // Music
+        if (body.music_url !== undefined) updates.music_url = body.music_url || null;
 
         // Gift
         if (body.gift_bank_name !== undefined)         updates.gift_bank_name         = body.gift_bank_name;

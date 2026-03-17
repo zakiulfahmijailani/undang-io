@@ -5,7 +5,6 @@ import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from './InvitationClientWrapper';
 import ViewTracker from './ViewTracker';
 
-// Disable Next.js full-route cache — edits in Supabase reflect immediately
 export const revalidate = 0;
 
 interface InvitePageProps {
@@ -45,7 +44,6 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
 
     if (slug === '404') notFound();
 
-    // Demo mode
     if (slug === 'demo') {
         return (
             <>
@@ -79,6 +77,7 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
             resepsi_location_name,
             resepsi_location_address,
             quote_text,
+            music_url,
             gift_bank_name,
             gift_bank_account,
             gift_bank_account_name,
@@ -95,8 +94,6 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         notFound();
     }
 
-    // Status guard: only block if truly not publishable
-    // 'active' and 'paid' = live; everything else needs ?preview=true
     const isLive = invitation.status === 'active' || invitation.status === 'paid';
     if (!isLive && !isPreview) {
         return (
@@ -110,7 +107,6 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         );
     }
 
-    // Map flat DB columns -> InvitationClientWrapper data shape
     const data: any = { ...demoData };
 
     const groomNick = invitation.groom_nickname || 'Mempelai Pria';
@@ -135,13 +131,16 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     if (invitation.akad_location_address) data.akad.address = invitation.akad_location_address;
 
     data.reception = { ...demoData.reception };
-    if (invitation.resepsi_datetime)           data.reception.date    = invitation.resepsi_datetime;
-    if (invitation.resepsi_location_name)      data.reception.venue   = invitation.resepsi_location_name;
-    if (invitation.resepsi_location_address)   data.reception.address = invitation.resepsi_location_address;
+    if (invitation.resepsi_datetime)         data.reception.date    = invitation.resepsi_datetime;
+    if (invitation.resepsi_location_name)    data.reception.venue   = invitation.resepsi_location_name;
+    if (invitation.resepsi_location_address) data.reception.address = invitation.resepsi_location_address;
 
     if (invitation.quote_text) {
         data.quote = { text: invitation.quote_text, source: 'Mempelai' };
     }
+
+    // Pass music URL — used by InvitationClientWrapper for the background audio
+    data.musicUrl = invitation.music_url || null;
 
     return (
         <>

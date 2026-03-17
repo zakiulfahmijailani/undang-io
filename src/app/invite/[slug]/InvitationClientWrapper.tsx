@@ -34,6 +34,7 @@ interface InvitationData {
     giftAddress: string;
     rsvpMessages: RsvpMessage[];
     calendarUrl: string;
+    musicUrl?: string | null;
 }
 
 interface WrapperProps {
@@ -53,7 +54,8 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
 
     const handleOpen = () => {
         setIsOpened(true);
-        if (audioRef.current) {
+        // Only play if a music URL is set
+        if (audioRef.current && data.musicUrl) {
             audioRef.current.play().then(() => {
                 setIsMusicPlaying(true);
             }).catch(() => { });
@@ -70,19 +72,24 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
         setIsMusicPlaying(!isMusicPlaying);
     };
 
-    // Build a safe quote object — never undefined
+    // Safe quote fallback
     const safeQuote = data.quote && data.quote.text
         ? data.quote
         : { text: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya.", source: "QS. Ar-Rum: 21" };
 
+    const hasMusicUrl = Boolean(data.musicUrl);
+
     return (
         <div className="min-h-screen bg-background text-foreground">
-            <audio
-                ref={audioRef}
-                loop
-                preload="auto"
-                src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-            />
+            {/* Audio element — preload=none until opened, then auto */}
+            {hasMusicUrl && (
+                <audio
+                    ref={audioRef}
+                    loop
+                    preload="none"
+                    src={data.musicUrl!}
+                />
+            )}
 
             {!isOpened && (
                 <CoverSection
@@ -109,7 +116,6 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
                         />
 
                         <CoupleSection groom={data.groom} bride={data.bride} />
-                        {/* Fix: pass quote as a single object prop, not spread */}
                         <QuoteSection quote={safeQuote} />
                         <LoveStorySection stories={data.loveStory} />
                         <CountdownSection targetDate={data.akad?.date} />
@@ -130,7 +136,10 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
 
                         <div className="h-20" />
                         <BottomNavbar />
-                        <MusicButton isPlaying={isMusicPlaying} onToggle={toggleMusic} />
+                        {/* Only render music button if a music URL is configured */}
+                        {hasMusicUrl && (
+                            <MusicButton isPlaying={isMusicPlaying} onToggle={toggleMusic} />
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
