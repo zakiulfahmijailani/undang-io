@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 upload_music.py
 ---------------
@@ -6,103 +7,105 @@ Batch download romantic/wedding music from Mixkit
 and upload to Supabase Storage bucket 'music'.
 
 Usage:
-    pip install requests supabase
+    pip install requests
     python scripts/upload_music.py
 
 Fill in SUPABASE_URL and SUPABASE_SERVICE_KEY below.
 """
 
-import os
+import sys
 import requests
 import json
 import time
 
+# Fix Windows terminal Unicode issue
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
+
 # ============================================================
-# CONFIG — isi sesuai project Supabase kamu
+# CONFIG - isi sesuai project Supabase kamu
 # ============================================================
 SUPABASE_URL = "https://XXXX.supabase.co"          # ganti XXXX
 SUPABASE_SERVICE_KEY = "eyJ..."                    # service_role key (bukan anon)
 BUCKET_NAME = "music"
 # ============================================================
 
-# Daftar lagu Mixkit — wedding & romantic, bebas royalti
 # Format: (filename_di_storage, url_download, display_title, genre, emoji)
 TRACKS = [
     (
         "mixkit-dreamy-nature-ambiance.mp3",
         "https://assets.mixkit.co/music/download/mixkit-dreamy-nature-ambiance-5027.mp3",
         "Dreamy Nature",
-        "Ambient \u00b7 Dreamy",
-        "\u2728",
+        "Ambient · Dreamy",
+        "✨",
     ),
     (
         "mixkit-serene-view-443.mp3",
         "https://assets.mixkit.co/music/download/mixkit-serene-view-443.mp3",
         "Serene View",
-        "Cinematic \u00b7 Calm",
-        "\ud83c\udf05",
+        "Cinematic · Calm",
+        "🌅",
     ),
     (
         "mixkit-sweet-romance-668.mp3",
         "https://assets.mixkit.co/music/download/mixkit-sweet-romance-668.mp3",
         "Sweet Romance",
-        "Piano \u00b7 Romantic",
-        "\u2764\ufe0f",
+        "Piano · Romantic",
+        "❤️",
     ),
     (
         "mixkit-romantic-moment-583.mp3",
         "https://assets.mixkit.co/music/download/mixkit-romantic-moment-583.mp3",
         "Romantic Moment",
-        "Orkestra \u00b7 Emotional",
-        "\ud83c\udf39",
+        "Orkestra · Emotional",
+        "🌹",
     ),
     (
         "mixkit-when-i-close-my-eyes-668.mp3",
         "https://assets.mixkit.co/music/download/mixkit-when-i-close-my-eyes-668.mp3",
         "When I Close My Eyes",
-        "Piano \u00b7 Nostalgic",
-        "\ud83c\udf19",
+        "Piano · Nostalgic",
+        "🌙",
     ),
     (
         "mixkit-beauty-of-annihilation-piano-remastered-8060.mp3",
         "https://assets.mixkit.co/music/download/mixkit-beauty-of-annihilation-piano-remastered-8060.mp3",
         "Beauty of Annihilation",
-        "Piano \u00b7 Melancholic",
-        "\ud83c\udfb9",
+        "Piano · Melancholic",
+        "🎹",
     ),
     (
         "mixkit-soft-winds-of-love-633.mp3",
         "https://assets.mixkit.co/music/download/mixkit-soft-winds-of-love-633.mp3",
         "Soft Winds of Love",
-        "Acoustic \u00b7 Warm",
-        "\ud83c\udf38",
+        "Acoustic · Warm",
+        "🌸",
     ),
     (
-        "mixkit-a-very-happy-christmas-897.mp3",
+        "mixkit-blissful-life-740.mp3",
         "https://assets.mixkit.co/music/download/mixkit-blissful-life-740.mp3",
         "Blissful Life",
-        "Acoustic \u00b7 Uplifting",
-        "\u2600\ufe0f",
+        "Acoustic · Uplifting",
+        "☀️",
     ),
     (
         "mixkit-love-in-the-fall-432.mp3",
         "https://assets.mixkit.co/music/download/mixkit-love-in-the-fall-432.mp3",
         "Love in the Fall",
-        "Cinematic \u00b7 Hopeful",
-        "\ud83c\udf42",
+        "Cinematic · Hopeful",
+        "🍂",
     ),
     (
         "mixkit-valley-sunset-127.mp3",
         "https://assets.mixkit.co/music/download/mixkit-valley-sunset-127.mp3",
         "Valley Sunset",
-        "Ambient \u00b7 Peaceful",
-        "\ud83c\udf04",
+        "Ambient · Peaceful",
+        "🌄",
     ),
 ]
 
 
 def create_bucket_if_not_exists():
-    """Create public bucket 'music' if it doesn't exist yet."""
     url = f"{SUPABASE_URL}/storage/v1/bucket"
     headers = {
         "apikey": SUPABASE_SERVICE_KEY,
@@ -112,16 +115,15 @@ def create_bucket_if_not_exists():
     payload = {"id": BUCKET_NAME, "name": BUCKET_NAME, "public": True}
     res = requests.post(url, headers=headers, json=payload)
     if res.status_code in (200, 201):
-        print(f"\u2705 Bucket '{BUCKET_NAME}' created.")
+        print(f"[OK] Bucket '{BUCKET_NAME}' created.")
     elif res.status_code == 409:
-        print(f"\u2139\ufe0f  Bucket '{BUCKET_NAME}' already exists.")
+        print(f"[INFO] Bucket '{BUCKET_NAME}' already exists.")
     else:
-        print(f"\u26a0\ufe0f  Bucket create response: {res.status_code} {res.text}")
+        print(f"[WARN] Bucket create response: {res.status_code} {res.text}")
 
 
-def download_file(url: str, filename: str) -> bytes | None:
-    """Download file from URL, return bytes or None on failure."""
-    print(f"  \u2193 Downloading {filename} ...", end=" ", flush=True)
+def download_file(url: str, filename: str):
+    print(f"  [DL] Downloading {filename} ...", end=" ", flush=True)
     try:
         res = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
         if res.status_code == 200:
@@ -135,20 +137,19 @@ def download_file(url: str, filename: str) -> bytes | None:
         return None
 
 
-def upload_to_supabase(filename: str, data: bytes) -> str | None:
-    """Upload bytes to Supabase Storage, return public URL or None."""
+def upload_to_supabase(filename: str, data: bytes):
     url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{filename}"
     headers = {
         "apikey": SUPABASE_SERVICE_KEY,
         "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
         "Content-Type": "audio/mpeg",
-        "x-upsert": "true",  # overwrite if exists
+        "x-upsert": "true",
     }
-    print(f"  \u2191 Uploading {filename} ...", end=" ", flush=True)
+    print(f"  [UP] Uploading {filename} ...", end=" ", flush=True)
     res = requests.post(url, headers=headers, data=data)
     if res.status_code in (200, 201):
         public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{filename}"
-        print(f"OK")
+        print("OK")
         return public_url
     else:
         print(f"FAILED ({res.status_code} {res.text})")
@@ -156,23 +157,23 @@ def upload_to_supabase(filename: str, data: bytes) -> str | None:
 
 
 def main():
-    print("\n\ud83c\udfb5 Wedding Music Uploader for Supabase Storage")
+    print("\n=== Wedding Music Uploader for Supabase Storage ===")
     print("=" * 50)
 
     if "XXXX" in SUPABASE_URL or "eyJ..." in SUPABASE_SERVICE_KEY:
-        print("\n\u274c ERROR: Isi dulu SUPABASE_URL dan SUPABASE_SERVICE_KEY di bagian CONFIG!")
+        print("\n[ERROR] Isi dulu SUPABASE_URL dan SUPABASE_SERVICE_KEY di bagian CONFIG!")
         return
 
     create_bucket_if_not_exists()
     print()
 
-    results = []  # list of (id, title, genre, emoji, public_url, duration)
+    results = []
 
     for filename, dl_url, title, genre, emoji in TRACKS:
-        print(f"\ud83c\udfb6 {title}")
+        print(f"[TRACK] {title}")
         data = download_file(dl_url, filename)
         if data is None:
-            print(f"  \u23ed\ufe0f  Skipped.\n")
+            print("  [SKIP] Skipped.\n")
             continue
 
         public_url = upload_to_supabase(filename, data)
@@ -188,29 +189,19 @@ def main():
                 "coverEmoji": emoji,
             })
         print()
-        time.sleep(0.5)  # be nice to the CDN
+        time.sleep(0.5)
 
-    # Output hasil sebagai TypeScript array
     print("\n" + "=" * 50)
-    print("\u2705 SELESAI! Copy paste hasil berikut ke src/data/weddingMusic.ts:\n")
-    print("export const WEDDING_MUSIC: WeddingTrack[] = [")
-    for t in results:
-        print(f"    {{")
-        print(f"        id: '{t['id']}',")
-        print(f"        title: '{t['title']}',")
-        print(f"        artist: '{t['artist']}',")
-        print(f"        genre: '{t['genre']}',")
-        print(f"        duration: '{t['duration']}',")
-        print(f"        url: '{t['url']}',")
-        print(f"        coverEmoji: '{t['coverEmoji']}',")
-        print(f"    }},")
-    print("];")
+    print("[DONE] Selesai! Hasil disimpan di scripts/music_urls_output.json")
+    print("Kirimkan isi file JSON tersebut ke AI untuk update weddingMusic.ts!\n")
 
-    # Simpan juga ke file JSON untuk referensi
-    with open("scripts/music_urls_output.json", "w") as f:
+    with open("scripts/music_urls_output.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
-    print("\n\ud83d\udcbe Hasil juga disimpan di scripts/music_urls_output.json")
-    print("\nKirimkan isi file JSON tersebut ke AI untuk update weddingMusic.ts otomatis!")
+
+    # Preview output
+    print("Preview URL yang berhasil diupload:")
+    for t in results:
+        print(f"  - {t['title']}: {t['url']}")
 
 
 if __name__ == "__main__":
