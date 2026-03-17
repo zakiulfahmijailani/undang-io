@@ -1,56 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Heart, Users, MapPin, Image, MessageCircle } from "lucide-react";
+import { Home, Users, MapPin, Camera, MessageSquare } from "lucide-react";
 
-export const invitationSections = [
-    { id: "hero", icon: Heart, label: "Home" },
-    { id: "mempelai", icon: Users, label: "Mempelai" },
-    { id: "lokasi", icon: MapPin, label: "Lokasi" },
-    { id: "galeri", icon: Image, label: "Galeri" },
-    { id: "ucapan", icon: MessageCircle, label: "Ucapan" },
+const items = [
+    { id: "hero", label: "Beranda", icon: Home },
+    { id: "couple", label: "Mempelai", icon: Users },
+    { id: "event", label: "Acara", icon: MapPin },
+    { id: "gallery", label: "Galeri", icon: Camera },
+    { id: "rsvp", label: "RSVP", icon: MessageSquare },
 ];
 
 const BottomNavbar = () => {
-    const [activeSection, setActiveSection] = useState("hero");
-
-    useEffect(() => {
-        const observers: IntersectionObserver[] = [];
-
-        invitationSections.forEach(({ id }) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting) setActiveSection(id);
-                },
-                { threshold: 0.3 }
-            );
-            observer.observe(el);
-            observers.push(observer);
-        });
-
-        return () => observers.forEach((o) => o.disconnect());
-    }, []);
-
     const scrollTo = (id: string) => {
         document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     };
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-md border-t border-border shadow-lg">
-            <div className="flex justify-around items-center py-2 px-2 max-w-lg mx-auto">
-                {invitationSections.map(({ id, icon: Icon, label }) => (
+        <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-2">
+            <div className="flex items-center gap-1 px-4 py-2.5 rounded-full skeu-card bg-white/90 backdrop-blur-md border border-white/60">
+                {items.map(({ id, label, icon: Icon }) => (
                     <button
                         key={id}
                         onClick={() => scrollTo(id)}
-                        className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors cursor-pointer ${activeSection === id
-                                ? "text-accent"
-                                : "text-muted-foreground hover:text-foreground"
-                            }`}
+                        className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full hover:bg-wedding-gold/10 transition-colors group skeu-raised"
+                        title={label}
                     >
-                        <Icon className="w-5 h-5" />
-                        <span className="text-[10px] font-serif-wedding">{label}</span>
+                        <Icon className="w-4 h-4 text-stone-500 group-hover:text-wedding-gold transition-colors" />
+                        <span className="text-[9px] text-stone-400 group-hover:text-wedding-gold transition-colors">{label}</span>
                     </button>
                 ))}
             </div>

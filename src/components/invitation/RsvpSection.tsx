@@ -2,147 +2,145 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, User, MessageCircle } from "lucide-react";
+import { Send, CheckCircle2, User, MessageSquare, Heart, HeartOff } from "lucide-react";
 
-export interface RsvpMessage {
-    name: string;
-    attendance: string;
-    message: string;
-    createdAt: string;
-}
+export interface RsvpMessage { id: string; guestName: string; message: string; attendance: "hadir" | "tidak_hadir"; createdAt: string; }
+interface RsvpSectionProps { invitationId?: string; existingMessages?: RsvpMessage[]; }
 
-interface RsvpSectionProps {
-    initialMessages: RsvpMessage[];
-}
-
-const attendanceLabels: Record<string, { label: string; emoji: string }> = {
-    hadir: { label: "Hadir", emoji: "✅" },
-    tidak_hadir: { label: "Tidak Hadir", emoji: "❌" },
-    ragu: { label: "Masih Ragu", emoji: "🤔" },
-};
-
-const RsvpSection = ({ initialMessages }: RsvpSectionProps) => {
-    const [messages, setMessages] = useState<RsvpMessage[]>(initialMessages);
+const RsvpSection = ({ invitationId, existingMessages = [] }: RsvpSectionProps) => {
     const [name, setName] = useState("");
-    const [attendance, setAttendance] = useState("hadir");
     const [message, setMessage] = useState("");
+    const [attendance, setAttendance] = useState<"hadir" | "tidak_hadir">("hadir");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [messages, setMessages] = useState<RsvpMessage[]>(existingMessages);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
         setIsSubmitting(true);
-        // TODO: Send to actual API route
-        setTimeout(() => {
-            setMessages((prev) => [
-                { name, attendance, message, createdAt: new Date().toISOString() },
-                ...prev,
-            ]);
-            setName("");
-            setMessage("");
-            setIsSubmitting(false);
-            alert("Terima kasih atas ucapan dan konfirmasi kehadiran Anda! ✨");
-        }, 500);
+        try {
+            if (invitationId) {
+                const res = await fetch(`/api/invitations/${invitationId}/rsvp`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ guestName: name, message, attendance }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setMessages(prev => [data.rsvp, ...prev]);
+                }
+            } else {
+                setMessages(prev => [{ id: Date.now().toString(), guestName: name, message, attendance, createdAt: new Date().toISOString() }, ...prev]);
+            }
+            setIsSubmitted(true);
+            setName(""); setMessage("");
+        } catch (e) { console.error(e); }
+        finally { setIsSubmitting(false); }
     };
 
     return (
-        <section id="ucapan" className="py-20 px-6 bg-card">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mb-12"
-            >
-                <p className="font-serif-wedding text-muted-foreground tracking-[0.3em] uppercase text-sm mb-2">
-                    Kirim Ucapan
-                </p>
-                <h2 className="font-vibes text-accent text-4xl md:text-5xl">Wishes & RSVP</h2>
-            </motion.div>
-
-            <div className="max-w-lg mx-auto">
-                {/* Form */}
-                <motion.form
-                    onSubmit={handleSubmit}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="bg-background rounded-2xl p-6 border border-accent/20 shadow-sm mb-8"
-                >
-                    <div className="space-y-4">
-                        <div>
-                            <label className="font-serif-wedding text-foreground text-sm mb-1 block">Nama</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Nama lengkap"
-                                required
-                                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card font-serif-wedding text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                            />
-                        </div>
-                        <div>
-                            <label className="font-serif-wedding text-foreground text-sm mb-1 block">Konfirmasi Kehadiran</label>
-                            <select
-                                value={attendance}
-                                onChange={(e) => setAttendance(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card font-serif-wedding text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                            >
-                                <option value="hadir">✅ Hadir</option>
-                                <option value="tidak_hadir">❌ Tidak Hadir</option>
-                                <option value="ragu">🤔 Masih Ragu</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="font-serif-wedding text-foreground text-sm mb-1 block">Ucapan & Doa</label>
-                            <textarea
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Tulis ucapan dan doa terbaik..."
-                                rows={3}
-                                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card font-serif-wedding text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting || !name.trim()}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-serif-wedding text-sm hover:bg-primary/90 disabled:opacity-50 transition-colors cursor-pointer"
-                        >
-                            <Send className="w-4 h-4" />
-                            {isSubmitting ? "Mengirim..." : "Kirim Ucapan"}
-                        </button>
+        <section id="rsvp" className="py-20 px-4 skeu-paper">
+            <div className="max-w-2xl mx-auto">
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+                    <p className="text-sm uppercase tracking-[0.3em] text-wedding-brown mb-3 skeu-text-emboss">Konfirmasi</p>
+                    <h2 className="font-vibes text-5xl md:text-6xl skeu-text-gold">RSVP & Ucapan</h2>
+                    <div className="mt-5 flex items-center justify-center gap-3">
+                        <div className="h-px w-16 bg-wedding-gold/50" />
+                        <MessageSquare className="w-4 h-4 text-wedding-gold" />
+                        <div className="h-px w-16 bg-wedding-gold/50" />
                     </div>
-                </motion.form>
+                </motion.div>
 
-                {/* Messages list */}
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-                    {messages.map((msg, i) => (
-                        <motion.div
-                            key={`${msg.name}-${msg.createdAt}`}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                            className="bg-background rounded-xl p-4 border border-border"
-                        >
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                                    <User className="w-4 h-4 text-accent" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="font-serif-wedding text-foreground text-sm font-semibold">{msg.name}</p>
-                                    <span className="text-xs text-muted-foreground">
-                                        {attendanceLabels[msg.attendance]?.emoji} {attendanceLabels[msg.attendance]?.label}
-                                    </span>
-                                </div>
+                {!isSubmitted ? (
+                    <motion.form
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        onSubmit={handleSubmit}
+                        className="skeu-card bg-white rounded-3xl p-7 space-y-5"
+                    >
+                        <div>
+                            <label className="text-xs uppercase tracking-widest text-stone-500 font-medium block mb-2">Nama Tamu</label>
+                            <div className="relative">
+                                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                                <input
+                                    type="text" value={name} onChange={e => setName(e.target.value)}
+                                    placeholder="Nama Anda" required
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-wedding-gold/40 skeu-inset bg-stone-50"
+                                />
                             </div>
-                            {msg.message && (
-                                <p className="font-serif-wedding text-muted-foreground text-sm ml-10 flex items-start gap-1">
-                                    <MessageCircle className="w-3 h-3 mt-1 shrink-0 text-accent/50" />
-                                    {msg.message}
-                                </p>
-                            )}
-                        </motion.div>
-                    ))}
-                </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs uppercase tracking-widest text-stone-500 font-medium block mb-2">Kehadiran</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                {(["hadir", "tidak_hadir"] as const).map(val => (
+                                    <button type="button" key={val}
+                                        onClick={() => setAttendance(val)}
+                                        className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition-all ${
+                                            attendance === val
+                                                ? "bg-wedding-gold text-white border-wedding-gold skeu-raised"
+                                                : "bg-white text-stone-600 border-stone-200 hover:border-wedding-gold/50"
+                                        }`}
+                                    >
+                                        {val === "hadir" ? <><Heart className="w-4 h-4" />Hadir</> : <><HeartOff className="w-4 h-4" />Tidak Hadir</>}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs uppercase tracking-widest text-stone-500 font-medium block mb-2">Ucapan & Doa</label>
+                            <textarea
+                                value={message} onChange={e => setMessage(e.target.value)}
+                                placeholder="Tuliskan ucapan dan doa terbaik Anda..."
+                                rows={3}
+                                className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-wedding-gold/40 resize-none skeu-inset bg-stone-50"
+                            />
+                        </div>
+
+                        <button
+                            type="submit" disabled={isSubmitting}
+                            className="w-full py-3.5 rounded-xl bg-wedding-gold text-white font-medium flex items-center justify-center gap-2 skeu-raised hover:opacity-90 transition-opacity disabled:opacity-50"
+                        >
+                            <Send className="w-4 h-4" />{isSubmitting ? "Mengirim..." : "Kirim Ucapan"}
+                        </button>
+                    </motion.form>
+                ) : (
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="skeu-card bg-white rounded-3xl p-10 text-center">
+                        <CheckCircle2 className="w-16 h-16 text-wedding-gold mx-auto mb-4" />
+                        <h3 className="font-vibes text-3xl skeu-text-gold mb-2">Terima Kasih!</h3>
+                        <p className="text-stone-500 text-sm">Ucapan dan konfirmasi kehadiran Anda telah kami terima.</p>
+                    </motion.div>
+                )}
+
+                {messages.length > 0 && (
+                    <div className="mt-10 space-y-4">
+                        <h3 className="text-center font-vibes text-3xl skeu-text-gold mb-6">Ucapan Tamu</h3>
+                        {messages.slice(0, 10).map((msg) => (
+                            <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                                className="skeu-card bg-white rounded-2xl p-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-9 h-9 rounded-full bg-wedding-gold/20 flex items-center justify-center flex-shrink-0 skeu-raised">
+                                        <User className="w-4 h-4 text-wedding-gold" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-semibold text-sm text-stone-800">{msg.guestName}</span>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                                msg.attendance === "hadir" ? "bg-green-100 text-green-700" : "bg-stone-100 text-stone-500"
+                                            }`}>
+                                                {msg.attendance === "hadir" ? "✓ Hadir" : "Tidak Hadir"}
+                                            </span>
+                                        </div>
+                                        {msg.message && <p className="text-sm text-stone-500 mt-1 leading-relaxed">{msg.message}</p>}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     );

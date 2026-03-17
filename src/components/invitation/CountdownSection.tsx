@@ -9,27 +9,21 @@ interface CountdownSectionProps {
 
 const CountdownSection = ({ targetDate }: CountdownSectionProps) => {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-    const [isPast, setIsPast] = useState(false);
 
     useEffect(() => {
-        const target = new Date(targetDate).getTime();
-        const update = () => {
-            const now = Date.now();
-            const diff = target - now;
-            if (diff <= 0) {
-                setIsPast(true);
-                return;
-            }
+        const calculate = () => {
+            const diff = new Date(targetDate).getTime() - Date.now();
+            if (diff <= 0) { setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 }); return; }
             setTimeLeft({
-                days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((diff / (1000 * 60)) % 60),
-                seconds: Math.floor((diff / 1000) % 60),
+                days: Math.floor(diff / 86400000),
+                hours: Math.floor((diff % 86400000) / 3600000),
+                minutes: Math.floor((diff % 3600000) / 60000),
+                seconds: Math.floor((diff % 60000) / 1000),
             });
         };
-        update();
-        const interval = setInterval(update, 1000);
-        return () => clearInterval(interval);
+        calculate();
+        const id = setInterval(calculate, 1000);
+        return () => clearInterval(id);
     }, [targetDate]);
 
     const units = [
@@ -40,49 +34,36 @@ const CountdownSection = ({ targetDate }: CountdownSectionProps) => {
     ];
 
     return (
-        <section className="py-20 px-6 bg-gradient-to-b from-muted/30 to-card">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mb-10"
-            >
-                <p className="font-serif-wedding text-muted-foreground tracking-[0.3em] uppercase text-sm mb-2">
-                    Menuju Hari Bahagia
-                </p>
-                <h2 className="font-vibes text-accent text-4xl md:text-5xl">Counting Down</h2>
-            </motion.div>
-
-            {isPast ? (
-                <motion.p
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    className="text-center font-serif-wedding text-foreground/80 text-xl max-w-md mx-auto"
-                >
-                    Semoga menjadi keluarga yang sakinah mawaddah warahmah 🌸
-                </motion.p>
-            ) : (
+        <section className="py-20 px-4 bg-wedding-brown skeu-velvet">
+            <div className="max-w-3xl mx-auto text-center">
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="flex justify-center gap-4 md:gap-6"
+                    transition={{ duration: 0.6 }}
                 >
-                    {units.map((unit) => (
-                        <div key={unit.label} className="flex flex-col items-center">
-                            <div className="w-16 h-16 md:w-24 md:h-24 rounded-xl bg-card border border-accent/20 shadow-lg flex items-center justify-center">
-                                <span className="font-script text-3xl md:text-5xl text-foreground">
-                                    {String(unit.value).padStart(2, "0")}
-                                </span>
-                            </div>
-                            <span className="font-serif-wedding text-muted-foreground text-xs md:text-sm mt-2 tracking-wider uppercase">
-                                {unit.label}
-                            </span>
-                        </div>
-                    ))}
+                    <p className="text-sm uppercase tracking-[0.3em] text-wedding-gold/80 mb-3 skeu-text-emboss">Menuju Hari Bahagia</p>
+                    <h2 className="font-vibes text-4xl md:text-5xl text-white mb-12 skeu-text-emboss">Hitung Mundur</h2>
                 </motion.div>
-            )}
+
+                <div className="grid grid-cols-4 gap-3 md:gap-6">
+                    {units.map(({ label, value }, i) => (
+                        <motion.div
+                            key={label}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                            className="skeu-card bg-white/10 backdrop-blur-sm rounded-2xl py-5 px-2 border border-white/20"
+                        >
+                            <div className="font-serif text-4xl md:text-5xl font-bold text-white skeu-text-emboss">
+                                {String(value).padStart(2, "0")}
+                            </div>
+                            <div className="text-wedding-gold/90 text-xs md:text-sm mt-2 uppercase tracking-widest">{label}</div>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
         </section>
     );
 };

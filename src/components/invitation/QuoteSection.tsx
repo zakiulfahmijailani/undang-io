@@ -3,34 +3,40 @@
 import { motion } from "framer-motion";
 
 interface QuoteSectionProps {
-    text: string;
-    source: string;
+    quote: { text: string; source: string };
 }
 
-const QuoteSection = ({ text, source }: QuoteSectionProps) => {
+const QuoteSection = ({ quote }: QuoteSectionProps) => {
     return (
-        <section className="py-20 px-6 relative overflow-hidden">
-            {/* Decorative background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-card via-muted/30 to-card" />
-
+        <section className="py-16 px-6 skeu-paper">
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="relative z-10 max-w-2xl mx-auto"
+                transition={{ duration: 0.6 }}
+                className="max-w-2xl mx-auto text-center"
             >
-                <div className="relative bg-card/80 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-accent/20 shadow-lg">
-                    {/* Corner ornaments */}
-                    <span className="absolute top-3 left-4 font-vibes text-accent/40 text-5xl">❦</span>
-                    <span className="absolute bottom-3 right-4 font-vibes text-accent/40 text-5xl rotate-180">❦</span>
+                {/* ornamen quote atas */}
+                <div className="flex items-center justify-center gap-3 mb-8">
+                    <div className="h-px w-12 bg-wedding-gold/40" />
+                    <span className="text-wedding-gold text-2xl skeu-text-gold">❝</span>
+                    <div className="h-px w-12 bg-wedding-gold/40" />
+                </div>
 
-                    <p className="font-serif-wedding italic text-foreground/80 text-lg md:text-xl leading-relaxed text-center px-4 md:px-8">
-                        "{text}"
+                <div className="skeu-inset bg-white/60 rounded-2xl px-8 py-8">
+                    <p className="font-serif-wedding text-lg md:text-xl text-stone-700 leading-relaxed italic skeu-text-emboss">
+                        {quote.text}
                     </p>
-                    <p className="font-serif-wedding text-accent text-center mt-6 text-sm tracking-widest uppercase">
-                        — {source}
+                    <p className="mt-5 text-sm text-wedding-brown/80 font-medium tracking-widest uppercase">
+                        — {quote.source}
                     </p>
+                </div>
+
+                {/* ornamen quote bawah */}
+                <div className="flex items-center justify-center gap-3 mt-8">
+                    <div className="h-px w-12 bg-wedding-gold/40" />
+                    <span className="text-wedding-gold text-2xl skeu-text-gold">❞</span>
+                    <div className="h-px w-12 bg-wedding-gold/40" />
                 </div>
             </motion.div>
         </section>

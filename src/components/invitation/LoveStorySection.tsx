@@ -1,75 +1,60 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-
-interface StoryItem {
-    date: string;
-    title: string;
-    description: string;
-    photo: string;
-}
+import { Heart } from "lucide-react";
 
 interface LoveStorySectionProps {
-    stories: StoryItem[];
+    stories: Array<{ year: string; title: string; description: string }>;
 }
 
-const LoveStorySection = ({ stories }: LoveStorySectionProps) => {
-    return (
-        <section id="story" className="py-20 px-6 bg-card">
+const LoveStorySection = ({ stories }: LoveStorySectionProps) => (
+    <section id="lovestory" className="py-20 px-4 skeu-paper">
+        <div className="max-w-2xl mx-auto">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-center mb-16"
+                className="text-center mb-14"
             >
-                <p className="font-serif-wedding text-muted-foreground tracking-[0.3em] uppercase text-sm mb-2">
-                    Kisah Kami
-                </p>
-                <h2 className="font-vibes text-accent text-4xl md:text-5xl">Love Story</h2>
+                <p className="text-sm uppercase tracking-[0.3em] text-wedding-brown mb-3 skeu-text-emboss">Perjalanan Cinta</p>
+                <h2 className="font-vibes text-5xl md:text-6xl skeu-text-gold">Kisah Kita</h2>
+                <div className="mt-5 flex items-center justify-center gap-3">
+                    <div className="h-px w-16 bg-wedding-gold/50" />
+                    <Heart className="w-4 h-4 text-wedding-gold fill-wedding-gold" />
+                    <div className="h-px w-16 bg-wedding-gold/50" />
+                </div>
             </motion.div>
 
-            <div className="max-w-3xl mx-auto relative">
-                {/* Timeline line */}
-                <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-accent/30 -translate-x-1/2" />
+            <div className="relative">
+                {/* vertical line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-wedding-gold/25" />
 
-                {stories.map((story, i) => {
-                    const isEven = i % 2 === 0;
-                    return (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, x: isEven ? -30 : 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, margin: "-50px" }}
-                            transition={{ duration: 0.6, delay: 0.1 }}
-                            className={`relative flex flex-col items-start mb-16 last:mb-0 ${isEven ? "md:flex-row" : "md:flex-row-reverse"
-                                }`}
-                        >
-                            {/* Timeline dot */}
-                            <div className="absolute left-4 md:left-1/2 w-3 h-3 rounded-full bg-accent border-2 border-card -translate-x-1/2 mt-2 z-10" />
+                {stories.map((story, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                        className={`relative flex mb-12 ${
+                            i % 2 === 0 ? "justify-start pr-8 md:pr-1/2" : "justify-end pl-8 md:pl-1/2"
+                        }`}
+                    >
+                        {/* dot on timeline */}
+                        <div className="absolute left-1/2 top-5 -translate-x-1/2 w-4 h-4 rounded-full bg-wedding-gold skeu-raised z-10" />
 
-                            {/* Content */}
-                            <div className={`ml-10 md:ml-0 md:w-1/2 ${isEven ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
-                                <span className="font-serif-wedding text-accent text-sm tracking-widest uppercase">
-                                    {story.date}
-                                </span>
-                                <h3 className="font-script text-2xl text-foreground mt-1 mb-2">{story.title}</h3>
-                                <p className="font-serif-wedding text-muted-foreground text-sm leading-relaxed">
-                                    {story.description}
-                                </p>
-                                <img
-                                    src={story.photo}
-                                    alt={story.title}
-                                    className="mt-4 rounded-xl w-full h-48 object-cover shadow-md"
-                                    loading="lazy"
-                                />
-                            </div>
-                        </motion.div>
-                    );
-                })}
+                        <div className={`skeu-card bg-white rounded-2xl p-5 max-w-xs ${
+                            i % 2 === 0 ? "text-right" : "text-left"
+                        }`}>
+                            <span className="text-xs font-bold text-wedding-gold tracking-widest uppercase">{story.year}</span>
+                            <h4 className="font-serif font-bold text-stone-800 mt-1 mb-2">{story.title}</h4>
+                            <p className="text-sm text-stone-500 leading-relaxed">{story.description}</p>
+                        </div>
+                    </motion.div>
+                ))}
             </div>
-        </section>
-    );
-};
+        </div>
+    </section>
+);
 
 export default LoveStorySection;

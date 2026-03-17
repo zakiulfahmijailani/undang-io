@@ -1,110 +1,86 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Copy, CreditCard, Gift, QrCode } from "lucide-react";
-// Since useToast doesn't exist yet, we'll gracefully fallback or use an alert
-// For now, I'll provide a placeholder alert for copying.
+import { Copy, Check, Gift, MapPin } from "lucide-react";
 
-interface BankAccount {
-    bank: string;
-    number: string;
-    name: string;
-}
-
+interface BankAccount { bank: string; number: string; name: string; }
 interface LoveGiftSectionProps {
     bankAccounts: BankAccount[];
-    giftAddress: string;
+    giftAddress?: string;
 }
 
 const LoveGiftSection = ({ bankAccounts, giftAddress }: LoveGiftSectionProps) => {
+    const [copied, setCopied] = useState<string | null>(null);
 
-    const copyToClipboard = (text: string, label: string) => {
+    const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
-        alert(`${label} berhasil disalin! ✨`);
+        setCopied(text);
+        setTimeout(() => setCopied(null), 2000);
     };
 
     return (
-        <section className="py-20 px-6">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mb-12"
-            >
-                <p className="font-serif-wedding text-muted-foreground tracking-[0.3em] uppercase text-sm mb-2">
-                    Amplop Digital
-                </p>
-                <h2 className="font-vibes text-accent text-4xl md:text-5xl">Love Gift</h2>
-                <p className="font-serif-wedding text-muted-foreground mt-4 max-w-md mx-auto text-sm">
-                    Doa restu Anda merupakan karunia yang sangat berarti bagi kami. Namun jika Anda ingin memberikan tanda kasih, kami menyediakan beberapa opsi berikut.
-                </p>
-            </motion.div>
+        <section id="gift" className="py-20 px-4 skeu-paper">
+            <div className="max-w-2xl mx-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-12"
+                >
+                    <p className="text-sm uppercase tracking-[0.3em] text-wedding-brown mb-3 skeu-text-emboss">Tanda Kasih</p>
+                    <h2 className="font-vibes text-5xl md:text-6xl skeu-text-gold">Amplop Digital</h2>
+                    <div className="mt-5 flex items-center justify-center gap-3">
+                        <div className="h-px w-16 bg-wedding-gold/50" />
+                        <Gift className="w-4 h-4 text-wedding-gold" />
+                        <div className="h-px w-16 bg-wedding-gold/50" />
+                    </div>
+                    <p className="mt-6 text-sm text-stone-500 max-w-sm mx-auto">Doa restu Anda adalah hadiah terbaik. Namun jika ingin memberikan tanda kasih, berikut informasinya.</p>
+                </motion.div>
 
-            <div className="max-w-lg mx-auto space-y-4">
-                {bankAccounts.map((account, i) => (
+                <div className="space-y-4">
+                    {bankAccounts.map((acc, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.1 }}
+                            className="skeu-card bg-white rounded-2xl p-5"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-wedding-brown/70 uppercase tracking-widest skeu-text-emboss">{acc.bank}</p>
+                                    <p className="font-mono text-lg font-bold text-stone-800 mt-1">{acc.number}</p>
+                                    <p className="text-sm text-stone-500">{acc.name}</p>
+                                </div>
+                                <button
+                                    onClick={() => handleCopy(acc.number)}
+                                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-wedding-gold text-white text-xs font-medium skeu-raised transition-all"
+                                >
+                                    {copied === acc.number ? <><Check className="w-3.5 h-3.5" />Tersalin</> : <><Copy className="w-3.5 h-3.5" />Salin</>}
+                                </button>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {giftAddress && (
                     <motion.div
-                        key={i}
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ delay: i * 0.1 }}
-                        className="bg-card rounded-xl p-5 border border-accent/20 shadow-sm"
+                        className="mt-6 skeu-card bg-white rounded-2xl p-5"
                     >
-                        <div className="flex items-center gap-3 mb-3">
-                            <CreditCard className="w-5 h-5 text-accent" />
-                            <span className="font-serif-wedding text-foreground font-semibold text-sm">{account.bank}</span>
-                        </div>
-                        <div className="flex items-center justify-between bg-muted rounded-lg px-4 py-3">
+                        <div className="flex items-start gap-3">
+                            <MapPin className="w-5 h-5 text-wedding-gold mt-0.5 flex-shrink-0" />
                             <div>
-                                <p className="font-mono text-foreground text-lg tracking-wider">{account.number}</p>
-                                <p className="font-serif-wedding text-muted-foreground text-xs mt-1">a.n. {account.name}</p>
+                                <p className="text-xs text-wedding-brown/70 uppercase tracking-widest mb-1 skeu-text-emboss">Kirim Hadiah ke</p>
+                                <p className="text-sm text-stone-700 leading-relaxed">{giftAddress}</p>
                             </div>
-                            <button
-                                onClick={() => copyToClipboard(account.number, "Nomor rekening")}
-                                className="p-2 rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
-                            >
-                                <Copy className="w-4 h-4" />
-                            </button>
                         </div>
                     </motion.div>
-                ))}
-
-                {/* QRIS placeholder */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="bg-card rounded-xl p-5 border border-accent/20 shadow-sm text-center"
-                >
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        <QrCode className="w-5 h-5 text-accent" />
-                        <span className="font-serif-wedding text-foreground font-semibold text-sm">QRIS</span>
-                    </div>
-                    <div className="w-48 h-48 mx-auto bg-muted rounded-xl flex items-center justify-center">
-                        <p className="font-serif-wedding text-muted-foreground text-xs">QR Code Placeholder</p>
-                    </div>
-                </motion.div>
-
-                {/* Gift address */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="bg-card rounded-xl p-5 border border-accent/20 shadow-sm"
-                >
-                    <div className="flex items-center gap-3 mb-3">
-                        <Gift className="w-5 h-5 text-accent" />
-                        <span className="font-serif-wedding text-foreground font-semibold text-sm">Kirim Hadiah</span>
-                    </div>
-                    <p className="font-serif-wedding text-muted-foreground text-sm">{giftAddress}</p>
-                    <button
-                        onClick={() => copyToClipboard(giftAddress, "Alamat")}
-                        className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent/10 text-accent text-xs font-serif-wedding hover:bg-accent/20 transition-colors cursor-pointer"
-                    >
-                        <Copy className="w-3.5 h-3.5" />
-                        Salin Alamat
-                    </button>
-                </motion.div>
+                )}
             </div>
         </section>
     );

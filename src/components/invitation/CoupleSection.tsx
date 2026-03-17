@@ -3,63 +3,69 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-interface PersonData {
-    fullName: string;
-    father: string;
-    mother: string;
-    photo: string;
-}
-
 interface CoupleSectionProps {
-    groom: PersonData;
-    bride: PersonData;
+    groom: { fullName: string; father: string; mother: string; photo: string; instagram?: string };
+    bride: { fullName: string; father: string; mother: string; photo?: string; instagram?: string };
 }
-
-const PersonCard = ({ person, direction }: { person: PersonData; direction: "left" | "right" }) => (
-    <motion.div
-        initial={{ opacity: 0, x: direction === "left" ? -60 : 60 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.7 }}
-        className="flex flex-col items-center text-center"
-    >
-        <div className="relative w-40 h-40 md:w-48 md:h-48 mb-6">
-            <div className="absolute inset-0 rounded-full border-4 border-accent/50 animate-pulse-soft" />
-            <img
-                src={person.photo}
-                alt={person.fullName}
-                className="w-full h-full rounded-full object-cover border-4 border-accent"
-                loading="lazy"
-            />
-        </div>
-        <h3 className="font-script text-3xl md:text-4xl text-foreground mb-3">{person.fullName}</h3>
-        <p className="font-serif-wedding text-muted-foreground text-sm md:text-base">
-            Putra/i dari
-        </p>
-        <p className="font-serif-wedding text-foreground/80 text-sm md:text-base">{person.father}</p>
-        <p className="font-serif-wedding text-foreground/80 text-sm md:text-base">{person.mother}</p>
-    </motion.div>
-);
 
 const CoupleSection = ({ groom, bride }: CoupleSectionProps) => {
     return (
-        <section id="mempelai" className="py-20 px-6 bg-card">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="text-center mb-12"
-            >
-                <p className="font-serif-wedding text-muted-foreground tracking-[0.3em] uppercase text-sm mb-2">
-                    Mempelai
-                </p>
-                <h2 className="font-vibes text-accent text-4xl md:text-5xl">Bride & Groom</h2>
-            </motion.div>
+        <section id="couple" className="py-20 px-4 skeu-paper">
+            <div className="max-w-4xl mx-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-16"
+                >
+                    <p className="text-sm uppercase tracking-[0.3em] text-wedding-brown mb-3 skeu-text-emboss">Mempelai</p>
+                    <h2 className="font-vibes text-5xl md:text-6xl skeu-text-gold">Dua Insan Bersatu</h2>
+                    {/* ornamen divider */}
+                    <div className="mt-6 flex items-center justify-center gap-3">
+                        <div className="h-px w-16 bg-wedding-gold/50" />
+                        <span className="text-wedding-gold text-xl">✦</span>
+                        <div className="h-px w-16 bg-wedding-gold/50" />
+                    </div>
+                </motion.div>
 
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
-                <PersonCard person={groom} direction="left" />
-                <PersonCard person={bride} direction="right" />
+                <div className="grid md:grid-cols-2 gap-12">
+                    {[{ person: groom, label: "Mempelai Pria" }, { person: bride, label: "Mempelai Wanita" }].map(({ person, label }, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: i === 0 ? -30 : 30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: i * 0.2 }}
+                            className="text-center"
+                        >
+                            {person.photo && (
+                                <div className="w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden skeu-inset border-4 border-wedding-gold/30">
+                                    <Image
+                                        src={person.photo}
+                                        alt={person.fullName}
+                                        width={192}
+                                        height={192}
+                                        className="w-full h-full object-cover"
+                                        unoptimized
+                                    />
+                                </div>
+                            )}
+                            <p className="text-xs uppercase tracking-[0.2em] text-wedding-brown/70 mb-2 skeu-text-emboss">{label}</p>
+                            <h3 className="font-vibes text-4xl mb-3 skeu-text-gold">{person.fullName}</h3>
+                            <p className="text-sm text-stone-600">
+                                Putra/i dari {person.father} &amp; {person.mother}
+                            </p>
+                            {person.instagram && (
+                                <a href={`https://instagram.com/${person.instagram.replace('@','')}`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="inline-block mt-3 text-xs text-wedding-brown/70 hover:text-wedding-brown transition-colors">
+                                    {person.instagram}
+                                </a>
+                            )}
+                        </motion.div>
+                    ))}
+                </div>
             </div>
         </section>
     );
