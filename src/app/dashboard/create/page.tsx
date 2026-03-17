@@ -2,17 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select } from "@/components/ui/select"
-import { Text } from "@/components/ui/typography"
 import {
-  ChevronRight, ChevronLeft, Save, Sparkles, Image as ImageIcon,
-  Plus, Trash2, Lock, ToggleLeft, ToggleRight
+  ChevronRight, ChevronLeft, Save, Sparkles,
+  Image as ImageIcon, Plus, Trash2, ToggleLeft, ToggleRight
 } from "lucide-react"
 
-// ─── Steps ───────────────────────────────────────────────────────────────────
 const STEPS = [
   "Data Mempelai",
   "Jadwal & Lokasi",
@@ -22,47 +16,31 @@ const STEPS = [
   "Preview & Publish",
 ]
 
-// ─── Toggle Section Component ────────────────────────────────────────────────
-function ToggleSection({
-  enabled, onToggle, label, badge = "Opsional", children
-}: {
-  enabled: boolean
-  onToggle: () => void
-  label: string
-  badge?: string
-  children: React.ReactNode
+// ─── Primitives ──────────────────────────────────────────────────────────────
+function ToggleSection({ enabled, onToggle, label, children }: {
+  enabled: boolean; onToggle: () => void; label: string; children: React.ReactNode
 }) {
   return (
     <div className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
       enabled ? "border-[#D4A91C]/40 shadow-sm" : "border-[#EDE6D6]"
     }`}>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-5 py-4 bg-[#FDFCF9] hover:bg-[#FAF8F3] transition-colors"
-      >
+      <button type="button" onClick={onToggle}
+        className="w-full flex items-center justify-between px-5 py-4 bg-[#FDFCF9] hover:bg-[#FAF8F3] transition-colors">
         <div className="flex items-center gap-3">
           <span className="font-medium text-[#1E1B18] text-sm">{label}</span>
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-            enabled
-              ? "bg-[#D4A91C]/15 text-[#7D5C0C]"
-              : "bg-[#EDE6D6] text-[#9A9390]"
-          }`}>{badge}</span>
+            enabled ? "bg-[#D4A91C]/15 text-[#7D5C0C]" : "bg-[#EDE6D6] text-[#9A9390]"
+          }`}>Opsional</span>
         </div>
-        {enabled
-          ? <ToggleRight className="w-5 h-5 text-[#D4A91C]" />
-          : <ToggleLeft className="w-5 h-5 text-[#C2BEB8]" />}
+        {enabled ? <ToggleRight className="w-5 h-5 text-[#D4A91C]" /> : <ToggleLeft className="w-5 h-5 text-[#C2BEB8]" />}
       </button>
       {enabled && (
-        <div className="px-5 pb-5 pt-1 bg-white flex flex-col gap-4 border-t border-[#EDE6D6]">
-          {children}
-        </div>
+        <div className="px-5 pb-5 pt-1 bg-white flex flex-col gap-4 border-t border-[#EDE6D6]">{children}</div>
       )}
     </div>
   )
 }
 
-// ─── Field Label ─────────────────────────────────────────────────────────────
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
     <label className="block text-xs font-semibold uppercase tracking-wider text-[#726C67] mb-1.5">
@@ -71,22 +49,32 @@ function Label({ children, required }: { children: React.ReactNode; required?: b
   )
 }
 
-// ─── Textarea ────────────────────────────────────────────────────────────────
-function Textarea({ value, onChange, placeholder, rows = 4 }: {
-  value: string; onChange: (v: string) => void; placeholder?: string; rows?: number
+function TInput({ label, value, onChange, placeholder, type = "text", required }: {
+  label?: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; required?: boolean
 }) {
   return (
-    <textarea
-      rows={rows}
-      className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-3 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all resize-none"
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-    />
+    <div>
+      {label && <Label required={required}>{label}</Label>}
+      <input type={type}
+        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all"
+        placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
+    </div>
   )
 }
 
-// ─── Section Divider ─────────────────────────────────────────────────────────
+function TTextarea({ label, value, onChange, placeholder, rows = 4 }: {
+  label?: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number
+}) {
+  return (
+    <div>
+      {label && <Label>{label}</Label>}
+      <textarea rows={rows}
+        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-3 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all resize-none"
+        value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+    </div>
+  )
+}
+
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3 py-1">
@@ -97,145 +85,115 @@ function SectionDivider({ label }: { label: string }) {
   )
 }
 
-// ─── Main Form ────────────────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────────
 export default function CreateInvitationWizard() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // ── Compulsory fields ──
-  const [formData, setFormData] = useState({
-    // Step 1: couple
-    groomName: "",
+  const [f, setF] = useState({
+    groomFullName: "",
     groomNickname: "",
-    brideName: "",
+    brideFullName: "",
     brideNickname: "",
-    // Step 2: events
     eventType: "akad_resepsi" as "akad" | "resepsi" | "akad_resepsi",
-    akadDate: "",
-    akadTime: "",
-    akadVenueName: "",
-    akadVenueAddress: "",
-    resepsiDate: "",
-    resepsiTime: "",
-    resepsiVenueName: "",
-    resepsiVenueAddress: "",
-    // Step 3: theme
+    akadDate: "", akadTime: "", akadVenue: "", akadAddress: "",
+    receptionDate: "", receptionTime: "", receptionVenue: "", receptionAddress: "",
     themeId: "minimalist-white",
-    // Step 4: content
     greetingText: "Assalamu'alaikum Wr. Wb.\n\nDengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada acara pernikahan kami.",
   })
+  const upF = (p: Partial<typeof f>) => setF(prev => ({ ...prev, ...p }))
 
-  // ── Optional feature toggles ──
+  // ── Optional toggles ──
   const [opt, setOpt] = useState({
-    groomParents:     false,
-    brideParents:     false,
-    groomPhoto:       false,
-    bridePhoto:       false,
-    groomIg:          false,
-    brideIg:          false,
-    mapsUrl:          false,
-    dresscode:        false,
-    openingQuote:     false,
-    loveStory:        false,
-    gallery:          false,
-    music:            false,
-    rsvp:             false,
-    guestbook:        false,
-    giftBank:         false,
-    giftAddress:      false,
-    qris:             false,
+    groomParents: false, brideParents: false,
+    groomPhoto: false, bridePhoto: false,
+    groomIg: false, brideIg: false,
+    mapsUrl: false, dresscode: false,
+    openingQuote: false, loveStory: false,
+    gallery: false, music: false,
+    rsvp: false, guestbook: false,
+    giftBank: false, giftAddress: false, qris: false,
   })
-
-  const toggleOpt = (key: keyof typeof opt) => setOpt(p => ({ ...p, [key]: !p[key] }))
+  const toggleOpt = (k: keyof typeof opt) => setOpt(p => ({ ...p, [k]: !p[k] }))
 
   // ── Optional field values ──
-  const [extra, setExtra] = useState({
-    groomFatherName: "", groomMotherName: "",
-    brideFatherName: "", brideMotherName: "",
+  const [x, setX] = useState({
+    groomFather: "", groomMother: "",
+    brideFather: "", brideMother: "",
     groomPhotoUrl: "", bridePhotoUrl: "",
     groomIg: "", brideIg: "",
-    akadMapsUrl: "", resepsiMapsUrl: "",
-    dresscodeColors: "" ,dresscodeNote: "",
-    openingQuote: "", openingQuoteSource: "",
+    akadMapsUrl: "", receptionMapsUrl: "",
+    dresscodeColors: "", dresscodeNote: "",
+    quoteText: "", quoteSource: "",
     loveStory: [] as { year: string; title: string; desc: string }[],
     musicUrl: "",
     rsvpDeadline: "", rsvpMessage: "", rsvpMaxGuests: "1",
-    bankAccounts: [] as { bank: string; number: string; name: string }[],
+    bankName: "", bankAccount: "", bankAccountName: "",
     giftAddress: "",
     qrisAccount: "",
   })
+  const upX = (p: Partial<typeof x>) => setX(prev => ({ ...prev, ...p }))
 
-  const upExtra = (patch: Partial<typeof extra>) => setExtra(p => ({ ...p, ...patch }))
-
-  // ── Love story helpers ──
-  const addStoryEvent = () => upExtra({ loveStory: [...extra.loveStory, { year: "", title: "", desc: "" }] })
-  const removeStoryEvent = (i: number) => upExtra({ loveStory: extra.loveStory.filter((_, n) => n !== i) })
-  const updateStory = (i: number, patch: Partial<{ year: string; title: string; desc: string }>) =>
-    upExtra({ loveStory: extra.loveStory.map((e, n) => n === i ? { ...e, ...patch } : e) })
-
-  // ── Bank account helpers ──
-  const addBank = () => upExtra({ bankAccounts: [...extra.bankAccounts, { bank: "", number: "", name: "" }] })
-  const removeBank = (i: number) => upExtra({ bankAccounts: extra.bankAccounts.filter((_, n) => n !== i) })
-  const updateBank = (i: number, patch: Partial<{ bank: string; number: string; name: string }>) =>
-    upExtra({ bankAccounts: extra.bankAccounts.map((b, n) => n === i ? { ...b, ...patch } : b) })
-
-  const set = (patch: Partial<typeof formData>) => setFormData(p => ({ ...p, ...patch }))
-
-  const handleNext = () => { if (currentStep < STEPS.length - 1) setCurrentStep(s => s + 1) }
-  const handlePrev = () => { if (currentStep > 0) setCurrentStep(s => s - 1) }
+  const addStory = () => upX({ loveStory: [...x.loveStory, { year: "", title: "", desc: "" }] })
+  const removeStory = (i: number) => upX({ loveStory: x.loveStory.filter((_, n) => n !== i) })
+  const updateStory = (i: number, p: Partial<typeof x.loveStory[0]>) =>
+    upX({ loveStory: x.loveStory.map((e, n) => n === i ? { ...e, ...p } : e) })
 
   const handlePublish = async () => {
     setIsSubmitting(true)
     try {
-      const events = []
-      if (formData.eventType === "akad" || formData.eventType === "akad_resepsi") {
-        events.push({ type: "akad", date: formData.akadDate, start_time: formData.akadTime, venue_name: formData.akadVenueName, venue_address: formData.akadVenueAddress, maps_url: opt.mapsUrl ? extra.akadMapsUrl : null })
-      }
-      if (formData.eventType === "resepsi" || formData.eventType === "akad_resepsi") {
-        events.push({ type: "resepsi", date: formData.resepsiDate, start_time: formData.resepsiTime, venue_name: formData.resepsiVenueName, venue_address: formData.resepsiVenueAddress, maps_url: opt.mapsUrl ? extra.resepsiMapsUrl : null })
-      }
-
+      // ── POST /api/invitations (schema: groom_name, bride_name, theme_id, details.*) ──
       const res = await fetch('/api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          groom: {
-            full_name: formData.groomName,
-            nickname: formData.groomNickname,
-            father_name: opt.groomParents ? extra.groomFatherName : null,
-            mother_name: opt.groomParents ? extra.groomMotherName : null,
-            photo_url: opt.groomPhoto ? extra.groomPhotoUrl : null,
-            instagram: opt.groomIg ? extra.groomIg : null,
-          },
-          bride: {
-            full_name: formData.brideName,
-            nickname: formData.brideNickname,
-            father_name: opt.brideParents ? extra.brideFatherName : null,
-            mother_name: opt.brideParents ? extra.brideMotherName : null,
-            photo_url: opt.bridePhoto ? extra.bridePhotoUrl : null,
-            instagram: opt.brideIg ? extra.brideIg : null,
-          },
-          events,
-          theme_id: formData.themeId,
-          opening_text: formData.greetingText,
-          opening_quote: opt.openingQuote ? { text: extra.openingQuote, source: extra.openingQuoteSource } : null,
-          love_story: opt.loveStory ? extra.loveStory : null,
-          dresscode: opt.dresscode ? { colors: extra.dresscodeColors, note: extra.dresscodeNote } : null,
-          music_url: opt.music ? extra.musicUrl : null,
-          rsvp: opt.rsvp ? { deadline: extra.rsvpDeadline, message: extra.rsvpMessage, max_guests: Number(extra.rsvpMaxGuests) } : null,
-          guestbook_enabled: opt.guestbook,
-          digital_gift: (opt.giftBank || opt.giftAddress || opt.qris) ? {
-            bank_accounts: opt.giftBank ? extra.bankAccounts : [],
-            delivery_address: opt.giftAddress ? extra.giftAddress : null,
-            qris_account: opt.qris ? extra.qrisAccount : null,
-          } : null,
-          status: 'published'
+          groom_name: f.groomNickname || f.groomFullName,
+          bride_name: f.brideNickname || f.brideFullName,
+          theme_id: f.themeId,
+          details: {
+            groom_full_name: f.groomFullName,
+            groom_nickname:  f.groomNickname,
+            groom_father:    opt.groomParents ? x.groomFather : undefined,
+            groom_mother:    opt.groomParents ? x.groomMother : undefined,
+            bride_full_name: f.brideFullName,
+            bride_nickname:  f.brideNickname,
+            bride_father:    opt.brideParents ? x.brideFather : undefined,
+            bride_mother:    opt.brideParents ? x.brideMother : undefined,
+            akad_date:        (f.eventType === "akad" || f.eventType === "akad_resepsi") ? f.akadDate : undefined,
+            akad_time:        (f.eventType === "akad" || f.eventType === "akad_resepsi") ? f.akadTime : undefined,
+            akad_venue:       (f.eventType === "akad" || f.eventType === "akad_resepsi") ? f.akadVenue : undefined,
+            akad_address:     (f.eventType === "akad" || f.eventType === "akad_resepsi") ? f.akadAddress : undefined,
+            reception_date:    (f.eventType === "resepsi" || f.eventType === "akad_resepsi") ? f.receptionDate : undefined,
+            reception_time:    (f.eventType === "resepsi" || f.eventType === "akad_resepsi") ? f.receptionTime : undefined,
+            reception_venue:   (f.eventType === "resepsi" || f.eventType === "akad_resepsi") ? f.receptionVenue : undefined,
+            reception_address: (f.eventType === "resepsi" || f.eventType === "akad_resepsi") ? f.receptionAddress : undefined,
+            quote_text:   opt.openingQuote ? x.quoteText : f.greetingText,
+            quote_source: opt.openingQuote ? x.quoteSource : undefined,
+          }
+        })
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error?.message || 'Gagal menyimpan undangan')
+
+      // ── PATCH with remaining optional fields ──
+      const { id } = result.data
+      await fetch(`/api/invitations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          greeting_text:        f.greetingText,
+          gift_bank_name:       opt.giftBank ? x.bankName : undefined,
+          gift_bank_account:    opt.giftBank ? x.bankAccount : undefined,
+          gift_bank_account_name: opt.giftBank ? x.bankAccountName : undefined,
+          gift_shipping_address:  opt.giftAddress ? x.giftAddress : undefined,
+          show_gift_section:    opt.giftBank || opt.giftAddress || opt.qris,
+          show_couple_photos:   opt.groomPhoto || opt.bridePhoto,
+          show_prewed_gallery:  opt.gallery,
         })
       })
 
-      const result = await res.json()
-      if (!res.ok) throw new Error(result.error?.message || 'Gagal menyimpan undangan')
       router.push("/dashboard")
     } catch (error: any) {
       console.error(error)
@@ -243,33 +201,6 @@ export default function CreateInvitationWizard() {
       setIsSubmitting(false)
     }
   }
-
-  // ── Input shorthand ──
-  const inp = (label: string, field: keyof typeof formData, placeholder?: string, type = "text", required = false) => (
-    <div>
-      <Label required={required}>{label}</Label>
-      <input
-        type={type}
-        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all"
-        placeholder={placeholder}
-        value={formData[field] as string}
-        onChange={e => set({ [field]: e.target.value } as any)}
-      />
-    </div>
-  )
-
-  const inpExtra = (label: string, field: keyof typeof extra, placeholder?: string, type = "text") => (
-    <div>
-      <Label>{label}</Label>
-      <input
-        type={type}
-        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all"
-        placeholder={placeholder}
-        value={extra[field] as string}
-        onChange={e => upExtra({ [field]: e.target.value } as any)}
-      />
-    </div>
-  )
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6 pb-24">
@@ -282,7 +213,7 @@ export default function CreateInvitationWizard() {
       <div className="flex gap-1.5 overflow-x-auto pb-1">
         {STEPS.map((step, idx) => (
           <button key={idx} type="button" onClick={() => setCurrentStep(idx)}
-            className="flex-1 min-w-[80px] group flex flex-col items-start gap-1.5">
+            className="flex-1 min-w-[80px] flex flex-col items-start gap-1.5">
             <div className={`h-1 w-full rounded-full transition-all ${
               idx < currentStep ? 'bg-[#D4A91C]' : idx === currentStep ? 'bg-[#1E1B18]' : 'bg-[#EDE6D6]'
             }`} />
@@ -293,124 +224,118 @@ export default function CreateInvitationWizard() {
         ))}
       </div>
 
-      {/* Card */}
       <div className="rounded-2xl border border-[#EDE6D6] bg-white overflow-hidden shadow-sm">
         <div className="px-6 pt-6 pb-2">
           <h2 className="font-display text-2xl font-light text-[#1E1B18]">{STEPS[currentStep]}</h2>
           <p className="text-xs text-[#9A9390] mt-1">
-            {currentStep === 0 && "Data nama pengantin pria dan wanita. Isi semua yang bertanda *."}
+            {currentStep === 0 && "Nama pengantin pria dan wanita. Isi semua yang bertanda *."}
             {currentStep === 1 && "Waktu dan tempat akad / resepsi."}
             {currentStep === 2 && "Pilih tampilan undangan."}
-            {currentStep === 3 && "Teks sambutan, foto, dan quote pembuka."}
-            {currentStep === 4 && "Fitur-fitur opsional — aktifkan hanya yang dibutuhkan."}
+            {currentStep === 3 && "Teks sambutan, foto, dan konten opsional."}
+            {currentStep === 4 && "Fitur tambahan — aktifkan hanya yang dibutuhkan."}
             {currentStep === 5 && "Periksa ringkasan sebelum diterbitkan."}
           </p>
         </div>
 
         <div className="px-6 py-5 flex flex-col gap-5">
 
-          {/* ─── STEP 1: Data Mempelai ──────────────────────────────── */}
+          {/* STEP 1: Data Mempelai */}
           {currentStep === 0 && (
             <>
               <SectionDivider label="Pengantin Pria" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {inp("Nama Lengkap Pria", "groomName", "Mohammad Andi", "text", true)}
-                {inp("Nama Panggilan", "groomNickname", "Andi", "text", true)}
+                <TInput label="Nama Lengkap Pria" required value={f.groomFullName} onChange={v => upF({ groomFullName: v })} placeholder="Mohammad Andi" />
+                <TInput label="Nama Panggilan" required value={f.groomNickname} onChange={v => upF({ groomNickname: v })} placeholder="Andi" />
               </div>
               <ToggleSection enabled={opt.groomParents} onToggle={() => toggleOpt('groomParents')} label="Nama Orang Tua Pria">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {inpExtra("Nama Ayah", "groomFatherName", "Bpk. Fauzi Ahmad")}
-                  {inpExtra("Nama Ibu", "groomMotherName", "Ibu Siti Rohani")}
+                  <TInput label="Nama Ayah" value={x.groomFather} onChange={v => upX({ groomFather: v })} placeholder="Bpk. Fauzi Ahmad" />
+                  <TInput label="Nama Ibu" value={x.groomMother} onChange={v => upX({ groomMother: v })} placeholder="Ibu Siti Rohani" />
                 </div>
               </ToggleSection>
               <ToggleSection enabled={opt.groomPhoto} onToggle={() => toggleOpt('groomPhoto')} label="Foto Pengantin Pria">
-                {inpExtra("URL Foto", "groomPhotoUrl", "https://...")}
+                <TInput label="URL Foto" value={x.groomPhotoUrl} onChange={v => upX({ groomPhotoUrl: v })} placeholder="https://..." />
               </ToggleSection>
               <ToggleSection enabled={opt.groomIg} onToggle={() => toggleOpt('groomIg')} label="Instagram Pengantin Pria">
-                {inpExtra("Username Instagram", "groomIg", "@andi.rahman")}
+                <TInput label="Username" value={x.groomIg} onChange={v => upX({ groomIg: v })} placeholder="@andi.rahman" />
               </ToggleSection>
 
               <SectionDivider label="Pengantin Wanita" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {inp("Nama Lengkap Wanita", "brideName", "Rina Angelina", "text", true)}
-                {inp("Nama Panggilan", "brideNickname", "Rina", "text", true)}
+                <TInput label="Nama Lengkap Wanita" required value={f.brideFullName} onChange={v => upF({ brideFullName: v })} placeholder="Rina Angelina" />
+                <TInput label="Nama Panggilan" required value={f.brideNickname} onChange={v => upF({ brideNickname: v })} placeholder="Rina" />
               </div>
               <ToggleSection enabled={opt.brideParents} onToggle={() => toggleOpt('brideParents')} label="Nama Orang Tua Wanita">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {inpExtra("Nama Ayah", "brideFatherName", "Bpk. Hasan")}
-                  {inpExtra("Nama Ibu", "brideMotherName", "Ibu Rahayu")}
+                  <TInput label="Nama Ayah" value={x.brideFather} onChange={v => upX({ brideFather: v })} placeholder="Bpk. Hasan" />
+                  <TInput label="Nama Ibu" value={x.brideMother} onChange={v => upX({ brideMother: v })} placeholder="Ibu Rahayu" />
                 </div>
               </ToggleSection>
               <ToggleSection enabled={opt.bridePhoto} onToggle={() => toggleOpt('bridePhoto')} label="Foto Pengantin Wanita">
-                {inpExtra("URL Foto", "bridePhotoUrl", "https://...")}
+                <TInput label="URL Foto" value={x.bridePhotoUrl} onChange={v => upX({ bridePhotoUrl: v })} placeholder="https://..." />
               </ToggleSection>
               <ToggleSection enabled={opt.brideIg} onToggle={() => toggleOpt('brideIg')} label="Instagram Pengantin Wanita">
-                {inpExtra("Username Instagram", "brideIg", "@rina.dewi")}
+                <TInput label="Username" value={x.brideIg} onChange={v => upX({ brideIg: v })} placeholder="@rina.dewi" />
               </ToggleSection>
             </>
           )}
 
-          {/* ─── STEP 2: Jadwal & Lokasi ────────────────────────────── */}
+          {/* STEP 2: Jadwal & Lokasi */}
           {currentStep === 1 && (
             <>
               <div>
                 <Label required>Jenis Acara</Label>
-                <select
-                  className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all"
-                  value={formData.eventType}
-                  onChange={e => set({ eventType: e.target.value as any })}
-                >
+                <select className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all"
+                  value={f.eventType} onChange={e => upF({ eventType: e.target.value as any })}>
                   <option value="akad">Akad Nikah Saja</option>
                   <option value="resepsi">Resepsi Saja</option>
                   <option value="akad_resepsi">Akad & Resepsi (2 sesi)</option>
                 </select>
               </div>
 
-              {(formData.eventType === "akad" || formData.eventType === "akad_resepsi") && (
+              {(f.eventType === "akad" || f.eventType === "akad_resepsi") && (
                 <>
                   <SectionDivider label="Akad Nikah" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {inp("Tanggal Akad", "akadDate", "", "date", true)}
-                    {inp("Waktu Akad", "akadTime", "", "time", true)}
+                    <TInput label="Tanggal" required type="date" value={f.akadDate} onChange={v => upF({ akadDate: v })} />
+                    <TInput label="Waktu" required type="time" value={f.akadTime} onChange={v => upF({ akadTime: v })} />
                   </div>
-                  {inp("Nama Gedung / Venue Akad", "akadVenueName", "Masjid Al-Ikhlas", "text", true)}
-                  {inp("Alamat Lengkap Akad", "akadVenueAddress", "Jl. Kebon Jeruk No.1, Jakarta", "text", true)}
+                  <TInput label="Nama Gedung / Venue" required value={f.akadVenue} onChange={v => upF({ akadVenue: v })} placeholder="Masjid Al-Ikhlas" />
+                  <TInput label="Alamat Lengkap" required value={f.akadAddress} onChange={v => upF({ akadAddress: v })} placeholder="Jl. Kebon Jeruk No.1, Jakarta" />
                 </>
               )}
 
-              {(formData.eventType === "resepsi" || formData.eventType === "akad_resepsi") && (
+              {(f.eventType === "resepsi" || f.eventType === "akad_resepsi") && (
                 <>
                   <SectionDivider label="Resepsi" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {inp("Tanggal Resepsi", "resepsiDate", "", "date", true)}
-                    {inp("Waktu Resepsi", "resepsiTime", "", "time", true)}
+                    <TInput label="Tanggal" required type="date" value={f.receptionDate} onChange={v => upF({ receptionDate: v })} />
+                    <TInput label="Waktu" required type="time" value={f.receptionTime} onChange={v => upF({ receptionTime: v })} />
                   </div>
-                  {inp("Nama Gedung / Venue Resepsi", "resepsiVenueName", "Gedung Sabuga", "text", true)}
-                  {inp("Alamat Lengkap Resepsi", "resepsiVenueAddress", "Jl. Tamansari No.73, Bandung", "text", true)}
+                  <TInput label="Nama Gedung / Venue" required value={f.receptionVenue} onChange={v => upF({ receptionVenue: v })} placeholder="Gedung Sabuga" />
+                  <TInput label="Alamat Lengkap" required value={f.receptionAddress} onChange={v => upF({ receptionAddress: v })} placeholder="Jl. Tamansari No.73, Bandung" />
                 </>
               )}
 
               <ToggleSection enabled={opt.mapsUrl} onToggle={() => toggleOpt('mapsUrl')} label="Tambahkan Link Google Maps">
                 <div className="flex flex-col gap-3">
-                  {(formData.eventType === "akad" || formData.eventType === "akad_resepsi") &&
-                    inpExtra("Google Maps URL (Akad)", "akadMapsUrl", "https://maps.app.goo.gl/...")}
-                  {(formData.eventType === "resepsi" || formData.eventType === "akad_resepsi") &&
-                    inpExtra("Google Maps URL (Resepsi)", "resepsiMapsUrl", "https://maps.app.goo.gl/...")}
+                  {(f.eventType === "akad" || f.eventType === "akad_resepsi") &&
+                    <TInput label="Maps URL Akad" value={x.akadMapsUrl} onChange={v => upX({ akadMapsUrl: v })} placeholder="https://maps.app.goo.gl/..." />}
+                  {(f.eventType === "resepsi" || f.eventType === "akad_resepsi") &&
+                    <TInput label="Maps URL Resepsi" value={x.receptionMapsUrl} onChange={v => upX({ receptionMapsUrl: v })} placeholder="https://maps.app.goo.gl/..." />}
                 </div>
               </ToggleSection>
 
               <ToggleSection enabled={opt.dresscode} onToggle={() => toggleOpt('dresscode')} label="Dress Code">
-                <div className="flex flex-col gap-3">
-                  {inpExtra("Warna Dress Code", "dresscodeColors", "Sage green, cream, champagne")}
-                  {inpExtra("Catatan Dress Code", "dresscodeNote", "Mohon tidak memakai baju putih")}
-                </div>
+                <TInput label="Warna" value={x.dresscodeColors} onChange={v => upX({ dresscodeColors: v })} placeholder="Sage green, cream" />
+                <TInput label="Catatan" value={x.dresscodeNote} onChange={v => upX({ dresscodeNote: v })} placeholder="Mohon tidak memakai baju putih" />
               </ToggleSection>
             </>
           )}
 
-          {/* ─── STEP 3: Tema ────────────────────────────────────────── */}
+          {/* STEP 3: Tema */}
           {currentStep === 2 && (
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               {[
                 { id: 'minimalist-white', name: 'Modern Minimalis', cat: 'Modern' },
                 { id: 'garden-romance',   name: 'Garden Romance',   cat: 'Modern' },
@@ -419,15 +344,10 @@ export default function CreateInvitationWizard() {
                 { id: 'islami',           name: 'Islami Elegan',    cat: 'Islami' },
                 { id: 'modern-bold',      name: 'Modern Bold',      cat: 'Modern' },
               ].map(t => (
-                <button
-                  key={t.id} type="button"
-                  onClick={() => set({ themeId: t.id })}
+                <button key={t.id} type="button" onClick={() => upF({ themeId: t.id })}
                   className={`relative rounded-2xl overflow-hidden border-2 transition-all text-left ${
-                    formData.themeId === t.id
-                      ? 'border-[#D4A91C] shadow-md'
-                      : 'border-[#EDE6D6] hover:border-[#D4A91C]/40'
-                  }`}
-                >
+                    f.themeId === t.id ? 'border-[#D4A91C] shadow-md' : 'border-[#EDE6D6] hover:border-[#D4A91C]/40'
+                  }`}>
                   <div className="aspect-[3/4] bg-[#F5F0E8] flex items-center justify-center">
                     <ImageIcon className="w-10 h-10 text-[#C2BEB8]" />
                   </div>
@@ -435,7 +355,7 @@ export default function CreateInvitationWizard() {
                     <p className="text-xs font-semibold text-[#1E1B18]">{t.name}</p>
                     <p className="text-[10px] text-[#9A9390]">{t.cat}</p>
                   </div>
-                  {formData.themeId === t.id && (
+                  {f.themeId === t.id && (
                     <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#D4A91C] flex items-center justify-center">
                       <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                     </div>
@@ -445,64 +365,48 @@ export default function CreateInvitationWizard() {
             </div>
           )}
 
-          {/* ─── STEP 4: Konten & Media ─────────────────────────────── */}
+          {/* STEP 4: Konten & Media */}
           {currentStep === 3 && (
             <>
-              <div>
-                <Label required>Teks Sambutan</Label>
-                <Textarea
-                  value={formData.greetingText}
-                  onChange={v => set({ greetingText: v })}
-                  placeholder="Bismillah… Dengan memohon rahmat Allah SWT…"
-                  rows={5}
-                />
-                <button type="button" className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[#D4A91C] hover:text-[#B88E14] transition-colors">
-                  <Sparkles className="w-3.5 h-3.5" /> Bantu tulis dengan AI
-                </button>
-              </div>
+              <TTextarea label="Teks Sambutan" value={f.greetingText} onChange={v => upF({ greetingText: v })} rows={5} />
+              <button type="button" className="-mt-3 flex items-center gap-1.5 text-xs font-semibold text-[#D4A91C] hover:text-[#B88E14] transition-colors">
+                <Sparkles className="w-3.5 h-3.5" /> Bantu tulis dengan AI
+              </button>
 
               <ToggleSection enabled={opt.openingQuote} onToggle={() => toggleOpt('openingQuote')} label="Ayat / Quote Pembuka">
-                <div className="flex flex-col gap-3">
-                  <Textarea
-                    value={extra.openingQuote}
-                    onChange={v => upExtra({ openingQuote: v })}
-                    placeholder="وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُمْ مِنْ أَنفُسِكُمْ أَزْوَاجًا…"
-                    rows={3}
-                  />
-                  {inpExtra("Sumber (misal: QS. Ar-Rum: 21)", "openingQuoteSource", "QS. Ar-Rum: 21")}
-                </div>
+                <TTextarea value={x.quoteText} onChange={v => upX({ quoteText: v })} placeholder="\u0648\u064e\u0645\u0650\u0646\u0652 \u0622\u064a\u064e\u0627\u062a\u0650\u0647\u0650 \u0623\u064e\u0646\u0652 \u062e\u064e\u0644\u064e\u0642\u064e \u0644\u064e\u0643\u064f\u0645\u0652..." rows={3} />
+                <TInput label="Sumber" value={x.quoteSource} onChange={v => upX({ quoteSource: v })} placeholder="QS. Ar-Rum: 21" />
               </ToggleSection>
 
               <ToggleSection enabled={opt.gallery} onToggle={() => toggleOpt('gallery')} label="Galeri Foto">
-                <div className="border border-dashed border-[#EDE6D6] rounded-xl p-8 flex flex-col items-center justify-center text-center bg-[#FDFCF9]">
+                <div className="border border-dashed border-[#EDE6D6] rounded-xl p-8 flex flex-col items-center text-center bg-[#FDFCF9]">
                   <ImageIcon className="w-8 h-8 text-[#C2BEB8] mb-2" />
                   <p className="text-sm font-medium text-[#4A4540]">Upload Foto Galeri</p>
-                  <p className="text-xs text-[#9A9390] mt-1 mb-4">Maksimal 12 foto. Format JPG, PNG, WEBP.</p>
-                  <button type="button" className="px-4 py-2 rounded-full border border-[#EDE6D6] text-xs font-semibold text-[#4A4540] hover:border-[#D4A91C] transition-colors">Pilih File</button>
+                  <p className="text-xs text-[#9A9390] mt-1 mb-4">Maks. 12 foto. JPG, PNG, WEBP.</p>
+                  <button type="button" className="px-4 py-2 rounded-full border border-[#EDE6D6] text-xs font-semibold hover:border-[#D4A91C] transition-colors">Pilih File</button>
                 </div>
               </ToggleSection>
 
               <ToggleSection enabled={opt.music} onToggle={() => toggleOpt('music')} label="Musik Latar">
-                {inpExtra("URL Audio (MP3)", "musicUrl", "https://drive.google.com/...")}
-                <p className="text-xs text-[#9A9390]">Gunakan link Google Drive, Dropbox, atau direct MP3 URL.</p>
+                <TInput label="URL Audio (MP3)" value={x.musicUrl} onChange={v => upX({ musicUrl: v })} placeholder="https://drive.google.com/..." />
               </ToggleSection>
 
               <ToggleSection enabled={opt.loveStory} onToggle={() => toggleOpt('loveStory')} label="Timeline Kisah Cinta">
                 <div className="flex flex-col gap-3">
-                  {extra.loveStory.map((ev, i) => (
+                  {x.loveStory.map((ev, i) => (
                     <div key={i} className="rounded-xl border border-[#EDE6D6] bg-[#FDFCF9] p-4 flex flex-col gap-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#D4A91C] uppercase tracking-wider">Peristiwa {i + 1}</span>
-                        <button type="button" onClick={() => removeStoryEvent(i)} className="text-[#C2BEB8] hover:text-[#E05555] transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        <span className="text-xs font-bold text-[#D4A91C]">Peristiwa {i + 1}</span>
+                        <button type="button" onClick={() => removeStory(i)}><Trash2 className="w-4 h-4 text-[#C2BEB8] hover:text-[#E05555]" /></button>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <div><Label>Tahun</Label><input className="w-full rounded-xl border border-[#EDE6D6] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#D4A91C] transition-all" placeholder="2023" value={ev.year} onChange={e => updateStory(i, { year: e.target.value })} /></div>
-                        <div><Label>Judul</Label><input className="w-full rounded-xl border border-[#EDE6D6] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#D4A91C] transition-all" placeholder="Pertama Bertemu" value={ev.title} onChange={e => updateStory(i, { title: e.target.value })} /></div>
+                        <TInput label="Tahun" value={ev.year} onChange={v => updateStory(i, { year: v })} placeholder="2023" />
+                        <TInput label="Judul" value={ev.title} onChange={v => updateStory(i, { title: v })} placeholder="Pertama Bertemu" />
                       </div>
-                      <div><Label>Cerita Singkat</Label><Textarea value={ev.desc} onChange={v => updateStory(i, { desc: v })} placeholder="Kami pertama kali bertemu di…" rows={2} /></div>
+                      <TTextarea label="Cerita Singkat" value={ev.desc} onChange={v => updateStory(i, { desc: v })} rows={2} />
                     </div>
                   ))}
-                  <button type="button" onClick={addStoryEvent}
+                  <button type="button" onClick={addStory}
                     className="flex items-center gap-2 justify-center py-3 rounded-xl border border-dashed border-[#D4A91C]/40 text-sm text-[#D4A91C] font-medium hover:bg-[#D4A91C]/5 transition-colors">
                     <Plus className="w-4 h-4" /> Tambah Peristiwa
                   </button>
@@ -511,35 +415,25 @@ export default function CreateInvitationWizard() {
             </>
           )}
 
-          {/* ─── STEP 5: Fitur Tambahan ─────────────────────────────── */}
+          {/* STEP 5: Fitur Tambahan */}
           {currentStep === 4 && (
             <>
               <SectionDivider label="RSVP & Buku Tamu" />
-
               <ToggleSection enabled={opt.rsvp} onToggle={() => toggleOpt('rsvp')} label="Aktifkan RSVP">
-                <div className="flex flex-col gap-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <Label>Batas RSVP</Label>
-                      <input type="date" className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[#D4A91C] transition-all"
-                        value={extra.rsvpDeadline} onChange={e => upExtra({ rsvpDeadline: e.target.value })} />
-                    </div>
-                    <div>
-                      <Label>Maks. Tamu per Link</Label>
-                      <select className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[#D4A91C] transition-all"
-                        value={extra.rsvpMaxGuests} onChange={e => upExtra({ rsvpMaxGuests: e.target.value })}>
-                        <option value="1">1 orang</option>
-                        <option value="2">2 orang</option>
-                        <option value="5">5 orang</option>
-                        <option value="10">Tak terbatas</option>
-                      </select>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <TInput label="Batas RSVP" type="date" value={x.rsvpDeadline} onChange={v => upX({ rsvpDeadline: v })} />
                   <div>
-                    <Label>Pesan RSVP</Label>
-                    <Textarea value={extra.rsvpMessage} onChange={v => upExtra({ rsvpMessage: v })} placeholder="Kami sangat mengharap kehadiran Anda…" rows={2} />
+                    <Label>Maks. Tamu per Link</Label>
+                    <select className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[#D4A91C] transition-all"
+                      value={x.rsvpMaxGuests} onChange={e => upX({ rsvpMaxGuests: e.target.value })}>
+                      <option value="1">1 orang</option>
+                      <option value="2">2 orang</option>
+                      <option value="5">5 orang</option>
+                      <option value="10">Tak terbatas</option>
+                    </select>
                   </div>
                 </div>
+                <TTextarea label="Pesan RSVP" value={x.rsvpMessage} onChange={v => upX({ rsvpMessage: v })} placeholder="Kami sangat mengharap kehadiran Anda…" rows={2} />
               </ToggleSection>
 
               <ToggleSection enabled={opt.guestbook} onToggle={() => toggleOpt('guestbook')} label="Buku Tamu & Ucapan">
@@ -547,73 +441,52 @@ export default function CreateInvitationWizard() {
               </ToggleSection>
 
               <SectionDivider label="Amplop Digital" />
-
               <ToggleSection enabled={opt.giftBank} onToggle={() => toggleOpt('giftBank')} label="Transfer Bank / E-Wallet">
-                <div className="flex flex-col gap-3">
-                  {extra.bankAccounts.map((b, i) => (
-                    <div key={i} className="rounded-xl border border-[#EDE6D6] bg-[#FDFCF9] p-4 flex flex-col gap-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#D4A91C] uppercase tracking-wider">Rekening {i + 1}</span>
-                        <button type="button" onClick={() => removeBank(i)} className="text-[#C2BEB8] hover:text-[#E05555] transition-colors"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div><Label>Bank / E-Wallet</Label><input className="w-full rounded-xl border border-[#EDE6D6] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#D4A91C] transition-all" placeholder="BCA / GoPay" value={b.bank} onChange={e => updateBank(i, { bank: e.target.value })} /></div>
-                        <div><Label>Nomor Rekening</Label><input className="w-full rounded-xl border border-[#EDE6D6] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#D4A91C] transition-all" placeholder="12345678" value={b.number} onChange={e => updateBank(i, { number: e.target.value })} /></div>
-                        <div><Label>Atas Nama</Label><input className="w-full rounded-xl border border-[#EDE6D6] bg-white px-3 py-2 text-sm focus:outline-none focus:border-[#D4A91C] transition-all" placeholder="Rina Angelina" value={b.name} onChange={e => updateBank(i, { name: e.target.value })} /></div>
-                      </div>
-                    </div>
-                  ))}
-                  <button type="button" onClick={addBank}
-                    className="flex items-center gap-2 justify-center py-3 rounded-xl border border-dashed border-[#D4A91C]/40 text-sm text-[#D4A91C] font-medium hover:bg-[#D4A91C]/5 transition-colors">
-                    <Plus className="w-4 h-4" /> Tambah Rekening
-                  </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <TInput label="Bank / E-Wallet" value={x.bankName} onChange={v => upX({ bankName: v })} placeholder="BCA / GoPay" />
+                  <TInput label="Nomor Rekening" value={x.bankAccount} onChange={v => upX({ bankAccount: v })} placeholder="12345678" />
+                  <TInput label="Atas Nama" value={x.bankAccountName} onChange={v => upX({ bankAccountName: v })} placeholder="Rina Angelina" />
                 </div>
               </ToggleSection>
 
               <ToggleSection enabled={opt.qris} onToggle={() => toggleOpt('qris')} label="QRIS">
-                <div className="flex flex-col gap-3">
-                  {inpExtra("Nomor / ID QRIS", "qrisAccount", "QRIS-1234 / Dana 08xxxxxxxx")}
-                  <div className="border border-dashed border-[#EDE6D6] rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#FDFCF9]">
-                    <p className="text-sm font-medium text-[#4A4540] mb-1">Upload Gambar QRIS</p>
-                    <p className="text-xs text-[#9A9390] mb-3">Format PNG atau JPG.</p>
-                    <button type="button" className="px-4 py-2 rounded-full border border-[#EDE6D6] text-xs font-semibold text-[#4A4540] hover:border-[#D4A91C] transition-colors">Pilih File</button>
-                  </div>
+                <TInput label="Nomor / ID QRIS" value={x.qrisAccount} onChange={v => upX({ qrisAccount: v })} placeholder="QRIS-1234" />
+                <div className="border border-dashed border-[#EDE6D6] rounded-xl p-6 flex flex-col items-center text-center bg-[#FDFCF9]">
+                  <p className="text-sm font-medium text-[#4A4540] mb-3">Upload Gambar QRIS</p>
+                  <button type="button" className="px-4 py-2 rounded-full border border-[#EDE6D6] text-xs font-semibold hover:border-[#D4A91C] transition-colors">Pilih File</button>
                 </div>
               </ToggleSection>
 
               <ToggleSection enabled={opt.giftAddress} onToggle={() => toggleOpt('giftAddress')} label="Alamat Pengiriman Hadiah Fisik">
-                <Textarea value={extra.giftAddress} onChange={v => upExtra({ giftAddress: v })} placeholder="Jl. Melati No. 12, RT 03 RW 05, Kelurahan…" rows={3} />
+                <TTextarea value={x.giftAddress} onChange={v => upX({ giftAddress: v })} placeholder="Jl. Melati No. 12, RT 03 RW 05…" rows={3} />
               </ToggleSection>
             </>
           )}
 
-          {/* ─── STEP 6: Preview & Publish ──────────────────────────── */}
+          {/* STEP 6: Preview & Publish */}
           {currentStep === 5 && (
-            <div className="flex flex-col gap-5">
-              <div className="rounded-2xl bg-[#FDFCF9] border border-[#EDE6D6] overflow-hidden">
-                <div className="px-5 py-3 border-b border-[#EDE6D6]">
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#9A9390]">Ringkasan</p>
-                </div>
-                <div className="px-5 py-4 grid grid-cols-2 gap-y-3 text-sm">
-                  {[
-                    ['Pengantin', `${formData.groomNickname || '—'} & ${formData.brideNickname || '—'}`],
-                    ['Jenis Acara', formData.eventType.replace('_', ' & ')],
-                    ['Tema', formData.themeId.replace(/-/g, ' ')],
-                    ['RSVP', opt.rsvp ? 'Aktif' : 'Nonaktif'],
-                    ['Buku Tamu', opt.guestbook ? 'Aktif' : 'Nonaktif'],
-                    ['Amplop Digital', [opt.giftBank && 'Bank', opt.qris && 'QRIS', opt.giftAddress && 'Alamat'].filter(Boolean).join(', ') || 'Nonaktif'],
-                    ['Kisah Cinta', opt.loveStory ? `${extra.loveStory.length} peristiwa` : 'Nonaktif'],
-                    ['Galeri', opt.gallery ? 'Aktif' : 'Nonaktif'],
-                    ['Musik', opt.music ? 'Aktif' : 'Nonaktif'],
-                  ].map(([label, val]) => (
-                    <>
-                      <span className="text-[#9A9390]">{label}</span>
-                      <span className="font-medium text-[#1E1B18] capitalize">{val}</span>
-                    </>
-                  ))}
-                </div>
+            <div className="rounded-2xl bg-[#FDFCF9] border border-[#EDE6D6] overflow-hidden">
+              <div className="px-5 py-3 border-b border-[#EDE6D6]">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#9A9390]">Ringkasan</p>
               </div>
-              <p className="text-xs text-center text-[#9A9390]">Anda masih bisa mengubah semua data ini setelah diterbitkan.</p>
+              <div className="px-5 py-4 grid grid-cols-2 gap-y-3 text-sm">
+                {[
+                  ['Pengantin', `${f.groomNickname || '—'} & ${f.brideNickname || '—'}`],
+                  ['Jenis Acara', f.eventType.replace('_', ' & ')],
+                  ['Tema', f.themeId.replace(/-/g, ' ')],
+                  ['RSVP', opt.rsvp ? 'Aktif' : 'Nonaktif'],
+                  ['Buku Tamu', opt.guestbook ? 'Aktif' : 'Nonaktif'],
+                  ['Amplop Digital', [opt.giftBank && 'Bank', opt.qris && 'QRIS', opt.giftAddress && 'Alamat'].filter(Boolean).join(', ') || 'Nonaktif'],
+                  ['Galeri', opt.gallery ? 'Aktif' : 'Nonaktif'],
+                  ['Musik', opt.music ? 'Aktif' : 'Nonaktif'],
+                ].map(([label, val], i) => (
+                  <>
+                    <span key={`l${i}`} className="text-[#9A9390]">{label}</span>
+                    <span key={`v${i}`} className="font-medium text-[#1E1B18] capitalize">{val}</span>
+                  </>
+                ))}
+              </div>
+              <p className="text-xs text-center text-[#9A9390] pb-4">Anda masih bisa mengubah semua data ini setelah diterbitkan.</p>
             </div>
           )}
 
@@ -621,12 +494,13 @@ export default function CreateInvitationWizard() {
 
         {/* Footer Nav */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-[#EDE6D6] bg-[#FDFCF9]">
-          <button type="button" onClick={handlePrev} disabled={currentStep === 0 || isSubmitting}
+          <button type="button" onClick={() => { if (currentStep > 0) setCurrentStep(s => s - 1) }}
+            disabled={currentStep === 0 || isSubmitting}
             className="flex items-center gap-1.5 text-sm font-medium text-[#726C67] hover:text-[#1E1B18] disabled:opacity-30 transition-colors">
             <ChevronLeft className="w-4 h-4" /> Kembali
           </button>
           {currentStep < STEPS.length - 1 ? (
-            <button type="button" onClick={handleNext}
+            <button type="button" onClick={() => setCurrentStep(s => s + 1)}
               className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1E1B18] text-[#FDFCF9] text-sm font-medium hover:bg-[#302C28] transition-colors">
               Lanjut <ChevronRight className="w-4 h-4" />
             </button>
