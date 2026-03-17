@@ -3,106 +3,49 @@
 """
 upload_music.py
 ---------------
-Batch download romantic/wedding music from Mixkit
-and upload to Supabase Storage bucket 'music'.
+Upload local MP3 files to Supabase Storage bucket 'music'.
 
 Usage:
-    pip install requests
-    python scripts/upload_music.py
+    1. Taruh file MP3 ke folder: scripts/music/
+    2. Isi SUPABASE_URL dan SUPABASE_SERVICE_KEY di bagian CONFIG
+    3. Jalankan: python scripts/upload_music.py
 
-Fill in SUPABASE_URL and SUPABASE_SERVICE_KEY below.
+Requirements:
+    pip install requests
 """
 
 import sys
+import os
 import requests
 import json
 import time
 
-# Fix Windows terminal Unicode issue
-if sys.stdout.encoding != 'utf-8':
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
     sys.stdout.reconfigure(encoding='utf-8')
 
 # ============================================================
 # CONFIG - isi sesuai project Supabase kamu
 # ============================================================
 SUPABASE_URL = "https://XXXX.supabase.co"          # ganti XXXX
-SUPABASE_SERVICE_KEY = "eyJ..."                    # service_role key (bukan anon)
+SUPABASE_SERVICE_KEY = "eyJ..."                     # service_role key (bukan anon)
 BUCKET_NAME = "music"
+MUSIC_FOLDER = os.path.join(os.path.dirname(__file__), "music")
 # ============================================================
 
-# Format: (filename_di_storage, url_download, display_title, genre, emoji)
-TRACKS = [
-    (
-        "mixkit-dreamy-nature-ambiance.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-dreamy-nature-ambiance-5027.mp3",
-        "Dreamy Nature",
-        "Ambient · Dreamy",
-        "✨",
-    ),
-    (
-        "mixkit-serene-view-443.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-serene-view-443.mp3",
-        "Serene View",
-        "Cinematic · Calm",
-        "🌅",
-    ),
-    (
-        "mixkit-sweet-romance-668.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-sweet-romance-668.mp3",
-        "Sweet Romance",
-        "Piano · Romantic",
-        "❤️",
-    ),
-    (
-        "mixkit-romantic-moment-583.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-romantic-moment-583.mp3",
-        "Romantic Moment",
-        "Orkestra · Emotional",
-        "🌹",
-    ),
-    (
-        "mixkit-when-i-close-my-eyes-668.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-when-i-close-my-eyes-668.mp3",
-        "When I Close My Eyes",
-        "Piano · Nostalgic",
-        "🌙",
-    ),
-    (
-        "mixkit-beauty-of-annihilation-piano-remastered-8060.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-beauty-of-annihilation-piano-remastered-8060.mp3",
-        "Beauty of Annihilation",
-        "Piano · Melancholic",
-        "🎹",
-    ),
-    (
-        "mixkit-soft-winds-of-love-633.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-soft-winds-of-love-633.mp3",
-        "Soft Winds of Love",
-        "Acoustic · Warm",
-        "🌸",
-    ),
-    (
-        "mixkit-blissful-life-740.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-blissful-life-740.mp3",
-        "Blissful Life",
-        "Acoustic · Uplifting",
-        "☀️",
-    ),
-    (
-        "mixkit-love-in-the-fall-432.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-love-in-the-fall-432.mp3",
-        "Love in the Fall",
-        "Cinematic · Hopeful",
-        "🍂",
-    ),
-    (
-        "mixkit-valley-sunset-127.mp3",
-        "https://assets.mixkit.co/music/download/mixkit-valley-sunset-127.mp3",
-        "Valley Sunset",
-        "Ambient · Peaceful",
-        "🌄",
-    ),
-]
+# Mapping nama file -> metadata (title, genre, emoji)
+# Kalau nama file tidak ada di sini, akan pakai nama file sebagai title
+TRACK_METADATA = {
+    "dreamy-nature.mp3":        ("Dreamy Nature",        "Ambient · Dreamy",      "✨"),
+    "serene-view.mp3":          ("Serene View",           "Cinematic · Calm",      "🌅"),
+    "sweet-romance.mp3":        ("Sweet Romance",         "Piano · Romantic",      "❤️"),
+    "romantic-moment.mp3":      ("Romantic Moment",       "Orkestra · Emotional",  "🌹"),
+    "when-i-close-my-eyes.mp3": ("When I Close My Eyes",  "Piano · Nostalgic",     "🌙"),
+    "beauty-annihilation.mp3":  ("Beauty of Annihilation","Piano · Melancholic",   "🎹"),
+    "soft-winds-of-love.mp3":   ("Soft Winds of Love",    "Acoustic · Warm",       "🌸"),
+    "blissful-life.mp3":        ("Blissful Life",          "Acoustic · Uplifting",  "☀️"),
+    "love-in-the-fall.mp3":     ("Love in the Fall",       "Cinematic · Hopeful",   "🍂"),
+    "valley-sunset.mp3":        ("Valley Sunset",          "Ambient · Peaceful",    "🌄"),
+}
 
 
 def create_bucket_if_not_exists():
@@ -120,21 +63,6 @@ def create_bucket_if_not_exists():
         print(f"[INFO] Bucket '{BUCKET_NAME}' already exists.")
     else:
         print(f"[WARN] Bucket create response: {res.status_code} {res.text}")
-
-
-def download_file(url: str, filename: str):
-    print(f"  [DL] Downloading {filename} ...", end=" ", flush=True)
-    try:
-        res = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
-        if res.status_code == 200:
-            print(f"OK ({len(res.content) // 1024} KB)")
-            return res.content
-        else:
-            print(f"FAILED ({res.status_code})")
-            return None
-    except Exception as e:
-        print(f"ERROR: {e}")
-        return None
 
 
 def upload_to_supabase(filename: str, data: bytes):
@@ -164,21 +92,44 @@ def main():
         print("\n[ERROR] Isi dulu SUPABASE_URL dan SUPABASE_SERVICE_KEY di bagian CONFIG!")
         return
 
+    # Cek folder music/
+    if not os.path.isdir(MUSIC_FOLDER):
+        print(f"\n[ERROR] Folder tidak ditemukan: {MUSIC_FOLDER}")
+        print("Buat folder 'scripts/music/' dan taruh file MP3 di sana.")
+        return
+
+    mp3_files = sorted([f for f in os.listdir(MUSIC_FOLDER) if f.lower().endswith(".mp3")])
+    if not mp3_files:
+        print(f"\n[ERROR] Tidak ada file .mp3 di folder: {MUSIC_FOLDER}")
+        print("Download lagu dari https://mixkit.co/free-stock-music/tag/wedding/")
+        print("lalu taruh di folder scripts/music/")
+        return
+
+    print(f"\n[INFO] Ditemukan {len(mp3_files)} file MP3 di scripts/music/")
     create_bucket_if_not_exists()
     print()
 
     results = []
 
-    for filename, dl_url, title, genre, emoji in TRACKS:
-        print(f"[TRACK] {title}")
-        data = download_file(dl_url, filename)
-        if data is None:
-            print("  [SKIP] Skipped.\n")
-            continue
+    for filename in mp3_files:
+        filepath = os.path.join(MUSIC_FOLDER, filename)
+        size_kb = os.path.getsize(filepath) // 1024
+
+        # Ambil metadata, fallback ke nama file
+        if filename in TRACK_METADATA:
+            title, genre, emoji = TRACK_METADATA[filename]
+        else:
+            title = filename.replace(".mp3", "").replace("-", " ").title()
+            genre = "Music"
+            emoji = "🎵"
+
+        print(f"[TRACK] {title} ({size_kb} KB)")
+        with open(filepath, "rb") as f:
+            data = f.read()
 
         public_url = upload_to_supabase(filename, data)
         if public_url:
-            track_id = filename.replace(".mp3", "").replace(" ", "-")
+            track_id = filename.replace(".mp3", "")
             results.append({
                 "id": track_id,
                 "title": title,
@@ -189,17 +140,24 @@ def main():
                 "coverEmoji": emoji,
             })
         print()
-        time.sleep(0.5)
+        time.sleep(0.3)
 
-    print("\n" + "=" * 50)
-    print("[DONE] Selesai! Hasil disimpan di scripts/music_urls_output.json")
-    print("Kirimkan isi file JSON tersebut ke AI untuk update weddingMusic.ts!\n")
+    print("=" * 50)
 
-    with open("scripts/music_urls_output.json", "w", encoding="utf-8") as f:
+    if not results:
+        print("[WARN] Tidak ada file yang berhasil diupload.")
+        return
+
+    # Simpan JSON
+    output_path = os.path.join(os.path.dirname(__file__), "music_urls_output.json")
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
-    # Preview output
-    print("Preview URL yang berhasil diupload:")
+    print(f"[DONE] {len(results)}/{len(mp3_files)} lagu berhasil diupload!")
+    print(f"[SAVE] Hasil disimpan di scripts/music_urls_output.json")
+    print("\nKirimkan isi file JSON tersebut ke AI untuk update weddingMusic.ts!\n")
+
+    print("Preview URL:")
     for t in results:
         print(f"  - {t['title']}: {t['url']}")
 
