@@ -20,6 +20,7 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
     let unreadCount = 0;
     let initialMessages: any[] = [];
     let invitationSlug = 'demo';
+    let invitationStatus = 'draft';
 
     if (!supabaseUrl) {
         // MOCK DATA FOR LOCAL DEVELOPMENT
@@ -28,6 +29,7 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
         rsvpCount = 120;
         unreadCount = 5;
         invitationSlug = 'demo';
+        invitationStatus = 'active';
         initialMessages = [
             { id: '1', guest_name: 'Andi', attendance: 'hadir', message: 'Selamat ya bro!', created_at: new Date().toISOString(), is_read: false },
             { id: '2', guest_name: 'Riska', attendance: 'tidak_hadir', message: 'Maaf ngga bisa dateng 🙏', created_at: new Date(Date.now() - 3600000).toISOString(), is_read: true }
@@ -40,12 +42,13 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
             redirect("/login");
         }
 
-        // 1. Fetch Invitation Details & Verify Ownership
+        // Fetch flat columns directly — no invitation_details join needed
         const { data: invitation, error: invError } = await supabase
             .from('invitations')
             .select(`
-                id, slug, status, created_at,
-                invitation_details ( groom_name, bride_name )
+                id, slug, status,
+                groom_nickname, groom_full_name,
+                bride_nickname, bride_full_name
             `)
             .eq('id', id)
             .eq('user_id', user.id)
@@ -55,11 +58,13 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
             redirect("/dashboard");
         }
 
-        const { groom_name, bride_name } = invitation.invitation_details || {};
-        coupleName = groom_name && bride_name ? `${groom_name} & ${bride_name}` : "Undangan";
+        const groomName = invitation.groom_nickname || invitation.groom_full_name || null;
+        const brideName = invitation.bride_nickname || invitation.bride_full_name || null;
+        coupleName = groomName && brideName ? `${groomName} & ${brideName}` : (groomName || brideName || 'Undangan');
         invitationSlug = invitation.slug;
+        invitationStatus = invitation.status;
 
-        // 2. Fetch Aggregated Stats
+        // Stats
         const { count: fetchedViewCount } = await supabase
             .from('invitation_views')
             .select('*', { count: 'exact', head: true })
@@ -79,7 +84,6 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
             .eq('is_read', false);
         unreadCount = fetchedUnreadCount || 0;
 
-        // 3. Fetch Initial Table Data (page 1, limit 10)
         const { data: fetchedMessages } = await supabase
             .from('rsvp_messages')
             .select('id, guest_name, attendance, message, created_at, is_read')
@@ -89,10 +93,15 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
         initialMessages = fetchedMessages || [];
     }
 
+    // Build preview URL: always use ?preview=true so draft invitations render
+    const isLive = invitationStatus === 'active' || invitationStatus === 'paid';
+    const previewUrl = isLive
+        ? `/invite/${invitationSlug}`
+        : `/invite/${invitationSlug}?preview=true`;
+
     return (
         <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
             <Suspense fallback={null}><GuestSessionClearer /></Suspense>
-            {/* Header / Actions */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex flex-col gap-3">
                     <Link href="/dashboard" className="text-sm font-medium text-stone-500 hover:text-gold-600 flex items-center gap-1.5 transition-colors w-fit group">
@@ -101,9 +110,10 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
                     <h1 className="text-3xl font-serif font-bold text-stone-800">{coupleName}</h1>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                    <Link href={`/u/${invitationSlug}`} target="_blank" className="flex-1 md:flex-none">
+                    <Link href={previewUrl} target="_blank" className="flex-1 md:flex-none">
                         <Button variant="secondary" className="w-full text-stone-600 hover:text-gold-600 border-stone-200">
-                            <Eye className="w-4 h-4 mr-2" /> Lihat Undangan
+                            <Eye className="w-4 h-4 mr-2" />
+                            {isLive ? 'Lihat Undangan' : 'Preview Undangan'}
                         </Button>
                     </Link>
                     <Link href={`/dashboard/undangan/${id}/edit`} className="flex-1 md:flex-none">
@@ -114,7 +124,6 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
                 </div>
             </div>
 
-            {/* Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <Card className="border-stone-200 shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2 bg-stone-50/50 rounded-t-xl border-b border-stone-100">
@@ -156,7 +165,6 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
                 </Card>
             </div>
 
-            {/* RSVP Table List */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
@@ -164,7 +172,6 @@ export default async function UndanganDashboardPage({ params }: { params: Promis
                         <p className="text-sm text-stone-500 mt-0.5">Daftar ucapan dan konfirmasi kehadiran dari tamu undanganmu.</p>
                     </div>
                 </div>
-
                 <RsvpClientTable
                     initialMessages={initialMessages || []}
                     invitationId={id}
