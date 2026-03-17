@@ -384,4 +384,153 @@
     margin-right: auto;
   }
 
+  /* ============================================================
+     SKEUOMORPHIC UTILITY LAYER
+     Usage: tambahkan class ke elemen HTML/JSX manapun.
+     Tidak mengganggu class Tailwind atau shadcn/ui yang sudah ada.
+     ============================================================ */
+
+  /* -- Shadow variables (tersedia global) -- */
+  :root {
+    /* Raised surface — tombol, kartu, badge */
+    --skeu-shadow-raised:
+      4px 4px 10px rgba(0, 0, 0, 0.15),
+      -2px -2px 8px rgba(255, 255, 255, 0.75);
+
+    /* Pressed / aktif state — tombol ditekan */
+    --skeu-shadow-pressed:
+      inset 3px 3px 8px rgba(0, 0, 0, 0.15),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.6);
+
+    /* Card depth — section card undangan */
+    --skeu-shadow-card:
+      8px 8px 24px rgba(0, 0, 0, 0.12),
+      -4px -4px 16px rgba(255, 255, 255, 0.85);
+
+    /* Gold foil — border/divider dengan aksen emas */
+    --skeu-shadow-gold:
+      0 2px 8px rgba(212, 169, 28, 0.4),
+      0 -1px 4px rgba(255, 235, 150, 0.5),
+      inset 0 1px 0 rgba(255, 248, 200, 0.6);
+
+    /* Paper texture — background undangan, kertas linen */
+    --skeu-bg-paper:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.015) 2px,
+        rgba(0,0,0,0.015) 4px
+      );
+
+    /* Velvet / fabric — cover section undangan */
+    --skeu-bg-velvet:
+      radial-gradient(
+        ellipse at 30% 30%,
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+      );
+  }
+
+  /* Raised surface — tombol utama, badge, section header */
+  .skeu-raised {
+    box-shadow: var(--skeu-shadow-raised);
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .skeu-raised:active {
+    box-shadow: var(--skeu-shadow-pressed);
+    transform: translateY(1px);
+  }
+
+  /* Pressed / inset — input aktif, toggle on */
+  .skeu-pressed {
+    box-shadow: var(--skeu-shadow-pressed);
+  }
+
+  /* Card depth — wrapper section undangan */
+  .skeu-card {
+    box-shadow: var(--skeu-shadow-card);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  /* Gold accent — border emas di divider, ornamen */
+  .skeu-gold {
+    box-shadow: var(--skeu-shadow-gold);
+    border: 1px solid rgba(212, 169, 28, 0.45);
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 245, 180, 0.15) 0%,
+      transparent 50%,
+      rgba(212, 169, 28, 0.08) 100%
+    );
+  }
+
+  /* Paper texture — latar belakang undangan */
+  .skeu-paper {
+    background-image: var(--skeu-bg-paper);
+    background-color: #FDFBF7;
+    box-shadow:
+      inset 0 0 40px rgba(0, 0, 0, 0.04),
+      0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Velvet / cover mewah — hero section, cover undangan */
+  .skeu-velvet {
+    background-image: var(--skeu-bg-velvet);
+    box-shadow:
+      inset 0 2px 20px rgba(0, 0, 0, 0.25),
+      inset 0 -2px 10px rgba(0, 0, 0, 0.15),
+      4px 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* Inner relief — frame foto, section quote */
+  .skeu-inset {
+    box-shadow:
+      inset 4px 4px 12px rgba(0, 0, 0, 0.12),
+      inset -2px -2px 8px rgba(255, 255, 255, 0.7),
+      0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  /* Glass panel — overlay card di atas foto */
+  .skeu-glass {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  /* Emboss text — nama mempelai, judul section */
+  .skeu-text-emboss {
+    text-shadow:
+      1px 1px 2px rgba(255, 255, 255, 0.8),
+      -1px -1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Deboss text — subtitle, caption */
+  .skeu-text-deboss {
+    text-shadow:
+      1px 1px 0px rgba(255, 255, 255, 0.6),
+      -1px -1px 1px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Gold foil text — aksen nama mempelai, ornamen */
+  .skeu-text-gold {
+    background: linear-gradient(
+      135deg,
+      #c9a84c 0%,
+      #f0d080 30%,
+      #c9a84c 50%,
+      #f0d080 70%,
+      #a07830 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
 }
