@@ -18,7 +18,6 @@ import { RsvpMessage } from "@/components/invitation/RsvpSection";
 import { Theme } from "@/types/theme";
 import MasterInvitationRenderer from "@/components/invitation/MasterInvitationRenderer";
 
-// Kita mendefinisikan tipe data sesuai dengan demoData agar aman
 interface InvitationData {
     coupleShortName: string;
     groom: any;
@@ -48,12 +47,10 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
 
-    // If a theme is provided, use the MasterInvitationRenderer (themed engine)
     if (theme) {
         return <MasterInvitationRenderer theme={theme} invitationData={data as any} />;
     }
 
-    // Otherwise, fall back to the original hardcoded section-based rendering
     const handleOpen = () => {
         setIsOpened(true);
         if (audioRef.current) {
@@ -72,6 +69,11 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
         }
         setIsMusicPlaying(!isMusicPlaying);
     };
+
+    // Build a safe quote object — never undefined
+    const safeQuote = data.quote && data.quote.text
+        ? data.quote
+        : { text: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya.", source: "QS. Ar-Rum: 21" };
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -99,17 +101,18 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
                     >
                         <HeroSection
                             coupleShortName={data.coupleShortName}
-                            groomName={data.groom.fullName}
-                            brideName={data.bride.fullName}
+                            groomName={data.groom?.fullName}
+                            brideName={data.bride?.fullName}
                             heroPhoto={data.heroPhoto}
-                            weddingDate={data.akad.date}
+                            weddingDate={data.akad?.date}
                             calendarUrl={data.calendarUrl}
                         />
 
                         <CoupleSection groom={data.groom} bride={data.bride} />
-                        <QuoteSection text={data.quote.text} source={data.quote.source} />
+                        {/* Fix: pass quote as a single object prop, not spread */}
+                        <QuoteSection quote={safeQuote} />
                         <LoveStorySection stories={data.loveStory} />
-                        <CountdownSection targetDate={data.akad.date} />
+                        <CountdownSection targetDate={data.akad?.date} />
 
                         <EventSection
                             akad={data.akad}

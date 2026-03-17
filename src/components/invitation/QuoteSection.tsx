@@ -7,6 +7,9 @@ interface QuoteSectionProps {
 }
 
 const QuoteSection = ({ quote }: QuoteSectionProps) => {
+    // Guard: jika quote tidak tersedia, jangan render section ini
+    if (!quote || !quote.text) return null;
+
     return (
         <section className="py-16 px-6 skeu-paper">
             <motion.div
@@ -16,7 +19,6 @@ const QuoteSection = ({ quote }: QuoteSectionProps) => {
                 transition={{ duration: 0.6 }}
                 className="max-w-2xl mx-auto text-center"
             >
-                {/* ornamen quote atas */}
                 <div className="flex items-center justify-center gap-3 mb-8">
                     <div className="h-px w-12 bg-wedding-gold/40" />
                     <span className="text-wedding-gold text-2xl skeu-text-gold">❝</span>
@@ -32,7 +34,6 @@ const QuoteSection = ({ quote }: QuoteSectionProps) => {
                     </p>
                 </div>
 
-                {/* ornamen quote bawah */}
                 <div className="flex items-center justify-center gap-3 mt-8">
                     <div className="h-px w-12 bg-wedding-gold/40" />
                     <span className="text-wedding-gold text-2xl skeu-text-gold">❞</span>
