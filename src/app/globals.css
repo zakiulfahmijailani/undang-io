@@ -1,152 +1,135 @@
 @import "tailwindcss";
 
+/* ============================================================
+   UNDANG.IO — LUXURY WEDDING DESIGN SYSTEM v2
+   Inspired by: The Row, Vera Wang, Kinfolk Magazine
+   Palette: Ivory + Deep Charcoal + Champagne Gold + Dusty Rose
+   Typography: Cormorant Garamond (display) + Inter (body)
+   ============================================================ */
+
 @theme inline {
-  /* Fonts */
-  --font-display: var(--font-display), 'Palatino Linotype', Georgia, serif;
-  --font-body: var(--font-body), 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-mono), 'Fira Code', monospace;
-  --font-script: var(--font-script), 'Dancing Script', cursive;
-  --font-vibes: var(--font-vibes), 'Great Vibes', cursive;
-  --font-serif-wedding: var(--font-serif-wedding), 'Playfair Display', serif;
+  /* ── Fonts ─────────────────────────────────────────────── */
+  --font-display:       var(--font-display), 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+  --font-body:          var(--font-body), 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:          var(--font-mono), 'Fira Code', monospace;
+  --font-script:        var(--font-script), 'Great Vibes', cursive;
+  --font-vibes:         var(--font-vibes), 'Great Vibes', cursive;
+  --font-serif-wedding: var(--font-serif-wedding), 'Cormorant Garamond', 'Playfair Display', serif;
 
-  /* Colors: Brand Primary (Champagne Gold) */
-  --color-primary-50: #FDFAF0;
-  --color-primary-100: #FAF3D4;
-  --color-primary-200: #F4E49A;
-  --color-primary-300: #EDD15E;
-  --color-primary-400: #E6BE30;
-  --color-primary-500: #D4A91C;
-  --color-primary-600: #B88E14;
-  --color-primary-700: #9A720F;
-  --color-primary-800: #7D5C0C;
-  --color-primary-900: #614509;
+  /* ── Core Palette ───────────────────────────────────────── */
 
-  /* Colors: Neutral (Warm Stone) */
-  --color-neutral-0: #FFFFFF;
-  --color-neutral-50: #FAFAF9;
-  --color-neutral-100: #F5F4F2;
-  --color-neutral-200: #E8E5E1;
-  --color-neutral-300: #D4CFC9;
-  --color-neutral-400: #B8B2AA;
-  --color-neutral-500: #9A9189;
-  --color-neutral-600: #7A7169;
-  --color-neutral-700: #5A5349;
-  --color-neutral-800: #3D3630;
-  --color-neutral-900: #211E1A;
+  /* Ivory — page background */
+  --color-ivory-50:   #FDFCF9;
+  --color-ivory-100:  #FAF8F3;
+  --color-ivory-200:  #F5F0E8;
+  --color-ivory-300:  #EDE6D6;
 
-  /* Colors: Accent (Dusty Rose) */
-  --color-accent-50: #FDF3F4;
-  --color-accent-100: #FAE2E4;
-  --color-accent-200: #F5C2C7;
-  --color-accent-300: #EC99A0;
-  --color-accent-400: #E0707A;
-  --color-accent-500: #D4515C;
-  --color-accent-600: #B83D47;
-  --color-accent-700: #972E38;
-  --color-accent-800: #7A2430;
-  --color-accent-900: #5E1C26;
+  /* Charcoal — text */
+  --color-charcoal-50:  #F4F3F1;
+  --color-charcoal-100: #E0DEDA;
+  --color-charcoal-200: #C2BEB8;
+  --color-charcoal-300: #9A9390;
+  --color-charcoal-400: #726C67;
+  --color-charcoal-500: #4A4540;
+  --color-charcoal-600: #302C28;
+  --color-charcoal-700: #1E1B18;
+  --color-charcoal-800: #141210;
+  --color-charcoal-900: #0A0908;
 
-  /* Colors: Deep Forest */
-  --color-forest-50: #F2F5F0;
-  --color-forest-100: #E1EAD9;
-  --color-forest-200: #C0D4B3;
-  --color-forest-300: #97B889;
-  --color-forest-400: #6F9B5E;
-  --color-forest-500: #4E7D42;
-  --color-forest-600: #3D6433;
-  --color-forest-700: #2E4D26;
-  --color-forest-800: #1F361A;
-  --color-forest-900: #12200F;
+  /* Gold — brand accent */
+  --color-gold-50:    #FDFAF0;
+  --color-gold-100:   #FAF3D4;
+  --color-gold-200:   #F2E09A;
+  --color-gold-300:   #E8CB60;
+  --color-gold-400:   #D4A91C;
+  --color-gold-500:   #B88E14;
+  --color-gold-600:   #9A720F;
+  --color-gold-700:   #7D5C0C;
+  --color-gold-800:   #614509;
+  --color-gold-900:   #452F06;
 
-  /* Semantic Colors */
-  --color-success-light: #ECFDF5;
-  --color-success-base: #059669;
-  --color-success-dark: #065F46;
-  --color-success-border: #A7F3D0;
+  /* Blush — secondary accent */
+  --color-blush-50:   #FEF6F6;
+  --color-blush-100:  #FCEAEA;
+  --color-blush-200:  #F9CFCF;
+  --color-blush-300:  #F4ABAB;
+  --color-blush-400:  #EC8080;
+  --color-blush-500:  #E05555;
+  --color-blush-600:  #C93C3C;
+  --color-blush-700:  #A82E2E;
+  --color-blush-800:  #852323;
+  --color-blush-900:  #621A1A;
 
-  --color-error-light: #FFF1F2;
-  --color-error-base: #DC2626;
-  --color-error-dark: #991B1B;
-  --color-error-border: #FECACA;
+  /* Sage — optional natural accent */
+  --color-sage-300:   #A8BFA4;
+  --color-sage-500:   #6B9367;
+  --color-sage-700:   #3D5E3A;
 
-  --color-warning-light: #FFFBEB;
-  --color-warning-base: #D97706;
-  --color-warning-dark: #92400E;
-  --color-warning-border: #FDE68A;
+  /* ── Semantic Mapping (Tailwind utility classes) ────────── */
+  --color-background:        #FDFCF9;   /* ivory page bg */
+  --color-foreground:        #1E1B18;   /* charcoal text */
+  --color-muted:             #F5F0E8;   /* subtle bg */
+  --color-muted-foreground:  #726C67;   /* soft label */
+  --color-border:            #EDE6D6;   /* dividers */
+  --color-input:             #EDE6D6;
+  --color-ring:              #D4A91C;   /* focus ring = gold */
 
-  --color-info-light: #EFF6FF;
-  --color-info-base: #2563EB;
-  --color-info-dark: #1E40AF;
-  --color-info-border: #BFDBFE;
+  --color-card:              #FFFFFF;
+  --color-card-foreground:   #1E1B18;
+  --color-popover:           #FFFFFF;
+  --color-popover-foreground:#1E1B18;
 
-  /* Surface Colors */
-  --color-surface-page: #FAFAF9;
-  --color-surface-card: #FFFFFF;
-  --color-surface-overlay: rgba(33, 30, 26, 0.5);
-  --color-surface-sidebar: #F5F4F2;
-  --color-surface-footer: #211E1A;
+  --color-primary:           #1E1B18;   /* deep charcoal CTA */
+  --color-primary-foreground:#FDFCF9;
 
-  /* Colors: Wedding Theme (from joy-knot) */
-  --color-wedding-rose: #f43f5e;
-  --color-wedding-rose-light: #fda4af;
-  --color-wedding-sage: #86efac;
-  --color-wedding-sage-dark: #22c55e;
-  --color-wedding-gold: #fbbf24;
-  --color-wedding-gold-light: #fde68a;
-  --color-wedding-cream: #fefce8;
-  --color-wedding-brown: #a16207;
+  --color-secondary:         #F5F0E8;
+  --color-secondary-foreground: #4A4540;
 
-  /* Colors: Brand (from joy-knot integration) */
-  --color-brand-navy: #14213D;
-  --color-brand-gold: #C9A84C;
+  --color-accent:            #D4A91C;   /* champagne gold */
+  --color-accent-foreground: #FDFCF9;
+
+  --color-destructive:       #C93C3C;
+  --color-destructive-foreground: #FDFCF9;
+
+  /* ── Wedding theme helpers (kept for invitation components) */
+  --color-wedding-rose:       #E05555;
+  --color-wedding-rose-light: #F4ABAB;
+  --color-wedding-sage:       #A8BFA4;
+  --color-wedding-sage-dark:  #6B9367;
+  --color-wedding-gold:       #D4A91C;
+  --color-wedding-gold-light: #F2E09A;
+  --color-wedding-cream:      #FDFCF9;
+  --color-wedding-brown:      #7D5C0C;
+
+  /* ── Brand helpers */
+  --color-brand-navy:       #14213D;
+  --color-brand-gold:       #C9A84C;
   --color-brand-gold-light: #E8C97A;
-  --color-brand-cream: #FDF6EC;
-  --color-brand-rose: #F5E6E8;
+  --color-brand-cream:      #FDFCF9;
+  --color-brand-rose:       #F9CFCF;
 
-  /* Theme Dynamic Colors */
-  --color-theme-bg: var(--theme-bg, #FFFFFF);
-  --color-theme-bg-alt: var(--theme-bg-alt, #FAFAF9);
-  --color-theme-primary: var(--theme-primary, #D4A91C);
-  --color-theme-text: var(--theme-text, #211E1A);
-  --color-theme-text-muted: var(--theme-text-muted, #7A7169);
-  --color-theme-border: var(--theme-border, #E8E5E1);
-  --color-theme-accent: var(--theme-accent, #D4A91C);
+  /* ── Surface Colors */
+  --color-surface-page:    #FDFCF9;
+  --color-surface-card:    #FFFFFF;
+  --color-surface-sidebar: #FDFCF9;
+  --color-surface-footer:  #1E1B18;
 
-  /* Shadows */
-  --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-1: 0 1px 2px rgba(33, 30, 26, 0.06), 0 1px 3px rgba(33, 30, 26, 0.08);
-  /* sm */
-  --shadow-2: 0 4px 6px rgba(33, 30, 26, 0.05), 0 2px 10px rgba(33, 30, 26, 0.08);
-  /* md */
-  --shadow-3: 0 10px 25px rgba(33, 30, 26, 0.1), 0 4px 12px rgba(33, 30, 26, 0.06);
-  /* lg */
-  --shadow-4: 0 20px 60px rgba(33, 30, 26, 0.15), 0 8px 24px rgba(33, 30, 26, 0.1);
-  /* xl */
-  --shadow-gold: 0 4px 16px rgba(212, 169, 28, 0.35);
-  --shadow-inner: inset 0 2px 4px rgba(33, 30, 26, 0.06);
+  /* ── Semantic states */
+  --color-success-light:  #ECFDF5;
+  --color-success-base:   #059669;
+  --color-success-dark:   #065F46;
+  --color-error-light:    #FFF1F2;
+  --color-error-base:     #C93C3C;
+  --color-error-dark:     #851E1E;
+  --color-warning-light:  #FFFBEB;
+  --color-warning-base:   #B88E14;
+  --color-info-light:     #EFF6FF;
+  --color-info-base:      #2563EB;
 
-  /* Shadow Aliases to map to standard Tailwind */
-  --shadow-sm: var(--shadow-1);
-  --shadow-md: var(--shadow-2);
-  --shadow-lg: var(--shadow-3);
-  --shadow-xl: var(--shadow-4);
-
-  /* Border Radius */
-  --radius-none: 0px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
-  --radius-3xl: 32px;
-  --radius-full: 9999px;
-
-  /* Typography Sizes/Styles via Text configuration if needed */
-  /* Re-mapping standard text classes with Design System scale if required */
+  /* ── Typography Scale ───────────────────────────────────── */
   --text-display-2xl: 72px;
-  --text-display-xl: 60px;
-  --text-display-lg: 48px;
+  --text-display-xl:  60px;
+  --text-display-lg:  48px;
   --text-h1: 36px;
   --text-h2: 28px;
   --text-h3: 22px;
@@ -158,379 +141,303 @@
   --text-body-sm: 14px;
   --text-body-xs: 12px;
 
-  /* Animations (from joy-knot) */
+  /* ── Border Radius ─────────────────────────────────────── */
+  --radius-none: 0px;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-3xl:  40px;
+  --radius-full: 9999px;
+  --radius:      8px;  /* shadcn default alias */
+
+  /* ── Shadows ────────────────────────────────────────────── */
+  --shadow-1:  0 1px 2px rgba(30,27,24,.04), 0 1px 4px rgba(30,27,24,.06);
+  --shadow-2:  0 2px 8px rgba(30,27,24,.06), 0 4px 16px rgba(30,27,24,.08);
+  --shadow-3:  0 8px 24px rgba(30,27,24,.10), 0 2px 8px rgba(30,27,24,.06);
+  --shadow-4:  0 20px 60px rgba(30,27,24,.14), 0 8px 24px rgba(30,27,24,.08);
+  --shadow-gold: 0 4px 20px rgba(212,169,28,.30);
+  --shadow-sm:   var(--shadow-1);
+  --shadow-md:   var(--shadow-2);
+  --shadow-lg:   var(--shadow-3);
+  --shadow-xl:   var(--shadow-4);
+
+  /* ── Animations ─────────────────────────────────────────── */
   --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
-  --animate-float: float 3s ease-in-out infinite;
-  --animate-fade-in: fade-in 0.6s ease-out forwards;
-  --animate-fade-in-up: fade-in-up 0.6s ease-out forwards;
-  --animate-slide-up: slide-up 0.8s ease-out forwards;
-  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-accordion-up:   accordion-up 0.2s ease-out;
+  --animate-pulse-soft:     pulse-soft 3s ease-in-out infinite;
+  --animate-float:          float 4s ease-in-out infinite;
+  --animate-fade-in:        fade-in 0.5s ease-out forwards;
+  --animate-fade-in-up:     fade-in-up 0.6s ease-out forwards;
+  --animate-slide-up:       slide-up 0.7s ease-out forwards;
+  --animate-shimmer:        shimmer 2s linear infinite;
 
   @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-
-    to {
-      height: var(--radix-accordion-content-height);
-    }
+    from { height: 0; }
+    to   { height: var(--radix-accordion-content-height); }
   }
-
   @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-
-    to {
-      height: 0;
-    }
+    from { height: var(--radix-accordion-content-height); }
+    to   { height: 0; }
   }
-
   @keyframes pulse-soft {
-
-    0%,
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    50% {
-      opacity: 0.8;
-      transform: scale(1.05);
-    }
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.85; transform:scale(1.03); }
   }
-
   @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-
-    50% {
-      transform: translateY(-10px);
-    }
+    0%,100% { transform:translateY(0); }
+    50%     { transform:translateY(-8px); }
   }
-
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity:0; }
+    to   { opacity:1; }
   }
-
   @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
   }
-
   @keyframes slide-up {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity:0; transform:translateY(32px); }
+    to   { opacity:1; transform:translateY(0); }
   }
-
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0%   { background-position:-200% 0; }
+    100% { background-position:200% 0; }
   }
 }
 
-/* Layer utilities manually mapped */
+/* ── Base Reset ─────────────────────────────────────────────── */
+* {
+  border-color: var(--color-border);
+  outline-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar              { width: 5px; height: 5px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: var(--color-charcoal-200); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover  { background: var(--color-charcoal-300); }
+
+/* ── Selection ──────────────────────────────────────────────── */
+::selection { background: color-mix(in srgb, var(--color-gold-200) 60%, transparent); }
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
 @layer utilities {
   .text-display-2xl {
     font-size: var(--text-display-2xl);
-    line-height: 1.1;
-    letter-spacing: -0.03em;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
     font-family: var(--font-display);
+    font-weight: 300;
   }
-
   .text-display-xl {
     font-size: var(--text-display-xl);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
     font-family: var(--font-display);
+    font-weight: 300;
   }
-
   .text-display-lg {
     font-size: var(--text-display-lg);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
     font-family: var(--font-display);
+    font-weight: 300;
   }
-
   .text-h1 {
     font-size: var(--text-h1);
     line-height: 1.2;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     font-family: var(--font-display);
+    font-weight: 400;
   }
-
   .text-h2 {
     font-size: var(--text-h2);
     line-height: 1.25;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     font-family: var(--font-display);
+    font-weight: 400;
   }
-
   .text-h3 {
     font-size: var(--text-h3);
     line-height: 1.3;
-    letter-spacing: -0.005em;
+    letter-spacing: -0.01em;
     font-family: var(--font-display);
+    font-weight: 400;
   }
-
   .text-h4 {
     font-size: var(--text-h4);
     line-height: 1.4;
-    letter-spacing: 0;
     font-family: var(--font-body);
+    font-weight: 500;
   }
-
   .text-h5 {
     font-size: var(--text-h5);
     line-height: 1.4;
-    letter-spacing: 0;
     font-family: var(--font-body);
+    font-weight: 500;
   }
-
   .text-h6 {
     font-size: var(--text-h6);
     line-height: 1.5;
     letter-spacing: 0.01em;
     font-family: var(--font-body);
+    font-weight: 500;
+  }
+  .text-body-lg { font-size: var(--text-body-lg); line-height: 1.65; font-family: var(--font-body); }
+  .text-body-md { font-size: var(--text-body-md); line-height: 1.65; font-family: var(--font-body); }
+  .text-body-sm { font-size: var(--text-body-sm); line-height: 1.55; font-family: var(--font-body); }
+  .text-body-xs { font-size: var(--text-body-xs); line-height: 1.45; font-family: var(--font-body); }
+  .text-label-lg { font-size:14px; line-height:1; letter-spacing:.04em; font-weight:600; text-transform:uppercase; }
+  .text-label-sm { font-size:11px; line-height:1; letter-spacing:.06em; font-weight:600; text-transform:uppercase; }
+  .text-caption  { font-size:11px; line-height:1.4; letter-spacing:.01em; }
+  .text-overline { font-size:10px; line-height:1; letter-spacing:.14em; font-weight:700; text-transform:uppercase; }
+
+  /* Container helpers */
+  .container-xs  { max-width:480px;  margin-left:auto; margin-right:auto; }
+  .container-sm  { max-width:640px;  margin-left:auto; margin-right:auto; }
+  .container-md  { max-width:768px;  margin-left:auto; margin-right:auto; }
+  .container-lg  { max-width:1024px; margin-left:auto; margin-right:auto; }
+  .container-xl  { max-width:1200px; margin-left:auto; margin-right:auto; }
+
+  /* ── Gold gradient text (used on headings) */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #c9a84c 0%, #f0d080 35%, #c9a84c 55%, #e8c068 75%, #a07830 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .text-body-lg {
-    font-size: var(--text-body-lg);
-    line-height: 1.6;
-    font-family: var(--font-body);
+  /* ── Divider with center ornament */
+  .divider-gold {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .divider-gold::before,
+  .divider-gold::after {
+    content: '';
+    flex: 1;
+    max-width: 64px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #D4A91C, transparent);
   }
 
-  .text-body-md {
-    font-size: var(--text-body-md);
-    line-height: 1.6;
-    font-family: var(--font-body);
+  /* ── Subtle page grain texture */
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
   }
 
-  .text-body-sm {
-    font-size: var(--text-body-sm);
-    line-height: 1.5;
-    font-family: var(--font-body);
+  /* ── Glass card */
+  .card-glass {
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: 0 8px 32px rgba(30,27,24,.10), inset 0 1px 0 rgba(255,255,255,0.7);
   }
 
-  .text-body-xs {
-    font-size: var(--text-body-xs);
-    line-height: 1.4;
-    font-family: var(--font-body);
+  /* ── Luxury card — bordered with gold top accent */
+  .card-luxury {
+    background: #FFFFFF;
+    border: 1px solid #EDE6D6;
+    border-top: 2px solid #D4A91C;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(30,27,24,.07), 0 1px 4px rgba(30,27,24,.05);
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+  }
+  .card-luxury:hover {
+    box-shadow: 0 12px 40px rgba(30,27,24,.11), 0 2px 8px rgba(30,27,24,.07);
+    transform: translateY(-2px);
   }
 
-  .text-label-lg {
-    font-size: 14px;
-    line-height: 1;
-    letter-spacing: 0.01em;
+  /* ── Sidebar item active state */
+  .sidebar-item-active {
+    background: linear-gradient(90deg, rgba(212,169,28,.12) 0%, transparent 100%);
+    border-left: 2px solid #D4A91C;
+    color: #1E1B18;
     font-weight: 600;
   }
 
-  .text-label-sm {
-    font-size: 12px;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    font-weight: 600;
+  /* ── Invitation section base — all components inherit this */
+  .section-invite {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: #FDFCF9;
   }
 
-  .text-caption {
-    font-size: 11px;
-    line-height: 1.4;
-    letter-spacing: 0.02em;
-  }
-
-  .text-overline {
-    font-size: 11px;
-    line-height: 1;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  /* Container Sizes */
-  .container-xs {
-    max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .container-sm {
-    max-width: 640px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .container-md {
-    max-width: 768px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .container-lg {
-    max-width: 1024px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .container-xl {
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  /* ============================================================
-     SKEUOMORPHIC UTILITY LAYER
-     Usage: tambahkan class ke elemen HTML/JSX manapun.
-     Tidak mengganggu class Tailwind atau shadcn/ui yang sudah ada.
-     ============================================================ */
-
-  /* -- Shadow variables (tersedia global) -- */
+  /* ── Skeuomorphic helpers (kept from v1, refined) */
   :root {
-    /* Raised surface — tombol, kartu, badge */
     --skeu-shadow-raised:
-      4px 4px 10px rgba(0, 0, 0, 0.15),
-      -2px -2px 8px rgba(255, 255, 255, 0.75);
-
-    /* Pressed / aktif state — tombol ditekan */
+      0 1px 3px rgba(0,0,0,.10),
+      0 4px 12px rgba(0,0,0,.08),
+      inset 0 1px 0 rgba(255,255,255,.9);
     --skeu-shadow-pressed:
-      inset 3px 3px 8px rgba(0, 0, 0, 0.15),
-      inset -2px -2px 6px rgba(255, 255, 255, 0.6);
-
-    /* Card depth — section card undangan */
+      inset 2px 2px 6px rgba(0,0,0,.12),
+      inset -1px -1px 4px rgba(255,255,255,.55);
     --skeu-shadow-card:
-      8px 8px 24px rgba(0, 0, 0, 0.12),
-      -4px -4px 16px rgba(255, 255, 255, 0.85);
-
-    /* Gold foil — border/divider dengan aksen emas */
-    --skeu-shadow-gold:
-      0 2px 8px rgba(212, 169, 28, 0.4),
-      0 -1px 4px rgba(255, 235, 150, 0.5),
-      inset 0 1px 0 rgba(255, 248, 200, 0.6);
-
-    /* Paper texture — background undangan, kertas linen */
-    --skeu-bg-paper:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.015) 2px,
-        rgba(0,0,0,0.015) 4px
-      );
-
-    /* Velvet / fabric — cover section undangan */
-    --skeu-bg-velvet:
-      radial-gradient(
-        ellipse at 30% 30%,
-        rgba(255, 255, 255, 0.08) 0%,
-        transparent 60%
-      );
+      0 4px 16px rgba(30,27,24,.08),
+      0 1px 4px rgba(30,27,24,.06),
+      inset 0 1px 0 rgba(255,255,255,.8);
   }
-
-  /* Raised surface — tombol utama, badge, section header */
   .skeu-raised {
     box-shadow: var(--skeu-shadow-raised);
     transition: box-shadow 0.15s ease, transform 0.1s ease;
   }
-  .skeu-raised:active {
-    box-shadow: var(--skeu-shadow-pressed);
-    transform: translateY(1px);
+  .skeu-raised:active { box-shadow: var(--skeu-shadow-pressed); transform: translateY(1px); }
+  .skeu-pressed { box-shadow: var(--skeu-shadow-pressed); }
+  .skeu-card    { box-shadow: var(--skeu-shadow-card); border: 1px solid rgba(255,255,255,.6); }
+  .skeu-inset   {
+    box-shadow: inset 2px 2px 8px rgba(0,0,0,.08), inset -1px -1px 4px rgba(255,255,255,.7);
+    border: 1px solid rgba(0,0,0,.06);
   }
-
-  /* Pressed / inset — input aktif, toggle on */
-  .skeu-pressed {
-    box-shadow: var(--skeu-shadow-pressed);
+  .skeu-gold    {
+    box-shadow: 0 2px 8px rgba(212,169,28,.25), inset 0 1px 0 rgba(255,248,200,.6);
+    border: 1px solid rgba(212,169,28,.40);
   }
-
-  /* Card depth — wrapper section undangan */
-  .skeu-card {
-    box-shadow: var(--skeu-shadow-card);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+  .skeu-paper   {
+    background-color: #FDFCF9;
+    box-shadow: inset 0 0 60px rgba(0,0,0,.025);
   }
-
-  /* Gold accent — border emas di divider, ornamen */
-  .skeu-gold {
-    box-shadow: var(--skeu-shadow-gold);
-    border: 1px solid rgba(212, 169, 28, 0.45);
-    background-image: linear-gradient(
-      135deg,
-      rgba(255, 245, 180, 0.15) 0%,
-      transparent 50%,
-      rgba(212, 169, 28, 0.08) 100%
-    );
+  .skeu-velvet  {
+    box-shadow: inset 0 2px 20px rgba(0,0,0,.20), inset 0 -2px 10px rgba(0,0,0,.12);
   }
-
-  /* Paper texture — latar belakang undangan */
-  .skeu-paper {
-    background-image: var(--skeu-bg-paper);
-    background-color: #FDFBF7;
-    box-shadow:
-      inset 0 0 40px rgba(0, 0, 0, 0.04),
-      0 1px 3px rgba(0, 0, 0, 0.08);
-  }
-
-  /* Velvet / cover mewah — hero section, cover undangan */
-  .skeu-velvet {
-    background-image: var(--skeu-bg-velvet);
-    box-shadow:
-      inset 0 2px 20px rgba(0, 0, 0, 0.25),
-      inset 0 -2px 10px rgba(0, 0, 0, 0.15),
-      4px 4px 20px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  /* Inner relief — frame foto, section quote */
-  .skeu-inset {
-    box-shadow:
-      inset 4px 4px 12px rgba(0, 0, 0, 0.12),
-      inset -2px -2px 8px rgba(255, 255, 255, 0.7),
-      0 1px 3px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-  }
-
-  /* Glass panel — overlay card di atas foto */
-  .skeu-glass {
-    background: rgba(255, 255, 255, 0.18);
+  .skeu-glass   {
+    background: rgba(255,255,255,.18);
     backdrop-filter: blur(12px) saturate(1.4);
     -webkit-backdrop-filter: blur(12px) saturate(1.4);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255,255,255,.35);
+    box-shadow: 0 8px 32px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.5);
   }
-
-  /* Emboss text — nama mempelai, judul section */
-  .skeu-text-emboss {
-    text-shadow:
-      1px 1px 2px rgba(255, 255, 255, 0.8),
-      -1px -1px 2px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Deboss text — subtitle, caption */
-  .skeu-text-deboss {
-    text-shadow:
-      1px 1px 0px rgba(255, 255, 255, 0.6),
-      -1px -1px 1px rgba(0, 0, 0, 0.3);
-  }
-
-  /* Gold foil text — aksen nama mempelai, ornamen */
+  .skeu-text-emboss { text-shadow: 1px 1px 2px rgba(255,255,255,.8), -1px -1px 2px rgba(0,0,0,.15); }
+  .skeu-text-deboss { text-shadow: 1px 1px 0 rgba(255,255,255,.5), -1px -1px 1px rgba(0,0,0,.25); }
   .skeu-text-gold {
-    background: linear-gradient(
-      135deg,
-      #c9a84c 0%,
-      #f0d080 30%,
-      #c9a84c 50%,
-      #f0d080 70%,
-      #a07830 100%
-    );
+    background: linear-gradient(135deg, #c9a84c 0%, #f0d080 35%, #c9a84c 55%, #e8c068 75%, #a07830 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.15));
   }
 }
