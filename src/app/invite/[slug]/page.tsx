@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from './InvitationClientWrapper';
 import ViewTracker from './ViewTracker';
+import ParallaxWrapper from './ParallaxWrapper';
 
 export const revalidate = 0;
 
@@ -62,6 +63,7 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
             slug,
             status,
             created_at,
+            active_theme_id,
             groom_full_name,
             groom_nickname,
             groom_father_name,
@@ -115,24 +117,24 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
 
     data.groom = { ...demoData.groom };
     data.groom.nickname = groomNick;
-    if (invitation.groom_full_name)   data.groom.fullName = invitation.groom_full_name;
-    if (invitation.groom_father_name) data.groom.father   = `Bapak ${invitation.groom_father_name}`;
-    if (invitation.groom_mother_name) data.groom.mother   = `Ibu ${invitation.groom_mother_name}`;
+    if (invitation.groom_full_name) data.groom.fullName = invitation.groom_full_name;
+    if (invitation.groom_father_name) data.groom.father = `Bapak ${invitation.groom_father_name}`;
+    if (invitation.groom_mother_name) data.groom.mother = `Ibu ${invitation.groom_mother_name}`;
 
     data.bride = { ...demoData.bride };
     data.bride.nickname = brideNick;
-    if (invitation.bride_full_name)   data.bride.fullName = invitation.bride_full_name;
-    if (invitation.bride_father_name) data.bride.father   = `Bapak ${invitation.bride_father_name}`;
-    if (invitation.bride_mother_name) data.bride.mother   = `Ibu ${invitation.bride_mother_name}`;
+    if (invitation.bride_full_name) data.bride.fullName = invitation.bride_full_name;
+    if (invitation.bride_father_name) data.bride.father = `Bapak ${invitation.bride_father_name}`;
+    if (invitation.bride_mother_name) data.bride.mother = `Ibu ${invitation.bride_mother_name}`;
 
     data.akad = { ...demoData.akad };
-    if (invitation.akad_datetime)         data.akad.date    = invitation.akad_datetime;
-    if (invitation.akad_location_name)    data.akad.venue   = invitation.akad_location_name;
+    if (invitation.akad_datetime) data.akad.date = invitation.akad_datetime;
+    if (invitation.akad_location_name) data.akad.venue = invitation.akad_location_name;
     if (invitation.akad_location_address) data.akad.address = invitation.akad_location_address;
 
     data.reception = { ...demoData.reception };
-    if (invitation.resepsi_datetime)         data.reception.date    = invitation.resepsi_datetime;
-    if (invitation.resepsi_location_name)    data.reception.venue   = invitation.resepsi_location_name;
+    if (invitation.resepsi_datetime) data.reception.date = invitation.resepsi_datetime;
+    if (invitation.resepsi_location_name) data.reception.venue = invitation.resepsi_location_name;
     if (invitation.resepsi_location_address) data.reception.address = invitation.resepsi_location_address;
 
     if (invitation.quote_text) {
@@ -144,7 +146,11 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
 
     return (
         <>
-            <InvitationClientWrapper data={data} invitationId={invitation.id} />
+            <ParallaxWrapper
+                data={data}
+                invitationId={invitation.id}
+                activeThemeId={invitation.active_theme_id ?? null}
+            />
             <ViewTracker slug={slug} isPreview={isPreview} />
         </>
     );
