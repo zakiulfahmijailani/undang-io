@@ -26,8 +26,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
 # ============================================================
 # CONFIG - isi sesuai project Supabase kamu
 # ============================================================
-SUPABASE_URL = "https://XXXX.supabase.co"          # ganti XXXX
-SUPABASE_SERVICE_KEY = "eyJ..."                     # service_role key (bukan anon)
+SUPABASE_URL = "https://zbhjomuenjacoepwpiyw.supabase.co"          # ganti XXXX
+SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpiaGpvbXVlbmphY29lcHdwaXl3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzQ4ODQ1MCwiZXhwIjoyMDg5MDY0NDUwfQ.HyU0FrooJbZwfbggtKQrIX0K_ybxtTIshJSEFc9Jtsk"                     # service_role key (bukan anon)
 BUCKET_NAME = "music"
 MUSIC_FOLDER = os.path.join(os.path.dirname(__file__), "music")
 # ============================================================

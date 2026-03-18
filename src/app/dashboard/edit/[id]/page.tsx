@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect, use, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import {
   ChevronRight, ChevronLeft, Save, Sparkles,
   Image as ImageIcon, Plus, Trash2, Loader2,
-  ToggleLeft, ToggleRight
+  ToggleLeft, ToggleRight, MapPin, Search, X
 } from "lucide-react"
+import { VenueAutocomplete } from "@/components/ui/VenueAutocomplete"
 
 // ─── Primitives (shared with create page) ─────────────────────────────────────────────
 function ToggleSection({ enabled, onToggle, label, children }: {
@@ -170,6 +171,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
           giftBank:     !!(d.gift_bank_account),
           giftAddress:  !!(d.gift_shipping_address),
           showGallery:  !!(d.show_prewed_gallery),
+          mapsUrl:      !!(d.akad_maps_url || d.resepsi_maps_url),
         }))
         upX({
           groomFather:    d.groom_father_name || "",
@@ -180,6 +182,8 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
           bankAccount:    d.gift_bank_account || "",
           bankAccountName: d.gift_bank_account_name || "",
           giftAddress:    d.gift_shipping_address || "",
+          akadMapsUrl:    d.akad_maps_url || "",
+          receptionMapsUrl: d.resepsi_maps_url || "",
         })
       } catch (err: any) {
         console.error(err)
@@ -223,6 +227,8 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
           show_gift_section:    opt.giftBank || opt.giftAddress || opt.qris,
           show_couple_photos:   opt.groomPhoto || opt.bridePhoto,
           show_prewed_gallery:  opt.gallery,
+          akad_maps_url: (f.eventType === "akad" || f.eventType === "akad_resepsi") ? x.akadMapsUrl : null,
+          resepsi_maps_url: (f.eventType === "resepsi" || f.eventType === "akad_resepsi") ? x.receptionMapsUrl : null,
         })
       })
 
@@ -331,7 +337,30 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                     <TInput label="Tanggal" required type="date" value={f.akadDate} onChange={v => upF({ akadDate: v })} />
                     <TInput label="Waktu" required type="time" value={f.akadTime} onChange={v => upF({ akadTime: v })} />
                   </div>
-                  <TInput label="Nama Venue" required value={f.akadVenue} onChange={v => upF({ akadVenue: v })} placeholder="Masjid Al-Ikhlas" />
+                  <VenueAutocomplete
+                    label="Nama Venue" required
+                    value={f.akadVenue}
+                    placeholder="Ketik nama masjid atau gedung..."
+                    onSelect={(name, address, mapsUrl) => {
+                      upF({ akadVenue: name, akadAddress: address })
+                      if (mapsUrl) {
+                        upX({ akadMapsUrl: mapsUrl })
+                        setOpt(p => ({ ...p, mapsUrl: true }))
+                      }
+                    }}
+                  />
+                  {x.akadMapsUrl && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FAF8F3] border border-[#EDE6D6]">
+                      <MapPin className="w-3.5 h-3.5 text-[#D4A91C]" />
+                      <a href={x.akadMapsUrl} target="_blank" rel="noopener noreferrer"
+                         className="text-xs text-[#D4A91C] hover:underline truncate">
+                        Buka di Google Maps
+                      </a>
+                      <button type="button" onClick={() => upX({ akadMapsUrl: '' })} className="ml-auto">
+                        <X className="w-3 h-3 text-[#C2BEB8]" />
+                      </button>
+                    </div>
+                  )}
                   <TInput label="Alamat Lengkap" required value={f.akadAddress} onChange={v => upF({ akadAddress: v })} placeholder="Jl. Kebon Jeruk..." />
                 </>
               )}
@@ -342,11 +371,35 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                     <TInput label="Tanggal" required type="date" value={f.receptionDate} onChange={v => upF({ receptionDate: v })} />
                     <TInput label="Waktu" required type="time" value={f.receptionTime} onChange={v => upF({ receptionTime: v })} />
                   </div>
-                  <TInput label="Nama Venue" required value={f.receptionVenue} onChange={v => upF({ receptionVenue: v })} placeholder="Gedung Sabuga" />
+                  <VenueAutocomplete
+                    label="Nama Venue" required
+                    value={f.receptionVenue}
+                    placeholder="Ketik nama masjid atau gedung..."
+                    onSelect={(name, address, mapsUrl) => {
+                      upF({ receptionVenue: name, receptionAddress: address })
+                      if (mapsUrl) {
+                        upX({ receptionMapsUrl: mapsUrl })
+                        setOpt(p => ({ ...p, mapsUrl: true }))
+                      }
+                    }}
+                  />
+                  {x.receptionMapsUrl && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FAF8F3] border border-[#EDE6D6]">
+                      <MapPin className="w-3.5 h-3.5 text-[#D4A91C]" />
+                      <a href={x.receptionMapsUrl} target="_blank" rel="noopener noreferrer"
+                         className="text-xs text-[#D4A91C] hover:underline truncate">
+                        Buka di Google Maps
+                      </a>
+                      <button type="button" onClick={() => upX({ receptionMapsUrl: '' })} className="ml-auto">
+                        <X className="w-3 h-3 text-[#C2BEB8]" />
+                      </button>
+                    </div>
+                  )}
                   <TInput label="Alamat Lengkap" required value={f.receptionAddress} onChange={v => upF({ receptionAddress: v })} placeholder="Jl. Tamansari No.73..." />
                 </>
               )}
-              <ToggleSection enabled={opt.mapsUrl} onToggle={() => toggleOpt('mapsUrl')} label="Link Google Maps">
+              <ToggleSection enabled={opt.mapsUrl} onToggle={() => toggleOpt('mapsUrl')} label="Override Link Maps Manual">
+                <p className="text-xs text-[#9A9390]">Isi manual jika link otomatis tidak akurat.</p>
                 {(f.eventType === "akad" || f.eventType === "akad_resepsi") &&
                   <TInput label="Maps URL Akad" value={x.akadMapsUrl} onChange={v => upX({ akadMapsUrl: v })} placeholder="https://maps.app.goo.gl/..." />}
                 {(f.eventType === "resepsi" || f.eventType === "akad_resepsi") &&
