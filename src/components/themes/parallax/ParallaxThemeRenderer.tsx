@@ -128,7 +128,14 @@ export function ParallaxThemeRenderer({
     });
 
     const { config } = theme;
-    const { tiltStrength, scrollStrength, lerpFactor, gyroEnabled, zoomEnabled } = config.animation;
+    const animation = config.animation ?? {
+        tiltStrength: 12,
+        scrollStrength: 0.35,
+        lerpFactor: 0.08,
+        gyroEnabled: true,
+        zoomEnabled: true,
+    };
+    const { tiltStrength, scrollStrength, lerpFactor, gyroEnabled, zoomEnabled } = animation;
 
     useEffect(() => {
         const isMobile = window.matchMedia('(pointer: coarse)').matches;
