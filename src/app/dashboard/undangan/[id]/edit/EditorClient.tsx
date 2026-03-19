@@ -475,13 +475,37 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                             >
                                                 <Icon className="w-3.5 h-3.5" />
                                                 <span>{tab.label}</span>
-                                                {/* dot visibility */}
-                                                {sectionId && (
-                                                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isVisible === false ? "bg-stone-400" : "bg-emerald-400"
-                                                        }`} />
-                                                )}
                                                 {isLocked && <Lock className="w-2.5 h-2.5 opacity-40" />}
                                             </button>
+
+                                            {/* Toggle on/off — explicit untuk mobile, hanya jika punya sectionId dan tidak locked */}
+                                            {sectionId && !isLocked && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const current = sectionId in (formData.sections_visibility as any)
+                                                            ? (formData.sections_visibility as any)[sectionId]
+                                                            : true;
+                                                        handleChange("sections_visibility", {
+                                                            ...(formData.sections_visibility as any),
+                                                            [sectionId]: !current,
+                                                        });
+                                                    }}
+                                                    className={`flex items-center gap-1 px-2 py-1.5 mx-1 rounded-xl border text-[10px] font-bold transition-all flex-shrink-0 ${isVisible !== false
+                                                        ? "bg-emerald-500 border-emerald-500 text-white"
+                                                        : "bg-stone-200 border-stone-300 text-stone-400"
+                                                        }`}
+                                                    title={isVisible !== false ? "Tampil" : "Disembunyikan"}
+                                                >
+                                                    <span className={`w-5 h-3 rounded-full relative flex items-center transition-colors ${isVisible !== false ? "bg-white/30" : "bg-stone-300/40"
+                                                        }`}>
+                                                        <span className={`absolute top-0.5 w-2 h-2 bg-white rounded-full shadow transition-transform ${isVisible !== false ? "translate-x-2.5" : "translate-x-0.5"
+                                                            }`} />
+                                                    </span>
+                                                    {isVisible !== false ? "ON" : "OFF"}
+                                                </button>
+                                            )}
                                         </div>
                                     );
                                 })}
