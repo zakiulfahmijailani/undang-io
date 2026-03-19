@@ -1,315 +1,330 @@
 "use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Heart, Sparkles, Clock, Palette, Share2,
-  MessageSquare, ChevronRight, Star, Check, ArrowRight
+import Link from 'next/link';
+import { 
+  ArrowRight, 
+  CheckCircle2, 
+  XCircle, 
+  Sparkles, 
+  Layout, 
+  Navigation,
+  ArrowUpRight,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-
-const features = [
-  { icon: Sparkles, title: 'Langsung Jadi',       desc: 'Undangan lengkap dalam 5 menit. Tanpa ribet, tanpa coding.' },
-  { icon: Palette,  title: 'Ratusan Tema',         desc: 'Jawa, Bali, Minang, Modern, Islami, dan masih banyak lagi.' },
-  { icon: Share2,   title: 'Bagikan via WhatsApp', desc: 'Satu link untuk semua tamu. Mudah, cepat, elegan.' },
-  { icon: MessageSquare, title: 'RSVP & Ucapan',  desc: 'Tamu konfirmasi kehadiran dan kirim ucapan langsung.' },
-  { icon: Clock,    title: 'Live Selamanya',        desc: 'Bayar sekali, undangan aktif untuk selamanya.' },
-  { icon: Heart,    title: 'Desain Premium',        desc: 'Tampilan mewah yang indah di semua perangkat.' },
-];
-
-const testimonials = [
-  { name: 'Rina & Dimas', text: 'Undangan digitalnya cantik sekali dan sangat mudah dibuat. Tamu-tamu kami langsung terpesona!', location: 'Jakarta', initial: 'RD' },
-  { name: 'Ayu & Budi',   text: 'Hanya 5 menit dan undangan sudah jadi. Praktis dan tampilannya mewah.', location: 'Bandung', initial: 'AB' },
-  { name: 'Sari & Eko',   text: 'Tema Jawa Klasiknya membuat undangan kami terasa sangat personal dan mewah.', location: 'Yogyakarta', initial: 'SE' },
-];
-
-const themes = [
-  { id: 'jawa',    name: 'Jawa Klasik',       cat: 'Budaya',   img: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=560&fit=crop&q=80' },
-  { id: 'bali',    name: 'Bali Tropis',        cat: 'Budaya',   img: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&h=560&fit=crop&q=80' },
-  { id: 'modern',  name: 'Modern Minimalis',   cat: 'Modern',   img: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=560&fit=crop&q=80' },
-];
-
-const pricing = [
-  'Undangan live selamanya',
-  'Link undangan permanen',
-  'Bebas edit kapan saja',
-  'RSVP & ucapan tamu',
-  'Ratusan tema premium',
-  'Bagikan via WhatsApp',
-  'Tersimpan di akun kamu',
-];
 
 export default function LandingPage() {
   const router = useRouter();
 
-  return (
-    <div className="min-h-screen bg-[#FDFCF9] text-[#1E1B18]">
+  const showcases = [
+    {
+      title: "The Minimalist",
+      desc: "Architectural lines meet ivory whites.",
+      img: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80",
+      className: "md:col-span-2 md:row-span-2",
+      gradient: "from-primary-stitch/80"
+    },
+    {
+      title: "Luxe Rose",
+      desc: "",
+      img: "https://images.unsplash.com/photo-1522673607200-164883eecd4c?w=600&q=80",
+      className: "md:col-span-2 h-[300px]",
+      gradient: "from-tertiary-stitch/60"
+    },
+    {
+      title: "Midnight",
+      desc: "",
+      img: "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80",
+      className: "md:col-span-1 h-[300px]",
+      gradient: "from-primary-stitch/20"
+    },
+    {
+      title: "Botanical",
+      desc: "",
+      img: "https://images.unsplash.com/photo-1544078751-58fee2d8a03b?w=600&q=80",
+      className: "md:col-span-1 h-[300px]",
+      gradient: "from-primary-stitch/10"
+    }
+  ];
 
-      {/* ── Navbar ─────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 h-16 flex items-center border-b border-[#EDE6D6] bg-[#FDFCF9]/90 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#1E1B18] flex items-center justify-center">
-              <Heart className="w-3.5 h-3.5 text-[#D4A91C]" fill="currentColor" />
-            </div>
-            <span className="font-display text-lg font-medium tracking-tight">
-              undang<span className="text-[#D4A91C]">.io</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="text-sm text-[#4A4540] hover:text-[#1E1B18]" asChild>
-              <Link href="/login">Masuk</Link>
-            </Button>
-            <Button size="sm" className="bg-[#1E1B18] text-[#FDFCF9] hover:bg-[#302C28] rounded-full px-5 text-sm" asChild>
-              <Link href="/register">Mulai Gratis</Link>
-            </Button>
+  return (
+    <div className="bg-surface-stitch text-on-surface-stitch selection:bg-tertiary-fixed-dim-stitch font-sans antialiased">
+      
+      {/* ── TopNavBar ── */}
+      <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant-stitch/20">
+        <div className="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+          <div className="text-2xl font-black tracking-tighter text-primary-stitch">Undang-io</div>
+          <div className="hidden md:flex space-x-12 items-center tracking-tight font-medium">
+            <Link className="text-secondary-stitch hover:text-primary-stitch transition-colors" href="#features">Features</Link>
+            <Link className="text-secondary-stitch hover:text-primary-stitch transition-colors" href="#pricing">Pricing</Link>
+            <Link className="text-secondary-stitch hover:text-primary-stitch transition-colors" href="#showcase">Showcase</Link>
+          </div>
+          <div className="flex items-center space-x-6">
+            <button 
+              onClick={() => router.push('/login')}
+              className="text-secondary-stitch hover:text-primary-stitch transition-all duration-300 font-medium scale-95 active:scale-90"
+            >
+              Login
+            </button>
+            <button 
+              onClick={() => router.push('/register')}
+              className="bg-primary-stitch text-on-primary-stitch px-8 py-3 rounded-full font-bold scale-95 active:scale-90 transition-transform hover:opacity-90 shadow-lg shadow-primary-stitch/20"
+            >
+              Get Started
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero ───────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-20 pb-24 md:pt-28 md:pb-32">
-        {/* subtle grain overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-grain opacity-60" />
-        {/* warm gradient */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#F5F0E8]/60 via-transparent to-[#FAF8F3]/40" />
-
-        <div className="relative mx-auto max-w-6xl px-5">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
-
-            {/* Left: Headline */}
-            <div className="animate-fade-in-up">
-              <Badge className="mb-6 bg-[#F5F0E8] text-[#7D5C0C] border-[#D4A91C]/30 font-medium tracking-wide text-xs px-3 py-1.5 rounded-full">
-                ✦ Coba Gratis — Tanpa Daftar
-              </Badge>
-              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-light leading-[1.06] tracking-tight text-[#1E1B18] mb-6">
-                Undangan
-                <br />
-                <em className="not-italic text-gold-gradient">Pernikahan</em>
-                <br />
-                Digital Kamu
-              </h1>
-              <p className="text-[#726C67] text-lg md:text-xl leading-relaxed mb-10 max-w-md">
-                Buat, publish, dan bagikan undangan elegan dalam 5 menit.
-                Bayar sekali <span className="font-semibold text-[#1E1B18]">Rp 49.000</span>, live selamanya.
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  onClick={() => router.push('/buat-undangan')}
-                  className="bg-[#1E1B18] hover:bg-[#302C28] text-[#FDFCF9] rounded-full px-8 py-3 h-auto text-base font-medium gap-2 group shadow-lg"
-                >
-                  Mulai Buat Undangan
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-                <Button
-                  onClick={() => router.push('/invite/demo')}
-                  variant="outline"
-                  className="rounded-full px-8 py-3 h-auto text-base border-[#EDE6D6] hover:border-[#D4A91C] hover:bg-[#FDFCF9] text-[#1E1B18]"
-                >
-                  Lihat Contoh
-                </Button>
-              </div>
-
-              {/* Social proof */}
-              <div className="mt-10 flex items-center gap-4">
-                <div className="flex -space-x-2">
-                  {['RD','AB','SE','KW','FH'].map((i,n) => (
-                    <div key={n} className="w-8 h-8 rounded-full bg-[#EDE6D6] border-2 border-[#FDFCF9] flex items-center justify-center text-[9px] font-bold text-[#4A4540]">{i}</div>
-                  ))}
-                </div>
-                <div>
-                  <div className="flex gap-0.5 mb-0.5">{[...Array(5)].map((_,j)=><Star key={j} className="w-3 h-3 fill-[#D4A91C] text-[#D4A91C]" />)}</div>
-                  <p className="text-xs text-[#726C67]">1,200+ pasangan sudah memakai undang.io</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Floating card preview */}
-            <div className="relative flex justify-center lg:justify-end animate-fade-in">
-              <div className="relative w-64 md:w-72">
-                {/* Main card */}
-                <div className="card-glass rounded-3xl overflow-hidden shadow-xl">
-                  <img
-                    src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=560&fit=crop&q=80"
-                    alt="Contoh undangan"
-                    className="w-full h-80 object-cover"
-                  />
-                  <div className="p-5">
-                    <p className="text-xs text-[#726C67] tracking-widest uppercase mb-1">The Wedding of</p>
-                    <p className="font-script text-3xl text-[#1E1B18]">Rina & Dimas</p>
-                    <p className="text-xs text-[#726C67] mt-1">15 Maret 2026 · Yogyakarta</p>
-                  </div>
-                </div>
-                {/* Floating badge */}
-                <div className="absolute -bottom-4 -left-6 card-glass rounded-2xl px-4 py-3 shadow-lg animate-float">
-                  <p className="text-xs font-semibold text-[#1E1B18]">✓ Live dalam 5 menit</p>
-                </div>
-                {/* Floating stat */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 rounded-2xl bg-[#1E1B18] flex flex-col items-center justify-center shadow-xl">
-                  <p className="text-lg font-bold text-[#D4A91C] leading-none">49k</p>
-                  <p className="text-[8px] text-[#FDFCF9]/70 mt-0.5">Rp saja</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Theme Strip ────────────────────────────────────── */}
-      <section className="border-y border-[#EDE6D6] py-16 bg-[#FAF8F3]">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center mb-12">
-            <p className="text-overline text-[#D4A91C] mb-3">Koleksi Tema</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18]">Pilih Gaya Kamu</h2>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-3">
-            {themes.map(t => (
-              <div key={t.id} className="group card-luxury overflow-hidden cursor-pointer" onClick={() => router.push('/buat-undangan')}>
-                <div className="relative aspect-[3/4] overflow-hidden">
-                  <img src={t.img} alt={t.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B18]/60 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <Badge className="bg-[#D4A91C] text-[#1E1B18] text-[10px] px-2 py-0.5 font-semibold mb-2">{t.cat}</Badge>
-                    <p className="text-white font-display text-2xl font-light">{t.name}</p>
-                  </div>
-                </div>
-                <div className="p-4 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-[#1E1B18]">Rp 49.000</span>
-                  <ChevronRight className="w-4 h-4 text-[#D4A91C] transition-transform group-hover:translate-x-1" />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <Button variant="outline" className="rounded-full px-8 border-[#D4A91C]/40 text-[#7D5C0C] hover:bg-[#FAF8F3]" onClick={() => router.push('/buat-undangan')}>
-              Lihat Semua Tema
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ───────────────────────────────────────── */}
-      <section className="py-20">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center mb-14">
-            <p className="text-overline text-[#D4A91C] mb-3">Kenapa undang.io</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18]">Semua yang Kamu Butuhkan</h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f, i) => (
-              <div key={i} className="group p-7 rounded-2xl border border-[#EDE6D6] bg-white hover:border-[#D4A91C]/50 hover:shadow-md transition-all duration-300">
-                <div className="w-10 h-10 rounded-xl bg-[#F5F0E8] flex items-center justify-center mb-5 group-hover:bg-[#D4A91C]/10 transition-colors">
-                  <f.icon className="w-5 h-5 text-[#D4A91C]" />
-                </div>
-                <h3 className="font-semibold text-[#1E1B18] mb-2">{f.title}</h3>
-                <p className="text-sm text-[#726C67] leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pricing ────────────────────────────────────────── */}
-      <section className="py-20 bg-[#1E1B18]">
-        <div className="mx-auto max-w-md px-5 text-center">
-          <p className="text-overline text-[#D4A91C] mb-4">Harga</p>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-[#FDFCF9] mb-12">Simpel & Transparan</h2>
-          <div className="rounded-3xl overflow-hidden border border-white/10">
-            {/* Header */}
-            <div className="bg-[#D4A91C] px-8 pt-10 pb-8 text-center">
-              <p className="text-xs uppercase tracking-widest text-[#1E1B18]/70 mb-2">Per Undangan</p>
-              <div className="flex items-baseline justify-center gap-2 mb-2">
-                <span className="font-display text-5xl font-light text-[#1E1B18]">Rp 49.000</span>
-              </div>
-              <p className="text-sm text-[#1E1B18]/60 line-through">Rp 99.000</p>
-              <span className="inline-block mt-3 bg-[#1E1B18] text-[#D4A91C] text-xs font-bold px-3 py-1 rounded-full">HEMAT 51%</span>
-            </div>
-            {/* Features list */}
-            <div className="bg-white px-8 py-8">
-              <ul className="space-y-4 text-left">
-                {pricing.map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-[#D4A91C]/15 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-[#D4A91C]" strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[#1E1B18]">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                className="mt-8 w-full bg-[#1E1B18] hover:bg-[#302C28] text-[#FDFCF9] rounded-full py-3 h-auto text-base font-medium"
-                onClick={() => router.push('/buat-undangan')}
-              >
-                Buat Undangan Sekarang
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ───────────────────────────────────── */}
-      <section className="py-20 bg-[#FAF8F3]">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center mb-14">
-            <p className="text-overline text-[#D4A91C] mb-3">Testimoni</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18]">Kata Mereka</h2>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((t, i) => (
-              <div key={i} className="bg-white rounded-2xl p-7 border border-[#EDE6D6] hover:shadow-md transition-shadow">
-                <div className="flex gap-0.5 mb-5">
-                  {[...Array(5)].map((_,j) => <Star key={j} className="w-4 h-4 fill-[#D4A91C] text-[#D4A91C]" />)}
-                </div>
-                <p className="text-[#4A4540] text-sm leading-relaxed mb-6 italic">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#EDE6D6] flex items-center justify-center text-xs font-bold text-[#4A4540]">{t.initial}</div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#1E1B18]">{t.name}</p>
-                    <p className="text-xs text-[#726C67]">{t.location}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA Banner ─────────────────────────────────────── */}
-      <section className="py-20 border-t border-[#EDE6D6]">
-        <div className="mx-auto max-w-2xl px-5 text-center">
-          <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18] mb-4">
-            Siap buat undangan
-            <br />
-            <em className="not-italic text-gold-gradient">yang tak terlupakan?</em>
-          </h2>
-          <p className="text-[#726C67] mb-8">Mulai gratis. Live dalam 5 menit. Tak perlu coding.</p>
-          <Button
-            className="bg-[#1E1B18] hover:bg-[#302C28] text-[#FDFCF9] rounded-full px-10 py-3.5 h-auto text-base font-medium gap-2 group shadow-lg"
-            onClick={() => router.push('/buat-undangan')}
-          >
-            Mulai Sekarang
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </div>
-      </section>
-
-      {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="border-t border-[#EDE6D6] bg-[#1E1B18] py-10">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#D4A91C]/20 flex items-center justify-center">
-                <Heart className="w-3 h-3 text-[#D4A91C]" fill="currentColor" />
-              </div>
-              <span className="font-display text-lg font-medium text-[#FDFCF9]">
-                undang<span className="text-[#D4A91C]">.io</span>
+      <main>
+        {/* ── Hero Section ── */}
+        <section className="relative pt-32 pb-24 px-8 overflow-hidden min-h-screen flex items-center">
+          <div className="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7 z-10">
+              <span className="inline-block py-1 px-4 rounded-full bg-surface-container-highest-stitch text-primary-stitch text-[10px] font-bold tracking-[0.2em] uppercase mb-8">
+                The Digital Concierge
               </span>
+              <h1 className="text-6xl md:text-8xl font-black text-primary-stitch tracking-tighter leading-[0.9] mb-12">
+                Digital Elegance <br/>
+                <span className="text-on-tertiary-container-stitch italic font-light">Redefined.</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-secondary-stitch max-w-xl leading-relaxed mb-16 font-light">
+                Experience the precision of high-end editorial design for your most cherished moments. Craft bespoke wedding experiences that mirror the sophistication of a luxury fashion journal.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6">
+                <button 
+                  onClick={() => router.push('/buat-undangan')}
+                  className="bg-primary-stitch text-on-primary-stitch px-10 py-5 rounded-full text-lg font-bold shadow-2xl shadow-primary-stitch/20 hover:scale-105 transition-transform"
+                >
+                  Begin Your Story
+                </button>
+                <button 
+                  onClick={() => router.push('/invite/demo')}
+                  className="bg-surface-container-highest-stitch text-primary-stitch px-10 py-5 rounded-full text-lg font-semibold hover:bg-surface-container-high-stitch transition-colors"
+                >
+                  Explore Templates
+                </button>
+              </div>
             </div>
-            <p className="text-sm text-[#FDFCF9]/40">
-              © 2026 undang.io — Bikin undangan pernikahan digital, langsung jadi.
-            </p>
+            
+            <div className="lg:col-span-5 relative mt-12 lg:mt-0">
+              {/* Asymmetrical Gallery Stack */}
+              <div className="relative w-full aspect-[4/5] rounded-[48px] overflow-hidden shadow-2xl rotate-3 translate-x-12 z-20">
+                <img 
+                  alt="Luxury Wedding Reception" 
+                  className="w-full h-full object-cover"
+                  src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&q=80" 
+                />
+              </div>
+              <div className="absolute -top-12 -left-12 w-2/3 aspect-[4/5] rounded-[40px] overflow-hidden shadow-xl -rotate-6 z-10 bg-surface-container-low-stitch border border-white/20 backdrop-blur-xl">
+                <img 
+                  alt="Wedding Ceremony" 
+                  className="w-full h-full object-cover opacity-80"
+                  src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80" 
+                />
+              </div>
+              <div className="absolute -bottom-16 right-0 w-1/2 p-6 rounded-[32px] bg-tertiary-stitch text-on-tertiary-stitch z-30 shadow-2xl">
+                <div className="flex items-center gap-4 mb-4">
+                  <Sparkles className="w-5 h-5 text-tertiary-fixed-dim-stitch" />
+                  <span className="text-xs font-bold tracking-widest uppercase">Premium Finish</span>
+                </div>
+                <p className="text-sm font-light opacity-90 leading-relaxed">
+                  Every invitation is rendered in ultra-high fidelity titanium textures.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Showcase: Bento Grid Layout ── */}
+        <section id="showcase" className="py-24 px-8 bg-surface-container-low-stitch">
+          <div className="max-w-screen-2xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+              <div className="max-w-2xl">
+                <h2 className="text-4xl md:text-5xl font-black text-primary-stitch tracking-tighter mb-6">Editorial Showcases</h2>
+                <p className="text-secondary-stitch text-lg leading-relaxed">Choose from our curated collections designed by international editorial directors.</p>
+              </div>
+              <button 
+                onClick={() => router.push('/buat-undangan')}
+                className="flex items-center gap-2 text-primary-stitch font-bold group"
+              >
+                View All Collections 
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {showcases.map((item, i) => (
+                <div key={i} className={`${item.className} relative group rounded-[40px] overflow-hidden bg-surface-container-lowest-stitch shadow-sm`}>
+                  <img 
+                    alt={item.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    src={item.img} 
+                  />
+                  <div className={`absolute inset-0 bg-gradient-to-t ${item.gradient} via-transparent to-transparent opacity-60`}></div>
+                  <div className="absolute bottom-10 left-10 text-white">
+                    <h3 className="text-3xl font-bold mb-2">{item.title}</h3>
+                    {item.desc && <p className="text-white/80 font-light">{item.desc}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Pricing Section ── */}
+        <section id="pricing" className="py-32 px-8 bg-surface-stitch">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-24">
+              <span className="text-on-tertiary-container-stitch font-black tracking-[0.3em] uppercase text-xs">Investment</span>
+              <h2 className="text-5xl md:text-6xl font-black text-primary-stitch tracking-tighter mt-4">Simple, Transparent Tiering</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+              {/* Essential */}
+              <div className="bg-surface-container-low-stitch p-10 rounded-[48px] flex flex-col hover:translate-y-[-8px] transition-transform duration-500 border border-outline-variant-stitch/20">
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-primary-stitch mb-2">Essential</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-primary-stitch">Rp 49k</span>
+                    <span className="text-secondary-stitch font-medium">/event</span>
+                  </div>
+                </div>
+                <ul className="space-y-4 mb-12 flex-grow">
+                  <li className="flex items-center gap-3 text-secondary-stitch">
+                    <CheckCircle2 className="w-5 h-5 text-primary-stitch" />
+                    10 Editorial Templates
+                  </li>
+                  <li className="flex items-center gap-3 text-secondary-stitch">
+                    <CheckCircle2 className="w-5 h-5 text-primary-stitch" />
+                    Digital RSVP Tracking
+                  </li>
+                  <li className="flex items-center gap-3 text-secondary-stitch opacity-40">
+                    <XCircle className="w-5 h-5" />
+                    Custom Domain
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => router.push('/buat-undangan')}
+                  className="w-full py-4 rounded-full border-2 border-outline-variant-stitch text-primary-stitch font-bold hover:bg-primary-stitch hover:text-white transition-all"
+                >
+                  Select Plan
+                </button>
+              </div>
+
+              {/* Titanium (Featured) */}
+              <div className="bg-primary-stitch p-10 rounded-[48px] flex flex-col relative overflow-hidden shadow-2xl scale-105 z-10 text-white">
+                <div className="absolute top-6 right-10 bg-tertiary-fixed-dim-stitch text-on-tertiary-fixed-variant-stitch px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Popular</div>
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-on-primary-container-stitch mb-2">Titanium Account</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black">Rp 129k</span>
+                    <span className="text-on-primary-container-stitch font-medium">/event</span>
+                  </div>
+                </div>
+                <ul className="space-y-4 mb-12 flex-grow">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-tertiary-fixed-dim-stitch" />
+                    Unlimited Luxury Templates
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-tertiary-fixed-dim-stitch" />
+                    Concierge Support
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-tertiary-fixed-dim-stitch" />
+                    Custom Invitation Domain
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-tertiary-fixed-dim-stitch" />
+                    Guest List Automation
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => router.push('/buat-undangan')}
+                  className="w-full py-5 rounded-full bg-gradient-to-r from-tertiary-fixed-dim-stitch to-on-tertiary-container-stitch text-tertiary-stitch font-black shadow-xl shadow-tertiary-stitch/40 hover:scale-105 transition-transform"
+                >
+                  Get Premium Access
+                </button>
+              </div>
+
+              {/* Bespoke */}
+              <div className="bg-surface-container-low-stitch p-10 rounded-[48px] flex flex-col hover:translate-y-[-8px] transition-transform duration-500 border border-outline-variant-stitch/20">
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-primary-stitch mb-2">Bespoke</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-primary-stitch">Rp 299k</span>
+                    <span className="text-secondary-stitch font-medium">/event</span>
+                  </div>
+                </div>
+                <ul className="space-y-4 mb-12 flex-grow">
+                  <li className="flex items-center gap-3 text-secondary-stitch">
+                    <CheckCircle2 className="w-5 h-5 text-primary-stitch" />
+                    Custom Design Direction
+                  </li>
+                  <li className="flex items-center gap-3 text-secondary-stitch">
+                    <CheckCircle2 className="w-5 h-5 text-primary-stitch" />
+                    One-on-One Editor Call
+                  </li>
+                  <li className="flex items-center gap-3 text-secondary-stitch">
+                    <CheckCircle2 className="w-5 h-5 text-primary-stitch" />
+                    Multi-Event Coordination
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => router.push('/buat-undangan')}
+                  className="w-full py-4 rounded-full border-2 border-outline-variant-stitch text-primary-stitch font-bold hover:bg-primary-stitch hover:text-white transition-all"
+                >
+                  Inquire Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Final CTA Section ── */}
+        <section className="py-24 px-8">
+          <div className="max-w-5xl mx-auto rounded-[64px] bg-primary-stitch relative overflow-hidden p-16 md:p-24 text-center">
+            <div className="absolute inset-0 opacity-20 overflow-hidden">
+              <div className="absolute -top-1/2 -left-1/4 w-[150%] h-[150%] bg-gradient-to-tr from-on-tertiary-container-stitch to-transparent blur-3xl rounded-full"></div>
+            </div>
+            <div className="relative z-10">
+              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8">Ready to define your digital legacy?</h2>
+              <p className="text-on-primary-container-stitch text-xl max-w-2xl mx-auto mb-16 font-light">Join over 10,000+ couples who chose editorial excellence for their digital presence.</p>
+              <div className="flex flex-col sm:flex-row justify-center gap-6">
+                <button 
+                  onClick={() => router.push('/buat-undangan')}
+                  className="bg-white text-primary-stitch px-12 py-5 rounded-full font-black text-lg shadow-2xl hover:scale-105 transition-transform"
+                >
+                  Create My Invitation
+                </button>
+                <button 
+                  onClick={() => router.push('/invite/demo')}
+                  className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-12 py-5 rounded-full font-bold text-lg hover:bg-white/20 transition-colors"
+                >
+                  Browse Gallery
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="w-full py-20 px-8 bg-surface-container-low-stitch">
+        <div className="max-w-7xl mx-auto border-t border-outline-variant-stitch/30 pt-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-2xl font-black text-primary-stitch">Undang-io Luxe</div>
+            <div className="flex flex-wrap justify-center gap-8 text-xs font-medium tracking-wide text-secondary-stitch uppercase">
+              <Link className="hover:text-primary-stitch transition-colors" href="#">Privacy Policy</Link>
+              <Link className="hover:text-primary-stitch transition-colors" href="#">Terms of Service</Link>
+              <Link className="hover:text-primary-stitch transition-colors" href="#">Contact</Link>
+              <Link className="hover:text-primary-stitch transition-colors" href="#">Wedding Gallery</Link>
+            </div>
+            <div className="text-secondary-stitch text-xs font-medium tracking-wide">
+              © 2026 Undang-io Luxe. All rights reserved.
+            </div>
           </div>
         </div>
       </footer>

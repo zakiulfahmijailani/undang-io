@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Clock, Eye, CreditCard, AlertTriangle } from "lucide-react";
+import { Clock, Eye, CreditCard, AlertTriangle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 interface GuestSessionCardProps {
     guestSession: {
@@ -50,71 +49,68 @@ function useCountdown(expiresAt: string) {
 export default function GuestSessionCard({ guestSession }: GuestSessionCardProps) {
     const { display, isExpired, isUrgent } = useCountdown(guestSession.expires_at);
     const inv = guestSession.invitation_data;
-    const groomName = inv?.groomNickname || inv?.groomFullName || "Mempelai Pria";
-    const brideName = inv?.brideNickname || inv?.brideFullName || "Mempelai Wanita";
+    const groomName = inv?.groomNickname || inv?.groomFullName || "Groom";
+    const brideName = inv?.brideNickname || inv?.brideFullName || "Bride";
 
     return (
-        <Card className="border-amber-200 bg-amber-50/40 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-            {/* Timer badge top right */}
-            <div className="absolute top-3 right-3">
-                {isExpired ? (
-                    <Badge variant="destructive" className="flex items-center gap-1 text-xs">
-                        <AlertTriangle className="h-3 w-3" /> Expired
-                    </Badge>
-                ) : (
-                    <Badge
-                        className={`flex items-center gap-1 text-xs font-mono ${
-                            isUrgent
-                                ? "bg-red-500 text-white"
-                                : "bg-amber-500 text-white"
-                        }`}
-                    >
-                        <Clock className="h-3 w-3" />
-                        {display}
-                    </Badge>
-                )}
-            </div>
+        <Card className="overflow-hidden border-outline-variant-stitch/20 rounded-[40px] shadow-glow-stitch hover:shadow-2xl transition-all duration-700 bg-white/60 backdrop-blur-xl group">
+            <CardContent className="p-8">
+                <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-stitch/10 border border-tertiary-stitch/20 text-tertiary-stitch text-[9px] font-black tracking-widest uppercase">
+                        <Sparkles className="w-3 h-3" />
+                        <span>Draft Concept</span>
+                    </div>
 
-            <CardContent className="p-5 pt-5">
-                {/* Label sementara */}
-                <div className="mb-3">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                        Belum Dipublikasikan
-                    </span>
+                    <div className="flex items-center gap-2">
+                        {isExpired ? (
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-stitch text-white text-[10px] font-bold">
+                                <AlertTriangle className="h-3 w-3" /> EXPIRED
+                            </div>
+                        ) : (
+                            <div
+                                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-wider ${
+                                    isUrgent
+                                        ? "bg-error-stitch text-white animate-pulse"
+                                        : "bg-primary-stitch text-white"
+                                }`}
+                            >
+                                <Clock className="h-3 w-3" />
+                                {display}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Nama pasangan */}
-                <h3 className="font-serif text-xl font-bold text-stone-800 mb-1">
+                <h3 className="text-3xl font-black text-primary-stitch tracking-tighter mb-2 leading-tight">
                     {groomName} & {brideName}
                 </h3>
-                <p className="text-sm text-stone-500 mb-4">
+                <p className="text-secondary-stitch text-sm font-light mb-8 leading-relaxed">
                     {isExpired
-                        ? "Undangan ini sudah kadaluarsa."
-                        : `Bayar sebelum timer habis untuk mempublikasikan permanen.`}
+                        ? "This session has expired. Start a new bespoke journey."
+                        : `Finalize your payment before the timer expires to secure your digital presence.`}
                 </p>
 
-                {/* Action buttons */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-4">
                     {!isExpired && (
                         <>
-                            <Button size="sm" className="gap-1 cursor-pointer" asChild>
-                                <Link href={`/pembayaran/${guestSession.slug}`}>
-                                    <CreditCard className="h-3.5 w-3.5" />
-                                    Bayar Rp 45.000
-                                </Link>
-                            </Button>
-                            <Button size="sm" variant="secondary" className="gap-1 cursor-pointer" asChild>
-                                <Link href={`/u/${guestSession.slug}`}>
-                                    <Eye className="h-3.5 w-3.5" />
-                                    Lihat Preview
-                                </Link>
-                            </Button>
+                            <Link href={`/pembayaran/${guestSession.slug}`} className="flex-1">
+                                <button className="w-full h-14 bg-on-tertiary-container-stitch text-tertiary-stitch rounded-full font-black tracking-widest uppercase text-xs shadow-lg shadow-tertiary-stitch/20 active:scale-95 transition-all">
+                                    Publish Now
+                                </button>
+                            </Link>
+                            <Link href={`/u/${guestSession.slug}`} className="flex-1">
+                                <button className="w-full h-14 border border-outline-variant-stitch/30 text-primary-stitch rounded-full font-black tracking-widest uppercase text-xs hover:bg-surface-container-low-stitch active:scale-95 transition-all">
+                                    Preview
+                                </button>
+                            </Link>
                         </>
                     )}
                     {isExpired && (
-                        <Button size="sm" variant="secondary" className="cursor-pointer" asChild>
-                            <Link href="/buat-undangan">Buat Ulang</Link>
-                        </Button>
+                        <Link href="/buat-undangan" className="w-full">
+                            <button className="w-full h-14 bg-primary-stitch text-white rounded-full font-black tracking-widest uppercase text-xs shadow-xl shadow-primary-stitch/20 active:scale-95 transition-all">
+                                Recreate Invitation
+                            </button>
+                        </Link>
                     )}
                 </div>
             </CardContent>

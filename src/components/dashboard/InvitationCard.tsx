@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart2, Eye, Pencil } from 'lucide-react';
+import { BarChart2, Eye, Pencil, Calendar, Link as LinkIcon } from 'lucide-react';
 
 export interface InvitationCardProps {
     invitation: {
@@ -23,104 +23,100 @@ export interface InvitationCardProps {
 
 export default function InvitationCard({ invitation }: InvitationCardProps) {
     const details = invitation.invitation_details;
-    const groomName = details?.groom_name || 'Nama';
-    const brideName = details?.bride_name || 'Belum Diisi';
+    const groomName = details?.groom_name || 'Mempelai';
+    const brideName = details?.bride_name || 'Pasangan';
     const spouseName = `${groomName} & ${brideName}`;
 
-    let displayDate = 'Tanggal belum ditentukan';
+    let displayDate = 'TBA';
     if (details?.reception_date) {
-        displayDate = new Date(details.reception_date).toLocaleDateString('id-ID', {
-            day: '2-digit', month: 'long', year: 'numeric'
+        displayDate = new Date(details.reception_date).toLocaleDateString('en-US', {
+            day: '2-digit', month: 'short', year: 'numeric'
         });
     } else if (details?.akad_date) {
-        displayDate = new Date(details.akad_date).toLocaleDateString('id-ID', {
-            day: '2-digit', month: 'long', year: 'numeric'
+        displayDate = new Date(details.akad_date).toLocaleDateString('en-US', {
+            day: '2-digit', month: 'short', year: 'numeric'
         });
     }
 
-    let badgeColor = 'bg-slate-100 text-slate-700';
+    let badgeStyles = 'bg-surface-container-high-stitch text-secondary-stitch';
     let badgeLabel = 'Draft';
     if (invitation.status === 'unpaid') {
-        badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        badgeLabel = 'Belum Aktif';
+        badgeStyles = 'bg-tertiary-stitch/10 text-tertiary-stitch border-tertiary-stitch/20';
+        badgeLabel = 'Pending Payment';
     } else if (invitation.status === 'active') {
-        badgeColor = 'bg-green-100 text-green-800 border-green-200';
-        badgeLabel = 'Aktif';
+        badgeStyles = 'bg-primary-stitch text-white';
+        badgeLabel = 'Active';
     } else if (invitation.status === 'expired') {
-        badgeColor = 'bg-red-100 text-red-800 border-red-200';
-        badgeLabel = 'Kedaluwarsa';
+        badgeStyles = 'bg-error-container-stitch text-error-stitch border-error-stitch/20';
+        badgeLabel = 'Expired';
     }
 
     const photoUrl = details?.couple_photo_url;
     const initial = `${groomName.charAt(0)}${brideName.charAt(0)}`.toUpperCase();
 
-    // Always allow preview:
-    // - active/paid: open live URL (no preview param)
-    // - draft/unpaid/other: open with ?preview=true
     const isLive = invitation.status === 'active' || (invitation.status as string) === 'paid';
     const previewHref = isLive
         ? `/invite/${invitation.slug}`
         : `/invite/${invitation.slug}?preview=true`;
 
     return (
-        <Card className="overflow-hidden border border-slate-200 hover:shadow-lg transition-all duration-300 flex flex-col group">
+        <Card className="overflow-hidden border-outline-variant-stitch/20 rounded-[40px] shadow-glow-stitch hover:shadow-2xl transition-all duration-700 bg-white group">
             <CardContent className="p-0 flex flex-col h-full">
-                <div className="p-6 flex gap-4">
+                <div className="p-8 flex gap-6">
                     <div className="flex-shrink-0">
                         {photoUrl ? (
-                            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-slate-100 relative">
+                            <div className="w-24 h-24 rounded-[32px] overflow-hidden border-4 border-surface-container-low-stitch relative shadow-xl rotate-[-3deg] group-hover:rotate-0 transition-transform duration-500">
                                 <Image src={photoUrl} alt="Couple Photo" fill className="object-cover" />
                             </div>
                         ) : (
-                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gold-200 to-amber-100 flex items-center justify-center font-serif text-xl font-bold text-gold-700 shadow-inner">
+                            <div className="w-24 h-24 rounded-[32px] bg-primary-stitch flex items-center justify-center font-black text-2xl text-white shadow-xl rotate-[-3deg] group-hover:rotate-0 transition-transform duration-500">
                                 {initial}
                             </div>
                         )}
                     </div>
 
                     <div className="flex flex-col flex-grow justify-center min-w-0">
-                        <h3 className="font-serif font-bold text-lg text-slate-800 truncate" title={spouseName}>
-                            {spouseName}
-                        </h3>
-                        <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5 whitespace-nowrap overflow-hidden text-ellipsis">
-                            📅 {displayDate}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1 truncate">
-                            🔗 undang.io/invite/{invitation.slug}
-                        </p>
-                        <div className="mt-2">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium border ${badgeColor}`}>
+                        <div className="flex items-center gap-3 mb-2">
+                           <span className={`px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase border ${badgeStyles}`}>
                                 {badgeLabel}
                             </span>
+                        </div>
+                        <h3 className="text-2xl font-black text-primary-stitch tracking-tighter truncate leading-tight" title={spouseName}>
+                            {spouseName}
+                        </h3>
+                        <div className="flex flex-col gap-1 mt-3">
+                            <p className="text-xs text-secondary-stitch/60 flex items-center gap-2 font-medium">
+                                <Calendar className="w-3.5 h-3.5 text-on-tertiary-container-stitch" />
+                                {displayDate}
+                            </p>
+                            <p className="text-xs text-secondary-stitch/60 flex items-center gap-2 font-medium truncate">
+                                <LinkIcon className="w-3.5 h-3.5 text-on-tertiary-container-stitch" />
+                                undang.io/{invitation.slug}
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-auto border-t border-slate-100 bg-slate-50/50 p-4 flex items-center gap-3">
-                    <Link href={`/dashboard/undangan/${invitation.id}`} className="flex-1">
-                        <Button variant="secondary" size="sm" className="w-full h-9 flex items-center justify-center gap-2 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                <div className="mt-4 border-t border-outline-variant-stitch/10 p-6 pt-0 flex flex-wrap items-center gap-4">
+                    <Link href={`/dashboard/undangan/${invitation.id}`} className="flex-1 min-w-[120px]">
+                        <button className="w-full h-12 flex items-center justify-center gap-2 rounded-full border border-outline-variant-stitch/30 text-primary-stitch text-xs font-bold hover:bg-surface-container-low-stitch transition-all active:scale-95">
                             <BarChart2 className="w-4 h-4" />
-                            <span>Dasbor</span>
-                        </Button>
+                            <span>Analytics</span>
+                        </button>
                     </Link>
 
-                    {/* Lihat / Preview — always clickable, uses ?preview=true for non-live */}
-                    <Link href={previewHref} target="_blank" className="flex-1">
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="w-full h-9 flex items-center justify-center gap-2 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-                        >
+                    <Link href={previewHref} target="_blank" className="flex-1 min-w-[120px]">
+                        <button className="w-full h-12 flex items-center justify-center gap-2 rounded-full border border-outline-variant-stitch/30 text-primary-stitch text-xs font-bold hover:bg-surface-container-low-stitch transition-all active:scale-95">
                             <Eye className="w-4 h-4" />
-                            <span>{isLive ? 'Lihat' : 'Preview'}</span>
-                        </Button>
+                            <span>{isLive ? 'Visit' : 'Preview'}</span>
+                        </button>
                     </Link>
 
-                    <Link href={`/dashboard/undangan/${invitation.id}/edit`} className="flex-1">
-                        <Button variant="primary" size="sm" className="w-full h-9 flex items-center justify-center gap-2 bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-600 hover:to-amber-700 text-white border-0 shadow-md">
+                    <Link href={`/dashboard/undangan/${invitation.id}/edit`} className="flex-1 min-w-[120px]">
+                        <button className="w-full h-12 flex items-center justify-center gap-2 rounded-full bg-primary-stitch text-white text-xs font-bold shadow-lg shadow-primary-stitch/20 hover:scale-105 transition-all active:scale-95">
                             <Pencil className="w-4 h-4" />
-                            <span>Edit</span>
-                        </Button>
+                            <span>Edit Design</span>
+                        </button>
                     </Link>
                 </div>
             </CardContent>

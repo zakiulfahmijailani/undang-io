@@ -95,94 +95,92 @@ export default function MusicPickerTab({ invitationId, currentMusicUrl, onChange
 
             {/* Status musik aktif */}
             {currentMusicUrl ? (
-                <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                        <Music2 className="w-4 h-4 text-emerald-600" />
+                <div className="flex items-center gap-4 px-5 py-4 bg-tertiary-fixed-dim-stitch/30 border border-outline-variant-stitch/10 rounded-3xl text-sm shadow-inner">
+                    <div className="w-10 h-10 rounded-2xl bg-white shadow-glow-stitch flex items-center justify-center flex-shrink-0 animate-pulse">
+                        <Music2 className="w-5 h-5 text-primary-stitch" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-emerald-800 truncate">
+                        <p className="font-black text-primary-stitch truncate uppercase tracking-widest text-[10px]">
                             {isCustom
-                                ? (uploadedName || 'File custom')
+                                ? (uploadedName || 'TITANIUM CUSTOM')
                                 : selectedTrack?.title}
                         </p>
-                        <p className="text-xs text-emerald-600">
-                            {isCustom ? 'Upload sendiri' : selectedTrack?.genre}
+                        <p className="text-[10px] text-secondary-stitch/60 font-medium">
+                            {isCustom ? 'PRO UPLOAD' : selectedTrack?.genre}
                         </p>
                     </div>
                     <button
                         onClick={handleClear}
-                        className="flex-shrink-0 text-stone-400 hover:text-red-500 transition-colors p-1"
+                        className="flex-shrink-0 text-secondary-stitch/30 hover:text-error-stitch transition-all p-2 bg-white rounded-full shadow-sm hover:scale-110 active:scale-90"
                         title="Hapus musik"
                     >
                         <X className="w-4 h-4" />
                     </button>
                 </div>
             ) : (
-                <div className="flex items-center gap-2 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-500">
+                <div className="flex items-center gap-3 px-5 py-4 bg-surface-container-low-stitch border border-outline-variant-stitch/10 rounded-3xl text-[10px] font-black uppercase tracking-widest text-secondary-stitch/40">
                     <Music2 className="w-4 h-4" />
-                    <span>Belum ada musik dipilih</span>
+                    <span>No Soundtrack Selected</span>
                 </div>
             )}
 
             {/* Curated list — scrollable */}
             <div>
-                <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2">🎵 Koleksi Musik (10 lagu)</p>
-                <div className="flex flex-col gap-1.5 max-h-[360px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-stone-200">
+                <p className="text-[10px] font-black text-on-tertiary-container-stitch uppercase tracking-[0.2em] mb-3 px-1">🎵 TITANIUM COLLECTION</p>
+                <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-1">
                     {WEDDING_MUSIC.map((track) => {
                         const isSelected = currentMusicUrl === track.url;
                         const isPreviewing = previewingId === track.id;
                         return (
                             <div
                                 key={track.id}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+                                className={`flex items-center gap-3 px-4 py-3 rounded-[24px] border transition-all duration-300 ${
                                     isSelected
-                                        ? 'bg-amber-50 border-amber-300'
-                                        : 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+                                        ? 'bg-white border-primary-stitch shadow-glow-stitch ring-1 ring-primary-stitch/20'
+                                        : 'bg-white border-outline-variant-stitch/10 hover:border-primary-stitch/40 hover:bg-surface-container-low-stitch'
                                 }`}
                             >
                                 {/* Emoji */}
-                                <span className="text-xl w-9 h-9 flex items-center justify-center bg-stone-100 rounded-lg flex-shrink-0">
+                                <span className="text-xl w-10 h-10 flex items-center justify-center bg-surface-container-high-stitch rounded-2xl flex-shrink-0 shadow-inner">
                                     {track.coverEmoji}
                                 </span>
-
+ 
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-stone-800 truncate">{track.title}</p>
-                                    <p className="text-xs text-stone-400">{track.genre} · {track.duration}</p>
+                                    <p className="text-[11px] font-black text-primary-stitch truncate uppercase tracking-tight">{track.title}</p>
+                                    <p className="text-[10px] text-secondary-stitch/60 font-medium">{track.genre} · {track.duration}</p>
                                 </div>
-
+ 
                                 {/* Preview button */}
                                 <button
                                     onClick={(e) => handlePreview(e, track)}
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all flex-shrink-0 shadow-sm ${
                                         isPreviewing
-                                            ? 'bg-amber-500 text-white'
-                                            : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                                            ? 'bg-tertiary-stitch text-white scale-110 rotate-12'
+                                            : 'bg-surface-container-high-stitch text-primary-stitch hover:bg-white hover:shadow-lg'
                                     }`}
                                     title={isPreviewing ? 'Stop preview' : 'Preview'}
                                 >
                                     {isPreviewing
-                                        ? <Pause className="w-3.5 h-3.5" />
-                                        : <Play className="w-3.5 h-3.5" />}
+                                        ? <Pause className="w-4 h-4 fill-current" />
+                                        : <Play className="w-4 h-4 fill-current" />}
                                 </button>
-
+ 
                                 {/* Explicit select button */}
-                                <Button
-                                    size="sm"
+                                <button
                                     onClick={() => handleSelect(track)}
-                                    className={`h-8 px-3 text-xs flex-shrink-0 transition-all ${
+                                    className={`h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-widest flex-shrink-0 transition-all ${
                                         isSelected
-                                            ? 'bg-amber-500 text-white hover:bg-amber-600 border-0'
-                                            : 'bg-white text-stone-700 border border-stone-300 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700'
+                                            ? 'bg-primary-stitch text-white shadow-lg'
+                                            : 'bg-white border border-outline-variant-stitch/30 text-primary-stitch hover:bg-surface-container-low-stitch'
                                     }`}
-                                    variant={isSelected ? 'default' : 'secondary'}
                                 >
                                     {isSelected ? (
-                                        <><Check className="w-3 h-3 mr-1" />Dipilih</>
+                                        <><Check className="w-3.5 h-3.5 mr-1" />ACTIVE</>
                                     ) : (
-                                        'Pilih'
+                                        'SELECT'
                                     )}
-                                </Button>
+                                </button>
                             </div>
                         );
                     })}
@@ -191,24 +189,25 @@ export default function MusicPickerTab({ invitationId, currentMusicUrl, onChange
 
             {/* Custom upload */}
             <div>
-                <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2">📁 Upload Musik Sendiri</p>
+                <p className="text-[10px] font-black text-on-tertiary-container-stitch uppercase tracking-[0.2em] mb-3 px-1">📁 EXTERNAL SOUNDTRACK</p>
                 <div
                     onClick={() => !isUploading && fileInputRef.current?.click()}
-                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+                    className={`flex flex-col items-center justify-center gap-4 p-10 rounded-[32px] border-2 border-dashed transition-all duration-500 cursor-pointer ${
                         isUploading
-                            ? 'border-amber-300 bg-amber-50 cursor-wait'
-                            : 'border-stone-300 hover:border-amber-400 hover:bg-amber-50/40'
+                            ? 'border-tertiary-stitch bg-tertiary-stitch/5 cursor-wait'
+                            : 'border-outline-variant-stitch/40 hover:border-primary-stitch hover:bg-surface-container-low-stitch hover:shadow-glow-stitch'
                     }`}
                 >
                     {isUploading ? (
-                        <><Loader2 className="w-6 h-6 text-amber-500 animate-spin" /><p className="text-sm text-amber-700">Mengupload...</p></>
+                        <><Loader2 className="w-8 h-8 text-tertiary-stitch animate-spin" /><p className="text-[10px] font-black uppercase tracking-widest text-primary-stitch">PROVISIONING...</p></>
                     ) : (
                         <>
-                            <Upload className="w-6 h-6 text-stone-400" />
-                            <p className="text-sm font-medium text-stone-700">Klik untuk upload MP3</p>
-                            <div className="text-center space-y-0.5">
-                                <p className="text-xs text-stone-500">Format: MP3 · Maks. <span className="font-semibold text-stone-700">{MUSIC_UPLOAD_LIMITS.maxSizeMB}MB</span></p>
-                                <p className="text-xs text-stone-400">Disarankan: maks. <span className="font-semibold">{MUSIC_UPLOAD_LIMITS.recommendedDurationMin} menit</span> agar halaman tidak berat</p>
+                            <div className="w-14 h-14 bg-white rounded-2xl shadow-glow-stitch flex items-center justify-center mb-1">
+                                <Upload className="w-7 h-7 text-primary-stitch" />
+                            </div>
+                            <div className="text-center space-y-1">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-primary-stitch">Uplink Custom MP3</p>
+                                <p className="text-[10px] text-secondary-stitch/60 font-medium italic">MAX 10MB · HIGH FIDELITY RECOMMENDED</p>
                             </div>
                         </>
                     )}

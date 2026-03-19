@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Heart, Mail, Lock } from "lucide-react";
+import { Mail, Lock, Heart, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -128,73 +128,86 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm shadow-lg border-border/50">
-        <CardContent className="p-8">
-          <Link href="/" className="mb-6 flex items-center justify-center gap-2">
-            <Heart className="h-6 w-6 text-accent" fill="currentColor" />
-            <span className="text-xl font-bold text-foreground">
-              undang<span className="text-accent">.io</span>
+    <div className="flex min-h-screen items-center justify-center bg-surface-stitch px-4 font-sans selection:bg-tertiary-fixed-dim-stitch">
+      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
+        <div className="absolute -top-1/4 -right-1/4 w-1/2 h-1/2 bg-on-tertiary-container-stitch blur-[120px] rounded-full"></div>
+        <div className="absolute -bottom-1/4 -left-1/4 w-1/2 h-1/2 bg-primary-stitch blur-[120px] rounded-full"></div>
+      </div>
+
+      <Card className="w-full max-w-sm shadow-2xl border-outline-variant-stitch/20 rounded-[40px] z-10 overflow-hidden bg-white/80 backdrop-blur-xl">
+        <CardContent className="p-10">
+          <Link href="/" className="mb-10 flex flex-col items-center gap-2 group">
+            <div className="w-12 h-12 rounded-2xl bg-primary-stitch flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
+               <Heart className="h-6 w-6 text-white" fill="currentColor" />
+            </div>
+            <span className="text-2xl font-black text-primary-stitch tracking-tighter">
+              undang.io
             </span>
           </Link>
-          <h1 className="mb-6 text-center text-xl font-bold text-foreground">Masuk ke Akun</h1>
+          
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-black text-primary-stitch tracking-tight mb-2">Welcome Back</h1>
+            <p className="text-secondary-stitch text-sm font-light">Continue your journey in editorial excellence.</p>
+          </div>
 
           {message && (
-            <p className="mb-4 text-center text-sm font-medium text-destructive bg-destructive/10 p-2 rounded-md">
-              {message}
-            </p>
+            <div className="mb-6 p-3 rounded-2xl bg-error-container-stitch/50 border border-error-stitch/10 flex items-center gap-3 text-error-stitch text-xs font-medium">
+              <p className="flex-1">{message}</p>
+            </div>
           )}
 
           {guestSessionToken && (
-            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-              ⏳ Login untuk menyimpan undanganmu dan perpanjang timer 10 menit.
+            <div className="mb-6 rounded-2xl border border-tertiary-fixed-dim-stitch/30 bg-tertiary-stitch/5 p-4 text-[11px] text-tertiary-stitch leading-relaxed">
+              <span className="font-bold block mb-1">PROMPT</span>
+              Login to preserve your temporary invitation and extend your timer by 10 minutes.
             </div>
           )}
 
-          <Button
-            variant="secondary"
-            className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer"
+          <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            type="button"
+            className="w-full h-14 flex items-center justify-center gap-3 mb-6 bg-white border border-outline-variant-stitch/30 rounded-2xl text-primary-stitch font-bold text-sm shadow-sm hover:bg-surface-container-low-stitch transition-colors active:scale-95 disabled:opacity-50"
           >
             <FaGoogle className="w-4 h-4 text-red-500" />
-            Masuk dengan Google
-          </Button>
+            Sign in with Google
+          </button>
 
-          <div className="relative mb-4">
+          <div className="relative mb-8">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/50" />
+              <span className="w-full border-t border-outline-variant-stitch/20" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Atau dengan email</span>
+            <div className="relative flex justify-center text-[10px] font-bold tracking-[0.2em] uppercase">
+              <span className="bg-white px-4 text-secondary-stitch/60">Or use email</span>
             </div>
           </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <div className="relative mt-1">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <form onSubmit={handleEmailLogin} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-[10px] font-bold tracking-widest uppercase text-primary-stitch ml-1">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-stitch/40" />
                 <Input
                   id="email"
                   type="email"
-                  className="pl-9"
-                  placeholder="nama@email.com"
+                  className="h-14 pl-12 rounded-2xl border-outline-variant-stitch/40 bg-surface-container-low-stitch/30 focus:bg-white focus:ring-primary-stitch/20 transition-all"
+                  placeholder="name@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="password">Kata Sandi</Label>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center ml-1">
+                <Label htmlFor="password" className="text-[10px] font-bold tracking-widest uppercase text-primary-stitch">Password</Label>
+                <Link href="#" className="text-[10px] font-bold text-on-tertiary-container-stitch hover:underline">Forgot?</Link>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-stitch/40" />
                 <Input
                   id="password"
                   type="password"
-                  className="pl-9"
+                  className="h-14 pl-12 rounded-2xl border-outline-variant-stitch/40 bg-surface-container-low-stitch/30 focus:bg-white focus:ring-primary-stitch/20 transition-all"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -202,19 +215,27 @@ export default function Login() {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full mt-6 cursor-pointer" disabled={loading}>
-              {loading ? "Memproses..." : "Masuk"}
-            </Button>
+            <button 
+              type="submit" 
+              className="w-full h-14 mt-4 bg-primary-stitch text-white rounded-full font-black tracking-widest uppercase text-sm shadow-xl shadow-primary-stitch/20 active:scale-95 transition-all disabled:opacity-50" 
+              disabled={loading}
+            >
+              {loading ? "AUTHENTICATING..." : "Sign In"}
+            </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Belum punya akun?{" "}
-            <Link href="/register" className="font-semibold text-accent hover:underline">
-              Daftar Gratis
+          <p className="mt-8 text-center text-xs text-secondary-stitch/80 font-light">
+            Don't have an account?{" "}
+            <Link href="/register" className="font-bold text-on-tertiary-container-stitch hover:underline">
+              Join for Free
             </Link>
           </p>
         </CardContent>
       </Card>
+      
+      <div className="fixed bottom-8 text-[10px] font-bold text-secondary-stitch/40 tracking-[0.3em] uppercase">
+        Undang-io Editorial System
+      </div>
     </div>
   );
 }

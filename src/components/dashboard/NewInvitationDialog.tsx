@@ -59,9 +59,9 @@ export default function NewInvitationDialog({ children }: { children?: React.Rea
         <>
             <div onClick={() => setOpen(true)}>
                 {children ? children : (
-                    <Button variant="primary" className="gap-2 h-11 px-6 shadow-lg shadow-primary/20">
-                        <Plus className="w-5 h-5" /> Buat Undangan Baru
-                    </Button>
+                    <button className="flex items-center gap-3 h-12 px-8 rounded-full bg-primary-stitch text-white shadow-xl shadow-primary-stitch/20 hover:scale-105 hover:rotate-1 transition-all active:scale-95 text-[10px] font-black uppercase tracking-[0.2em]">
+                        <Plus className="w-5 h-5" /> Initiate Creation
+                    </button>
                 )}
             </div>
 
@@ -98,19 +98,28 @@ export default function NewInvitationDialog({ children }: { children?: React.Rea
                         )}
                     </div>
                     <div className="flex justify-end gap-2 pt-4">
-                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={isLoading}>
-                            Batal
-                        </Button>
-                        <Button type="submit" variant="primary" disabled={isLoading} className="bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-600 hover:to-amber-700 text-white border-0 shadow-md">
+                        <button
+                            type="button"
+                            onClick={() => setOpen(false)}
+                            disabled={isLoading}
+                            className="px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest text-secondary-stitch/60 hover:bg-surface-container-low-stitch transition-all"
+                        >
+                            Abandone
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="px-8 py-3 rounded-full bg-primary-stitch text-white shadow-xl shadow-primary-stitch/20 hover:scale-105 transition-all active:scale-95 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                        >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Menyimpan...
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Synchronizing...
                                 </>
                             ) : (
-                                "Buat Sekarang"
+                                "Generate Portfolio"
                             )}
-                        </Button>
+                        </button>
                     </div>
                 </form>
             </Modal>

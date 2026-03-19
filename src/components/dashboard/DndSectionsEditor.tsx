@@ -33,33 +33,33 @@ function SortableRow({ id, visible, onToggle }: {
         <div
             ref={setNodeRef}
             style={{ transform: CSS.Transform.toString(transform), transition }}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${isDragging
-                    ? "bg-amber-50 border-amber-300 shadow-lg z-50"
-                    : "bg-white border-stone-100 hover:border-stone-200"
+            className={`flex items-center gap-4 px-5 py-4 rounded-[24px] border transition-all duration-300 ${isDragging
+                    ? "bg-white border-primary-stitch shadow-2xl z-50 scale-105"
+                    : "bg-white border-outline-variant-stitch/10 hover:border-primary-stitch/40 hover:bg-surface-container-low-stitch"
                 }`}
         >
             {/* Drag handle */}
             <button
                 {...attributes}
                 {...listeners}
-                className="text-stone-300 hover:text-stone-500 cursor-grab active:cursor-grabbing touch-none"
+                className="text-secondary-stitch/20 hover:text-primary-stitch cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
             >
-                <GripVertical className="w-4 h-4" />
+                <GripVertical className="w-5 h-5" />
             </button>
-
+ 
             {/* Label */}
-            <span className={`flex-1 text-sm font-medium ${visible ? "text-stone-700" : "text-stone-300"}`}>
+            <span className={`flex-1 text-[11px] font-black uppercase tracking-widest ${visible ? "text-primary-stitch" : "text-secondary-stitch/30"}`}>
                 {SECTION_LABELS[id] || id}
             </span>
-
+ 
             {/* Toggle */}
             <button
                 type="button"
                 onClick={onToggle}
-                className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${visible ? "bg-amber-500" : "bg-stone-200"
+                className={`relative w-11 h-6 rounded-full transition-all duration-300 flex-shrink-0 shadow-inner ${visible ? "bg-tertiary-stitch" : "bg-surface-container-high-stitch"
                     }`}
             >
-                <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${visible ? "translate-x-5" : "translate-x-0"
+                <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-lg transition-transform duration-300 ${visible ? "translate-x-5" : "translate-x-0"
                     }`} />
             </button>
         </div>

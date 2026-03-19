@@ -108,6 +108,29 @@
   --color-brand-cream:      #FDFCF9;
   --color-brand-rose:       #F9CFCF;
 
+  /* ── Stitch Design Tokens ── */
+  --color-primary-stitch:            #1a274b;
+  --color-on-primary-stitch:         #ffffff;
+  --color-primary-container-stitch:  #313d62;
+  --color-on-primary-container-stitch: #9ca8d4;
+  --color-tertiary-stitch:           #3f201d;
+  --color-on-tertiary-stitch:        #ffffff;
+  --color-tertiary-container-stitch: #583532;
+  --color-on-tertiary-container-stitch: #ce9e99;
+  --color-surface-stitch:            #f7f9ff;
+  --color-on-surface-stitch:         #171c22;
+  --color-surface-container-lowest-stitch: #ffffff;
+  --color-surface-container-low-stitch:    #f0f4fc;
+  --color-surface-container-stitch:        #eaeef6;
+  --color-surface-container-high-stitch:   #e4e8f0;
+  --color-surface-container-highest-stitch: #dee3eb;
+  --color-outline-variant-stitch:          #c6c6cf;
+  --color-secondary-stitch:                #5f5e5c;
+  --color-error-stitch:                    #ba1a1a;
+  --color-error-container-stitch:          #ffdad6;
+  --color-on-error-container-stitch:       #93000a;
+  --color-tertiary-fixed-dim-stitch:       #eebab5;
+
   /* ── Surface Colors */
   --color-surface-page:    #FDFCF9;
   --color-surface-card:    #FFFFFF;
@@ -369,6 +392,21 @@ body {
   .card-luxury:hover {
     box-shadow: 0 12px 40px rgba(30,27,24,.11), 0 2px 8px rgba(30,27,24,.07);
     transform: translateY(-2px);
+  }
+
+  /* ── Stitch Utilities ── */
+  .glass-panel-stitch {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .shadow-glow-stitch {
+    box-shadow: 0 0 40px rgba(26, 39, 75, 0.06);
+  }
+
+  .shadow-primary-stitch {
+    box-shadow: 0 10px 30px -10px rgba(26, 39, 75, 0.3);
   }
 
   /* ── Sidebar item active state */
