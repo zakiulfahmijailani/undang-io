@@ -76,7 +76,11 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         dresscode: "",
         greeting_text: initialData.quote_text || "",
         music_url: initialData.music_url || "",
-        love_story: [],
+        love_story: initialData.love_story || [
+            { year: "2020", title: "Pertama Bertemu", description: "" },
+            { year: "2021", title: "Mulai Dekat", description: "" },
+            { year: "2023", title: "Lamaran", description: "" },
+        ],
         gallery_photos: [],
         bank_accounts: [],
         enable_rsvp: true,
@@ -169,7 +173,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         { id: "fotocover", label: "Foto & Cover", icon: ImageIcon },
         { id: "mempelai", label: "Data Mempelai", icon: Users },
         { id: "acara", label: "Acara", icon: MapPin },
-        { id: "lovestory", label: "Kisah Cinta", icon: Heart, soon: true },
+        { id: "lovestory", label: "Kisah Cinta", icon: Heart },
         { id: "galeri", label: "Galeri Foto", icon: Camera, soon: true },
         { id: "amplop", label: "Amplop Digital", icon: Gift, soon: true },
         { id: "ayat", label: "Ayat & Quote", icon: Type, soon: true },
@@ -492,7 +496,116 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                         </Section>
                                     </div>
                                 )}
+                                {/* ── KISAH CINTA ── */}
+                                {activeTab === "lovestory" && (
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
+                                            <p className="text-sm text-stone-400 mt-1">
+                                                Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
+                                            </p>
+                                        </div>
 
+                                        <div className="space-y-3">
+                                            {(formData.love_story as any[]).map((story, i) => (
+                                                <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-100 space-y-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                                                {i + 1}
+                                                            </span>
+                                                            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Momen {i + 1}</span>
+                                                        </div>
+                                                        {(formData.love_story as any[]).length > 1 && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const updated = (formData.love_story as any[]).filter((_, idx) => idx !== i);
+                                                                    handleChange("love_story", updated);
+                                                                }}
+                                                                className="text-stone-300 hover:text-red-500 transition-colors p-1"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div className="space-y-1">
+                                                            <label className="block text-xs font-semibold text-stone-600">Tahun</label>
+                                                            <Input
+                                                                value={story.year}
+                                                                onChange={e => {
+                                                                    const updated = [...(formData.love_story as any[])];
+                                                                    updated[i] = { ...updated[i], year: e.target.value };
+                                                                    handleChange("love_story", updated);
+                                                                }}
+                                                                placeholder="2021"
+                                                                maxLength={9}
+                                                                className="text-base py-3"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-2 space-y-1">
+                                                            <label className="block text-xs font-semibold text-stone-600">Judul <span className="text-stone-300 font-normal">maks. 30 karakter</span></label>
+                                                            <Input
+                                                                value={story.title}
+                                                                onChange={e => {
+                                                                    if (e.target.value.length > 30) return;
+                                                                    const updated = [...(formData.love_story as any[])];
+                                                                    updated[i] = { ...updated[i], title: e.target.value };
+                                                                    handleChange("love_story", updated);
+                                                                }}
+                                                                placeholder="Pertama Bertemu"
+                                                                maxLength={30}
+                                                                className="text-base py-3"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <label className="block text-xs font-semibold text-stone-600">Cerita singkat</label>
+                                                            <span className={`text-xs ${story.description?.length > 100 ? "text-amber-500" : "text-stone-300"}`}>
+                                                                {story.description?.length || 0}/120
+                                                            </span>
+                                                        </div>
+                                                        <textarea
+                                                            rows={2}
+                                                            maxLength={120}
+                                                            className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
+                                                            value={story.description}
+                                                            onChange={e => {
+                                                                if (e.target.value.length > 120) return;
+                                                                const updated = [...(formData.love_story as any[])];
+                                                                updated[i] = { ...updated[i], description: e.target.value };
+                                                                handleChange("love_story", updated);
+                                                            }}
+                                                            placeholder="Ceritakan momen ini secara singkat..."
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {(formData.love_story as any[]).length < 5 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const updated = [...(formData.love_story as any[]), { year: "", title: "", description: "" }];
+                                                    handleChange("love_story", updated);
+                                                }}
+                                                className="w-full py-3 rounded-2xl border-2 border-dashed border-stone-200 text-stone-400 hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50/40 transition-all text-sm font-semibold flex items-center justify-center gap-2"
+                                            >
+                                                <span className="text-lg leading-none">+</span> Tambah Momen
+                                                <span className="text-xs font-normal text-stone-300">({(formData.love_story as any[]).length}/5)</span>
+                                            </button>
+                                        )}
+
+                                        {(formData.love_story as any[]).length >= 5 && (
+                                            <p className="text-center text-xs text-stone-400 py-2">
+                                                ✓ Maksimal 5 momen untuk tampilan terbaik
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                                 {/* ── MUSIK ── */}
                                 {activeTab === "musik" && (
                                     <MusicPickerTab
@@ -503,7 +616,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 )}
 
                                 {/* ── COMING SOON tabs ── */}
-                                {["lovestory", "galeri", "amplop", "ayat", "pengaturan"].includes(activeTab) && (
+                                {["galeri", "amplop", "ayat", "pengaturan"].includes(activeTab) && (
                                     <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in">
                                         <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center mb-5 text-stone-300">
                                             {activeTab === "lovestory" && <Heart className="w-7 h-7" />}
