@@ -321,6 +321,15 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
 
 
+    const tabs = [
+        ALL_TABS.find(t => t.id === "infodasar")!,
+        ...(formData.sections_order as string[])
+            .map(sid => ALL_TABS.find(t => t.sectionId === sid))
+            .filter(Boolean) as typeof ALL_TABS,
+    ];
+
+    const coupleName = `${formData.groom_name || "Mempelai Pria"} & ${formData.bride_name || "Mempelai Wanita"}`;
+
 
     return (
         <div className="flex flex-col h-full bg-stone-50 min-h-screen">
@@ -769,8 +778,8 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                             {(formData.love_story as any[]).map((story, i) => (
                                                 <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-100 space-y-3">
                                                     <div>
-                                                        <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
-                                                        <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
+                                                        <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
+                                                        <p className="text-sm text-stone-400 mt-1">Ceritakan perjalanan kalian.</p>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
                                                         <div className="space-y-1">
