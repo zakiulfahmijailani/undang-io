@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#eebab5",
+              "error-container": "#ffdad6",
+              "surface-container-highest": "#dee3eb",
+              "error": "#ba1a1a",
+              "surface-container": "#eaeef6",
+              "inverse-surface": "#2c3137",
+              "outline-variant": "#c6c6cf",
+              "on-primary": "#ffffff",
+              "surface-tint": "#515d84",
+              "surface-container-high": "#e4e8f0",
+              "secondary": "#5f5e5c",
+              "on-error-container": "#93000a",
+              "on-primary-fixed": "#0c193d",
+              "surface-dim": "#d6dae2",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed-dim": "#b9c5f2",
+              "secondary-fixed": "#e5e2df",
+              "on-surface-variant": "#45464e",
+              "secondary-fixed-dim": "#c8c6c4",
+              "surface": "#f7f9ff",
+              "inverse-on-surface": "#edf1f9",
+              "primary": "#1a274b",
+              "on-primary-fixed-variant": "#39456b",
+              "secondary-container": "#e5e2df",
+              "surface-bright": "#f7f9ff",
+              "surface-variant": "#dee3eb",
+              "on-primary-container": "#9ca8d4",
+              "on-error": "#ffffff",
+              "background": "#f7f9ff",
+              "tertiary-container": "#583532",
+              "on-tertiary-container": "#ce9e99",
+              "inverse-primary": "#b9c5f2",
+              "on-background": "#171c22",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed": "#2f1311",
+              "on-tertiary-fixed-variant": "#623d3a",
+              "primary-fixed": "#dbe1ff",
+              "on-secondary-fixed-variant": "#474745",
+              "on-secondary-container": "#656462",
+              "outline": "#76767f",
+              "on-secondary": "#ffffff",
+              "primary-container": "#313d62",
+              "on-surface": "#171c22",
+              "tertiary-fixed": "#ffdad6",
+              "tertiary": "#3f201d",
+              "on-secondary-fixed": "#1b1c1a",
+              "surface-container-low": "#f0f4fc"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-hidden">
+<!-- TopNavBar Component -->
+<nav class="fixed top-0 w-full z-50 bg-slate-50/70 backdrop-blur-xl bg-gradient-to-b from-slate-200/20 to-transparent shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-black tracking-tighter text-[#1a274b]">Undang-io</div>
+<div class="hidden md:flex items-center space-x-8 font-['Inter'] tracking-tight font-medium">
+<a class="text-slate-500 hover:text-[#1a274b] transition-colors" href="#">Features</a>
+<a class="text-slate-500 hover:text-[#1a274b] transition-colors" href="#">Pricing</a>
+<a class="text-slate-500 hover:text-[#1a274b] transition-colors" href="#">Showcase</a>
+</div>
+<div class="flex items-center space-x-4">
+<button class="text-[#1a274b] font-medium hover:opacity-80 transition-all duration-300 scale-95 active:scale-90">Login</button>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all scale-95 active:scale-90">Get Started</button>
+</div>
+</div>
+</nav>
+<!-- Editor Layout -->
+<main class="flex h-screen pt-20">
+<!-- Sidebar Customization -->
+<aside class="w-80 h-full bg-surface-container-low flex flex-col overflow-hidden shadow-2xl shadow-primary/5 z-40">
+<div class="p-6 space-y-8 overflow-y-auto no-scrollbar">
+<!-- Section: Design Style -->
+<section>
+<label class="text-[10px] font-bold tracking-widest uppercase text-secondary mb-4 block">Canvas Style</label>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-surface-container-lowest border-2 border-on-tertiary-container shadow-sm transition-transform active:scale-95">
+<span class="material-symbols-outlined text-on-tertiary-container mb-2" data-icon="article">article</span>
+<span class="text-xs font-semibold">Classic</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-surface-container-high hover:bg-surface-container-highest transition-all active:scale-95">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+<span class="text-xs font-semibold">Modern</span>
+</button>
+</div>
+</section>
+<!-- Section: Typography -->
+<section class="space-y-4">
+<label class="text-[10px] font-bold tracking-widest uppercase text-secondary block">Typography</label>
+<div class="space-y-3">
+<div class="p-4 bg-surface-container-lowest rounded-xl">
+<span class="text-[10px] text-secondary-fixed-dim block mb-1">Headline Font</span>
+<div class="flex justify-between items-center">
+<span class="font-headline font-bold text-primary">Inter Display</span>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="unfold_more">unfold_more</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex-1 p-3 bg-surface-container-lowest rounded-xl flex items-center justify-between">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="format_size">format_size</span>
+<span class="text-xs font-bold">64pt</span>
+</div>
+<div class="flex gap-1">
+<button class="p-3 bg-surface-container-lowest rounded-xl"><span class="material-symbols-outlined text-sm" data-icon="format_bold">format_bold</span></button>
+<button class="p-3 bg-surface-container-lowest rounded-xl"><span class="material-symbols-outlined text-sm" data-icon="format_italic">format_italic</span></button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Color Palette -->
+<section class="space-y-4">
+<label class="text-[10px] font-bold tracking-widest uppercase text-secondary block">Color Palette</label>
+<div class="flex space-x-2">
+<button class="w-8 h-8 rounded-full bg-primary ring-2 ring-offset-2 ring-on-tertiary-container"></button>
+<button class="w-8 h-8 rounded-full bg-secondary"></button>
+<button class="w-8 h-8 rounded-full bg-[#ce9e99]"></button>
+<button class="w-8 h-8 rounded-full bg-[#3f201d]"></button>
+<button class="w-8 h-8 rounded-full bg-white border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-xs" data-icon="add">add</span>
+</button>
+</div>
+</section>
+<!-- Section: Assets -->
+<section class="space-y-4">
+<label class="text-[10px] font-bold tracking-widest uppercase text-secondary block">Imagery &amp; Media</label>
+<div class="aspect-video rounded-2xl bg-surface-container-high border-2 border-dashed border-outline-variant flex flex-col items-center justify-center p-4 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-primary text-3xl mb-2" data-icon="upload_file">upload_file</span>
+<p class="text-[10px] font-medium text-secondary text-center">Drag &amp; Drop high-res photos</p>
+</div>
+<div class="flex gap-2">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="Wedding rings on silk background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8YiOVwNzQEO8rDQ609c5JcY7VMZLMaxbP_VXw4KWQZNukIld7LIIFQ-uV5yVk6dA8qbKNdt6GNIJPtMJEGnfeOgi7bXjeFO75ldXjb3zby6Q6V2X1yCWQrSWjQYdJliswYq8FlgZZQ2BB6svrz6GoFtH6l4LcQhezf7FZdlXWPwKjkbziskgS_0AmaQ9kbSgu0BRI3c1HGXoRS79uOi86b_5t46lyZdAxy73pc7ECfcFQykAqcjCDF4E3dwiz0eloA3PMjJndSYdw"/>
+</div>
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="Floral wedding arch detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgeB-hJA6Tn1kv7mF38K_m_VTCX7wwBQXYTBxXGu6FkgjbJ1HVMFQw2NGs8VUx9-0JQ29fwgHv8EM3176Pyi75vhYbzDNE2oVJqPL5Rr5I7Oo64VMwE9e8C8FcVhuygahSFKhDnJcy7YrgfaaaU8Bl7ZCF6n-RK51F5bdkMUtDka7fyyj8zxPtSxQcr3WBHowPzoboB3N8K0zUPcbcVTjFyt52sHh2HHa_CpYQg5SFxdfQwDFLn6IHDQHN5WiI9kmgodAoIOLhgeGN"/>
+</div>
+<div class="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center bg-surface-container-highest text-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="more_horiz">more_horiz</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar Footer CTA -->
+<div class="p-6 bg-surface-container-high/50 backdrop-blur-md">
+<button class="w-full bg-tertiary-container text-on-tertiary-container py-4 rounded-full font-black tracking-widest uppercase text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-tertiary-container/10">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span>
+                    Publish Invitation
+                </button>
+</div>
+</aside>
+<!-- Main Canvas Area -->
+<section class="flex-1 bg-surface-container p-12 overflow-y-auto flex justify-center items-start no-scrollbar relative">
+<!-- Canvas Toolbar (Floating) -->
+<div class="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 bg-surface-container-lowest/80 backdrop-blur-xl rounded-full shadow-2xl z-20">
+<button class="p-3 hover:bg-surface-container-high rounded-full transition-colors"><span class="material-symbols-outlined text-primary" data-icon="zoom_in">zoom_in</span></button>
+<div class="w-px h-6 bg-outline-variant/30"></div>
+<button class="p-3 hover:bg-surface-container-high rounded-full transition-colors"><span class="material-symbols-outlined text-primary" data-icon="undo">undo</span></button>
+<button class="p-3 hover:bg-surface-container-high rounded-full transition-colors"><span class="material-symbols-outlined text-primary" data-icon="redo">redo</span></button>
+<div class="w-px h-6 bg-outline-variant/30"></div>
+<button class="flex items-center gap-2 px-4 py-2 hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="devices">devices</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-secondary">Mobile View</span>
+</button>
+</div>
+<!-- Invitation Preview Canvas -->
+<div class="w-full max-w-[600px] bg-white rounded-[2.5rem] shadow-[0_40px_100px_rgba(26,39,75,0.1)] overflow-hidden min-h-[900px] mt-12 mb-20">
+<!-- Invitation Content Shell -->
+<div class="relative w-full aspect-[3/4]">
+<img class="w-full h-full object-cover" data-alt="Abstract luxury marble texture with rose gold veins" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDy45kwXK7jLNBhXXOF2VTVfoR9Yu-AMPo4_T-46e3NrlHW_9hrVgyiIvgfCONJiJiTwKakvIN2FOWUpDSIet0ZQJUHLL9OZ94FVH2qy3VEukT0zb_eNbhKGuI_Z1w-JXuX41bJFhbzOwHbMEDUzV9kE9vw70vGGnyTXCdNsvK3nxGdbYoyn2aMBCiLtVck9kif0sqY8gvxQuzp7wT0dTjiyji00L_Jv60_Ci5-ecijul7a-VcBzb4mGLcxnIE7tQcfJafPoedtt9mJ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<!-- Text Overlay -->
+<div class="absolute inset-x-0 bottom-0 p-12 text-center">
+<span class="label-md font-bold tracking-[0.3em] text-white/60 uppercase block mb-4">You're Invited to</span>
+<h1 class="font-headline text-5xl font-black text-white tracking-tighter leading-tight mb-2">ARTHUR &amp; <br/>BEATRICE</h1>
+<p class="text-on-tertiary-container font-medium tracking-[0.1em] text-sm">SATURDAY, AUGUST 24, 2024</p>
+</div>
+</div>
+<div class="p-12 space-y-12 bg-white">
+<div class="space-y-6">
+<div class="flex justify-center">
+<span class="material-symbols-outlined text-on-tertiary-container text-4xl" data-icon="diamond" style="font-variation-settings: 'FILL' 1;">diamond</span>
+</div>
+<p class="text-center font-body text-secondary leading-relaxed max-w-sm mx-auto">
+                            Together with their families, they request the pleasure of your company as they exchange vows and celebrate their new life together.
+                        </p>
+</div>
+<div class="grid grid-cols-2 gap-8 py-8 border-y border-outline-variant/10">
+<div class="text-center">
+<span class="text-[10px] font-bold tracking-widest uppercase text-secondary block mb-2">Location</span>
+<h3 class="font-headline font-bold text-primary">The Ritz-Carlton</h3>
+<p class="text-xs text-secondary">New York, Central Park</p>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold tracking-widest uppercase text-secondary block mb-2">Reception</span>
+<h3 class="font-headline font-bold text-primary">Grand Ballroom</h3>
+<p class="text-xs text-secondary">Followed by cocktails</p>
+</div>
+</div>
+<div class="flex justify-center">
+<button class="bg-primary text-on-primary px-12 py-4 rounded-full font-bold tracking-widest uppercase text-xs shadow-xl shadow-primary/20">
+                            RSVP Online
+                        </button>
+</div>
+</div>
+</div>
+<!-- Floating Preview Button -->
+<div class="fixed bottom-24 right-12">
+<button class="w-16 h-16 bg-surface-container-lowest text-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-8 pt-4 bg-white/80 backdrop-blur-2xl shadow-2xl rounded-t-[32px]">
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-bold tracking-widest uppercase mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#ce9e99] scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="text-[10px] font-bold tracking-widest uppercase mt-1">Editor</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+<span class="text-[10px] font-bold tracking-widest uppercase mt-1">Preview</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold tracking-widest uppercase mt-1">Profile</span>
+</a>
+</nav>
+</body></html>
