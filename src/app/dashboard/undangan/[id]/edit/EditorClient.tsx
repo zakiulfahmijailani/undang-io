@@ -160,6 +160,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
     const [activeTab, setActiveTab] = useState("infodasar");
     const [isUploading, setIsUploading] = useState(false);
     const [showPreview, setShowPreview] = useState(true);
+    const [mobileMode, setMobileMode] = useState<"edit" | "preview">("edit");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState({
@@ -346,9 +347,32 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                         </div>
                     </div>
                     <div className="flex w-full sm:w-auto items-center gap-2">
+                        {/* Mobile only — Edit/Preview toggle */}
+                        <div className="md:hidden flex rounded-xl border border-stone-200 bg-stone-100 p-0.5 flex-shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => setMobileMode("edit")}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mobileMode === "edit"
+                                    ? "bg-white text-stone-800 shadow-sm"
+                                    : "text-stone-400"
+                                    }`}
+                            >
+                                ✏️ Edit
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMobileMode("preview")}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mobileMode === "preview"
+                                    ? "bg-white text-stone-800 shadow-sm"
+                                    : "text-stone-400"
+                                    }`}
+                            >
+                                👁 Preview
+                            </button>
+                        </div>
                         <Button
                             variant="secondary"
-                            className="h-9 border-stone-200 text-stone-600 bg-white hover:bg-stone-50 text-sm"
+                            className="hidden md:flex h-9 border-stone-200 text-stone-600 bg-white hover:bg-stone-50 text-sm"
                             onClick={() => setShowPreview(p => !p)}
                         >
                             {showPreview
@@ -369,10 +393,13 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             </div>
 
             {/* ── Split Pane Body ── */}
-            <div className="flex flex-col md:flex-row flex-1 overflow-auto md:overflow-hidden" style={{ minHeight: "calc(100vh - 64px)" }}>
+            <div className="flex flex-col md:flex-row flex-1" style={{ minHeight: "calc(100vh - 64px)" }}>
 
                 {/* LEFT — Editor Form */}
-                <div className={`flex flex-col overflow-hidden bg-stone-50 transition-all duration-300 ${showPreview ? "w-full md:w-[420px] lg:w-[460px] md:flex-shrink-0" : "w-full"}`}>
+                <div className={`flex flex-col overflow-hidden bg-stone-50 transition-all duration-300 md:sticky md:top-0 md:h-screen
+    ${mobileMode === "preview" ? "hidden md:flex" : "flex"}
+    ${showPreview ? "w-full md:w-[420px] lg:w-[460px] md:flex-shrink-0" : "w-full"}
+`}>
 
                     {/* Tab Nav — vertical sidebar style */}
                     <div className="flex md:flex-row overflow-x-auto md:overflow-visible flex-shrink-0 border-b border-stone-200 bg-white">
@@ -929,8 +956,8 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     </div>
                 </div>
 
-                {/* RIGHT — Live Preview (unchanged) */}
-                {showPreview && (
+                {/* RIGHT — Live Preview */}
+                {(showPreview || mobileMode === "preview") && (
                     <div className="flex flex-col flex-1 overflow-hidden border-t md:border-t-0 md:border-l border-stone-200 bg-stone-100 min-h-[600px] md:min-h-0">
                         <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-stone-200 flex-shrink-0">
                             <div className="flex gap-1.5">
