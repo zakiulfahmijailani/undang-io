@@ -326,7 +326,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
     const coupleName = `${formData.groom_name || "Mempelai Pria"} & ${formData.bride_name || "Mempelai Wanita"}`;
 
-    const coupleName = `${formData.groom_name || "Mempelai Pria"} & ${formData.bride_name || "Mempelai Wanita"}`;
+
 
     return (
         <div className="flex flex-col h-full bg-stone-50 min-h-screen">
