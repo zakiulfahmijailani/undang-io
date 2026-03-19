@@ -84,6 +84,14 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         gallery_photos: [],
         bank_accounts: [],
         enable_rsvp: true,
+        gift_bank_name: initialData.gift_bank_name || "",
+        gift_bank_account: initialData.gift_bank_account || "",
+        gift_bank_account_name: initialData.gift_bank_account_name || "",
+        gift_shipping_address: initialData.gift_shipping_address || "",
+        quote_source: initialData.quote_source || "",
+        show_couple_photos: initialData.show_couple_photos ?? true,
+        show_prewed_gallery: initialData.show_prewed_gallery ?? true,
+        show_gift_section: initialData.show_gift_section ?? true,
     });
 
     const liveData = {
@@ -123,6 +131,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             source: formData.greeting_text ? "Mempelai" : demoData.quote.source,
         },
         musicUrl: formData.music_url || null,
+        loveStory: (formData.love_story as any[]).filter(s => s.title?.trim()),
     };
 
     const handleSaveAll = async () => {
@@ -174,11 +183,11 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         { id: "mempelai", label: "Data Mempelai", icon: Users },
         { id: "acara", label: "Acara", icon: MapPin },
         { id: "lovestory", label: "Kisah Cinta", icon: Heart },
-        { id: "galeri", label: "Galeri Foto", icon: Camera, soon: true },
-        { id: "amplop", label: "Amplop Digital", icon: Gift, soon: true },
-        { id: "ayat", label: "Ayat & Quote", icon: Type, soon: true },
+        { id: "galeri", label: "Galeri Foto", icon: Camera },
+        { id: "amplop", label: "Amplop Digital", icon: Gift },
+        { id: "ayat", label: "Ayat & Quote", icon: Type },
         { id: "musik", label: "Musik", icon: Music },
-        { id: "pengaturan", label: "Pengaturan", icon: Settings, soon: true },
+        { id: "pengaturan", label: "Pengaturan", icon: Settings },
     ];
 
     const coupleName = `${formData.groom_name || "Mempelai Pria"} & ${formData.bride_name || "Mempelai Wanita"}`;
@@ -615,18 +624,157 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                     />
                                 )}
 
-                                {/* ── COMING SOON tabs ── */}
-                                {["galeri", "amplop", "ayat", "pengaturan"].includes(activeTab) && (
-                                    <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in">
-                                        <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center mb-5 text-stone-300">
-                                            {activeTab === "lovestory" && <Heart className="w-7 h-7" />}
-                                            {activeTab === "galeri" && <Camera className="w-7 h-7" />}
-                                            {activeTab === "amplop" && <Gift className="w-7 h-7" />}
-                                            {activeTab === "ayat" && <Type className="w-7 h-7" />}
-                                            {activeTab === "pengaturan" && <Settings className="w-7 h-7" />}
+                                {/* ── GALERI ── */}
+                                {activeTab === "galeri" && (
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
                                         </div>
-                                        <h2 className="text-lg font-serif font-bold text-stone-700 mb-2">Segera Hadir</h2>
-                                        <p className="text-stone-400 text-sm max-w-xs leading-relaxed">Fitur ini sedang dibangun dan akan segera tersedia.</p>
+                                        <div className="space-y-3">
+                                            {((formData.gallery_photos as string[]).length === 0) && (
+                                                <p className="text-sm text-stone-400 text-center py-6 bg-stone-50 rounded-2xl border border-dashed border-stone-200">
+                                                    Belum ada foto. Tambahkan URL foto di bawah.
+                                                </p>
+                                            )}
+                                            {(formData.gallery_photos as string[]).map((url, i) => (
+                                                <div key={i} className="flex items-center gap-2">
+                                                    <span className="text-xs font-bold text-stone-400 w-5 text-center">{i + 1}</span>
+                                                    <Input
+                                                        value={url}
+                                                        onChange={e => {
+                                                            const updated = [...(formData.gallery_photos as string[])];
+                                                            updated[i] = e.target.value;
+                                                            handleChange("gallery_photos", updated);
+                                                        }}
+                                                        placeholder="https://..."
+                                                        className="text-base py-3 flex-1"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const updated = (formData.gallery_photos as string[]).filter((_, idx) => idx !== i);
+                                                            handleChange("gallery_photos", updated);
+                                                        }}
+                                                        className="p-2 text-stone-300 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {(formData.gallery_photos as string[]).length < 8 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleChange("gallery_photos", [...(formData.gallery_photos as string[]), ""])}
+                                                className="w-full py-3 rounded-2xl border-2 border-dashed border-stone-200 text-stone-400 hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50/40 transition-all text-sm font-semibold flex items-center justify-center gap-2"
+                                            >
+                                                <span className="text-lg leading-none">+</span> Tambah Foto
+                                                <span className="text-xs font-normal text-stone-300">({(formData.gallery_photos as string[]).length}/8)</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* ── AMPLOP DIGITAL ── */}
+                                {activeTab === "amplop" && (
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
+                                        </div>
+
+                                        <Section title="Transfer Bank / E-Wallet" accent="amber">
+                                            <Field label="Nama Bank / E-Wallet">
+                                                <Input value={formData.gift_bank_name || ""} onChange={e => handleChange("gift_bank_name", e.target.value)} placeholder="BCA / GoPay / OVO" className="text-base py-3" />
+                                            </Field>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <Field label="Nomor Rekening">
+                                                    <Input value={formData.gift_bank_account || ""} onChange={e => handleChange("gift_bank_account", e.target.value)} placeholder="1234567890" className="text-base py-3" />
+                                                </Field>
+                                                <Field label="Atas Nama">
+                                                    <Input value={formData.gift_bank_account_name || ""} onChange={e => handleChange("gift_bank_account_name", e.target.value)} placeholder="Nama Pemilik" className="text-base py-3" />
+                                                </Field>
+                                            </div>
+                                        </Section>
+
+                                        <Section title="Alamat Pengiriman Hadiah" accent="rose">
+                                            <Field label="Alamat Lengkap">
+                                                <textarea
+                                                    rows={3}
+                                                    className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
+                                                    value={formData.gift_shipping_address || ""}
+                                                    onChange={e => handleChange("gift_shipping_address", e.target.value)}
+                                                    placeholder="Jl. Contoh No. 1, Kota, Kode Pos"
+                                                />
+                                            </Field>
+                                        </Section>
+                                    </div>
+                                )}
+
+                                {/* ── AYAT & QUOTE ── */}
+                                {activeTab === "ayat" && (
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
+                                        </div>
+                                        <Field label="Teks Kutipan">
+                                            <textarea
+                                                rows={4}
+                                                className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
+                                                value={formData.greeting_text}
+                                                onChange={e => handleChange("greeting_text", e.target.value)}
+                                                placeholder="Dan di antara tanda-tanda kekuasaan-Nya..."
+                                            />
+                                        </Field>
+                                        <Field label="Sumber / Referensi">
+                                            <Input
+                                                value={formData.quote_source || ""}
+                                                onChange={e => handleChange("quote_source", e.target.value)}
+                                                placeholder="QS. Ar-Rum: 21"
+                                                className="text-base py-3"
+                                            />
+                                        </Field>
+                                    </div>
+                                )}
+
+                                {/* ── PENGATURAN ── */}
+                                {activeTab === "pengaturan" && (
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Pengaturan</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Visibilitas dan kontrol undangan.</p>
+                                        </div>
+
+                                        <Section title="Tampilan" accent="amber">
+                                            {[
+                                                { key: "show_couple_photos", label: "Tampilkan foto pasangan" },
+                                                { key: "show_prewed_gallery", label: "Tampilkan galeri prewedding" },
+                                                { key: "show_gift_section", label: "Tampilkan amplop digital" },
+                                            ].map(({ key, label }) => (
+                                                <div key={key} className="flex items-center justify-between py-1">
+                                                    <span className="text-sm text-stone-700 font-medium">{label}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleChange(key, !(formData as any)[key])}
+                                                        className={`relative w-11 h-6 rounded-full transition-colors ${(formData as any)[key] ? "bg-amber-500" : "bg-stone-200"}`}
+                                                    >
+                                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${(formData as any)[key] ? "translate-x-5" : "translate-x-0"}`} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </Section>
+
+                                        <Section title="Status Undangan" accent="rose">
+                                            <Field label="Status" hint="Ubah ke Aktif agar tamu dapat mengakses undangan.">
+                                                <Select id="status-pengaturan" value={formData.status} onChange={e => handleChange("status", e.target.value)}>
+                                                    <option value="unpaid">Belum Aktif (Draft)</option>
+                                                    <option value="active">Aktif (Publik)</option>
+                                                    <option value="expired">Kedaluwarsa</option>
+                                                </Select>
+                                            </Field>
+                                        </Section>
                                     </div>
                                 )}
 
