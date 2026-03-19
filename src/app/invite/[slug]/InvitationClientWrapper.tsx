@@ -35,6 +35,8 @@ interface InvitationData {
     rsvpMessages: RsvpMessage[];
     calendarUrl: string;
     musicUrl?: string | null;
+    sectionsOrder?: string[];                           // ← tambah ini
+    sectionsVisibility?: Record<string, boolean>;       // ← dan ini
 }
 
 interface WrapperProps {
@@ -106,34 +108,50 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <HeroSection
-                            coupleShortName={data.coupleShortName}
-                            groomName={data.groom?.fullName}
-                            brideName={data.bride?.fullName}
-                            heroPhoto={data.heroPhoto}
-                            weddingDate={data.akad?.date}
-                            calendarUrl={data.calendarUrl}
-                        />
+                        {(() => {
+                            const order = data.sectionsOrder || [
+                                "hero", "couple", "quote", "lovestory",
+                                "countdown", "event", "gallery", "gift", "rsvp"
+                            ];
+                            const vis = data.sectionsVisibility || {};
+                            const isVisible = (id: string) => vis[id] !== false;
 
-                        <CoupleSection groom={data.groom} bride={data.bride} />
-                        <QuoteSection quote={safeQuote} />
-                        <LoveStorySection stories={data.loveStory} />
-                        <CountdownSection targetDate={data.akad?.date} />
-
-                        <EventSection
-                            akad={data.akad}
-                            reception={data.reception}
-                            dressCode={data.dressCode}
-                        />
-
-                        <GallerySection photos={data.gallery} />
-                        <LoveGiftSection
-                            bankAccounts={data.bankAccounts}
-                            giftAddress={data.giftAddress}
-                        />
-
-                        <RsvpSection initialMessages={data.rsvpMessages} />
-
+                            return order.map((id) => {
+                                if (!isVisible(id)) return null;
+                                switch (id) {
+                                    case "hero": return (
+                                        <HeroSection key={id}
+                                            coupleShortName={data.coupleShortName}
+                                            groomName={data.groom?.fullName}
+                                            brideName={data.bride?.fullName}
+                                            heroPhoto={data.heroPhoto}
+                                            weddingDate={data.akad?.date}
+                                            calendarUrl={data.calendarUrl}
+                                        />
+                                    );
+                                    case "couple": return <CoupleSection key={id} groom={data.groom} bride={data.bride} />;
+                                    case "quote": return <QuoteSection key={id} quote={safeQuote} />;
+                                    case "lovestory": return <LoveStorySection key={id} stories={data.loveStory} />;
+                                    case "countdown": return <CountdownSection key={id} targetDate={data.akad?.date} />;
+                                    case "event": return (
+                                        <EventSection key={id}
+                                            akad={data.akad}
+                                            reception={data.reception}
+                                            dressCode={data.dressCode}
+                                        />
+                                    );
+                                    case "gallery": return <GallerySection key={id} photos={data.gallery} />;
+                                    case "gift": return (
+                                        <LoveGiftSection key={id}
+                                            bankAccounts={data.bankAccounts}
+                                            giftAddress={data.giftAddress}
+                                        />
+                                    );
+                                    case "rsvp": return <RsvpSection key={id} initialMessages={data.rsvpMessages} />;
+                                    default: return null;
+                                }
+                            });
+                        })()}
                         <div className="h-20" />
                         <BottomNavbar />
                         {/* Only render music button if a music URL is configured */}

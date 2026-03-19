@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import MusicPickerTab from "@/components/dashboard/MusicPickerTab";
+import DndSectionsEditor from "@/components/dashboard/DndSectionsEditor";
 
 interface EditorClientProps {
     initialData: any;
@@ -81,7 +82,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             { year: "2021", title: "Mulai Dekat", description: "" },
             { year: "2023", title: "Lamaran", description: "" },
         ],
-        gallery_photos: [],
+        gallery_photos: initialData.gallery_photos || [],
         bank_accounts: [],
         sections_order: initialData.sections_order || [
             "hero", "couple", "quote", "lovestory",
@@ -145,6 +146,8 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         }] : demoData.bankAccounts,
         giftAddress: formData.gift_shipping_address || demoData.giftAddress,
         musicUrl: formData.music_url || null,
+        sectionsOrder: formData.sections_order as string[],
+        sectionsVisibility: formData.sections_visibility as Record<string, boolean>,
     };
 
     const handleSaveAll = async () => {
