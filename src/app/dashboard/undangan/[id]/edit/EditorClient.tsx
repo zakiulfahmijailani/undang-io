@@ -287,20 +287,33 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {tabs.map((tab) => {
                                     const Icon = tab.icon;
                                     const isActive = activeTab === tab.id;
+                                    const sectionMap: Record<string, string> = {
+                                        fotocover: "hero", acara: "event", lovestory: "lovestory",
+                                        galeri: "gallery", amplop: "gift", ayat: "quote",
+                                    };
+                                    const sectionId = sectionMap[tab.id];
+                                    const isVisible = sectionId
+                                        ? (sectionId in (formData.sections_visibility as any)
+                                            ? (formData.sections_visibility as any)[sectionId]
+                                            : true)
+                                        : null;
                                     return (
                                         <button
                                             key={tab.id}
                                             onClick={() => !tab.soon && setActiveTab(tab.id)}
-                                            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all ${isActive
-                                                ? "bg-stone-900 text-white"
-                                                : tab.soon
-                                                    ? "bg-stone-100 text-stone-300 cursor-not-allowed"
+                                            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all ${isActive ? "bg-stone-900 text-white"
+                                                : tab.soon ? "bg-stone-100 text-stone-300 cursor-not-allowed"
                                                     : "bg-stone-100 text-stone-600 hover:bg-amber-50 hover:text-amber-700"
                                                 }`}
                                         >
                                             <Icon className="w-3.5 h-3.5" />
                                             {tab.label}
-                                            {tab.soon && <Lock className="w-3 h-3" />}
+                                            {sectionId && isVisible === false && (
+                                                <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                                            )}
+                                            {sectionId && isVisible !== false && isVisible !== null && (
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                            )}
                                         </button>
                                     );
                                 })}
@@ -312,29 +325,75 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     <div className="flex flex-1 overflow-hidden">
 
                         {/* Vertical tab list — desktop only */}
-                        <nav className="hidden md:flex flex-col w-44 flex-shrink-0 border-r border-stone-200 bg-white overflow-y-auto py-2">
+                        <nav className="hidden md:flex flex-col w-52 flex-shrink-0 border-r border-stone-200 bg-white overflow-y-auto py-2">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 const isActive = activeTab === tab.id;
+                                // section ID yang punya toggle
+                                const sectionMap: Record<string, string> = {
+                                    fotocover: "hero",
+                                    acara: "event",
+                                    lovestory: "lovestory",
+                                    galeri: "gallery",
+                                    amplop: "gift",
+                                    ayat: "quote",
+                                };
+                                const lockedTabs = ["mempelai"]; // wajib tampil, tidak bisa di-off
+                                const sectionId = sectionMap[tab.id];
+                                const isLocked = lockedTabs.includes(tab.id);
+                                const isVisible = sectionId
+                                    ? (sectionId in (formData.sections_visibility as any)
+                                        ? (formData.sections_visibility as any)[sectionId]
+                                        : true)
+                                    : null;
+
                                 return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => !tab.soon && setActiveTab(tab.id)}
-                                        disabled={!!tab.soon}
-                                        className={`flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all text-left relative ${isActive
-                                            ? "bg-amber-50 text-amber-800 font-semibold"
-                                            : tab.soon
-                                                ? "text-stone-300 cursor-not-allowed"
-                                                : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
-                                            }`}
-                                    >
-                                        {isActive && (
-                                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
+                                    <div key={tab.id} className="flex items-center relative">
+                                        <button
+                                            onClick={() => !tab.soon && setActiveTab(tab.id)}
+                                            disabled={!!tab.soon}
+                                            className={`flex-1 flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all text-left relative ${isActive
+                                                ? "bg-amber-50 text-amber-800 font-semibold"
+                                                : tab.soon
+                                                    ? "text-stone-300 cursor-not-allowed"
+                                                    : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                                                }`}
+                                        >
+                                            {isActive && (
+                                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
+                                            )}
+                                            <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-amber-500" : tab.soon ? "text-stone-300" : "text-stone-400"}`} />
+                                            <span className="truncate">{tab.label}</span>
+                                        </button>
+
+                                        {/* Toggle kecil di samping kanan tab */}
+                                        {sectionId && !isLocked && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const current = sectionId in (formData.sections_visibility as any)
+                                                        ? (formData.sections_visibility as any)[sectionId]
+                                                        : true;
+                                                    handleChange("sections_visibility", {
+                                                        ...(formData.sections_visibility as any),
+                                                        [sectionId]: !current,
+                                                    });
+                                                }}
+                                                className="pr-3 flex-shrink-0"
+                                                title={isVisible ? "Sembunyikan section" : "Tampilkan section"}
+                                            >
+                                                <span className={`w-7 h-4 rounded-full relative flex items-center transition-colors ${isVisible ? "bg-emerald-400" : "bg-stone-200"}`}>
+                                                    <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-3.5" : "translate-x-0.5"}`} />
+                                                </span>
+                                            </button>
                                         )}
-                                        <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-amber-500" : tab.soon ? "text-stone-300" : "text-stone-400"}`} />
-                                        <span className="truncate">{tab.label}</span>
-                                        {tab.soon && <Lock className="w-3 h-3 ml-auto text-stone-300 flex-shrink-0" />}
-                                    </button>
+                                        {isLocked && (
+                                            <span className="pr-3 flex-shrink-0" title="Wajib tampil">
+                                                <Lock className="w-3 h-3 text-stone-300" />
+                                            </span>
+                                        )}
+                                    </div>
                                 );
                             })}
                         </nav>
