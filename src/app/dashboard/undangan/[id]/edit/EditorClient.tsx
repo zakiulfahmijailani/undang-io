@@ -420,7 +420,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     <div className="flex flex-1 overflow-hidden">
 
                         {/* Vertical tab list — desktop only, draggable */}
-                        <nav className="hidden md:flex flex-col w-52 flex-shrink-0 border-r border-stone-200 bg-white overflow-y-auto py-2">
+                        <nav className="hidden md:flex flex-col w-44 flex-shrink-0 border-r border-stone-200 bg-white overflow-y-auto py-2">
                             <DndContext
                                 sensors={useSensors(
                                     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -542,16 +542,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "fotocover" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Foto & Cover</h2>
-                                                    <p className="text-sm text-stone-400 mt-1">Upload foto utama pasangan.</p>
-                                                </div>
-                                                <SectionToggle
-                                                    sectionId="hero"
-                                                    visibility={formData.sections_visibility as any}
-                                                    onChange={(val) => handleChange("sections_visibility", val)}
-                                                />
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Foto & Cover</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Upload foto utama pasangan.</p>
                                             </div></div>
 
                                         {formData.couple_photo_url && (
@@ -609,16 +602,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "mempelai" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Data Mempelai</h2>
-                                                    <p className="text-sm text-stone-400 mt-1">Nama lengkap dan nama orang tua.</p>
-                                                </div>
-                                                <SectionToggle
-                                                    sectionId="couple"
-                                                    visibility={formData.sections_visibility as any}
-                                                    onChange={(val) => handleChange("sections_visibility", val)}
-                                                />
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Data Mempelai</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Nama lengkap dan nama orang tua.</p>
                                             </div></div>
 
                                         <Section title="Pengantin Pria" accent="amber">
@@ -655,16 +641,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "acara" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Detail Acara</h2>
-                                                    <p className="text-sm text-stone-400 mt-1">Waktu dan lokasi akad serta resepsi.</p>
-                                                </div>
-                                                <SectionToggle
-                                                    sectionId="event"
-                                                    visibility={formData.sections_visibility as any}
-                                                    onChange={(val) => handleChange("sections_visibility", val)}
-                                                />
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Detail Acara</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Waktu dan lokasi akad serta resepsi.</p>
                                             </div></div>
 
                                         <Section title="Akad Nikah" accent="amber">
@@ -714,43 +693,20 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "lovestory" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
-                                                    <p className="text-sm text-stone-400 mt-1">
-                                                        Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
-                                                    </p>
-                                                </div>
-                                                <SectionToggle
-                                                    sectionId="lovestory"
-                                                    visibility={formData.sections_visibility as any}
-                                                    onChange={(val) => handleChange("sections_visibility", val)}
-                                                />
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
+                                                <p className="text-sm text-stone-400 mt-1">
+                                                    Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
+                                                </p>
                                             </div>
                                         </div>
 
                                         <div className="space-y-3">
                                             {(formData.love_story as any[]).map((story, i) => (
                                                 <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-100 space-y-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                                                {i + 1}
-                                                            </span>
-                                                            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Momen {i + 1}</span>
-                                                        </div>
-                                                        {(formData.love_story as any[]).length > 1 && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    const updated = (formData.love_story as any[]).filter((_, idx) => idx !== i);
-                                                                    handleChange("love_story", updated);
-                                                                }}
-                                                                className="text-stone-300 hover:text-red-500 transition-colors p-1"
-                                                            >
-                                                                <X className="w-4 h-4" />
-                                                            </button>
-                                                        )}
+                                                    <div>
+                                                        <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
+                                                        <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
                                                         <div className="space-y-1">
@@ -842,16 +798,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "galeri" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
-                                                    <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
-                                                </div>
-                                                <SectionToggle
-                                                    sectionId="gallery"
-                                                    visibility={formData.sections_visibility as any}
-                                                    onChange={(val) => handleChange("sections_visibility", val)}
-                                                />
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
                                             </div></div>
                                         <div className="space-y-3">
                                             {((formData.gallery_photos as string[]).length === 0) && (
@@ -902,16 +851,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "amplop" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
-                                                    <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
-                                                </div>
-                                                <SectionToggle
-                                                    sectionId="gift"
-                                                    visibility={formData.sections_visibility as any}
-                                                    onChange={(val) => handleChange("sections_visibility", val)}
-                                                />
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
                                             </div></div>
 
                                         <Section title="Transfer Bank / E-Wallet" accent="amber">
@@ -956,16 +898,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "ayat" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
-                                                    <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
-                                                </div>
-                                                <SectionToggle
-                                                    sectionId="quote"
-                                                    visibility={formData.sections_visibility as any}
-                                                    onChange={(val) => handleChange("sections_visibility", val)}
-                                                />
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
                                             </div></div>
                                         <Field label="Teks Kutipan">
                                             <textarea
