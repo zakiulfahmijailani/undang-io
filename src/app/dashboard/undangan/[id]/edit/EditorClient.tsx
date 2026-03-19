@@ -46,6 +46,31 @@ function Section({ title, accent, children }: { title: string; accent?: "amber" 
     );
 }
 
+// ── Section Visibility Toggle ───────────────────────────────────
+function SectionToggle({ sectionId, visibility, onChange }: {
+    sectionId: string;
+    visibility: Record<string, boolean>;
+    onChange: (val: Record<string, boolean>) => void;
+}) {
+    const isVisible = visibility[sectionId] !== false;
+    return (
+        <button
+            type="button"
+            onClick={() => onChange({ ...visibility, [sectionId]: !isVisible })}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${isVisible
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                : "bg-stone-100 border-stone-200 text-stone-400"
+                }`}
+        >
+            <span className={`w-7 h-4 rounded-full relative transition-colors ${isVisible ? "bg-emerald-500" : "bg-stone-300"}`}>
+                <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-3.5" : "translate-x-0.5"}`} />
+            </span>
+            {isVisible ? "Ditampilkan" : "Disembunyikan"}
+        </button>
+    );
+}
+
+
 export default function EditorClient({ initialData }: EditorClientProps) {
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
@@ -377,9 +402,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "fotocover" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Foto & Cover</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Upload foto utama pasangan.</p>
-                                        </div>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Foto & Cover</h2>
+                                                    <p className="text-sm text-stone-400 mt-1">Upload foto utama pasangan.</p>
+                                                </div>
+                                                <SectionToggle
+                                                    sectionId="hero"
+                                                    visibility={formData.sections_visibility as any}
+                                                    onChange={(val) => handleChange("sections_visibility", val)}
+                                                />
+                                            </div></div>
 
                                         {formData.couple_photo_url && (
                                             <div className="relative w-full rounded-2xl overflow-hidden border border-stone-200 shadow-sm">
@@ -436,9 +469,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "mempelai" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Data Mempelai</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Nama lengkap dan nama orang tua.</p>
-                                        </div>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Data Mempelai</h2>
+                                                    <p className="text-sm text-stone-400 mt-1">Nama lengkap dan nama orang tua.</p>
+                                                </div>
+                                                <SectionToggle
+                                                    sectionId="couple"
+                                                    visibility={formData.sections_visibility as any}
+                                                    onChange={(val) => handleChange("sections_visibility", val)}
+                                                />
+                                            </div></div>
 
                                         <Section title="Pengantin Pria" accent="amber">
                                             <Field label="Nama Lengkap">
@@ -474,9 +515,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "acara" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Detail Acara</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Waktu dan lokasi akad serta resepsi.</p>
-                                        </div>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Detail Acara</h2>
+                                                    <p className="text-sm text-stone-400 mt-1">Waktu dan lokasi akad serta resepsi.</p>
+                                                </div>
+                                                <SectionToggle
+                                                    sectionId="event"
+                                                    visibility={formData.sections_visibility as any}
+                                                    onChange={(val) => handleChange("sections_visibility", val)}
+                                                />
+                                            </div></div>
 
                                         <Section title="Akad Nikah" accent="amber">
                                             <Field label="Tanggal & Waktu">
@@ -525,10 +574,19 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "lovestory" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
-                                            <p className="text-sm text-stone-400 mt-1">
-                                                Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
-                                            </p>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
+                                                    <p className="text-sm text-stone-400 mt-1">
+                                                        Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
+                                                    </p>
+                                                </div>
+                                                <SectionToggle
+                                                    sectionId="lovestory"
+                                                    visibility={formData.sections_visibility as any}
+                                                    onChange={(val) => handleChange("sections_visibility", val)}
+                                                />
+                                            </div>
                                         </div>
 
                                         <div className="space-y-3">
@@ -644,9 +702,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "galeri" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
-                                        </div>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
+                                                    <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
+                                                </div>
+                                                <SectionToggle
+                                                    sectionId="gallery"
+                                                    visibility={formData.sections_visibility as any}
+                                                    onChange={(val) => handleChange("sections_visibility", val)}
+                                                />
+                                            </div></div>
                                         <div className="space-y-3">
                                             {((formData.gallery_photos as string[]).length === 0) && (
                                                 <p className="text-sm text-stone-400 text-center py-6 bg-stone-50 rounded-2xl border border-dashed border-stone-200">
@@ -696,9 +762,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "amplop" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
-                                        </div>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
+                                                    <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
+                                                </div>
+                                                <SectionToggle
+                                                    sectionId="gift"
+                                                    visibility={formData.sections_visibility as any}
+                                                    onChange={(val) => handleChange("sections_visibility", val)}
+                                                />
+                                            </div></div>
 
                                         <Section title="Transfer Bank / E-Wallet" accent="amber">
                                             <Field label="Nama Bank / E-Wallet">
@@ -742,9 +816,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "ayat" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
-                                        </div>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
+                                                    <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
+                                                </div>
+                                                <SectionToggle
+                                                    sectionId="quote"
+                                                    visibility={formData.sections_visibility as any}
+                                                    onChange={(val) => handleChange("sections_visibility", val)}
+                                                />
+                                            </div></div>
                                         <Field label="Teks Kutipan">
                                             <textarea
                                                 rows={4}
