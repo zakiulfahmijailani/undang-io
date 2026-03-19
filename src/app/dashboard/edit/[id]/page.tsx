@@ -2,101 +2,107 @@
 
 import { useState, useEffect, use, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import {
-  ChevronRight, ChevronLeft, Save, Sparkles,
-  Image as ImageIcon, Plus, Trash2, Loader2,
-  ToggleLeft, ToggleRight, MapPin, Search, X,
-  Check, ExternalLink
-} from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { VenueAutocomplete } from "@/components/ui/VenueAutocomplete"
 
-// ─── Primitives (shared with create page) ─────────────────────────────────────────────
-function ToggleSection({ enabled, onToggle, label, children }: {
-  enabled: boolean; onToggle: () => void; label: string; children: React.ReactNode
+// ─── Luxe Primitives ─────────────────────────────────────────────────────────
+
+function ConfigSection({ label, children, isOpen, onToggle, optional, enabled }: {
+    label: string; children: React.ReactNode; isOpen: boolean; onToggle: () => void; optional?: boolean; enabled?: boolean;
 }) {
-  return (
-    <div className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-      enabled ? "border-[#D4A91C]/40 shadow-sm" : "border-[#EDE6D6]"
-    }`}>
-      <button type="button" onClick={onToggle}
-        className="w-full flex items-center justify-between px-5 py-4 bg-[#FDFCF9] hover:bg-[#FAF8F3] transition-colors">
-        <div className="flex items-center gap-3">
-          <span className="font-medium text-[#1E1B18] text-sm">{label}</span>
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-            enabled ? "bg-[#D4A91C]/15 text-[#7D5C0C]" : "bg-[#EDE6D6] text-[#9A9390]"
-          }`}>Opsional</span>
+    return (
+        <div className={`border-b border-outline-variant/10 overflow-hidden transition-all ${isOpen ? 'bg-white' : ''}`}>
+            <button 
+                onClick={onToggle}
+                className="w-full flex items-center justify-between p-6 hover:bg-surface-container-low transition-colors group text-left"
+            >
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Configuration</span>
+                    <h4 className="text-sm font-bold text-primary flex items-center gap-2">
+                        {label}
+                        {optional && (
+                            <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${enabled ? 'bg-tertiary-container/30 border-tertiary text-tertiary' : 'bg-slate-100 border-slate-200 text-slate-400'}`}>
+                                {enabled ? 'Enabled' : 'Optional'}
+                            </span>
+                        )}
+                    </h4>
+                </div>
+                <span className={`material-symbols-outlined transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                    keyboard_arrow_down
+                </span>
+            </button>
+            <div className={`px-6 pb-8 space-y-6 overflow-hidden transition-all duration-500 ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                {children}
+            </div>
         </div>
-        {enabled ? <ToggleRight className="w-5 h-5 text-[#D4A91C]" /> : <ToggleLeft className="w-5 h-5 text-[#C2BEB8]" />}
-      </button>
-      {enabled && (
-        <div className="px-5 pb-5 pt-1 bg-white flex flex-col gap-4 border-t border-[#EDE6D6]">{children}</div>
-      )}
-    </div>
-  )
+    )
 }
 
-function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
-  return (
-    <label className="block text-xs font-semibold uppercase tracking-wider text-[#726C67] mb-1.5">
-      {children}{required && <span className="text-[#E05555] ml-1">*</span>}
-    </label>
-  )
+function Field({ label, required }: { label: string; required?: boolean }) {
+    return (
+        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">
+            {label} {required && <span className="text-tertiary">*</span>}
+        </label>
+    )
 }
 
-function TInput({ label, value, onChange, placeholder, type = "text", required }: {
-  label?: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; required?: boolean
+function LuxeInput({ label, value, onChange, placeholder, type = "text", required }: {
+    label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; required?: boolean
 }) {
-  return (
-    <div>
-      {label && <Label required={required}>{label}</Label>}
-      <input type={type}
-        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all"
-        placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
-    </div>
-  )
+    return (
+        <div className="group">
+            <Field label={label} required={required} />
+            <input 
+                type={type}
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                placeholder={placeholder}
+                className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-slate-300 focus:outline-none focus:border-tertiary focus:ring-4 focus:ring-tertiary/10 transition-all font-['Inter']"
+            />
+        </div>
+    )
 }
 
-function TTextarea({ label, value, onChange, placeholder, rows = 4 }: {
-  label?: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number
+function LuxeTextarea({ label, value, onChange, placeholder, rows = 4 }: {
+    label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number
 }) {
-  return (
-    <div>
-      {label && <Label>{label}</Label>}
-      <textarea rows={rows}
-        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-3 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all resize-none"
-        value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
-    </div>
-  )
-}
-
-function SectionDivider({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-3 py-1">
-      <div className="h-px flex-1 bg-[#EDE6D6]" />
-      <span className="text-[10px] font-bold uppercase tracking-widest text-[#C2BEB8]">{label}</span>
-      <div className="h-px flex-1 bg-[#EDE6D6]" />
-    </div>
-  )
+    return (
+        <div>
+            <Field label={label} />
+            <textarea 
+                rows={rows}
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                placeholder={placeholder}
+                className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-slate-300 focus:outline-none focus:border-tertiary focus:ring-4 focus:ring-tertiary/10 transition-all font-['Inter'] resize-none"
+            />
+        </div>
+    )
 }
 
 const TABS = [
-  { id: 'mempelai', label: 'Data Mempelai' },
-  { id: 'jadwal', label: 'Jadwal & Lokasi' },
-  { id: 'konten', label: 'Konten & Media' },
-  { id: 'fitur', label: 'Fitur Tambahan' },
+  { id: 'mempelai', label: 'Identity', icon: 'person_edit' },
+  { id: 'jadwal', label: 'Timeline', icon: 'schedule' },
+  { id: 'konten', label: 'Editorial', icon: 'auto_stories' },
+  { id: 'fitur', label: 'Concierge', icon: 'concierge' },
 ]
 
 export default function EditInvitationWizard({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const { id } = use(params)
   const [activeTab, setActiveTab] = useState(0)
+  const [openSections, setOpenSections] = useState<string[]>(['primary_info'])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isDirty, setIsDirty] = useState(false)
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [slug, setSlug] = useState("")
 
-  // ── Compulsory fields (match DB column names from GET /api/invitations/[id]) ──
+  const toggleSection = (s: string) => {
+      setOpenSections(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
+  }
+
+  // ── State Management (Preserved from original) ──
   const [f, setF] = useState({
     groomFullName: "", groomNickname: "",
     brideFullName: "", brideNickname: "",
@@ -107,7 +113,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
   })
   const upF = (p: Partial<typeof f>) => { setF(prev => ({ ...prev, ...p })); setIsDirty(true); }
 
-  // ── Optional toggles ──
   const [opt, setOpt] = useState({
     groomParents: false, brideParents: false,
     groomPhoto: false, bridePhoto: false,
@@ -120,7 +125,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
   })
   const toggleOpt = (k: keyof typeof opt) => { setOpt(p => ({ ...p, [k]: !p[k] })); setIsDirty(true); }
 
-  // ── Optional field values ──
   const [x, setX] = useState({
     groomFather: "", groomMother: "",
     brideFather: "", brideMother: "",
@@ -142,7 +146,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
   const updateStory = (i: number, p: Partial<typeof x.loveStory[0]>) =>
     { upX({ loveStory: x.loveStory.map((e, n) => n === i ? { ...e, ...p } : e) }); setIsDirty(true); }
 
-  // ── Load existing data from API ──
+  // ── Load & Save Logic (Preserved from original) ──
   useEffect(() => {
     const load = async () => {
       try {
@@ -150,8 +154,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
         const json = await res.json()
         if (!res.ok) throw new Error(json.error?.message || 'Gagal memuat')
         const d = json.data || {}
-
-        // The GET returns flat DB columns directly
         upF({
           groomFullName:    d.groom_full_name || "",
           groomNickname:    d.groom_nickname || "",
@@ -166,20 +168,15 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
           receptionVenue:   d.resepsi_location_name || "",
           receptionAddress: d.resepsi_location_address || "",
           greetingText:     d.quote_text || "",
-          // Infer event type
-          eventType: d.akad_datetime && d.resepsi_datetime ? "akad_resepsi"
-            : d.akad_datetime ? "akad"
-            : "resepsi",
+          eventType: d.akad_datetime && d.resepsi_datetime ? "akad_resepsi" : d.akad_datetime ? "akad" : "resepsi",
         })
-
-        // Hydrate optional fields & auto-open their toggles
         setOpt(p => ({
           ...p,
           groomParents: !!(d.groom_father_name),
           brideParents: !!(d.bride_father_name),
           giftBank:     !!(d.gift_bank_account),
           giftAddress:  !!(d.gift_shipping_address),
-          showGallery:  !!(d.show_prewed_gallery),
+          gallery:  !!(d.show_prewed_gallery),
           mapsUrl:      !!(d.akad_maps_url || d.resepsi_maps_url),
         }))
         upX({
@@ -198,7 +195,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
         setIsDirty(false)
       } catch (err: any) {
         console.error(err)
-        alert(err.message)
         router.push("/dashboard")
       } finally {
         setIsLoading(false)
@@ -207,11 +203,9 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
     load()
   }, [id, router])
 
-  // ── Save ──
   const handleSave = async () => {
     setIsSubmitting(true)
     try {
-      // PATCH with flat field names matching the PATCH API contract
       const res = await fetch(`/api/invitations/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -242,323 +236,257 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
           resepsi_maps_url: (f.eventType === "resepsi" || f.eventType === "akad_resepsi") ? x.receptionMapsUrl : null,
         })
       })
-
       const result = await res.json()
       if (!res.ok) throw new Error(result.error?.message || 'Gagal menyimpan undangan')
-      
       setIsDirty(false)
       setShowSaveSuccess(true)
       setTimeout(() => setShowSaveSuccess(false), 3000)
-      setIsSubmitting(false)
     } catch (error: any) {
       console.error(error)
-      alert(error.message || 'Terjadi kesalahan sistem')
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleCancelChanges = () => {
-    if (confirm("Batalkan semua perubahan yang belum disimpan?")) {
-      window.location.reload()
+      alert(error.message)
+    } finally {
+        setIsSubmitting(false)
     }
   }
 
   if (isLoading) return (
     <div className="flex justify-center items-center min-h-[40vh]">
-      <Loader2 className="w-6 h-6 animate-spin text-[#D4A91C]" />
+      <Loader2 className="w-8 h-8 animate-spin text-tertiary" />
     </div>
   )
 
   return (
-    <div className="max-w-5xl mx-auto flex flex-col gap-8 pb-32">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-white/80 backdrop-blur-md py-4 border-b border-[#EDE6D6]/60">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className="font-display text-2xl font-light text-[#1E1B18]">Edit Undangan</h1>
-            <p className="text-xs text-[#726C67]">Kustomisasi data dan fitur undangan Anda.</p>
-          </div>
-          {showSaveSuccess && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold animate-in fade-in slide-in-from-left-2 transition-all">
-              <Check className="w-3.5 h-3.5" /> Tersimpan ✓
+    <div className="fixed inset-0 top-20 bg-surface-container-low flex overflow-hidden">
+        
+        {/* Left Control Sidebar: Editorial Style */}
+        <div className="w-[450px] bg-white border-r border-outline-variant/10 flex flex-col shadow-2xl z-20">
+            <div className="p-8 border-b border-outline-variant/5">
+                 <h2 className="text-3xl font-black text-primary tracking-tighter italic font-light">The Atelier</h2>
+                 <p className="text-[10px] text-slate-400 uppercase tracking-[0.3em] mt-1">Invitation Designer Pro</p>
             </div>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <a href={`/invite/${slug}?preview=true`} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#EDE6D6] text-sm font-medium text-[#1E1B18] hover:bg-[#FAF8F3] transition-colors">
-            <ExternalLink className="w-4 h-4" /> Preview
-          </a>
-        </div>
-      </div>
 
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* Sidebar Nav - Desktop */}
-        <div className="hidden md:flex flex-col w-56 sticky top-24 gap-1">
-          {TABS.map((tab, idx) => (
-            <button key={tab.id} onClick={() => setActiveTab(idx)}
-              className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                activeTab === idx 
-                ? "bg-[#1E1B18] text-[#FDFCF9] shadow-md shadow-black/10" 
-                : "text-[#726C67] hover:bg-[#FAF8F3] hover:text-[#1E1B18]"
-              }`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Mobile Nav - Pills */}
-        <div className="md:hidden w-full flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {TABS.map((tab, idx) => (
-            <button key={tab.id} onClick={() => setActiveTab(idx)}
-              className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
-                activeTab === idx 
-                ? "bg-[#1E1B18] text-[#FDFCF9] border-[#1E1B18]" 
-                : "bg-white text-[#726C67] border-[#EDE6D6]"
-              }`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 w-full bg-white rounded-3xl border border-[#EDE6D6] shadow-sm overflow-hidden p-6 md:p-8">
-          <h2 className="font-display text-2xl font-light text-[#1E1B18] mb-8">{TABS[activeTab].label}</h2>
-          
-          <div className="flex flex-col gap-6">
-            {activeTab === 0 && (
-              <>
-                <SectionDivider label="Pengantin Pria" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <TInput label="Nama Lengkap Pria" required value={f.groomFullName} onChange={v => upF({ groomFullName: v })} placeholder="Mohammad Andi" />
-                  <TInput label="Nama Panggilan" required value={f.groomNickname} onChange={v => upF({ groomNickname: v })} placeholder="Andi" />
-                </div>
-                <ToggleSection enabled={opt.groomParents} onToggle={() => toggleOpt('groomParents')} label="Nama Orang Tua Pria">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <TInput label="Nama Ayah" value={x.groomFather} onChange={v => upX({ groomFather: v })} placeholder="Bpk. Fauzi" />
-                    <TInput label="Nama Ibu" value={x.groomMother} onChange={v => upX({ groomMother: v })} placeholder="Ibu Siti" />
-                  </div>
-                </ToggleSection>
-                <ToggleSection enabled={opt.groomPhoto} onToggle={() => toggleOpt('groomPhoto')} label="Foto Pengantin Pria">
-                  <TInput label="URL Foto" value={x.groomPhotoUrl} onChange={v => upX({ groomPhotoUrl: v })} placeholder="https://..." />
-                </ToggleSection>
-                <ToggleSection enabled={opt.groomIg} onToggle={() => toggleOpt('groomIg')} label="Instagram Pengantin Pria">
-                  <TInput label="Username" value={x.groomIg} onChange={v => upX({ groomIg: v })} placeholder="@andi.rahman" />
-                </ToggleSection>
-
-                <SectionDivider label="Pengantin Wanita" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <TInput label="Nama Lengkap Wanita" required value={f.brideFullName} onChange={v => upF({ brideFullName: v })} placeholder="Rina Angelina" />
-                  <TInput label="Nama Panggilan" required value={f.brideNickname} onChange={v => upF({ brideNickname: v })} placeholder="Rina" />
-                </div>
-                <ToggleSection enabled={opt.brideParents} onToggle={() => toggleOpt('brideParents')} label="Nama Orang Tua Wanita">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <TInput label="Nama Ayah" value={x.brideFather} onChange={v => upX({ brideFather: v })} placeholder="Bpk. Hasan" />
-                    <TInput label="Nama Ibu" value={x.brideMother} onChange={v => upX({ brideMother: v })} placeholder="Ibu Rahayu" />
-                  </div>
-                </ToggleSection>
-                <ToggleSection enabled={opt.bridePhoto} onToggle={() => toggleOpt('bridePhoto')} label="Foto Pengantin Wanita">
-                  <TInput label="URL Foto" value={x.bridePhotoUrl} onChange={v => upX({ bridePhotoUrl: v })} placeholder="https://..." />
-                </ToggleSection>
-                <ToggleSection enabled={opt.brideIg} onToggle={() => toggleOpt('brideIg')} label="Instagram Pengantin Wanita">
-                  <TInput label="Username" value={x.brideIg} onChange={v => upX({ brideIg: v })} placeholder="@rina.dewi" />
-                </ToggleSection>
-              </>
-            )}
-            {activeTab === 1 && (
-              <>
-                <div>
-                  <Label required>Jenis Acara</Label>
-                  <select className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] focus:outline-none focus:border-[#D4A91C] transition-all"
-                    value={f.eventType} onChange={e => upF({ eventType: e.target.value as any })}>
-                    <option value="akad">Akad Nikah Saja</option>
-                    <option value="resepsi">Resepsi Saja</option>
-                    <option value="akad_resepsi">Akad & Resepsi</option>
-                  </select>
-                </div>
-                {(f.eventType === "akad" || f.eventType === "akad_resepsi") && (
-                  <>
-                    <SectionDivider label="Akad Nikah" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <TInput label="Tanggal" required type="date" value={f.akadDate} onChange={v => upF({ akadDate: v })} />
-                      <TInput label="Waktu" required type="time" value={f.akadTime} onChange={v => upF({ akadTime: v })} />
-                    </div>
-                    <VenueAutocomplete
-                      label="Nama Venue" required
-                      value={f.akadVenue}
-                      placeholder="Ketik nama masjid atau gedung..."
-                      onSelect={(name, address, mapsUrl) => {
-                        upF({ akadVenue: name, akadAddress: address })
-                        if (mapsUrl) {
-                          upX({ akadMapsUrl: mapsUrl })
-                          setOpt(p => ({ ...p, mapsUrl: true }))
-                        }
-                      }}
-                    />
-                    {x.akadMapsUrl && (
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FAF8F3] border border-[#EDE6D6]">
-                        <MapPin className="w-3.5 h-3.5 text-[#D4A91C]" />
-                        <a href={x.akadMapsUrl} target="_blank" rel="noopener noreferrer"
-                           className="text-xs text-[#D4A91C] hover:underline truncate">
-                          Buka di Google Maps
-                        </a>
-                        <button type="button" onClick={() => upX({ akadMapsUrl: '' })} className="ml-auto">
-                          <X className="w-3 h-3 text-[#C2BEB8]" />
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth">
+                {/* Secondary Tab Switcher */}
+                <div className="flex border-b border-outline-variant/5 bg-surface-container-lowest sticky top-0 z-10">
+                    {TABS.map((tab, idx) => (
+                        <button 
+                            key={tab.id}
+                            onClick={() => setActiveTab(idx)}
+                            className={`flex-1 py-6 flex flex-col items-center gap-2 transition-all ${
+                                activeTab === idx ? 'text-primary' : 'text-slate-300 hover:text-slate-500'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-xl">{tab.icon}</span>
+                            <span className="text-[8px] font-black uppercase tracking-widest">{tab.label}</span>
+                            {activeTab === idx && <div className="absolute bottom-0 w-8 h-1 bg-tertiary rounded-t-full"></div>}
                         </button>
-                      </div>
-                    )}
-                    <TInput label="Alamat Lengkap" required value={f.akadAddress} onChange={v => upF({ akadAddress: v })} placeholder="Jl. Kebon Jeruk..." />
-                  </>
-                )}
-                {(f.eventType === "resepsi" || f.eventType === "akad_resepsi") && (
-                  <>
-                    <SectionDivider label="Resepsi" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <TInput label="Tanggal" required type="date" value={f.receptionDate} onChange={v => upF({ receptionDate: v })} />
-                      <TInput label="Waktu" required type="time" value={f.receptionTime} onChange={v => upF({ receptionTime: v })} />
-                    </div>
-                    <VenueAutocomplete
-                      label="Nama Venue" required
-                      value={f.receptionVenue}
-                      placeholder="Ketik nama masjid atau gedung..."
-                      onSelect={(name, address, mapsUrl) => {
-                        upF({ receptionVenue: name, receptionAddress: address })
-                        if (mapsUrl) {
-                          upX({ receptionMapsUrl: mapsUrl })
-                          setOpt(p => ({ ...p, mapsUrl: true }))
-                        }
-                      }}
-                    />
-                    {x.receptionMapsUrl && (
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FAF8F3] border border-[#EDE6D6]">
-                        <MapPin className="w-3.5 h-3.5 text-[#D4A91C]" />
-                        <a href={x.receptionMapsUrl} target="_blank" rel="noopener noreferrer"
-                           className="text-xs text-[#D4A91C] hover:underline truncate">
-                          Buka di Google Maps
-                        </a>
-                        <button type="button" onClick={() => upX({ receptionMapsUrl: '' })} className="ml-auto">
-                          <X className="w-3 h-3 text-[#C2BEB8]" />
-                        </button>
-                      </div>
-                    )}
-                    <TInput label="Alamat Lengkap" required value={f.receptionAddress} onChange={v => upF({ receptionAddress: v })} placeholder="Jl. Tamansari No.73..." />
-                  </>
-                )}
-                <ToggleSection enabled={opt.mapsUrl} onToggle={() => toggleOpt('mapsUrl')} label="Override Link Maps Manual">
-                  <p className="text-xs text-[#9A9390]">Isi manual jika link otomatis tidak akurat.</p>
-                  {(f.eventType === "akad" || f.eventType === "akad_resepsi") &&
-                    <TInput label="Maps URL Akad" value={x.akadMapsUrl} onChange={v => upX({ akadMapsUrl: v })} placeholder="https://maps.app.goo.gl/..." />}
-                  {(f.eventType === "resepsi" || f.eventType === "akad_resepsi") &&
-                    <TInput label="Maps URL Resepsi" value={x.receptionMapsUrl} onChange={v => upX({ receptionMapsUrl: v })} placeholder="https://maps.app.goo.gl/..." />}
-                </ToggleSection>
-                <ToggleSection enabled={opt.dresscode} onToggle={() => toggleOpt('dresscode')} label="Dress Code">
-                  <TInput label="Warna" value={x.dresscodeColors} onChange={v => upX({ dresscodeColors: v })} placeholder="Sage green, cream" />
-                  <TInput label="Catatan" value={x.dresscodeNote} onChange={v => upX({ dresscodeNote: v })} placeholder="Mohon tidak memakai baju putih" />
-                </ToggleSection>
-              </>
-            )}
-            {activeTab === 2 && (
-              <>
-                <TTextarea label="Teks Sambutan" value={f.greetingText} onChange={v => upF({ greetingText: v })} rows={5} />
-                <button type="button" className="-mt-3 flex items-center gap-1.5 text-xs font-semibold text-[#D4A91C] hover:text-[#B88E14] transition-colors">
-                  <Sparkles className="w-3.5 h-3.5" /> Bantu tulis dengan AI
-                </button>
-                <ToggleSection enabled={opt.openingQuote} onToggle={() => toggleOpt('openingQuote')} label="Ayat / Quote Pembuka">
-                  <TTextarea value={x.quoteText} onChange={v => upX({ quoteText: v })} rows={3} />
-                  <TInput label="Sumber" value={x.quoteSource} onChange={v => upX({ quoteSource: v })} placeholder="QS. Ar-Rum: 21" />
-                </ToggleSection>
-                <ToggleSection enabled={opt.gallery} onToggle={() => toggleOpt('gallery')} label="Galeri Foto">
-                  <div className="border border-dashed border-[#EDE6D6] rounded-xl p-8 flex flex-col items-center text-center bg-[#FDFCF9]">
-                    <ImageIcon className="w-8 h-8 text-[#C2BEB8] mb-2" />
-                    <p className="text-sm font-medium text-[#4A4540]">Upload Foto Galeri</p>
-                    <button type="button" className="mt-4 px-4 py-2 rounded-full border border-[#EDE6D6] text-xs font-semibold hover:border-[#D4A91C] transition-colors">Pilih File</button>
-                  </div>
-                </ToggleSection>
-                <ToggleSection enabled={opt.music} onToggle={() => toggleOpt('music')} label="Musik Latar">
-                  <TInput label="URL Audio (MP3)" value={x.musicUrl} onChange={v => upX({ musicUrl: v })} placeholder="https://drive.google.com/..." />
-                </ToggleSection>
-                <ToggleSection enabled={opt.loveStory} onToggle={() => toggleOpt('loveStory')} label="Timeline Kisah Cinta">
-                  <div className="flex flex-col gap-3">
-                    {x.loveStory.map((ev, i) => (
-                      <div key={i} className="rounded-xl border border-[#EDE6D6] bg-[#FDFCF9] p-4 flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#D4A91C]">Peristiwa {i+1}</span>
-                          <button type="button" onClick={() => removeStory(i)}><Trash2 className="w-4 h-4 text-[#C2BEB8]" /></button>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <TInput label="Tahun" value={ev.year} onChange={v => updateStory(i, { year: v })} />
-                          <TInput label="Judul" value={ev.title} onChange={v => updateStory(i, { title: v })} />
-                        </div>
-                        <TTextarea label="Cerita" value={ev.desc} onChange={v => updateStory(i, { desc: v })} rows={2} />
-                      </div>
                     ))}
-                    <button type="button" onClick={addStory}
-                      className="flex items-center gap-2 justify-center py-3 rounded-xl border border-dashed border-[#D4A91C]/40 text-sm text-[#D4A91C] font-medium hover:bg-[#D4A91C]/5 transition-colors">
-                      <Plus className="w-4 h-4" /> Tambah Peristiwa
-                    </button>
-                  </div>
-                </ToggleSection>
-              </>
-            )}
-            {activeTab === 3 && (
-              <>
-                <SectionDivider label="RSVP & Buku Tamu" />
-                <ToggleSection enabled={opt.rsvp} onToggle={() => toggleOpt('rsvp')} label="Aktifkan RSVP">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <TInput label="Batas RSVP" type="date" value={x.rsvpDeadline} onChange={v => upX({ rsvpDeadline: v })} />
-                    <div>
-                      <Label>Maks. Tamu per Link</Label>
-                      <select className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[#D4A91C] transition-all"
-                        value={x.rsvpMaxGuests} onChange={e => upX({ rsvpMaxGuests: e.target.value })}>
-                        <option value="1">1 orang</option>
-                        <option value="2">2 orang</option>
-                        <option value="5">5 orang</option>
-                        <option value="10">Tak terbatas</option>
-                      </select>
-                    </div>
-                  </div>
-                  <TTextarea label="Pesan RSVP" value={x.rsvpMessage} onChange={v => upX({ rsvpMessage: v })} rows={2} />
-                </ToggleSection>
-                <ToggleSection enabled={opt.guestbook} onToggle={() => toggleOpt('guestbook')} label="Buku Tamu & Ucapan">
-                  <p className="text-xs text-[#9A9390]">Tamu dapat menulis ucapan langsung di halaman undangan.</p>
-                </ToggleSection>
+                </div>
 
-                <SectionDivider label="Amplop Digital" />
-                <ToggleSection enabled={opt.giftBank} onToggle={() => toggleOpt('giftBank')} label="Transfer Bank / E-Wallet">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <TInput label="Bank" value={x.bankName} onChange={v => upX({ bankName: v })} placeholder="BCA" />
-                    <TInput label="Nomor Rekening" value={x.bankAccount} onChange={v => upX({ bankAccount: v })} placeholder="12345678" />
-                    <TInput label="Atas Nama" value={x.bankAccountName} onChange={v => upX({ bankAccountName: v })} placeholder="Rina Angelina" />
-                  </div>
-                </ToggleSection>
-                <ToggleSection enabled={opt.qris} onToggle={() => toggleOpt('qris')} label="QRIS">
-                  <TInput label="Nomor / ID QRIS" value={x.qrisAccount} onChange={v => upX({ qrisAccount: v })} placeholder="QRIS-1234" />
-                </ToggleSection>
-                <ToggleSection enabled={opt.giftAddress} onToggle={() => toggleOpt('giftAddress')} label="Alamat Pengiriman Hadiah Fisik">
-                  <TTextarea value={x.giftAddress} onChange={v => upX({ giftAddress: v })} placeholder="Jl. Melati No. 12..." rows={3} />
-                </ToggleSection>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+                <div className="p-0">
+                    {activeTab === 0 && (
+                        <>
+                            <ConfigSection label="Primary Couple Data" isOpen={openSections.includes('primary_info')} onToggle={() => toggleSection('primary_info')}>
+                                <div className="grid grid-cols-2 gap-4">
+                                     <LuxeInput label="Groom Nickname" value={f.groomNickname} onChange={v => upF({ groomNickname: v })} required />
+                                     <LuxeInput label="Bride Nickname" value={f.brideNickname} onChange={v => upF({ brideNickname: v })} required />
+                                </div>
+                                <LuxeInput label="Full Name Groom" value={f.groomFullName} onChange={v => upF({ groomFullName: v })} />
+                                <LuxeInput label="Full Name Bride" value={f.brideFullName} onChange={v => upF({ brideFullName: v })} />
+                            </ConfigSection>
 
-      {/* Floating Save Bar */}
-      {isDirty && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50 animate-in fade-in slide-in-from-bottom-8 duration-500">
-          <div className="bg-[#1E1B18] rounded-2xl shadow-2xl p-4 flex items-center justify-between border border-white/10">
-            <div className="flex flex-col">
-              <span className="text-white text-sm font-semibold">Ada perubahan belum disimpan</span>
-              <button onClick={handleCancelChanges} className="text-[#9A9390] text-[10px] hover:text-white transition-colors text-left uppercase tracking-widest font-bold">Batalkan</button>
+                            <ConfigSection label="Family Lineage" optional enabled={opt.groomParents || opt.brideParents} isOpen={openSections.includes('parents')} onToggle={() => toggleSection('parents')}>
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl">
+                                        <input type="checkbox" checked={opt.groomParents} onChange={() => toggleOpt('groomParents')} className="w-5 h-5 accent-tertiary" />
+                                        <span className="text-xs font-bold text-primary">Include Groom's Parents</span>
+                                    </div>
+                                    {opt.groomParents && (
+                                        <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                                             <LuxeInput label="Father" value={x.groomFather} onChange={v => upX({ groomFather: v })} />
+                                             <LuxeInput label="Mother" value={x.groomMother} onChange={v => upX({ groomMother: v })} />
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl mt-4">
+                                        <input type="checkbox" checked={opt.brideParents} onChange={() => toggleOpt('brideParents')} className="w-5 h-5 accent-tertiary" />
+                                        <span className="text-xs font-bold text-primary">Include Bride's Parents</span>
+                                    </div>
+                                    {opt.brideParents && (
+                                        <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                                             <LuxeInput label="Father" value={x.brideFather} onChange={v => upX({ brideFather: v })} />
+                                             <LuxeInput label="Mother" value={x.brideMother} onChange={v => upX({ brideMother: v })} />
+                                        </div>
+                                    )}
+                                </div>
+                            </ConfigSection>
+                        </>
+                    )}
+
+                    {activeTab === 1 && (
+                        <div className="p-0">
+                            <ConfigSection label="Event Structure" isOpen={true} onToggle={() => {}}>
+                                <Field label="Event Type" />
+                                <div className="grid grid-cols-3 gap-2">
+                                    {(['akad', 'resepsi', 'akad_resepsi'] as const).map((type) => (
+                                        <button 
+                                            key={type}
+                                            onClick={() => upF({ eventType: type })}
+                                            className={`py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
+                                                f.eventType === type ? 'bg-primary text-white border-primary shadow-lg' : 'border-outline-variant/20 text-slate-400 hover:border-primary/40'
+                                            }`}
+                                        >
+                                            {type.replace('_', ' & ')}
+                                        </button>
+                                    ))}
+                                </div>
+                            </ConfigSection>
+
+                            {(f.eventType === 'akad' || f.eventType === 'akad_resepsi') && (
+                                <ConfigSection label="Akad Nikah Ceremony" isOpen={openSections.includes('akad')} onToggle={() => toggleSection('akad')}>
+                                     <div className="grid grid-cols-2 gap-4">
+                                         <LuxeInput type="date" label="Date" value={f.akadDate} onChange={v => upF({ akadDate: v })} />
+                                         <LuxeInput type="time" label="Time" value={f.akadTime} onChange={v => upF({ akadTime: v })} />
+                                     </div>
+                                     <VenueAutocomplete 
+                                        label="Venue Name"
+                                        value={f.akadVenue}
+                                        onSelect={(name, addr, maps) => {
+                                            upF({ akadVenue: name, akadAddress: addr })
+                                            if (maps) upX({ akadMapsUrl: maps })
+                                        }}
+                                     />
+                                     <LuxeTextarea label="Full Address" value={f.akadAddress} onChange={v => upF({ akadAddress: v })} rows={2} />
+                                </ConfigSection>
+                            )}
+
+                            {(f.eventType === 'resepsi' || f.eventType === 'akad_resepsi') && (
+                                <ConfigSection label="Grand Reception" isOpen={openSections.includes('resepsi')} onToggle={() => toggleSection('resepsi')}>
+                                     <div className="grid grid-cols-2 gap-4">
+                                         <LuxeInput type="date" label="Date" value={f.receptionDate} onChange={v => upF({ receptionDate: v })} />
+                                         <LuxeInput type="time" label="Time" value={f.receptionTime} onChange={v => upF({ receptionTime: v })} />
+                                     </div>
+                                     <VenueAutocomplete 
+                                        label="Venue Name"
+                                        value={f.receptionVenue}
+                                        onSelect={(name, addr, maps) => {
+                                            upF({ receptionVenue: name, receptionAddress: addr })
+                                            if (maps) upX({ receptionMapsUrl: maps })
+                                        }}
+                                     />
+                                     <LuxeTextarea label="Full Address" value={f.receptionAddress} onChange={v => upF({ receptionAddress: v })} rows={2} />
+                                </ConfigSection>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 2 && (
+                        <>
+                            <ConfigSection label="Greeting Text" isOpen={openSections.includes('greeting')} onToggle={() => toggleSection('greeting')}>
+                                <LuxeTextarea label="Opening Message" value={f.greetingText} onChange={v => upF({ greetingText: v })} rows={6} />
+                            </ConfigSection>
+                            <ConfigSection label="Visual Gallery" optional enabled={opt.gallery} isOpen={openSections.includes('gallery')} onToggle={() => toggleSection('gallery')}>
+                                <div className="border-2 border-dashed border-outline-variant/20 rounded-[32px] p-12 flex flex-col items-center text-center bg-surface-container-low hover:bg-white transition-colors group cursor-pointer">
+                                    <span className="material-symbols-outlined text-4xl text-slate-300 group-hover:text-tertiary transition-colors mb-4">image</span>
+                                    <p className="text-xs font-bold text-primary">Upload Editorial Photos</p>
+                                    <p className="text-[10px] text-slate-400 mt-2">Recommended: 2000x3000px</p>
+                                </div>
+                            </ConfigSection>
+                        </>
+                    )}
+
+                    {activeTab === 3 && (
+                        <>
+                            <ConfigSection label="Digital Envelopes" optional enabled={opt.giftBank} isOpen={openSections.includes('gift')} onToggle={() => toggleSection('gift')}>
+                                <div className="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl mb-6">
+                                    <input type="checkbox" checked={opt.giftBank} onChange={() => toggleOpt('giftBank')} className="w-5 h-5 accent-tertiary" />
+                                    <span className="text-xs font-bold text-primary">Enable Bank Transfer</span>
+                                </div>
+                                {opt.giftBank && (
+                                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                                        <LuxeInput label="Bank Name" value={x.bankName} onChange={v => upX({ bankName: v })} />
+                                        <LuxeInput label="Account Number" value={x.bankAccount} onChange={v => upX({ bankAccount: v })} />
+                                        <LuxeInput label="Account Holder" value={x.bankAccountName} onChange={v => upX({ bankAccountName: v })} />
+                                    </div>
+                                )}
+                            </ConfigSection>
+                        </>
+                    )}
+                </div>
             </div>
-            <button onClick={handleSave} disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#D4A91C] text-[#1E1B18] text-sm font-bold hover:bg-[#F0C129] transition-all disabled:opacity-50">
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Simpan
-            </button>
-          </div>
+
+            {/* Floating Footer Status */}
+            <div className="p-8 bg-white/80 backdrop-blur-xl border-t border-outline-variant/10 flex items-center justify-between">
+                <button 
+                    onClick={() => router.push('/dashboard')}
+                    className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+                >
+                    Discard Changes
+                </button>
+                <button 
+                    onClick={handleSave} 
+                    disabled={isSubmitting || !isDirty}
+                    className={`px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${
+                        isDirty 
+                        ? 'bg-primary text-white shadow-xl shadow-primary/20 hover:scale-105 active:scale-95' 
+                        : 'bg-surface-container-high text-slate-300'
+                    }`}
+                >
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="material-symbols-outlined text-lg">auto_awesome</span>}
+                    {showSaveSuccess ? 'Manifested ✓' : 'Save Concept'}
+                </button>
+            </div>
         </div>
-      )}
+
+        {/* Center Canvas: The "Stage" */}
+        <div className="flex-1 relative overflow-auto bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:32px_32px] flex items-center justify-center p-20">
+            {/* Infinite Control HUD */}
+            <div className="absolute top-10 left-10 flex gap-4">
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl px-6 py-3 flex items-center gap-6 shadow-xl border border-outline-variant/10">
+                     <div className="flex flex-col">
+                         <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Current View</span>
+                         <span className="text-xs font-bold text-primary">Mobile Editorial</span>
+                     </div>
+                     <div className="h-8 w-px bg-outline-variant/10"></div>
+                     <div className="flex gap-4">
+                         <button className="material-symbols-outlined text-slate-300 hover:text-primary transition-colors">undo</button>
+                         <button className="material-symbols-outlined text-slate-300 hover:text-primary transition-colors">redo</button>
+                     </div>
+                </div>
+            </div>
+
+            <div className="absolute top-10 right-10">
+                 <a 
+                    href={`/invite/${slug}?preview=true`} 
+                    target="_blank"
+                    className="bg-primary text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-2xl hover:translate-y-[-2px] transition-all"
+                >
+                    <span className="material-symbols-outlined text-sm">open_in_new</span>
+                    Full Story Preview
+                 </a>
+            </div>
+
+            {/* The Device Frame */}
+            <div className="relative group">
+                <div className="absolute inset-0 bg-primary/20 blur-[120px] rounded-full scale-150 group-hover:opacity-100 opacity-50 transition-opacity"></div>
+                <div className="w-[380px] h-[780px] bg-[#1E1B18] rounded-[60px] p-4 shadow-[0_0_100px_rgba(0,0,0,0.4)] border-[12px] border-[#2a2a2a] relative z-10 overflow-hidden">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-8 bg-[#2a2a2a] rounded-b-3xl z-50"></div>
+                    
+                    <iframe 
+                        src={`/invite/${slug}?preview=true`}
+                        className="w-full h-full rounded-[40px] bg-white border-none"
+                    />
+                </div>
+                
+                {/* Visual Metadata Annotations */}
+                <div className="absolute -right-64 top-40 w-56 animate-in slide-in-from-right-10 duration-1000">
+                    <div className="p-6 bg-white/40 backdrop-blur-md border-l-4 border-tertiary rounded-r-2xl">
+                        <span className="text-[8px] font-black uppercase tracking-widest text-slate-500">Live Feedback</span>
+                        <p className="text-xs font-medium text-primary mt-2 leading-relaxed italic">"Typography shifts and spacing are automatically adjusted to match your data."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
   )
 }

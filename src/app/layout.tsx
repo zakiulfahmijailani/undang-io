@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans, JetBrains_Mono, Dancing_Script, Great_Vibes, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond, Inter, Plus_Jakarta_Sans, JetBrains_Mono, Dancing_Script, Great_Vibes, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import DevNavLoader from "@/components/dev/DevNavLoader";
 
@@ -7,6 +7,12 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-display",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -48,8 +54,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+      </head>
       <body
-        className={`${plusJakartaSans.variable} ${cormorant.variable} ${jetbrainsMono.variable} ${dancingScript.variable} ${greatVibes.variable} ${playfairDisplay.variable} antialiased font-body text-neutral-700 bg-surface-page`}
+        className={`${inter.variable} ${plusJakartaSans.variable} ${cormorant.variable} ${jetbrainsMono.variable} ${dancingScript.variable} ${greatVibes.variable} ${playfairDisplay.variable} antialiased font-body text-on-surface bg-surface-container-low selection:bg-tertiary-fixed-dim`}
       >
         {children}
         <DevNavLoader />

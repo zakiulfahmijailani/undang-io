@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Clock, Eye, CreditCard, AlertTriangle, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface GuestSessionCardProps {
     guestSession: {
@@ -49,71 +46,69 @@ function useCountdown(expiresAt: string) {
 export default function GuestSessionCard({ guestSession }: GuestSessionCardProps) {
     const { display, isExpired, isUrgent } = useCountdown(guestSession.expires_at);
     const inv = guestSession.invitation_data;
-    const groomName = inv?.groomNickname || inv?.groomFullName || "Groom";
-    const brideName = inv?.brideNickname || inv?.brideFullName || "Bride";
+    const groomName = inv?.groomNickname || inv?.groomFullName || "Mempelai Pria";
+    const brideName = inv?.brideNickname || inv?.brideFullName || "Mempelai Wanita";
 
     return (
-        <Card className="overflow-hidden border-outline-variant-stitch/20 rounded-[40px] shadow-glow-stitch hover:shadow-2xl transition-all duration-700 bg-white/60 backdrop-blur-xl group">
-            <CardContent className="p-8">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-stitch/10 border border-tertiary-stitch/20 text-tertiary-stitch text-[9px] font-black tracking-widest uppercase">
-                        <Sparkles className="w-3 h-3" />
-                        <span>Draft Concept</span>
-                    </div>
+        <div className={`rounded-[32px] overflow-hidden border transition-all duration-500 relative ${
+            isUrgent ? "border-amber-400 bg-amber-50/30" : "border-outline-variant/10 bg-white"
+        }`}>
+            {/* Urgency Overlay */}
+            {isUrgent && (
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400 rotate-45 translate-x-16 -translate-y-16 opacity-10 pointer-events-none"></div>
+            )}
 
-                    <div className="flex items-center gap-2">
-                        {isExpired ? (
-                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-stitch text-white text-[10px] font-bold">
-                                <AlertTriangle className="h-3 w-3" /> EXPIRED
-                            </div>
-                        ) : (
-                            <div
-                                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-wider ${
-                                    isUrgent
-                                        ? "bg-error-stitch text-white animate-pulse"
-                                        : "bg-primary-stitch text-white"
-                                }`}
-                            >
-                                <Clock className="h-3 w-3" />
-                                {display}
-                            </div>
-                        )}
-                    </div>
+            <div className="p-8">
+                <div className="flex justify-between items-start mb-6">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm ${
+                        isUrgent ? "bg-amber-400 text-white animate-pulse" : "bg-primary-fixed text-on-primary-fixed"
+                    }`}>
+                        {isExpired ? "Expired" : "Free Trial Active"}
+                    </span>
+                    
+                    {!isExpired && (
+                        <div className="flex items-center gap-2 font-mono text-sm font-bold text-primary">
+                            <span className="material-symbols-outlined text-sm">schedule</span>
+                            {display}
+                        </div>
+                    )}
                 </div>
 
-                <h3 className="text-3xl font-black text-primary-stitch tracking-tighter mb-2 leading-tight">
+                <h3 className="text-2xl font-black text-primary tracking-tighter italic font-light mb-2">
                     {groomName} & {brideName}
                 </h3>
-                <p className="text-secondary-stitch text-sm font-light mb-8 leading-relaxed">
-                    {isExpired
-                        ? "This session has expired. Start a new bespoke journey."
-                        : `Finalize your payment before the timer expires to secure your digital presence.`}
+                <p className="text-slate-400 text-xs font-['Inter'] mb-8 leading-relaxed">
+                   Undangan ini bersifat sementara. Amankan mahakarya Anda ke lisensi permanen sebelum waktu habis.
                 </p>
 
-                <div className="flex items-center gap-4">
-                    {!isExpired && (
+                <div className="flex items-center gap-3">
+                    {!isExpired ? (
                         <>
-                            <Link href={`/pembayaran/${guestSession.slug}`} className="flex-1">
-                                <button className="w-full h-14 bg-on-tertiary-container-stitch text-tertiary-stitch rounded-full font-black tracking-widest uppercase text-xs shadow-lg shadow-tertiary-stitch/20 active:scale-95 transition-all">
-                                    Publish Now
-                                </button>
+                            <Link 
+                                href={`/pembayaran/${guestSession.slug}`}
+                                className="flex-1 bg-tertiary text-on-tertiary rounded-2xl py-4 flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-tertiary/20"
+                            >
+                                <span className="material-symbols-outlined text-lg">payments</span>
+                                Pay & Publish
                             </Link>
-                            <Link href={`/u/${guestSession.slug}`} className="flex-1">
-                                <button className="w-full h-14 border border-outline-variant-stitch/30 text-primary-stitch rounded-full font-black tracking-widest uppercase text-xs hover:bg-surface-container-low-stitch active:scale-95 transition-all">
-                                    Preview
-                                </button>
+                            <Link 
+                                href={`/u/${guestSession.slug}`}
+                                className="px-6 border border-outline-variant/20 rounded-2xl py-4 flex items-center justify-center text-primary hover:bg-surface-container-low transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-xl">visibility</span>
                             </Link>
                         </>
-                    )}
-                    {isExpired && (
-                        <Link href="/buat-undangan" className="w-full">
-                            <button className="w-full h-14 bg-primary-stitch text-white rounded-full font-black tracking-widest uppercase text-xs shadow-xl shadow-primary-stitch/20 active:scale-95 transition-all">
-                                Recreate Invitation
-                            </button>
+                    ) : (
+                        <Link 
+                            href="/buat-undangan"
+                            className="w-full bg-surface-container-high text-primary rounded-2xl py-4 flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest"
+                        >
+                            <span className="material-symbols-outlined">restart_alt</span>
+                            Start Over
                         </Link>
                     )}
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }
