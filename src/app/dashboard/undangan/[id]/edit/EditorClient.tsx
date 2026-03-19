@@ -83,7 +83,13 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         ],
         gallery_photos: [],
         bank_accounts: [],
-        enable_rsvp: true,
+        sections_order: initialData.sections_order || [
+            "hero", "couple", "quote", "lovestory",
+            "countdown", "event", "gallery", "gift", "rsvp"
+        ],
+        sections_visibility: initialData.sections_visibility || {},
+        enable_rsvp: true,   // ← baris ini sudah ada, jangan diubah
+
         gift_bank_name: initialData.gift_bank_name || "",
         gift_bank_account: initialData.gift_bank_account || "",
         gift_bank_account_name: initialData.gift_bank_account_name || "",
@@ -761,26 +767,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
                                             <h2 className="text-xl font-serif font-bold text-stone-800">Pengaturan</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Visibilitas dan kontrol undangan.</p>
+                                            <p className="text-sm text-stone-400 mt-1">Atur urutan dan visibilitas setiap bagian undangan.</p>
                                         </div>
 
-                                        <Section title="Tampilan" accent="amber">
-                                            {[
-                                                { key: "show_couple_photos", label: "Tampilkan foto pasangan" },
-                                                { key: "show_prewed_gallery", label: "Tampilkan galeri prewedding" },
-                                                { key: "show_gift_section", label: "Tampilkan amplop digital" },
-                                            ].map(({ key, label }) => (
-                                                <div key={key} className="flex items-center justify-between py-1">
-                                                    <span className="text-sm text-stone-700 font-medium">{label}</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleChange(key, !(formData as any)[key])}
-                                                        className={`relative w-11 h-6 rounded-full transition-colors ${(formData as any)[key] ? "bg-amber-500" : "bg-stone-200"}`}
-                                                    >
-                                                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${(formData as any)[key] ? "translate-x-5" : "translate-x-0"}`} />
-                                                    </button>
-                                                </div>
-                                            ))}
+                                        <Section title="Tampilan Bagian" accent="amber">
+                                            <p className="text-xs text-stone-400 mb-3">Drag ↕ untuk mengubah urutan. Toggle untuk show/hide.</p>
+                                            <DndSectionsEditor
+                                                sections={formData.sections_order as any[]}
+                                                visibility={formData.sections_visibility as any}
+                                                onSectionsChange={(val) => handleChange("sections_order", val)}
+                                                onVisibilityChange={(val) => handleChange("sections_visibility", val)}
+                                            />
                                         </Section>
 
                                         <Section title="Status Undangan" accent="rose">

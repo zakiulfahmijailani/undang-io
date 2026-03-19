@@ -137,6 +137,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         // Love story
         if (body.love_story !== undefined) updates.love_story = body.love_story;
 
+        // Sections order & visibility
+        if (body.sections_order !== undefined) updates.sections_order = body.sections_order;
+        if (body.sections_visibility !== undefined) updates.sections_visibility = body.sections_visibility;
         // Gift
         if (body.gift_bank_name !== undefined) updates.gift_bank_name = body.gift_bank_name;
         if (body.gift_bank_account !== undefined) {
