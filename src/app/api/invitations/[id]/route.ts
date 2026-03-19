@@ -35,17 +35,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 resepsi_location_name,
                 resepsi_location_address,
                 quote_text,
+                quote_source,
                 music_url,
+                love_story,
+                gallery_photos,
                 gift_bank_name,
                 gift_bank_account,
                 gift_bank_account_name,
                 gift_shipping_address,
                 show_couple_photos,
                 show_prewed_gallery,
-                show_gift_section,
-                show_love_story,
-                show_ayat,
-                show_pengaturan
+                show_gift_section
             `)
             .eq('id', id)
             .eq('user_id', user.id)
@@ -139,7 +139,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         // Gift
         if (body.gift_bank_name !== undefined) updates.gift_bank_name = body.gift_bank_name;
-        if (body.gift_bank_account !== undefined) updates.gift_bank_account = body.gift_bank_account;
+        if (body.gift_bank_account !== undefined) {
+            const cleaned = String(body.gift_bank_account).replace(/\D/g, "");
+            updates.gift_bank_account = cleaned;
+        }
         if (body.gift_bank_account_name !== undefined) updates.gift_bank_account_name = body.gift_bank_account_name;
         if (body.gift_shipping_address !== undefined) updates.gift_shipping_address = body.gift_shipping_address;
 

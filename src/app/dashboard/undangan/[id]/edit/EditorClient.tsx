@@ -128,10 +128,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         },
         quote: {
             text: formData.greeting_text || demoData.quote.text,
-            source: formData.greeting_text ? "Mempelai" : demoData.quote.source,
+            source: formData.quote_source || demoData.quote.source,
         },
-        musicUrl: formData.music_url || null,
         loveStory: (formData.love_story as any[]).filter(s => s.title?.trim()),
+        gallery: (formData.gallery_photos as string[]).filter(url => url.trim()),
+        bankAccounts: formData.gift_bank_name ? [{
+            bank: formData.gift_bank_name,
+            number: formData.gift_bank_account,        // ← ubah dari accountNumber
+            name: formData.gift_bank_account_name,     // ← ubah dari accountName
+        }] : demoData.bankAccounts,
+        giftAddress: formData.gift_shipping_address || demoData.giftAddress,
+        musicUrl: formData.music_url || null,
     };
 
     const handleSaveAll = async () => {
@@ -690,7 +697,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                             </Field>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <Field label="Nomor Rekening">
-                                                    <Input value={formData.gift_bank_account || ""} onChange={e => handleChange("gift_bank_account", e.target.value)} placeholder="1234567890" className="text-base py-3" />
+                                                    <Input
+                                                        value={formData.gift_bank_account || ""}
+                                                        onChange={e => {
+                                                            const val = e.target.value.replace(/\D/g, ""); // hapus semua non-angka
+                                                            handleChange("gift_bank_account", val);
+                                                        }}
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        placeholder="1234567890"
+                                                        className="text-base py-3"
+                                                    />
                                                 </Field>
                                                 <Field label="Atas Nama">
                                                     <Input value={formData.gift_bank_account_name || ""} onChange={e => handleChange("gift_bank_account_name", e.target.value)} placeholder="Nama Pemilik" className="text-base py-3" />
