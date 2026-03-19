@@ -7,7 +7,7 @@ import Image from "next/image";
 import {
     ArrowLeft, Save, Copy, Upload, Loader2, X,
     Info, Type, Image as ImageIcon, Heart, Users,
-    MapPin, Music, Settings, Camera, Gift, Eye, EyeOff, Lock
+    MapPin, Music, Settings, Camera, Gift, Eye, EyeOff, Lock, GripVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,15 @@ import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import MusicPickerTab from "@/components/dashboard/MusicPickerTab";
 import DndSectionsEditor from "@/components/dashboard/DndSectionsEditor";
+import {
+    DndContext, closestCenter, PointerSensor,
+    KeyboardSensor, useSensor, useSensors
+} from "@dnd-kit/core";
+import {
+    SortableContext, sortableKeyboardCoordinates,
+    verticalListSortingStrategy, useSortable, arrayMove
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface EditorClientProps {
     initialData: any;
@@ -70,6 +79,80 @@ function SectionToggle({ sectionId, visibility, onChange }: {
     );
 }
 
+// ── Sortable Tab Item ───────────────────────────────────────────
+function SortableTabItem({ tab, isActive, isLocked, isVisible, canDrag, onSelect, onToggle }: {
+    tab: { id: string; label: string; icon: any; sectionId: string | null };
+    isActive: boolean;
+    isLocked: boolean;
+    isVisible: boolean | null;
+    canDrag: boolean;
+    onSelect: () => void;
+    onToggle?: () => void;
+}) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+        useSortable({ id: tab.id, disabled: !canDrag });
+    const Icon = tab.icon;
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={{ transform: CSS.Transform.toString(transform), transition }}
+            className={`flex items-center relative bg-white ${isDragging ? "opacity-50 z-50" : ""}`}
+        >
+            {/* Drag handle — hanya muncul kalau bisa di-drag */}
+            {canDrag ? (
+                <button
+                    {...attributes}
+                    {...listeners}
+                    className="pl-2 pr-1 py-3 text-stone-200 hover:text-stone-400 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+                >
+                    <GripVertical className="w-3.5 h-3.5" />
+                </button>
+            ) : (
+                <span className="pl-2 pr-1 py-3 w-7 flex-shrink-0" />
+            )}
+
+            {/* Tombol tab utama */}
+            <button
+                onClick={onSelect}
+                className={`flex-1 flex items-center gap-2 py-3 pr-2 text-sm font-medium transition-all text-left relative ${isActive
+                    ? "text-amber-800 font-semibold"
+                    : "text-stone-600 hover:text-stone-900"
+                    }`}
+            >
+                {isActive && (
+                    <span className="absolute -left-7 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
+                )}
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-amber-500" : "text-stone-400"}`} />
+                <span className="truncate text-xs">{tab.label}</span>
+            </button>
+
+            {/* Toggle on/off — kalau tidak locked */}
+            {onToggle && !isLocked && (
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                    className="pr-2 flex-shrink-0"
+                    title={isVisible ? "Sembunyikan section" : "Tampilkan section"}
+                >
+                    <span className={`w-7 h-4 rounded-full relative flex items-center transition-colors ${isVisible ? "bg-emerald-400" : "bg-stone-200"
+                        }`}>
+                        <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-3.5" : "translate-x-0.5"
+                            }`} />
+                    </span>
+                </button>
+            )}
+
+            {/* Lock icon — kalau wajib tampil */}
+            {isLocked && (
+                <span className="pr-2 flex-shrink-0" title="Wajib tampil">
+                    <Lock className="w-3 h-3 text-stone-300" />
+                </span>
+            )}
+        </div>
+    );
+}
+
 
 export default function EditorClient({ initialData }: EditorClientProps) {
     const router = useRouter();
@@ -111,7 +194,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         bank_accounts: [],
         sections_order: initialData.sections_order || [
             "hero", "couple", "quote", "lovestory",
-            "countdown", "event", "gallery", "gift", "rsvp"
+            "countdown", "event", "gallery", "gift", "rsvp", "music"
         ],
         sections_visibility: initialData.sections_visibility || {},
         enable_rsvp: true,   // ← baris ini sudah ada, jangan diubah
@@ -228,7 +311,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         { id: "amplop", label: "Amplop Digital", icon: Gift },
         { id: "ayat", label: "Ayat & Quote", icon: Type },
         { id: "musik", label: "Musik", icon: Music },
-        { id: "pengaturan", label: "Pengaturan", icon: Settings },
+
     ];
 
     const coupleName = `${formData.groom_name || "Mempelai Pria"} & ${formData.bride_name || "Mempelai Wanita"}`;
@@ -324,54 +407,51 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     {/* Desktop: vertical tab list + content side by side */}
                     <div className="flex flex-1 overflow-hidden">
 
-                        {/* Vertical tab list — desktop only */}
+                        {/* Vertical tab list — desktop only, draggable */}
                         <nav className="hidden md:flex flex-col w-52 flex-shrink-0 border-r border-stone-200 bg-white overflow-y-auto py-2">
-                            {tabs.map((tab) => {
-                                const Icon = tab.icon;
-                                const isActive = activeTab === tab.id;
-                                // section ID yang punya toggle
-                                const sectionMap: Record<string, string> = {
-                                    fotocover: "hero",
-                                    acara: "event",
-                                    lovestory: "lovestory",
-                                    galeri: "gallery",
-                                    amplop: "gift",
-                                    ayat: "quote",
-                                };
-                                const lockedTabs = ["mempelai"]; // wajib tampil, tidak bisa di-off
-                                const sectionId = sectionMap[tab.id];
-                                const isLocked = lockedTabs.includes(tab.id);
-                                const isVisible = sectionId
-                                    ? (sectionId in (formData.sections_visibility as any)
-                                        ? (formData.sections_visibility as any)[sectionId]
-                                        : true)
-                                    : null;
+                            <DndContext
+                                sensors={useSensors(
+                                    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+                                    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+                                )}
+                                collisionDetection={closestCenter}
+                                onDragEnd={(event) => {
+                                    const { active, over } = event;
+                                    if (!over || active.id === over.id) return;
+                                    const activeT = ALL_TABS.find(t => t.id === active.id);
+                                    const overT = ALL_TABS.find(t => t.id === over.id);
+                                    if (!activeT?.sectionId || !overT?.sectionId) return;
+                                    const order = formData.sections_order as string[];
+                                    const oldIdx = order.indexOf(activeT.sectionId);
+                                    const newIdx = order.indexOf(overT.sectionId);
+                                    if (oldIdx !== -1 && newIdx !== -1) {
+                                        handleChange("sections_order", arrayMove(order, oldIdx, newIdx));
+                                    }
+                                }}
+                            >
+                                <SortableContext items={tabs.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                                    {tabs.map((tab) => {
+                                        const Icon = tab.icon;
+                                        const isActive = activeTab === tab.id;
+                                        const isLocked = LOCKED_TABS.includes(tab.id);
+                                        const sectionId = tab.sectionId;
+                                        const isVisible = sectionId
+                                            ? (sectionId in (formData.sections_visibility as any)
+                                                ? (formData.sections_visibility as any)[sectionId]
+                                                : true)
+                                            : null;
+                                        const canDrag = !!sectionId && !isLocked && tab.id !== "infodasar";
 
-                                return (
-                                    <div key={tab.id} className="flex items-center relative">
-                                        <button
-                                            onClick={() => !tab.soon && setActiveTab(tab.id)}
-                                            disabled={!!tab.soon}
-                                            className={`flex-1 flex items-center gap-2.5 px-4 py-3 text-sm font-medium transition-all text-left relative ${isActive
-                                                ? "bg-amber-50 text-amber-800 font-semibold"
-                                                : tab.soon
-                                                    ? "text-stone-300 cursor-not-allowed"
-                                                    : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
-                                                }`}
-                                        >
-                                            {isActive && (
-                                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
-                                            )}
-                                            <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-amber-500" : tab.soon ? "text-stone-300" : "text-stone-400"}`} />
-                                            <span className="truncate">{tab.label}</span>
-                                        </button>
-
-                                        {/* Toggle kecil di samping kanan tab */}
-                                        {sectionId && !isLocked && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
+                                        return (
+                                            <SortableTabItem
+                                                key={tab.id}
+                                                tab={tab}
+                                                isActive={isActive}
+                                                isLocked={isLocked}
+                                                isVisible={isVisible}
+                                                canDrag={canDrag}
+                                                onSelect={() => setActiveTab(tab.id)}
+                                                onToggle={sectionId && !isLocked ? () => {
                                                     const current = sectionId in (formData.sections_visibility as any)
                                                         ? (formData.sections_visibility as any)[sectionId]
                                                         : true;
@@ -379,23 +459,12 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                         ...(formData.sections_visibility as any),
                                                         [sectionId]: !current,
                                                     });
-                                                }}
-                                                className="pr-3 flex-shrink-0"
-                                                title={isVisible ? "Sembunyikan section" : "Tampilkan section"}
-                                            >
-                                                <span className={`w-7 h-4 rounded-full relative flex items-center transition-colors ${isVisible ? "bg-emerald-400" : "bg-stone-200"}`}>
-                                                    <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-3.5" : "translate-x-0.5"}`} />
-                                                </span>
-                                            </button>
-                                        )}
-                                        {isLocked && (
-                                            <span className="pr-3 flex-shrink-0" title="Wajib tampil">
-                                                <Lock className="w-3 h-3 text-stone-300" />
-                                            </span>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                                                } : undefined}
+                                            />
+                                        );
+                                    })}
+                                </SortableContext>
+                            </DndContext>
                         </nav>
 
                         {/* Tab content area */}
@@ -906,35 +975,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                     </div>
                                 )}
 
-                                {/* ── PENGATURAN ── */}
-                                {activeTab === "pengaturan" && (
-                                    <div className="space-y-5 animate-in fade-in duration-200">
-                                        <div>
-                                            <h2 className="text-xl font-serif font-bold text-stone-800">Pengaturan</h2>
-                                            <p className="text-sm text-stone-400 mt-1">Atur urutan dan visibilitas setiap bagian undangan.</p>
-                                        </div>
 
-                                        <Section title="Tampilan Bagian" accent="amber">
-                                            <p className="text-xs text-stone-400 mb-3">Drag ↕ untuk mengubah urutan. Toggle untuk show/hide.</p>
-                                            <DndSectionsEditor
-                                                sections={formData.sections_order as any[]}
-                                                visibility={formData.sections_visibility as any}
-                                                onSectionsChange={(val) => handleChange("sections_order", val)}
-                                                onVisibilityChange={(val) => handleChange("sections_visibility", val)}
-                                            />
-                                        </Section>
-
-                                        <Section title="Status Undangan" accent="rose">
-                                            <Field label="Status" hint="Ubah ke Aktif agar tamu dapat mengakses undangan.">
-                                                <Select id="status-pengaturan" value={formData.status} onChange={e => handleChange("status", e.target.value)}>
-                                                    <option value="unpaid">Belum Aktif (Draft)</option>
-                                                    <option value="active">Aktif (Publik)</option>
-                                                    <option value="expired">Kedaluwarsa</option>
-                                                </Select>
-                                            </Field>
-                                        </Section>
-                                    </div>
-                                )}
 
                             </div>
                         </div>
