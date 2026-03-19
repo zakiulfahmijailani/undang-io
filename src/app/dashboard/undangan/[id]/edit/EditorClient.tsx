@@ -301,18 +301,30 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         }
     };
 
-    const tabs = [
-        { id: "infodasar", label: "Informasi Dasar", icon: Info },
-        { id: "fotocover", label: "Foto & Cover", icon: ImageIcon },
-        { id: "mempelai", label: "Data Mempelai", icon: Users },
-        { id: "acara", label: "Acara", icon: MapPin },
-        { id: "lovestory", label: "Kisah Cinta", icon: Heart },
-        { id: "galeri", label: "Galeri Foto", icon: Camera },
-        { id: "amplop", label: "Amplop Digital", icon: Gift },
-        { id: "ayat", label: "Ayat & Quote", icon: Type },
-        { id: "musik", label: "Musik", icon: Music },
 
+    // ── Tab definitions ─────────────────────────────────────────────
+    const ALL_TABS = [
+        { id: "infodasar", label: "Informasi Dasar", icon: Info, sectionId: null },
+        { id: "fotocover", label: "Foto & Cover", icon: ImageIcon, sectionId: "hero" },
+        { id: "mempelai", label: "Data Mempelai", icon: Users, sectionId: "couple" },
+        { id: "acara", label: "Acara", icon: MapPin, sectionId: "event" },
+        { id: "lovestory", label: "Kisah Cinta", icon: Heart, sectionId: "lovestory" },
+        { id: "galeri", label: "Galeri Foto", icon: Camera, sectionId: "gallery" },
+        { id: "amplop", label: "Amplop Digital", icon: Gift, sectionId: "gift" },
+        { id: "ayat", label: "Ayat & Quote", icon: Type, sectionId: "quote" },
+        { id: "musik", label: "Musik", icon: Music, sectionId: "music" },
     ];
+
+    const LOCKED_TABS = ["mempelai", "fotocover"];
+
+    const tabs = [
+        ALL_TABS.find(t => t.id === "infodasar")!,
+        ...(formData.sections_order as string[])
+            .map(sid => ALL_TABS.find(t => t.sectionId === sid))
+            .filter(Boolean) as typeof ALL_TABS,
+    ];
+
+    const coupleName = `${formData.groom_name || "Mempelai Pria"} & ${formData.bride_name || "Mempelai Wanita"}`;
 
     const coupleName = `${formData.groom_name || "Mempelai Pria"} & ${formData.bride_name || "Mempelai Wanita"}`;
 
