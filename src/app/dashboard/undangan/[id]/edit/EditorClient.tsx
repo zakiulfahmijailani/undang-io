@@ -640,11 +640,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {/* ── FOTO & COVER ── */}
                                 {activeTab === "fotocover" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
-                                        <div>
-                                            <div>
-                                                <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Foto & Cover</h2>
-                                                <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">Upload foto utama pasangan.</p>
-                                            </div></div>
+
 
                                         {formData.couple_photo_url && (
                                             <div className="relative w-full rounded-[2.5rem] overflow-hidden border border-outline-variant-stitch/20 shadow-xl shadow-primary-stitch/5">
@@ -700,11 +696,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {/* ── DATA MEMPELAI ── */}
                                 {activeTab === "mempelai" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
-                                        <div>
-                                            <div>
-                                                <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Data Mempelai</h2>
-                                                <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">Nama lengkap dan nama orang tua.</p>
-                                            </div></div>
 
                                         <Section title="Pengantin Pria" accent="amber">
                                             <Field label="Nama Lengkap">
@@ -739,11 +730,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {/* ── ACARA ── */}
                                 {activeTab === "acara" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
-                                        <div>
-                                            <div>
-                                                <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Detail Acara</h2>
-                                                <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">Waktu dan lokasi akad serta resepsi.</p>
-                                            </div></div>
 
                                         <Section title="Akad Nikah" accent="amber">
                                             <Field label="Tanggal & Waktu">
@@ -791,14 +777,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {/* ── KISAH CINTA ── */}
                                 {activeTab === "lovestory" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
-                                        <div>
-                                            <div>
-                                                <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Kisah Cinta</h2>
-                                                <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">
-                                                    Ceritakan perjalanan kalian (maks. 5 momen).
-                                                </p>
-                                            </div>
-                                        </div>
 
                                         <div className="space-y-4">
                                             {(formData.love_story as any[]).map((story, i) => (
@@ -813,10 +791,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                     >
                                                         <X className="w-4 h-4" />
                                                     </button>
-                                                    <div>
-                                                        <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
-                                                        <p className="text-sm text-stone-400 mt-1">Ceritakan perjalanan kalian.</p>
-                                                    </div>
+
                                                     <div className="grid grid-cols-3 gap-3">
                                                         <div className="space-y-1.5">
                                                             <label className="block text-[10px] font-bold tracking-widest uppercase text-secondary-stitch">Tahun</label>
@@ -906,11 +881,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {/* ── GALERI ── */}
                                 {activeTab === "galeri" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
-                                        <div>
-                                            <div>
-                                                <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Galeri Foto</h2>
-                                                <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">URL foto prewedding (maks. 8 foto).</p>
-                                            </div></div>
+
                                         <div className="space-y-4">
                                             {((formData.gallery_photos as string[]).length === 0) && (
                                                 <p className="text-[10px] font-bold tracking-widest uppercase text-outline-stitch text-center py-10 bg-surface-container-stitch/20 rounded-[2rem] border-2 border-dashed border-outline-variant-stitch/30">
@@ -959,11 +930,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {/* ── AMPLOP DIGITAL ── */}
                                 {activeTab === "amplop" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
-                                        <div>
-                                            <div>
-                                                <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Amplop Digital</h2>
-                                                <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">Rekening dan pengiriman hadiah.</p>
-                                            </div></div>
+
 
                                         <Section title="Transfer Bank / E-Wallet" accent="amber">
                                             <Field label="Nama Bank / E-Wallet">
@@ -1006,11 +973,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {/* ── AYAT & QUOTE ── */}
                                 {activeTab === "ayat" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
-                                        <div>
-                                            <div>
-                                                <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Ayat & Quote</h2>
-                                                <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">Kutipan pembuka undangan.</p>
-                                            </div></div>
+
                                         <Field label="Teks Kutipan">
                                             <textarea
                                                 rows={4}
