@@ -147,7 +147,7 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
                                             giftAddress={data.giftAddress}
                                         />
                                     );
-                                    case "rsvp": return <RsvpSection key={id} initialMessages={data.rsvpMessages} />;
+                                    case "rsvp": return <RsvpSection key={id} existingMessages={data.rsvpMessages} />;
                                     default: return null;
                                 }
                             });

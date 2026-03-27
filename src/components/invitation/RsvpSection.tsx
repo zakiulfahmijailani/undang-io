@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle2, User, MessageSquare, Heart, HeartOff } from "lucide-react";
 
-export interface RsvpMessage { id: string; guestName: string; message: string; attendance: "hadir" | "tidak_hadir"; createdAt: string; }
+export interface RsvpMessage { id: string; guestName: string; message: string; attendance: "hadir" | "tidak_hadir" | "ragu" | string; createdAt: string; }
 interface RsvpSectionProps { invitationId?: string; existingMessages?: RsvpMessage[]; }
 
 const RsvpSection = ({ invitationId, existingMessages = [] }: RsvpSectionProps) => {

@@ -33,24 +33,28 @@ interface EditorClientProps {
 // ── Reusable field wrapper ──────────────────────────────────────
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
     return (
-        <div className="space-y-1.5">
-            <label className="block text-sm font-semibold text-secondary-stitch">{label}</label>
+        <div className="space-y-2 group">
+            <label className="block text-[13px] font-bold text-secondary-stitch tracking-wide transition-colors group-hover:text-primary-stitch">{label}</label>
             {children}
-            {hint && <p className="text-xs text-outline-stitch">{hint}</p>}
+            {hint && <p className="text-[11px] text-outline-stitch font-medium">{hint}</p>}
         </div>
     );
 }
 
 // ── Section block ───────────────────────────────────────────────
 function Section({ title, accent, children }: { title: string; accent?: "amber" | "rose"; children: React.ReactNode }) {
-    const dot = accent === "rose" ? "bg-error-stitch" : "bg-tertiary-stitch";
+    const dot = accent === "rose" ? "bg-rose-400" : "bg-amber-400";
+    const bg = accent === "rose" ? "bg-rose-50/30 border-rose-100" : "bg-amber-50/30 border-amber-100";
     return (
-        <div className="space-y-4 p-5 bg-surface-container-stitch/40 rounded-[2rem] border border-outline-variant-stitch/20">
-            <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full ${dot}`} />
-                <h3 className="font-bold text-secondary-stitch text-[10px] uppercase tracking-[0.2em]">{title}</h3>
+        <div className={`space-y-5 p-6 rounded-[2rem] border relative overflow-hidden transition-all duration-300 hover:shadow-sm ${bg}`}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/40 to-transparent rounded-bl-full -z-10" />
+            <div className="flex items-center gap-2.5 mb-2">
+                <span className={`w-2 h-2 rounded-full ${dot} shadow-sm`} />
+                <h3 className="font-bold text-secondary-stitch text-[10px] uppercase tracking-[0.25em]">{title}</h3>
             </div>
-            {children}
+            <div className="space-y-5">
+                {children}
+            </div>
         </div>
     );
 }
@@ -67,12 +71,12 @@ function SectionToggle({ sectionId, visibility, onChange }: {
             type="button"
             onClick={() => onChange({ ...visibility, [sectionId]: !isVisible })}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[10px] font-black tracking-widest uppercase transition-all ${isVisible
-                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                : "bg-surface-container-stitch border-outline-variant-stitch/30 text-outline-stitch"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
                 }`}
         >
-            <span className={`w-7 h-4 rounded-full relative transition-colors ${isVisible ? "bg-tertiary-stitch" : "bg-outline-variant-stitch"}`}>
-                <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-3.5" : "translate-x-0.5"}`} />
+            <span className={`relative w-9 h-5 rounded-full transition-colors duration-300 flex-shrink-0 ${isVisible ? "bg-emerald-500" : "bg-slate-300"}`}>
+                <span className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isVisible ? "translate-x-4" : "translate-x-0"}`} />
             </span>
             {isVisible ? "Ditampilkan" : "Disembunyikan"}
         </button>
@@ -97,58 +101,54 @@ function SortableTabItem({ tab, isActive, isLocked, isVisible, canDrag, onSelect
         <div
             ref={setNodeRef}
             style={{ transform: CSS.Transform.toString(transform), transition }}
-            className={`flex items-center relative transition-colors ${isActive ? "bg-surface-stitch" : "bg-surface-container-lowest-stitch"} ${isDragging ? "opacity-50 z-50 ring-2 ring-primary-stitch/10" : ""}`}
+            className={`flex items-center relative mb-0.5 group transition-all duration-200 ${isActive ? "bg-surface-stitch" : "bg-transparent hover:bg-surface-container-stitch/40"} ${isDragging ? "opacity-50 z-50 ring-2 ring-primary-stitch/30 rounded-lg" : ""}`}
         >
-            {/* Drag handle — hanya muncul kalau bisa di-drag */}
-            {canDrag ? (
-                <button
-                    {...attributes}
-                    {...listeners}
-                    className="pl-3 pr-1 py-3 text-outline-variant-stitch hover:text-secondary-stitch cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
-                >
-                    <GripVertical className="w-4 h-4" />
-                </button>
-            ) : (
-                <span className="pl-3 pr-1 py-3 w-8 flex-shrink-0" />
-            )}
+            {/* Left column: drag handle — fixed width */}
+            <div className="w-8 flex-shrink-0 flex items-center justify-center">
+                {canDrag ? (
+                    <button
+                        {...attributes}
+                        {...listeners}
+                        className="p-1 text-outline-variant-stitch hover:text-secondary-stitch cursor-grab active:cursor-grabbing touch-none"
+                    >
+                        <GripVertical className="w-4 h-4" />
+                    </button>
+                ) : (
+                    <span className="w-4" />
+                )}
+            </div>
 
-            {/* Tombol tab utama */}
+            {/* Middle column: tab label — fills remaining space */}
             <button
                 onClick={onSelect}
-                className={`flex-1 flex items-center gap-3 py-4 pr-2 text-sm transition-all text-left relative ${isActive
-                    ? "text-primary-stitch font-bold"
-                    : "text-secondary-stitch hover:text-primary-stitch"
+                className={`flex-1 min-w-0 flex items-center gap-2.5 py-3 text-sm transition-all text-left relative ${isActive
+                    ? "text-primary-stitch font-black tracking-tight"
+                    : "text-secondary-stitch hover:text-primary-stitch font-semibold"
                     }`}
             >
                 {isActive && (
-                    <span className="absolute -left-11 top-0 bottom-0 w-1.5 bg-tertiary-stitch rounded-r-lg" />
+                    <span className="absolute -left-8 top-1 bottom-1 w-1.5 bg-tertiary-stitch rounded-r-full shadow-sm shadow-tertiary-stitch/30" />
                 )}
                 <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-tertiary-stitch" : "text-outline-stitch"}`} />
                 <span className="truncate tracking-tight">{tab.label}</span>
             </button>
 
-            {/* Toggle on/off — kalau tidak locked */}
-            {onToggle && !isLocked && (
-                <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); onToggle(); }}
-                    className="pr-4 flex-shrink-0"
-                    title={isVisible ? "Sembunyikan section" : "Tampilkan section"}
-                >
-                    <span className={`w-8 h-4.5 rounded-full relative flex items-center transition-colors ${isVisible ? "bg-tertiary-stitch" : "bg-outline-variant-stitch"
-                        }`}>
-                        <span className={`absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-4" : "translate-x-0.5"
-                            }`} />
-                    </span>
-                </button>
-            )}
-
-            {/* Lock icon — kalau wajib tampil */}
-            {isLocked && (
-                <span className="pr-4 flex-shrink-0" title="Wajib tampil">
+            {/* Right column: toggle/lock — FIXED width so all rows align */}
+            <div className="w-14 flex-shrink-0 flex items-center justify-center">
+                {onToggle && !isLocked ? (
+                    <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                        title={isVisible ? "Sembunyikan section" : "Tampilkan section"}
+                    >
+                        <span className={`relative w-9 h-5 rounded-full block transition-colors duration-300 ${isVisible ? "bg-emerald-500" : "bg-slate-300"}`}>
+                            <span className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isVisible ? "translate-x-4" : "translate-x-0"}`} />
+                        </span>
+                    </button>
+                ) : isLocked ? (
                     <Lock className="w-3.5 h-3.5 text-outline-variant-stitch" />
-                </span>
-            )}
+                ) : null}
+            </div>
         </div>
     );
 }
@@ -165,7 +165,7 @@ const ALL_TABS = [
     { id: "ayat", label: "Ayat & Quote", icon: Type, sectionId: "quote" },
     { id: "musik", label: "Musik", icon: Music, sectionId: "music" },
 ];
-const LOCKED_TABS = ["mempelai", "fotocover"];
+const LOCKED_TABS = ["mempelai", "fotocover", "musik"];
 const NO_REORDER_TABS = ["mempelai", "fotocover", "musik"];
 
 
@@ -398,9 +398,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             <div className="flex flex-col md:flex-row flex-1" style={{ minHeight: "calc(100vh - 64px)" }}>
 
                 {/* LEFT — Editor Form */}
-                <div className={`flex flex-col overflow-hidden bg-surface-container-low-stitch transition-all duration-300 md:sticky md:top-0 md:h-screen
+                <div className={`flex flex-col overflow-hidden bg-surface-container-low-stitch transition-all duration-300 md:sticky md:top-0 md:h-[calc(100vh-80px)]
     ${mobileMode === "preview" ? "hidden md:flex" : "flex"}
-    ${showPreview ? "w-full md:w-[420px] lg:w-[460px] md:flex-shrink-0" : "w-full"}
+    ${showPreview ? "w-full md:w-[640px] lg:w-[720px] md:flex-shrink-0 shadow-2xl shadow-primary-stitch/5 z-10" : "w-full"}
 `}>
 
                     {/* Tab Nav — vertical sidebar style */}
@@ -492,15 +492,15 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                             [sectionId]: !current,
                                                         });
                                                     }}
-                                                    className={`flex items-center gap-1 px-2 py-1.5 mx-1 rounded-xl border text-[10px] font-bold transition-all flex-shrink-0 ${isVisible !== false
-                                                        ? "bg-emerald-500 border-emerald-500 text-white"
-                                                        : "bg-stone-200 border-stone-300 text-stone-400"
+                                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 mx-1 rounded-xl border text-[10px] font-bold transition-all flex-shrink-0 ${isVisible !== false
+                                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                                                        : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
                                                         }`}
                                                     title={isVisible !== false ? "Tampil" : "Disembunyikan"}
                                                 >
-                                                    <span className={`w-5 h-3 rounded-full relative flex items-center transition-colors ${isVisible !== false ? "bg-white/30" : "bg-stone-300/40"
+                                                    <span className={`relative w-7 h-4 rounded-full transition-colors duration-300 flex-shrink-0 block ${isVisible !== false ? "bg-emerald-500" : "bg-slate-300"
                                                         }`}>
-                                                        <span className={`absolute top-0.5 w-2 h-2 bg-white rounded-full shadow transition-transform ${isVisible !== false ? "translate-x-2.5" : "translate-x-0.5"
+                                                        <span className={`absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-300 ${isVisible !== false ? "translate-x-3" : "translate-x-0"
                                                             }`} />
                                                     </span>
                                                     {isVisible !== false ? "ON" : "OFF"}
@@ -517,7 +517,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     <div className="flex flex-1 overflow-hidden">
 
                         {/* Vertical tab list — desktop only, draggable */}
-                        <nav className="hidden md:flex flex-col w-44 flex-shrink-0 border-r border-outline-variant-stitch/20 bg-surface-container-lowest-stitch overflow-y-auto py-2">
+                        <nav className="hidden md:flex flex-col w-52 flex-shrink-0 border-r border-outline-variant-stitch/20 bg-surface-container-lowest-stitch overflow-y-auto py-4">
                             <DndContext
                                 sensors={useSensors(
                                     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -577,8 +577,12 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                         </nav>
 
                         {/* Tab content area */}
-                        <div className="flex-1 overflow-y-auto bg-surface-stitch">
-                            <div className="p-6 space-y-8">
+                        <div className="flex-1 overflow-y-auto bg-surface-stitch relative">
+                            {/* Decorative background accent */}
+                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-stitch/[0.02] rounded-full blur-[100px] pointer-events-none" />
+                            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tertiary-stitch/[0.03] rounded-full blur-[100px] pointer-events-none" />
+
+                            <div className="p-6 md:p-8 space-y-8 max-w-2xl mx-auto relative z-10 pb-24">
 
                                 {/* ── INFO DASAR ── */}
                                 {activeTab === "infodasar" && (

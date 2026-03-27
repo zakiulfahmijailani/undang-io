@@ -81,7 +81,7 @@ export default function InviteDemoPage() {
 
                         <CoupleSection groom={demoData.groom} bride={demoData.bride} />
 
-                        <QuoteSection text={demoData.quote.text} source={demoData.quote.source} />
+                        <QuoteSection quote={demoData.quote} />
 
                         <LoveStorySection stories={demoData.loveStory} />
 
@@ -100,7 +100,7 @@ export default function InviteDemoPage() {
                             giftAddress={demoData.giftAddress}
                         />
 
-                        <RsvpSection initialMessages={demoData.rsvpMessages} />
+                        <RsvpSection existingMessages={demoData.rsvpMessages as any} />
 
                         {/* Bottom padding for navbar */}
                         <div className="h-20" />
