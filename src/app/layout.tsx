@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond, Plus_Jakarta_Sans, JetBrains_Mono, Dancing_Script, Great_Vibes, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import DevNavLoader from "@/components/dev/DevNavLoader";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,6 +66,16 @@ export default function RootLayout({
       >
         {children}
         <DevNavLoader />
+        <Toaster
+          position="bottom-right"
+          richColors
+          toastOptions={{
+            duration: 4000,
+            classNames: {
+              toast: "font-body",
+            },
+          }}
+        />
       </body>
     </html>
   );

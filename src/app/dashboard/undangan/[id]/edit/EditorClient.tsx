@@ -16,6 +16,7 @@ import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import MusicPickerTab from "@/components/dashboard/MusicPickerTab";
 import DndSectionsEditor from "@/components/dashboard/DndSectionsEditor";
+import { toast } from "sonner";
 import {
     DndContext, closestCenter, PointerSensor,
     KeyboardSensor, useSensor, useSensors
@@ -99,7 +100,6 @@ function SortableTabItem({ tab, isActive, isLocked, isVisible, canDrag, onSelect
             style={{ transform: CSS.Transform.toString(transform), transition }}
             className={`flex items-center relative bg-white ${isDragging ? "opacity-50 z-50" : ""}`}
         >
-            {/* Drag handle — hanya muncul kalau bisa di-drag */}
             {canDrag ? (
                 <button
                     {...attributes}
@@ -112,7 +112,6 @@ function SortableTabItem({ tab, isActive, isLocked, isVisible, canDrag, onSelect
                 <span className="pl-2 pr-1 py-3 w-7 flex-shrink-0" />
             )}
 
-            {/* Tombol tab utama */}
             <button
                 onClick={onSelect}
                 className={`flex-1 flex items-center gap-2 py-3 pr-2 text-sm font-medium transition-all text-left relative ${isActive
@@ -127,7 +126,6 @@ function SortableTabItem({ tab, isActive, isLocked, isVisible, canDrag, onSelect
                 <span className="truncate text-xs">{tab.label}</span>
             </button>
 
-            {/* Toggle on/off — kalau tidak locked */}
             {onToggle && !isLocked && (
                 <button
                     type="button"
@@ -143,7 +141,6 @@ function SortableTabItem({ tab, isActive, isLocked, isVisible, canDrag, onSelect
                 </button>
             )}
 
-            {/* Lock icon — kalau wajib tampil */}
             {isLocked && (
                 <span className="pr-2 flex-shrink-0" title="Wajib tampil">
                     <Lock className="w-3 h-3 text-stone-300" />
@@ -213,7 +210,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             "countdown", "event", "gallery", "gift", "rsvp", "music"
         ],
         sections_visibility: initialData.sections_visibility || {},
-        enable_rsvp: true,   // ← baris ini sudah ada, jangan diubah
+        enable_rsvp: true,
 
         gift_bank_name: initialData.gift_bank_name || "",
         gift_bank_account: initialData.gift_bank_account || "",
@@ -265,8 +262,8 @@ export default function EditorClient({ initialData }: EditorClientProps) {
         gallery: (formData.gallery_photos as string[]).filter(url => url.trim()),
         bankAccounts: formData.gift_bank_name ? [{
             bank: formData.gift_bank_name,
-            number: formData.gift_bank_account,        // ← ubah dari accountNumber
-            name: formData.gift_bank_account_name,     // ← ubah dari accountName
+            number: formData.gift_bank_account,
+            name: formData.gift_bank_account_name,
         }] : demoData.bankAccounts,
         giftAddress: formData.gift_shipping_address || demoData.giftAddress,
         musicUrl: formData.music_url || null,
@@ -284,9 +281,16 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.error?.message || "Gagal menyimpan");
+            toast.success("Perubahan berhasil disimpan! ✅", {
+                description: "Semua data undangan telah diperbarui.",
+                duration: 3000,
+            });
             router.refresh();
         } catch (error: any) {
-            alert(error.message);
+            toast.error("Gagal menyimpan", {
+                description: error.message,
+                duration: 5000,
+            });
         } finally {
             setIsSaving(false);
         }
@@ -309,17 +313,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             const result = await res.json();
             if (!res.ok || result.error) throw new Error(result.error?.message || "Upload gagal");
             handleChange("couple_photo_url", result.data.url);
+            toast.success("Foto berhasil diupload! 📸", { duration: 3000 });
         } catch (err: any) {
-            alert("Upload gagal: " + err.message);
+            toast.error("Upload gagal", {
+                description: err.message,
+                duration: 5000,
+            });
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = "";
         }
     };
-
-
-
-
 
     const tabs = [
         ALL_TABS.find(t => t.id === "infodasar")!,
@@ -349,7 +353,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                         </div>
                     </div>
                     <div className="flex w-full sm:w-auto items-center gap-2">
-                        {/* Mobile only — Edit/Preview toggle */}
                         <div className="md:hidden flex rounded-xl border border-stone-200 bg-stone-100 p-0.5 flex-shrink-0">
                             <button
                                 type="button"
@@ -403,10 +406,10 @@ export default function EditorClient({ initialData }: EditorClientProps) {
     ${showPreview ? "w-full md:w-[420px] lg:w-[460px] md:flex-shrink-0" : "w-full"}
 `}>
 
-                    {/* Tab Nav — vertical sidebar style */}
+                    {/* Tab Nav */}
                     <div className="flex md:flex-row overflow-x-auto md:overflow-visible flex-shrink-0 border-b border-stone-200 bg-white">
                         <nav className="flex md:flex-col w-full md:w-auto md:border-r md:border-stone-200 md:bg-white overflow-x-auto scrollbar-hide">
-                            {/* Mobile: horizontal scroll pills with reorder */}
+                            {/* Mobile: horizontal scroll pills */}
                             <div className="md:hidden flex gap-1 px-3 py-2.5 overflow-x-auto scrollbar-hide">
                                 {tabs.map((tab) => {
                                     const Icon = tab.icon;
@@ -422,15 +425,11 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                     const order = formData.sections_order as string[];
                                     const currentIdx = sectionId ? order.indexOf(sectionId) : -1;
-
-                                    // Index minimum yang boleh ditempati section yang bisa dipindah
-                                    // "hero" dan "couple" harus selalu di posisi 0 dan 1
                                     const LOCKED_SECTION_IDS = ["hero", "couple"];
                                     const firstMovableIdx = LOCKED_SECTION_IDS.filter(s => order.includes(s)).length;
-                                    // firstMovableIdx = 2 kalau hero & couple ada, artinya index 0 & 1 tidak boleh dimasuki
 
                                     const moveUp = () => {
-                                        if (currentIdx <= firstMovableIdx) return; // tidak bisa lebih ke atas dari batas locked
+                                        if (currentIdx <= firstMovableIdx) return;
                                         handleChange("sections_order", arrayMove(order, currentIdx, currentIdx - 1));
                                     };
                                     const moveDown = () => {
@@ -446,7 +445,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                 : "bg-stone-100 border-stone-200 text-stone-600"
                                                 }`}
                                         >
-                                            {/* Tombol reorder — hanya untuk yang bisa dipindah */}
                                             {canReorder && (
                                                 <div className="flex flex-col border-r border-white/20">
                                                     <button
@@ -468,7 +466,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                 </div>
                                             )}
 
-                                            {/* Tab button utama */}
                                             <button
                                                 onClick={() => setActiveTab(tab.id)}
                                                 className="flex items-center gap-1.5 px-2.5 py-2"
@@ -478,7 +475,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                 {isLocked && <Lock className="w-2.5 h-2.5 opacity-40" />}
                                             </button>
 
-                                            {/* Toggle on/off — explicit untuk mobile, hanya jika punya sectionId dan tidak locked */}
                                             {sectionId && !isLocked && (
                                                 <button
                                                     type="button"
@@ -516,7 +512,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     {/* Desktop: vertical tab list + content side by side */}
                     <div className="flex flex-1 overflow-hidden">
 
-                        {/* Vertical tab list — desktop only, draggable */}
+                        {/* Vertical tab list — desktop only */}
                         <nav className="hidden md:flex flex-col w-44 flex-shrink-0 border-r border-stone-200 bg-white overflow-y-auto py-2">
                             <DndContext
                                 sensors={useSensors(
@@ -626,7 +622,10 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                     variant="secondary"
                                                     size="sm"
                                                     title="Salin Link"
-                                                    onClick={() => navigator.clipboard.writeText(`https://undang.io/invite/${formData.slug}`)}
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(`https://undang.io/invite/${formData.slug}`);
+                                                        toast.success("Link disalin! 🔗", { duration: 2000 });
+                                                    }}
                                                 >
                                                     <Copy className="w-4 h-4" />
                                                 </Button>
@@ -639,10 +638,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "fotocover" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div>
-                                                <h2 className="text-xl font-serif font-bold text-stone-800">Foto & Cover</h2>
-                                                <p className="text-sm text-stone-400 mt-1">Upload foto utama pasangan.</p>
-                                            </div></div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Foto & Cover</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Upload foto utama pasangan.</p>
+                                        </div>
 
                                         {formData.couple_photo_url && (
                                             <div className="relative w-full rounded-2xl overflow-hidden border border-stone-200 shadow-sm">
@@ -699,10 +697,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "mempelai" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div>
-                                                <h2 className="text-xl font-serif font-bold text-stone-800">Data Mempelai</h2>
-                                                <p className="text-sm text-stone-400 mt-1">Nama lengkap dan nama orang tua.</p>
-                                            </div></div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Data Mempelai</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Nama lengkap dan nama orang tua.</p>
+                                        </div>
 
                                         <Section title="Pengantin Pria" accent="amber">
                                             <Field label="Nama Lengkap">
@@ -738,10 +735,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "acara" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div>
-                                                <h2 className="text-xl font-serif font-bold text-stone-800">Detail Acara</h2>
-                                                <p className="text-sm text-stone-400 mt-1">Waktu dan lokasi akad serta resepsi.</p>
-                                            </div></div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Detail Acara</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Waktu dan lokasi akad serta resepsi.</p>
+                                        </div>
 
                                         <Section title="Akad Nikah" accent="amber">
                                             <Field label="Tanggal & Waktu">
@@ -786,25 +782,20 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                         </Section>
                                     </div>
                                 )}
+
                                 {/* ── KISAH CINTA ── */}
                                 {activeTab === "lovestory" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div>
-                                                <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
-                                                <p className="text-sm text-stone-400 mt-1">
-                                                    Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
-                                                </p>
-                                            </div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
+                                            <p className="text-sm text-stone-400 mt-1">
+                                                Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
+                                            </p>
                                         </div>
 
                                         <div className="space-y-3">
                                             {(formData.love_story as any[]).map((story, i) => (
                                                 <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-100 space-y-3">
-                                                    <div>
-                                                        <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
-                                                        <p className="text-sm text-stone-400 mt-1">Ceritakan perjalanan kalian.</p>
-                                                    </div>
                                                     <div className="grid grid-cols-3 gap-2">
                                                         <div className="space-y-1">
                                                             <label className="block text-xs font-semibold text-stone-600">Tahun</label>
@@ -857,6 +848,16 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                             placeholder="Ceritakan momen ini secara singkat..."
                                                         />
                                                     </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const updated = (formData.love_story as any[]).filter((_, idx) => idx !== i);
+                                                            handleChange("love_story", updated);
+                                                        }}
+                                                        className="text-xs text-stone-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                                                    >
+                                                        <X className="w-3 h-3" /> Hapus momen ini
+                                                    </button>
                                                 </div>
                                             ))}
                                         </div>
@@ -882,6 +883,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                         )}
                                     </div>
                                 )}
+
                                 {/* ── MUSIK ── */}
                                 {activeTab === "musik" && (
                                     <MusicPickerTab
@@ -895,10 +897,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "galeri" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div>
-                                                <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
-                                                <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
-                                            </div></div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
+                                        </div>
                                         <div className="space-y-3">
                                             {((formData.gallery_photos as string[]).length === 0) && (
                                                 <p className="text-sm text-stone-400 text-center py-6 bg-stone-50 rounded-2xl border border-dashed border-stone-200">
@@ -948,10 +949,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "amplop" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div>
-                                                <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
-                                                <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
-                                            </div></div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
+                                        </div>
 
                                         <Section title="Transfer Bank / E-Wallet" accent="amber">
                                             <Field label="Nama Bank / E-Wallet">
@@ -962,7 +962,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                     <Input
                                                         value={formData.gift_bank_account || ""}
                                                         onChange={e => {
-                                                            const val = e.target.value.replace(/\D/g, ""); // hapus semua non-angka
+                                                            const val = e.target.value.replace(/\D/g, "");
                                                             handleChange("gift_bank_account", val);
                                                         }}
                                                         inputMode="numeric"
@@ -995,10 +995,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                 {activeTab === "ayat" && (
                                     <div className="space-y-5 animate-in fade-in duration-200">
                                         <div>
-                                            <div>
-                                                <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
-                                                <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
-                                            </div></div>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
+                                        </div>
                                         <Field label="Teks Kutipan">
                                             <textarea
                                                 rows={4}
@@ -1018,8 +1017,6 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                         </Field>
                                     </div>
                                 )}
-
-
 
                             </div>
                         </div>

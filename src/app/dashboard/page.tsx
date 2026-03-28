@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, MailOpen, MessageSquareHeart, ShieldCheck, HeartPulse } from "lucide-react";
+import { Users, MailOpen, MessageSquareHeart, ShieldCheck, HeartPulse, Info } from "lucide-react";
 import InvitationCard from "@/components/dashboard/InvitationCard";
 import NewInvitationDialog from "@/components/dashboard/NewInvitationDialog";
 import GuestConversion from "./components/GuestConversion";
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
 
     const userName = profile?.full_name?.split(' ')[0] || 'Kak';
 
-    // 1. Fetch permanent invitations — query flat columns (no invitation_details relation)
+    // 1. Fetch permanent invitations
     const { data: invitationsRaw, error: invitationsError } = await supabase
         .from('invitations')
         .select(`
@@ -66,7 +66,6 @@ export default async function DashboardPage() {
 
     const validStatuses: InvitationStatus[] = ["draft", "active", "unpaid", "expired"];
 
-    // Map flat columns → shape that InvitationCard expects
     const typedInvitations: InvitationItem[] = (invitationsRaw || []).map((inv: any) => ({
         id: inv.id as string,
         slug: inv.slug as string,
@@ -81,7 +80,7 @@ export default async function DashboardPage() {
         },
     }));
 
-    // 2. Fetch claimed guest sessions (belum bayar, belum jadi permanent)
+    // 2. Fetch claimed guest sessions
     let claimedGuestSessions: any[] = [];
     const adminClient = getAdminClient();
     if (adminClient) {
@@ -139,6 +138,7 @@ export default async function DashboardPage() {
             ) : (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                        {/* Total Tayangan */}
                         <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Tayangan</CardTitle>
@@ -146,9 +146,18 @@ export default async function DashboardPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{totalViews}</div>
-                                <p className="text-xs text-muted-foreground mt-1">Total di semua undangan</p>
+                                {totalViews === 0 ? (
+                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                        <Info className="w-3 h-3 flex-shrink-0" />
+                                        Aktifkan undangan agar tamu bisa mengunjungi
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground mt-1">Total di semua undangan</p>
+                                )}
                             </CardContent>
                         </Card>
+
+                        {/* Total RSVP */}
                         <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground">Total RSVP</CardTitle>
@@ -156,9 +165,18 @@ export default async function DashboardPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{totalRsvps}</div>
-                                <p className="text-xs text-muted-foreground mt-1">Konfirmasi kehadiran</p>
+                                {totalRsvps === 0 ? (
+                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                        <Info className="w-3 h-3 flex-shrink-0" />
+                                        Konfirmasi tamu akan muncul di sini
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground mt-1">Konfirmasi kehadiran</p>
+                                )}
                             </CardContent>
                         </Card>
+
+                        {/* Ucapan Baru */}
                         <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -171,9 +189,18 @@ export default async function DashboardPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{newMessages}</div>
-                                <p className="text-xs text-muted-foreground mt-1">Belum dibaca</p>
+                                {newMessages === 0 ? (
+                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                        <Info className="w-3 h-3 flex-shrink-0" />
+                                        Ucapan dari tamu akan muncul di sini
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground mt-1">Belum dibaca</p>
+                                )}
                             </CardContent>
                         </Card>
+
+                        {/* Status Paket */}
                         <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow bg-secondary/30 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-400/20 to-transparent rounded-bl-full" />
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -196,11 +223,9 @@ export default async function DashboardPage() {
                         </div>
 
                         <div className="grid gap-6 md:grid-cols-2">
-                            {/* Claimed guest sessions — belum bayar, ada timer */}
                             {claimedGuestSessions.map((gs) => (
                                 <GuestSessionCard key={gs.id} guestSession={gs} />
                             ))}
-                            {/* Permanent invitations */}
                             {typedInvitations.map((invitation) => (
                                 <InvitationCard key={invitation.id} invitation={invitation} />
                             ))}
