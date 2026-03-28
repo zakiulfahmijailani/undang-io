@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import GuestCountdownBanner from "@/components/invitation/GuestCountdownBanner";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function GuestInvitationView(props: { params: Promise<{ slug: string }> }) {
     const params = use(props.params);
@@ -21,6 +22,11 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
     const [isExpired, setIsExpired] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    
+    // Auto-fetch theme if sessionData contains theme_id
+    const themeId = sessionData?.theme_id || '';
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(themeId);
+    const { theme, isLoading: themeLoading } = useTheme(themeId ? (isUuid ? { id: themeId } : { slug: themeId }) : { slug: 'dummy-none' });
 
     useEffect(() => {
         const fetchInvitation = async () => {
@@ -91,18 +97,18 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
     const invData = sessionData.invitation_data;
     const dataDisplay = {
         ...demoData,
-        coupleShortName: `${invData.groomNickname} & ${invData.brideNickname}`,
+        coupleShortName: `${invData.groomNickname || "Pria"} & ${invData.brideNickname || "Wanita"}`,
         theme: sessionData.theme_id,
         groom: {
             ...demoData.groom,
-            fullName: invData.groomFullName || "Mempelai Pria",
+            fullName: invData.groomFullName || invData.groomNickname || "Mempelai Pria",
             nickname: invData.groomNickname || "Pria",
             father: invData.groomFather ? `Bapak ${invData.groomFather}` : "",
             mother: invData.groomMother ? `Ibu ${invData.groomMother}` : "",
         },
         bride: {
             ...demoData.bride,
-            fullName: invData.brideFullName || "Mempelai Wanita",
+            fullName: invData.brideFullName || invData.brideNickname || "Mempelai Wanita",
             nickname: invData.brideNickname || "Wanita",
             father: invData.brideFather ? `Bapak ${invData.brideFather}` : "",
             mother: invData.brideMother ? `Ibu ${invData.brideMother}` : "",
@@ -131,7 +137,7 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
         return (
             <div className="relative min-h-screen">
                 <div className="pointer-events-none select-none blur-md opacity-60">
-                    <InvitationClientWrapper data={dataDisplay} />
+                    <InvitationClientWrapper data={dataDisplay} theme={theme as any} />
                 </div>
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-sm">
                     <Card className="mx-4 max-w-md shadow-2xl">
@@ -182,7 +188,9 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
                 </div>
             )}
 
-            <InvitationClientWrapper data={dataDisplay} />
+            {(!themeLoading || theme) && (
+                <InvitationClientWrapper data={dataDisplay} theme={theme as any} />
+            )}
         </div>
     );
 }
