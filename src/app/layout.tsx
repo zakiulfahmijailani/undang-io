@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans, JetBrains_Mono, Dancing_Script, Great_Vibes, Playfair_Display } from "next/font/google";
+import { Inter, Cormorant_Garamond, Plus_Jakarta_Sans, JetBrains_Mono, Dancing_Script, Great_Vibes, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import DevNavLoader from "@/components/dev/DevNavLoader";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
+});
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -37,7 +43,7 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "umuman - Platform Undangan Digital",
+  title: "undang.io - Platform Undangan Digital",
   description: "Platform undangan digital paling mudah digunakan dan paling cantik di Indonesia.",
 };
 
@@ -48,8 +54,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
-        className={`${plusJakartaSans.variable} ${cormorant.variable} ${jetbrainsMono.variable} ${dancingScript.variable} ${greatVibes.variable} ${playfairDisplay.variable} antialiased font-body text-neutral-700 bg-surface-page`}
+        className={`${inter.variable} ${plusJakartaSans.variable} ${cormorant.variable} ${jetbrainsMono.variable} ${dancingScript.variable} ${greatVibes.variable} ${playfairDisplay.variable} antialiased font-body text-on-surface bg-surface`}
       >
         {children}
         <DevNavLoader />

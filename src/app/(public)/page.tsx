@@ -1,317 +1,482 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Heart, Sparkles, Clock, Palette, Share2,
-  MessageSquare, ChevronRight, Star, Check, ArrowRight
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+
+/* ─── Data Arrays ──────────────────────────────────────────────── */
 
 const features = [
-  { icon: Sparkles, title: 'Langsung Jadi',       desc: 'Undangan lengkap dalam 5 menit. Tanpa ribet, tanpa coding.' },
-  { icon: Palette,  title: 'Ratusan Tema',         desc: 'Jawa, Bali, Minang, Modern, Islami, dan masih banyak lagi.' },
-  { icon: Share2,   title: 'Bagikan via WhatsApp', desc: 'Satu link untuk semua tamu. Mudah, cepat, elegan.' },
-  { icon: MessageSquare, title: 'RSVP & Ucapan',  desc: 'Tamu konfirmasi kehadiran dan kirim ucapan langsung.' },
-  { icon: Clock,    title: 'Live Selamanya',        desc: 'Bayar sekali, undangan aktif untuk selamanya.' },
-  { icon: Heart,    title: 'Desain Premium',        desc: 'Tampilan mewah yang indah di semua perangkat.' },
+  {
+    icon: 'auto_awesome',
+    title: 'Langsung Jadi',
+    desc: 'Undangan lengkap dalam 5 menit. Tanpa ribet, tanpa coding.',
+  },
+  {
+    icon: 'palette',
+    title: 'Ratusan Tema',
+    desc: 'Jawa, Bali, Minang, Modern, Islami, dan masih banyak lagi.',
+  },
+  {
+    icon: 'share',
+    title: 'Bagikan via WhatsApp',
+    desc: 'Satu link untuk semua tamu. Mudah, cepat, elegan.',
+  },
+  {
+    icon: 'forum',
+    title: 'RSVP & Ucapan',
+    desc: 'Tamu konfirmasi kehadiran dan kirim ucapan langsung.',
+  },
+  {
+    icon: 'schedule',
+    title: 'Live Selamanya',
+    desc: 'Bayar sekali, undangan aktif untuk selamanya.',
+  },
+  {
+    icon: 'diamond',
+    title: 'Desain Premium',
+    desc: 'Tampilan mewah yang indah di semua perangkat.',
+  },
 ];
 
 const testimonials = [
-  { name: 'Rina & Dimas', text: 'Undangan digitalnya cantik sekali dan sangat mudah dibuat. Tamu-tamu kami langsung terpesona!', location: 'Jakarta', initial: 'RD' },
-  { name: 'Ayu & Budi',   text: 'Hanya 5 menit dan undangan sudah jadi. Praktis dan tampilannya mewah.', location: 'Bandung', initial: 'AB' },
-  { name: 'Sari & Eko',   text: 'Tema Jawa Klasiknya membuat undangan kami terasa sangat personal dan mewah.', location: 'Yogyakarta', initial: 'SE' },
-];
-
-const themes = [
-  { id: 'jawa',    name: 'Jawa Klasik',       cat: 'Budaya',   img: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=560&fit=crop&q=80' },
-  { id: 'bali',    name: 'Bali Tropis',        cat: 'Budaya',   img: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&h=560&fit=crop&q=80' },
-  { id: 'modern',  name: 'Modern Minimalis',   cat: 'Modern',   img: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=560&fit=crop&q=80' },
-];
-
-const pricing = [
-  'Undangan live selamanya',
-  'Link undangan permanen',
-  'Bebas edit kapan saja',
-  'RSVP & ucapan tamu',
-  'Ratusan tema premium',
-  'Bagikan via WhatsApp',
-  'Tersimpan di akun kamu',
+  {
+    name: 'Rina & Dimas',
+    text: 'Undangan digitalnya cantik sekali dan sangat mudah dibuat. Tamu-tamu kami langsung terpesona!',
+    location: 'Jakarta',
+    initial: 'RD',
+  },
+  {
+    name: 'Ayu & Budi',
+    text: 'Hanya 5 menit dan undangan sudah jadi. Praktis dan tampilannya mewah. Sangat recommended!',
+    location: 'Bandung',
+    initial: 'AB',
+  },
+  {
+    name: 'Sari & Eko',
+    text: 'Tema Jawa Klasiknya membuat undangan kami terasa sangat personal dan mewah. Terima kasih undang.io!',
+    location: 'Yogyakarta',
+    initial: 'SE',
+  },
 ];
 
 export default function LandingPage() {
   const router = useRouter();
+  const [groomName, setGroomName] = useState('');
+  const [brideName, setBrideName] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState('');
+
+  const [themeOptions, setThemeOptions] = useState<any[]>([
+    { id: 'loading-1', name: 'Loading...', img: '' },
+    { id: 'loading-2', name: 'Loading...', img: '' },
+    { id: 'loading-3', name: 'Loading...', img: '' },
+  ]);
+
+  useEffect(() => {
+    async function loadThemes() {
+      const supabase = createBrowserSupabaseClient();
+      const { data } = await supabase.from('themes').select('*').eq('is_published', true).limit(3);
+      if (data && data.length > 0) {
+        setThemeOptions(data.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          img: t.preview_url || 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=560&fit=crop&q=80'
+        })));
+        setSelectedTheme(data[0].id);
+      }
+    }
+    loadThemes();
+  }, []);
+
+  const handleBegin = () => {
+    router.push('/buat-undangan');
+  };
+
+  const scrollToForm = () => {
+    document.getElementById('quick-start')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleQuickStart = () => {
+    if (groomName || brideName) {
+      sessionStorage.setItem('undang_draft', JSON.stringify({
+        groom_full_name: '',
+        groom_name: groomName,
+        bride_full_name: '',
+        bride_name: brideName,
+        themeId: selectedTheme
+      }));
+    }
+    if (selectedTheme) {
+      router.push(`/buat-undangan?theme=${selectedTheme}`);
+    } else {
+      router.push('/buat-undangan');
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] text-[#1E1B18]">
-
-      {/* ── Navbar ─────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 h-16 flex items-center border-b border-[#EDE6D6] bg-[#FDFCF9]/90 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#1E1B18] flex items-center justify-center">
-              <Heart className="w-3.5 h-3.5 text-[#D4A91C]" fill="currentColor" />
-            </div>
-            <span className="font-display text-lg font-medium tracking-tight">
-              undang<span className="text-[#D4A91C]">.io</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="text-sm text-[#4A4540] hover:text-[#1E1B18]" asChild>
-              <Link href="/login">Masuk</Link>
-            </Button>
-            <Button size="sm" className="bg-[#1E1B18] text-[#FDFCF9] hover:bg-[#302C28] rounded-full px-5 text-sm" asChild>
-              <Link href="/register">Mulai Gratis</Link>
-            </Button>
+    <div className="bg-background text-on-background selection:bg-tertiary-fixed-dim min-h-screen">
+      {/* TopNavBar */}
+      <nav className="fixed top-0 w-full z-50 bg-slate-50/70 backdrop-blur-xl bg-gradient-to-b from-slate-200/20 to-transparent shadow-none">
+        <div className="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+          <div className="text-2xl font-black tracking-tighter text-primary">undang.io</div>
+          <div className="hidden md:flex space-x-12 items-center font-['Inter'] tracking-tight font-medium">
+            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#features">Fitur</a>
+            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#pricing">Harga</a>
+            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#showcase">Tema</a>
+            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#testimonials">Testimoni</a>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link href="/login" className="text-slate-500 hover:text-primary transition-all duration-300 font-medium scale-95 active:scale-90">Masuk</Link>
+            <button
+              onClick={scrollToForm}
+              className="bg-primary text-on-primary px-7 py-2.5 rounded-full font-bold scale-95 active:scale-90 transition-transform hover:opacity-80 shadow-lg shadow-primary/20"
+            >
+              Buat Undangan
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero ───────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-20 pb-24 md:pt-28 md:pb-32">
-        {/* subtle grain overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-grain opacity-60" />
-        {/* warm gradient */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#F5F0E8]/60 via-transparent to-[#FAF8F3]/40" />
-
-        <div className="relative mx-auto max-w-6xl px-5">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
-
-            {/* Left: Headline */}
-            <div className="animate-fade-in-up">
-              <Badge className="mb-6 bg-[#F5F0E8] text-[#7D5C0C] border-[#D4A91C]/30 font-medium tracking-wide text-xs px-3 py-1.5 rounded-full">
-                ✦ Coba Gratis — Tanpa Daftar
-              </Badge>
-              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-light leading-[1.06] tracking-tight text-[#1E1B18] mb-6">
+      <main>
+        {/* ── Hero + Inline Quick-Start Form ── */}
+        <section id="quick-start" className="relative pt-32 pb-24 px-8 overflow-hidden min-h-[90vh] flex items-center">
+          <div className="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left: Headline + Quick-Start Form */}
+            <div className="lg:col-span-7 z-10">
+              <span className="inline-block py-1 px-4 rounded-full bg-surface-container-highest text-primary text-[10px] font-bold tracking-[0.2em] uppercase mb-8">
+                ✪ Langsung Buat — Tanpa Daftar
+              </span>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-primary tracking-tighter leading-[0.9] mb-6">
                 Undangan
-                <br />
-                <em className="not-italic text-gold-gradient">Pernikahan</em>
-                <br />
+                <br/>
+                <span className="text-on-tertiary-container italic font-light">Pernikahan</span>
+                <br/>
                 Digital Kamu
               </h1>
-              <p className="text-[#726C67] text-lg md:text-xl leading-relaxed mb-10 max-w-md">
-                Buat, publish, dan bagikan undangan elegan dalam 5 menit.
-                Bayar sekali <span className="font-semibold text-[#1E1B18]">Rp 49.000</span>, live selamanya.
+              <p className="text-xl md:text-2xl text-secondary max-w-xl leading-relaxed mb-10 font-light">
+                Isi nama, pilih tema, langsung live. Gratis 15 menit.
+                Bayar <span className="font-semibold text-primary">Rp 49.000</span> untuk selamanya.
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  onClick={() => router.push('/buat-undangan')}
-                  className="bg-[#1E1B18] hover:bg-[#302C28] text-[#FDFCF9] rounded-full px-8 py-3 h-auto text-base font-medium gap-2 group shadow-lg"
-                >
-                  Mulai Buat Undangan
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-                <Button
-                  onClick={() => router.push('/invite/demo')}
-                  className="rounded-full px-8 py-3 h-auto text-base border border-[#EDE6D6] hover:border-[#D4A91C] bg-transparent hover:bg-[#FDFCF9] text-[#1E1B18]"
-                >
-                  Lihat Contoh
-                </Button>
-              </div>
 
-              {/* Social proof */}
-              <div className="mt-10 flex items-center gap-4">
-                <div className="flex -space-x-2">
-                  {['RD','AB','SE','KW','FH'].map((i,n) => (
-                    <div key={n} className="w-8 h-8 rounded-full bg-[#EDE6D6] border-2 border-[#FDFCF9] flex items-center justify-center text-[9px] font-bold text-[#4A4540]">{i}</div>
+              {/* ── INLINE QUICK-START FORM ─────────────────── */}
+              <div className="bg-white border border-outline-variant/10 rounded-[32px] p-6 md:p-8 shadow-2xl max-w-lg">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
+                  <span className="text-[10px] font-black tracking-[0.2em] uppercase text-emerald-600">Buat Undangan Sekarang — Gratis</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nama Pria</label>
+                    <input
+                      type="text"
+                      value={groomName}
+                      onChange={(e) => setGroomName(e.target.value)}
+                      placeholder="Budi"
+                      className="w-full px-4 py-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 text-primary font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nama Wanita</label>
+                    <input
+                      type="text"
+                      value={brideName}
+                      onChange={(e) => setBrideName(e.target.value)}
+                      placeholder="Ayu"
+                      className="w-full px-4 py-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 text-primary font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Theme Quick-Select */}
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pilih Tema</label>
+                <div className="flex gap-3 mb-6">
+                  {themeOptions.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setSelectedTheme(t.id)}
+                      className={`flex-1 relative rounded-2xl overflow-hidden h-20 transition-all border-2 ${
+                        selectedTheme === t.id
+                          ? 'border-primary shadow-lg shadow-primary/20 scale-[1.02]'
+                          : 'border-transparent opacity-60 hover:opacity-80'
+                      }`}
+                    >
+                      <img src={t.img} alt={t.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <span className="absolute bottom-1.5 left-0 right-0 text-center text-white text-[10px] font-bold tracking-wide">{t.name}</span>
+                    </button>
                   ))}
                 </div>
-                <div>
-                  <div className="flex gap-0.5 mb-0.5">{[...Array(5)].map((_,j)=><Star key={j} className="w-3 h-3 fill-[#D4A91C] text-[#D4A91C]" />)}</div>
-                  <p className="text-xs text-[#726C67]">1,200+ pasangan sudah memakai undang.io</p>
-                </div>
+
+                <button
+                  onClick={handleQuickStart}
+                  className="w-full bg-primary text-on-primary py-4 rounded-full font-black text-base shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                >
+                  🚀 Buat Undangan Gratis
+                </button>
+                <p className="text-center text-[11px] text-slate-400 mt-3">Tanpa login · Live dalam 5 menit · Gratis 15 menit</p>
               </div>
             </div>
 
-            {/* Right: Floating card preview */}
-            <div className="relative flex justify-center lg:justify-end animate-fade-in">
-              <div className="relative w-64 md:w-72">
-                {/* Main card */}
-                <div className="card-glass rounded-3xl overflow-hidden shadow-xl">
-                  <img
-                    src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=560&fit=crop&q=80"
-                    alt="Contoh undangan"
-                    className="w-full h-80 object-cover"
-                  />
-                  <div className="p-5">
-                    <p className="text-xs text-[#726C67] tracking-widest uppercase mb-1">The Wedding of</p>
-                    <p className="font-script text-3xl text-[#1E1B18]">Rina & Dimas</p>
-                    <p className="text-xs text-[#726C67] mt-1">15 Maret 2026 · Yogyakarta</p>
+            {/* Right: Gallery Stack */}
+            <div className="lg:col-span-5 relative hidden lg:block">
+              <div className="relative w-full aspect-[4/5] rounded-[48px] overflow-hidden shadow-2xl rotate-3 translate-x-12 z-20">
+                <img
+                  alt="Undangan Pernikahan Mewah"
+                  className="w-full h-full object-cover"
+                  src="https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80"
+                />
+              </div>
+              <div className="absolute -top-12 -left-12 w-2/3 aspect-[4/5] rounded-[40px] overflow-hidden shadow-xl -rotate-6 z-10 bg-surface-container-low border border-white/20 backdrop-blur-xl">
+                <img
+                  alt="Upacara Pernikahan"
+                  className="w-full h-full object-cover opacity-80"
+                  src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80"
+                />
+              </div>
+              <div className="absolute -bottom-16 right-0 w-1/2 p-6 rounded-[32px] bg-tertiary text-on-tertiary z-30 shadow-2xl">
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="material-symbols-outlined text-tertiary-fixed-dim" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                  <span className="text-xs font-bold tracking-widest uppercase">Premium Finish</span>
+                </div>
+                <p className="text-sm font-light opacity-90 leading-relaxed">
+                  Setiap undangan dirender dengan desain mewah dan presisi tinggi.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Features ─────────────────────────────────────── */}
+        <section id="features" className="py-24 px-8 bg-surface-container-low border-y border-outline-variant/10">
+          <div className="max-w-screen-2xl mx-auto">
+            <div className="text-center mb-20">
+              <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Fitur Unggulan</span>
+              <h2 className="text-4xl md:text-6xl font-black text-primary tracking-tighter mt-4">Kenapa undang.io</h2>
+              <p className="text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed font-light">Semua yang kamu butuhkan untuk undangan pernikahan digital yang sempurna.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((f, i) => (
+                <div
+                  key={i}
+                  className="group bg-surface-container-lowest p-8 rounded-[32px] border border-outline-variant/10 hover:border-primary/20 hover:shadow-xl hover:translate-y-[-4px] transition-all duration-500"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-6 group-hover:bg-primary/10 transition-colors">
+                    <span
+                      className="material-symbols-outlined text-primary"
+                      style={{ fontSize: '28px', fontVariationSettings: "'FILL' 1" }}
+                    >
+                      {f.icon}
+                    </span>
                   </div>
+                  <h3 className="text-lg font-bold text-primary mb-3">{f.title}</h3>
+                  <p className="text-sm text-secondary leading-relaxed">{f.desc}</p>
                 </div>
-                {/* Floating badge */}
-                <div className="absolute -bottom-4 -left-6 card-glass rounded-2xl px-4 py-3 shadow-lg animate-float">
-                  <p className="text-xs font-semibold text-[#1E1B18]">✓ Live dalam 5 menit</p>
-                </div>
-                {/* Floating stat */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 rounded-2xl bg-[#1E1B18] flex flex-col items-center justify-center shadow-xl">
-                  <p className="text-lg font-bold text-[#D4A91C] leading-none">49k</p>
-                  <p className="text-[8px] text-[#FDFCF9]/70 mt-0.5">Rp saja</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Theme Strip ────────────────────────────────────── */}
-      <section className="border-y border-[#EDE6D6] py-16 bg-[#FAF8F3]">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center mb-12">
-            <p className="text-overline text-[#D4A91C] mb-3">Koleksi Tema</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18]">Pilih Gaya Kamu</h2>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-3">
-            {themes.map(t => (
-              <div key={t.id} className="group card-luxury overflow-hidden cursor-pointer" onClick={() => router.push('/buat-undangan')}>
-                <div className="relative aspect-[3/4] overflow-hidden">
-                  <img src={t.img} alt={t.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B18]/60 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <Badge className="bg-[#D4A91C] text-[#1E1B18] text-[10px] px-2 py-0.5 font-semibold mb-2">{t.cat}</Badge>
-                    <p className="text-white font-display text-2xl font-light">{t.name}</p>
-                  </div>
-                </div>
-                <div className="p-4 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-[#1E1B18]">Rp 49.000</span>
-                  <ChevronRight className="w-4 h-4 text-[#D4A91C] transition-transform group-hover:translate-x-1" />
-                </div>
+        {/* ── Showcase: Bento Grid ─────────────────────────── */}
+        <section id="showcase" className="py-24 px-8 bg-surface">
+          <div className="max-w-screen-2xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+              <div className="max-w-2xl">
+                <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Koleksi Tema</span>
+                <h2 className="text-4xl md:text-5xl font-black text-primary tracking-tighter mt-4">Tema Pilihan Editorial</h2>
+                <p className="text-secondary text-lg leading-relaxed mt-4">Pilih dari koleksi kurasi yang dirancang dengan standar desain internasional.</p>
               </div>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <Button
-              className="rounded-full px-8 border border-[#D4A91C]/40 text-[#7D5C0C] bg-transparent hover:bg-[#FAF8F3]"
-              onClick={() => router.push('/buat-undangan')}
-            >
-              Lihat Semua Tema
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ───────────────────────────────────────── */}
-      <section className="py-20">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center mb-14">
-            <p className="text-overline text-[#D4A91C] mb-3">Kenapa undang.io</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18]">Semua yang Kamu Butuhkan</h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f, i) => (
-              <div key={i} className="group p-7 rounded-2xl border border-[#EDE6D6] bg-white hover:border-[#D4A91C]/50 hover:shadow-md transition-all duration-300">
-                <div className="w-10 h-10 rounded-xl bg-[#F5F0E8] flex items-center justify-center mb-5 group-hover:bg-[#D4A91C]/10 transition-colors">
-                  <f.icon className="w-5 h-5 text-[#D4A91C]" />
-                </div>
-                <h3 className="font-semibold text-[#1E1B18] mb-2">{f.title}</h3>
-                <p className="text-sm text-[#726C67] leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pricing ────────────────────────────────────────── */}
-      <section className="py-20 bg-[#1E1B18]">
-        <div className="mx-auto max-w-md px-5 text-center">
-          <p className="text-overline text-[#D4A91C] mb-4">Harga</p>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-[#FDFCF9] mb-12">Simpel & Transparan</h2>
-          <div className="rounded-3xl overflow-hidden border border-white/10">
-            {/* Header */}
-            <div className="bg-[#D4A91C] px-8 pt-10 pb-8 text-center">
-              <p className="text-xs uppercase tracking-widest text-[#1E1B18]/70 mb-2">Per Undangan</p>
-              <div className="flex items-baseline justify-center gap-2 mb-2">
-                <span className="font-display text-5xl font-light text-[#1E1B18]">Rp 49.000</span>
-              </div>
-              <p className="text-sm text-[#1E1B18]/60 line-through">Rp 99.000</p>
-              <span className="inline-block mt-3 bg-[#1E1B18] text-[#D4A91C] text-xs font-bold px-3 py-1 rounded-full">HEMAT 51%</span>
-            </div>
-            {/* Features list */}
-            <div className="bg-white px-8 py-8">
-              <ul className="space-y-4 text-left">
-                {pricing.map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-[#D4A91C]/15 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-[#D4A91C]" strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[#1E1B18]">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                className="mt-8 w-full bg-[#1E1B18] hover:bg-[#302C28] text-[#FDFCF9] rounded-full py-3 h-auto text-base font-medium"
-                onClick={() => router.push('/buat-undangan')}
+              <button
+                onClick={handleBegin}
+                className="flex items-center gap-2 text-primary font-bold group"
               >
-                Buat Undangan Sekarang
-              </Button>
+                Lihat Semua Koleksi
+                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ───────────────────────────────────── */}
-      <section className="py-20 bg-[#FAF8F3]">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center mb-14">
-            <p className="text-overline text-[#D4A91C] mb-3">Testimoni</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18]">Kata Mereka</h2>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((t, i) => (
-              <div key={i} className="bg-white rounded-2xl p-7 border border-[#EDE6D6] hover:shadow-md transition-shadow">
-                <div className="flex gap-0.5 mb-5">
-                  {[...Array(5)].map((_,j) => <Star key={j} className="w-4 h-4 fill-[#D4A91C] text-[#D4A91C]" />)}
-                </div>
-                <p className="text-[#4A4540] text-sm leading-relaxed mb-6 italic">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#EDE6D6] flex items-center justify-center text-xs font-bold text-[#4A4540]">{t.initial}</div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#1E1B18]">{t.name}</p>
-                    <p className="text-xs text-[#726C67]">{t.location}</p>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="md:col-span-2 md:row-span-2 relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
+                <img alt="Tema Jawa Klasik" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-60"></div>
+                <div className="absolute bottom-10 left-10 text-white">
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-3">Budaya</span>
+                  <h3 className="text-3xl font-bold mb-2">Jawa Klasik</h3>
+                  <p className="text-white/80 font-light">Keanggunan tradisi Jawa yang abadi.</p>
                 </div>
               </div>
-            ))}
+              <div className="md:col-span-2 h-[300px] relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
+                <img alt="Tema Bali Tropis" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800&q=80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent opacity-40"></div>
+                <div className="absolute bottom-8 left-8 text-white">
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-3">Budaya</span>
+                  <h3 className="text-2xl font-bold">Bali Tropis</h3>
+                </div>
+              </div>
+              <div className="md:col-span-1 h-[300px] relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
+                <img alt="Tema Modern Minimalis" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1522673607200-1648482ce486?w=400&q=80" />
+                <div className="absolute bottom-6 left-6 text-white z-10">
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-2">Modern</span>
+                  <h3 className="text-xl font-bold">Minimalis</h3>
+                </div>
+                <div className="absolute inset-0 bg-primary/20"></div>
+              </div>
+              <div className="md:col-span-1 h-[300px] relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
+                <img alt="Tema Botanical" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&q=80" />
+                <div className="absolute bottom-6 left-6 text-white z-10">
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-2">Nature</span>
+                  <h3 className="text-xl font-bold">Botanical</h3>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent"></div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── CTA Banner ─────────────────────────────────────── */}
-      <section className="py-20 border-t border-[#EDE6D6]">
-        <div className="mx-auto max-w-2xl px-5 text-center">
-          <h2 className="font-display text-4xl md:text-5xl font-light text-[#1E1B18] mb-4">
-            Siap buat undangan
-            <br />
-            <em className="not-italic text-gold-gradient">yang tak terlupakan?</em>
-          </h2>
-          <p className="text-[#726C67] mb-8">Mulai gratis. Live dalam 5 menit. Tak perlu coding.</p>
-          <Button
-            className="bg-[#1E1B18] hover:bg-[#302C28] text-[#FDFCF9] rounded-full px-10 py-3.5 h-auto text-base font-medium gap-2 group shadow-lg"
-            onClick={() => router.push('/buat-undangan')}
-          >
-            Mulai Sekarang
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </div>
-      </section>
+        {/* ── Testimonials ─────────────────────────────────── */}
+        <section id="testimonials" className="py-24 px-8 bg-surface-container-low">
+          <div className="max-w-screen-2xl mx-auto">
+            <div className="text-center mb-20">
+              <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Testimoni</span>
+              <h2 className="text-4xl md:text-6xl font-black text-primary tracking-tighter mt-4">Kata Mereka</h2>
+              <p className="text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed font-light">Cerita nyata dari pasangan yang sudah mempercayakan undangan digital mereka kepada undang.io.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {testimonials.map((t, i) => (
+                <div key={i} className="bg-surface-container-lowest p-8 rounded-[32px] border border-outline-variant/10 hover:shadow-xl hover:translate-y-[-4px] transition-all duration-500">
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(5)].map((_, j) => (
+                      <span key={j} className="material-symbols-outlined text-amber-400" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>star</span>
+                    ))}
+                  </div>
+                  <p className="text-secondary text-sm leading-relaxed mb-8 italic">&ldquo;{t.text}&rdquo;</p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-sm font-black text-primary">{t.initial}</div>
+                    <div>
+                      <p className="text-sm font-bold text-primary">{t.name}</p>
+                      <p className="text-xs text-secondary">{t.location}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Pricing ──────────────────────────────────────── */}
+        <section id="pricing" className="py-32 px-8 bg-surface">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-24">
+              <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Investasi</span>
+              <h2 className="text-5xl md:text-6xl font-black text-primary tracking-tighter mt-4">Simpel & Transparan</h2>
+              <p className="text-secondary text-lg mt-4 max-w-xl mx-auto leading-relaxed font-light">Bayar sekali, live selamanya. Tanpa biaya tersembunyi.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Free Trial */}
+              <div className="bg-surface-container-lowest p-10 rounded-[48px] flex flex-col hover:translate-y-[-8px] transition-transform duration-500 shadow-sm">
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-primary mb-2">Free Trial</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-primary">Rp 0</span>
+                    <span className="text-secondary font-medium">/15 menit</span>
+                  </div>
+                </div>
+                <ul className="space-y-4 mb-12 flex-grow">
+                  {['Preview Instan','Semua Fitur Editor','Bagikan via WhatsApp'].map(item => (
+                    <li key={item} className="flex items-center gap-3 text-secondary">
+                      <span className="material-symbols-outlined text-emerald-500 scale-75">check_circle</span>
+                      {item}
+                    </li>
+                  ))}
+                  <li className="flex items-center gap-3 text-secondary opacity-40">
+                    <span className="material-symbols-outlined scale-75">cancel</span>
+                    Live Selamanya
+                  </li>
+                </ul>
+                <button onClick={scrollToForm} className="w-full py-4 rounded-full border-2 border-outline-variant text-primary font-bold hover:bg-surface-container-high transition-colors">
+                  Mulai Gratis
+                </button>
+              </div>
+              {/* Full Access (Featured) */}
+              <div className="bg-primary p-10 rounded-[48px] flex flex-col relative overflow-hidden shadow-2xl scale-105 z-10">
+                <div className="absolute top-6 right-10 bg-tertiary-fixed text-on-tertiary-fixed px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Popular</div>
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-on-primary-fixed-variant mb-2">Full Access</h3>
+                  <div className="flex items-baseline gap-1 text-white">
+                    <span className="text-5xl font-black">Rp 49k</span>
+                    <span className="text-on-primary-container font-medium">/undangan</span>
+                  </div>
+                  <p className="text-white/50 text-sm line-through mt-1">Rp 99.000</p>
+                  <span className="inline-block mt-2 bg-white/10 text-white text-xs font-bold px-3 py-1 rounded-full">HEMAT 51%</span>
+                </div>
+                <ul className="space-y-4 mb-12 flex-grow">
+                  {['Live Selamanya','RSVP & Buku Tamu Unlimited','Bebas Edit Kapan Saja','Semua Tema Premium','Bagikan via WhatsApp'].map(item => (
+                    <li key={item} className="flex items-center gap-3 text-white">
+                      <span className="material-symbols-outlined text-tertiary-fixed-dim scale-75" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <button onClick={handleBegin} className="w-full py-5 rounded-full bg-gradient-to-r from-tertiary-fixed-dim to-[#ce9e99] text-tertiary font-black shadow-xl shadow-tertiary/40 hover:opacity-90 transition-opacity">
+                  Dapatkan Akses Penuh
+                </button>
+              </div>
+              {/* Bespoke */}
+              <div className="bg-surface-container-lowest p-10 rounded-[48px] flex flex-col hover:translate-y-[-8px] transition-transform duration-500 shadow-sm">
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-primary mb-2">Bespoke</h3>
+                  <span className="text-4xl font-black text-primary">Tanya</span>
+                </div>
+                <ul className="space-y-4 mb-12 flex-grow">
+                  {['Desain Kustom Eksklusif','Dukungan Editor Khusus','Koordinasi Multi-Event'].map(item => (
+                    <li key={item} className="flex items-center gap-3 text-secondary">
+                      <span className="material-symbols-outlined text-primary scale-75">check_circle</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <button className="w-full py-4 rounded-full border-2 border-outline-variant text-primary font-bold hover:bg-surface-container-high transition-colors">Hubungi Kami</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Final CTA ────────────────────────────────────── */}
+        <section className="py-24 px-8">
+          <div className="max-w-5xl mx-auto rounded-[64px] bg-primary relative overflow-hidden p-16 md:p-24 text-center">
+            <div className="absolute inset-0 opacity-20 overflow-hidden">
+              <div className="absolute -top-1/2 -left-1/4 w-[150%] h-[150%] bg-gradient-to-tr from-[#ce9e99] to-transparent blur-3xl rounded-full"></div>
+            </div>
+            <div className="relative z-10">
+              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8">
+                Siap buat undangan<br/>yang tak terlupakan?
+              </h2>
+              <p className="text-on-primary-container text-xl max-w-2xl mx-auto mb-16 font-light">Mulai gratis. Live dalam 5 menit. Tanpa coding. Bergabunglah dengan ribuan pasangan yang memilih undang.io.</p>
+              <div className="flex flex-col sm:flex-row justify-center gap-6">
+                <button onClick={scrollToForm} className="bg-white text-primary px-12 py-5 rounded-full font-black text-lg shadow-2xl hover:scale-105 transition-transform">
+                  Mulai Sekarang
+                </button>
+                <button onClick={() => router.push('/register')} className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-12 py-5 rounded-full font-bold text-lg hover:bg-white/20 transition-colors">
+                  Daftar Akun
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="border-t border-[#EDE6D6] bg-[#1E1B18] py-10">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#D4A91C]/20 flex items-center justify-center">
-                <Heart className="w-3 h-3 text-[#D4A91C]" fill="currentColor" />
-              </div>
-              <span className="font-display text-lg font-medium text-[#FDFCF9]">
-                undang<span className="text-[#D4A91C]">.io</span>
-              </span>
-            </div>
-            <p className="text-sm text-[#FDFCF9]/40">
-              © 2026 undang.io — Bikin undangan pernikahan digital, langsung jadi.
-            </p>
+      <footer className="w-full py-12 px-8 bg-surface-container-low border-t border-outline-variant/10">
+        <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto space-y-8 md:space-y-0 text-secondary">
+          <div className="text-lg font-black text-primary">undang.io</div>
+          <div className="flex flex-wrap justify-center gap-8 text-xs font-light tracking-wide uppercase">
+            <a className="hover:text-primary transition-colors cursor-pointer">Kebijakan Privasi</a>
+            <a className="hover:text-primary transition-colors cursor-pointer">Syarat & Ketentuan</a>
+            <a className="hover:text-primary transition-colors cursor-pointer">Kontak</a>
+            <a className="hover:text-primary transition-colors cursor-pointer">Galeri Undangan</a>
+          </div>
+          <div className="text-xs font-light tracking-wide">
+            © 2026 undang.io — Bikin undangan pernikahan digital, langsung jadi.
           </div>
         </div>
       </footer>
