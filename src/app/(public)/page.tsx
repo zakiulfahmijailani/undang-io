@@ -93,6 +93,10 @@ export default function LandingPage() {
     router.push('/buat');
   };
 
+  const scrollToForm = () => {
+    document.getElementById('quick-start')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const handleQuickStart = () => {
     // Save minimal draft info
     if (groomName || brideName) {
@@ -123,13 +127,13 @@ export default function LandingPage() {
             <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#showcase">Tema</a>
             <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#testimonials">Testimoni</a>
           </div>
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4">
             <Link href="/login" className="text-slate-500 hover:text-primary transition-all duration-300 font-medium scale-95 active:scale-90">Masuk</Link>
-            <button 
-              onClick={handleBegin}
-              className="bg-primary text-on-primary px-8 py-3 rounded-full font-bold scale-95 active:scale-90 transition-transform hover:opacity-80 shadow-lg shadow-primary/20"
+            <button
+              onClick={scrollToForm}
+              className="bg-primary text-on-primary px-7 py-2.5 rounded-full font-bold scale-95 active:scale-90 transition-transform hover:opacity-80 shadow-lg shadow-primary/20"
             >
-              Coba Gratis
+              Buat Undangan
             </button>
           </div>
         </div>
@@ -137,7 +141,7 @@ export default function LandingPage() {
 
       <main>
         {/* ── Hero + Inline Quick-Start Form (AARRR: Acquisition & Activation) ── */}
-        <section className="relative pt-32 pb-24 px-8 overflow-hidden min-h-[90vh] flex items-center">
+        <section id="quick-start" className="relative pt-32 pb-24 px-8 overflow-hidden min-h-[90vh] flex items-center">
           <div className="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left: Headline + Quick-Start Form */}
             <div className="lg:col-span-7 z-10">
@@ -423,10 +427,10 @@ export default function LandingPage() {
                   </li>
                 </ul>
                 <button 
-                  onClick={handleBegin}
+                  onClick={scrollToForm}
                   className="w-full py-4 rounded-full border-2 border-outline-variant text-primary font-bold hover:bg-surface-container-high transition-colors"
                 >
-                  Coba Gratis
+                  Mulai Gratis
                 </button>
               </div>
               {/* Full Access (Featured) */}
@@ -511,7 +515,7 @@ export default function LandingPage() {
               <p className="text-on-primary-container text-xl max-w-2xl mx-auto mb-16 font-light">Mulai gratis. Live dalam 5 menit. Tanpa coding. Bergabunglah dengan ribuan pasangan yang memilih undang.io.</p>
               <div className="flex flex-col sm:flex-row justify-center gap-6">
                 <button 
-                  onClick={handleBegin}
+                  onClick={scrollToForm}
                   className="bg-white text-primary px-12 py-5 rounded-full font-black text-lg shadow-2xl hover:scale-105 transition-transform"
                 >
                   Mulai Sekarang
