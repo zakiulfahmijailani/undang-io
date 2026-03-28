@@ -8,6 +8,20 @@ import NewInvitationDialog from "@/components/dashboard/NewInvitationDialog";
 import GuestConversion from "./components/GuestConversion";
 import GuestSessionCard from "./components/GuestSessionCard";
 
+type InvitationItem = {
+    id: string;
+    slug: string;
+    status: string;
+    created_at: string;
+    invitation_details: {
+        groom_name: string | null;
+        bride_name: string | null;
+        couple_photo_url: string | null;
+        akad_date: string | null;
+        reception_date: string | null;
+    };
+};
+
 export default async function DashboardPage() {
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -49,11 +63,11 @@ export default async function DashboardPage() {
     }
 
     // Map flat columns → shape that InvitationCard expects
-    const typedInvitations = (invitationsRaw || []).map((inv: any) => ({
-        id: inv.id,
-        slug: inv.slug,
-        status: inv.status,
-        created_at: inv.created_at,
+    const typedInvitations: InvitationItem[] = (invitationsRaw || []).map((inv: any) => ({
+        id: inv.id as string,
+        slug: inv.slug as string,
+        status: inv.status as string,
+        created_at: inv.created_at as string,
         invitation_details: {
             groom_name: inv.groom_nickname || inv.groom_full_name || null,
             bride_name: inv.bride_nickname || inv.bride_full_name || null,
@@ -183,7 +197,7 @@ export default async function DashboardPage() {
                                 <GuestSessionCard key={gs.id} guestSession={gs} />
                             ))}
                             {/* Permanent invitations */}
-                            {typedInvitations.map((invitation) => (
+                            {typedInvitations.map((invitation: InvitationItem) => (
                                 <InvitationCard key={invitation.id} invitation={invitation} />
                             ))}
                         </div>
