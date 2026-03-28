@@ -9,6 +9,7 @@ import {
     Users, MailOpen, MessageSquareHeart, LayoutTemplate, Clock, CreditCard
 } from "lucide-react";
 import Link from "next/link";
+import DeleteInvitationButton from "@/components/dashboard/DeleteInvitationButton";
 
 export default async function MyInvitationsPage() {
     const supabase = await createServerSupabaseClient();
@@ -18,7 +19,6 @@ export default async function MyInvitationsPage() {
         redirect("/login");
     }
 
-    // 1. Fetch permanent invitations — flat columns (no invitation_details relation)
     const { data: invitationsRaw, error: invitationsError } = await supabase
         .from('invitations')
         .select(`
@@ -51,19 +51,22 @@ export default async function MyInvitationsPage() {
             : 'Tanggal belum ditentukan';
 
         let statusLabel = 'Draft';
-        let statusStyle = 'bg-gray-100 text-gray-600 border-gray-200';
+        let statusVariant: 'secondary' | 'default' | 'outline' | 'destructive' = 'secondary';
+        let statusClass = 'bg-secondary text-muted-foreground border-border';
         if (inv.status === 'active') {
-            statusLabel = 'Tayang'; statusStyle = 'bg-green-50 text-green-700 border-green-200';
+            statusLabel = 'Tayang';
+            statusClass = 'bg-green-50 text-green-700 border-green-200';
         } else if (inv.status === 'unpaid') {
-            statusLabel = 'Belum Aktif'; statusStyle = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+            statusLabel = 'Belum Aktif';
+            statusClass = 'bg-primary/10 text-primary border-primary/20';
         } else if (inv.status === 'expired') {
-            statusLabel = 'Kedaluwarsa'; statusStyle = 'bg-red-50 text-red-700 border-red-200';
+            statusLabel = 'Kedaluwarsa';
+            statusClass = 'bg-destructive/10 text-destructive border-destructive/20';
         }
 
-        return { id: inv.id, slug: inv.slug, title, date, status: inv.status, statusLabel, statusStyle, views: 0, rsvps: 0, messages: 0, isPermanent: true };
+        return { id: inv.id, slug: inv.slug, title, date, status: inv.status, statusLabel, statusVariant, statusClass, views: 0, rsvps: 0, messages: 0, isPermanent: true };
     });
 
-    // 2. Fetch claimed guest sessions — belum bayar, belum expired
     let claimedSessions: any[] = [];
     const adminClient = getAdminClient();
     if (adminClient) {
@@ -92,7 +95,7 @@ export default async function MyInvitationsPage() {
                 date: 'Tanggal belum ditentukan',
                 status: 'claimed',
                 statusLabel: 'Belum Dibayar',
-                statusStyle: 'bg-amber-50 text-amber-700 border-amber-200',
+                statusClass: 'bg-amber-50 text-amber-700 border-amber-200',
                 views: 0, rsvps: 0, messages: 0,
                 isPermanent: false,
                 minutesLeft,
@@ -100,7 +103,6 @@ export default async function MyInvitationsPage() {
         });
     }
 
-    // Merge: claimed sessions first, then permanent invitations
     const allItems = [...claimedSessions, ...permanentInvitations];
 
     return (
@@ -114,7 +116,7 @@ export default async function MyInvitationsPage() {
                     </p>
                 </div>
                 <Link href="/buat-undangan">
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-11 px-6 shadow-md">
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-11 px-6 shadow-md cursor-pointer">
                         <Plus className="w-5 h-5" /> Buat Undangan Baru
                     </Button>
                 </Link>
@@ -130,7 +132,7 @@ export default async function MyInvitationsPage() {
                         Anda belum membuat undangan apa pun. Mulai bagikan momen bahagia Anda dengan membuat undangan digital pertama Anda.
                     </p>
                     <Link href="/buat-undangan">
-                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-12 px-8 shadow-lg text-lg">
+                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-12 px-8 shadow-lg text-lg cursor-pointer">
                             <Plus className="w-5 h-5" /> Buat Undangan Pertamamu
                         </Button>
                     </Link>
@@ -141,14 +143,14 @@ export default async function MyInvitationsPage() {
                         <Card
                             key={item.id}
                             className={`overflow-hidden border-border/50 shadow-sm hover:shadow-md transition-shadow flex flex-col bg-card ${
-                                item.status === 'claimed' ? 'border-amber-200 bg-amber-50/30' : ''
+                                item.status === 'claimed' ? 'border-amber-200 bg-amber-50/20' : ''
                             }`}
                         >
                             {/* Status & Tanggal */}
                             <div className="p-5 pb-0 flex justify-between items-start">
                                 <Badge
                                     variant="secondary"
-                                    className={`font-semibold px-2.5 py-0.5 rounded-full text-xs border ${item.statusStyle}`}
+                                    className={`font-semibold px-2.5 py-0.5 rounded-full text-xs border ${item.statusClass}`}
                                 >
                                     {item.status === 'claimed' && <Clock className="w-3 h-3 inline mr-1" />}
                                     {item.statusLabel}
@@ -192,35 +194,31 @@ export default async function MyInvitationsPage() {
                                 {/* Tombol Aksi */}
                                 <div className="flex flex-wrap items-center gap-2 mt-5">
                                     {item.status === 'claimed' ? (
-                                        // Belum bayar: tombol Bayar + Preview
                                         <>
                                             <Link href={`/pembayaran/${item.slug}`} className="flex-1">
-                                                <Button className="w-full text-xs gap-1.5 bg-amber-500 hover:bg-amber-600 text-white">
+                                                <Button className="w-full text-xs gap-1.5 bg-amber-500 hover:bg-amber-600 text-white cursor-pointer">
                                                     <CreditCard className="w-3.5 h-3.5" /> Bayar Rp 45.000
                                                 </Button>
                                             </Link>
                                             <Link href={`/u/${item.slug}`} target="_blank">
-                                                <Button variant="secondary" className="shrink-0 h-9 w-9 p-0">
+                                                <Button variant="secondary" className="shrink-0 h-9 w-9 p-0 cursor-pointer">
                                                     <Eye className="w-4 h-4" />
                                                 </Button>
                                             </Link>
                                         </>
                                     ) : (
-                                        // Undangan permanen: Lihat, Edit, Hapus
                                         <>
                                             <Link href={`/u/${item.slug}`} target="_blank" className="flex-1">
-                                                <Button variant="secondary" className="w-full text-xs gap-1.5 bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10">
+                                                <Button variant="secondary" className="w-full text-xs gap-1.5 bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10 cursor-pointer">
                                                     <Eye className="w-3.5 h-3.5" /> Lihat Undangan
                                                 </Button>
                                             </Link>
                                             <Link href={`/dashboard/undangan/${item.id}/edit`}>
-                                                <Button variant="secondary" className="shrink-0 h-9 w-9 p-0 text-blue-600 border border-blue-200 hover:bg-blue-50">
+                                                <Button variant="secondary" className="shrink-0 h-9 w-9 p-0 text-accent border border-accent/20 hover:bg-accent/10 cursor-pointer">
                                                     <Edit className="w-4 h-4" />
                                                 </Button>
                                             </Link>
-                                            <Button variant="secondary" className="shrink-0 h-9 w-9 p-0 text-red-600 border border-red-200 hover:bg-red-50">
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                                            <DeleteInvitationButton invitationId={item.id} invitationTitle={item.title} />
                                         </>
                                     )}
                                 </div>
