@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Heart, ChevronLeft, ChevronRight, AlertTriangle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,7 @@ function generateSlug(groomNick: string, brideNick: string) {
 
 export default function BuatUndangan() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
 
@@ -63,12 +64,41 @@ export default function BuatUndangan() {
     quote: QUOTE_PRESETS[0].text, quoteSource: QUOTE_PRESETS[0].source,
   });
 
+  // ── Hydrate dari sessionStorage & URL query param ──────────────
+  useEffect(() => {
+    // 1. Baca ?theme= dari URL → pre-select tema & lompat ke step 2
+    const themeFromUrl = searchParams.get("theme");
+    if (themeFromUrl) {
+      const match = activeThemes.find((t) => t.id === themeFromUrl);
+      if (match) {
+        setSelectedThemeId(themeFromUrl);
+        setStep(2);
+      }
+    }
+
+    // 2. Baca draft dari sessionStorage → isi nama pria & wanita
+    try {
+      const raw = sessionStorage.getItem("undang_draft");
+      if (raw) {
+        const draft = JSON.parse(raw);
+        setForm((prev) => ({
+          ...prev,
+          groomFullName: draft.groom_name || draft.groom_full_name || prev.groomFullName,
+          groomNickname: draft.groom_name || prev.groomNickname,
+          brideFullName: draft.bride_name || draft.bride_full_name || prev.brideFullName,
+          brideNickname: draft.bride_name || prev.brideNickname,
+        }));
+        // Hapus draft supaya tidak terpakai ulang
+        sessionStorage.removeItem("undang_draft");
+      }
+    } catch (_) {}
+  }, [searchParams]);
+
   const update = (key: string, val: string) => setForm((prev) => ({ ...prev, [key]: val }));
 
   const handlePublish = async () => {
     const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
 
-    // Metadata for the guest session (25-minute trial)
     const sessionToken = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
@@ -90,7 +120,6 @@ export default function BuatUndangan() {
         throw new Error(errorData.error?.message || "Gagal mempublikasikan undangan.");
       }
 
-      // Save to localStorage — only the keys needed for claim flow
       localStorage.setItem(
         "guest_session",
         JSON.stringify({ sessionToken, slug, expiresAt })
@@ -125,12 +154,13 @@ export default function BuatUndangan() {
             {[1, 2, 3].map((s) => (
               <div key={s} className={`flex items-center gap-1 ${s === step ? "font-semibold text-foreground" : ""}`}>
                 <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${s < step
-                    ? "bg-accent text-accent-foreground"
-                    : s === step
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                    }`}
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                    s < step
+                      ? "bg-accent text-accent-foreground"
+                      : s === step
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                  }`}
                 >
                   {s < step ? <Check className="h-3 w-3" /> : s}
                 </span>
@@ -152,8 +182,9 @@ export default function BuatUndangan() {
               {activeThemes.map((theme) => (
                 <Card
                   key={theme.id}
-                  className={`cursor-pointer overflow-hidden transition-all ${selectedThemeId === theme.id ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"
-                    }`}
+                  className={`cursor-pointer overflow-hidden transition-all ${
+                    selectedThemeId === theme.id ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"
+                  }`}
                   onClick={() => setSelectedThemeId(theme.id)}
                 >
                   <div className="aspect-[9/16] max-h-52 overflow-hidden">
