@@ -105,8 +105,7 @@ export default function LandingPage() {
                 </Button>
                 <Button
                   onClick={() => router.push('/invite/demo')}
-                  variant="outline"
-                  className="rounded-full px-8 py-3 h-auto text-base border-[#EDE6D6] hover:border-[#D4A91C] hover:bg-[#FDFCF9] text-[#1E1B18]"
+                  className="rounded-full px-8 py-3 h-auto text-base border border-[#EDE6D6] hover:border-[#D4A91C] bg-transparent hover:bg-[#FDFCF9] text-[#1E1B18]"
                 >
                   Lihat Contoh
                 </Button>
@@ -183,7 +182,10 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <Button variant="outline" className="rounded-full px-8 border-[#D4A91C]/40 text-[#7D5C0C] hover:bg-[#FAF8F3]" onClick={() => router.push('/buat-undangan')}>
+            <Button
+              className="rounded-full px-8 border border-[#D4A91C]/40 text-[#7D5C0C] bg-transparent hover:bg-[#FAF8F3]"
+              onClick={() => router.push('/buat-undangan')}
+            >
               Lihat Semua Tema
             </Button>
           </div>
