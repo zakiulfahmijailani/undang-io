@@ -236,9 +236,9 @@ export default function BuatClient({ themeId }: BuatClientProps) {
           <button 
             onClick={() => handleSave()}
             disabled={isSaving || themeLoading}
-            className="bg-primary-stitch text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-md hover:bg-primary-stitch/90 transition flex items-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none h-11 bg-primary-stitch text-on-primary-stitch rounded-full px-8 py-2 font-bold shadow-lg shadow-primary-stitch/20 hover:opacity-90 transition-all active:scale-95 border-0 flex items-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />}
+            {isSaving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />}
             Simpan & Lanjutkan
           </button>
         </div>
@@ -450,7 +450,7 @@ export default function BuatClient({ themeId }: BuatClientProps) {
         <button 
           onClick={() => handleSave()}
           disabled={isSaving || themeLoading}
-          className="flex-1 bg-primary-stitch text-white px-6 py-4 rounded-full font-bold text-sm shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70"
+          className="flex-1 bg-primary-stitch text-on-primary-stitch h-14 rounded-full font-bold text-sm shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70 active:scale-95 border-0 transition-all"
         >
           {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Simpan & Lanjutkan
