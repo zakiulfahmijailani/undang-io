@@ -115,22 +115,27 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="bg-background text-on-background selection:bg-tertiary-fixed-dim min-h-screen">
-      {/* TopNavBar */}
-      <nav className="fixed top-0 w-full z-50 bg-slate-50/70 backdrop-blur-xl bg-gradient-to-b from-slate-200/20 to-transparent shadow-none">
-        <div className="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
-          <div className="text-2xl font-black tracking-tighter text-primary">undang.io</div>
-          <div className="hidden md:flex space-x-12 items-center font-['Inter'] tracking-tight font-medium">
-            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#features">Fitur</a>
-            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#pricing">Harga</a>
-            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#showcase">Tema</a>
-            <a className="text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#testimonials">Testimoni</a>
+    <div className="min-h-screen" style={{ backgroundColor: '#FDF2F8', color: '#831843', fontFamily: "'Cormorant Infant', Georgia, serif" }}>
+
+      {/* ── Navbar ─────────────────────────────────────────── */}
+      <nav className="fixed top-0 w-full z-50" style={{ backgroundColor: 'rgba(253,242,248,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #FBCFE8' }}>
+        <div className="flex justify-between items-center w-full px-8 py-4 max-w-screen-xl mx-auto">
+          {/* Logo — Great Vibes */}
+          <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: '2rem', color: '#DB2777', lineHeight: 1 }}>
+            undang.io
           </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/login" className="text-slate-500 hover:text-primary transition-all duration-300 font-medium scale-95 active:scale-90">Masuk</Link>
+          <div className="hidden md:flex space-x-10 items-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '14px', fontWeight: 500 }}>
+            <a className="transition-colors cursor-pointer hover:text-pink-600" style={{ color: '#BE185D' }} href="#features">Fitur</a>
+            <a className="transition-colors cursor-pointer hover:text-pink-600" style={{ color: '#BE185D' }} href="#pricing">Harga</a>
+            <a className="transition-colors cursor-pointer hover:text-pink-600" style={{ color: '#BE185D' }} href="#showcase">Tema</a>
+            <a className="transition-colors cursor-pointer hover:text-pink-600" style={{ color: '#BE185D' }} href="#testimonials">Testimoni</a>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="transition-colors font-medium" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '14px', color: '#BE185D' }}>Masuk</Link>
             <button
               onClick={scrollToForm}
-              className="bg-primary text-on-primary px-7 py-2.5 rounded-full font-bold scale-95 active:scale-90 transition-transform hover:opacity-80 shadow-lg shadow-primary/20"
+              className="transition-all duration-200 cursor-pointer"
+              style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#CA8A04', color: '#FFFFFF', padding: '10px 24px', borderRadius: '999px', fontWeight: 700, fontSize: '14px', boxShadow: '0 4px 12px rgba(202,138,4,0.25)' }}
             >
               Buat Undangan
             </button>
@@ -139,222 +144,236 @@ export default function LandingPage() {
       </nav>
 
       <main>
-        {/* ── Hero + Inline Quick-Start Form ── */}
+        {/* ── Hero ──────────────────────────────────────────── */}
         <section id="quick-start" className="relative pt-32 pb-24 px-8 overflow-hidden min-h-[90vh] flex items-center">
-          <div className="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Soft floral background blobs */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(244,114,182,0.15) 0%, transparent 70%)' }} />
+            <div className="absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(202,138,4,0.10) 0%, transparent 70%)' }} />
+          </div>
+
+          <div className="max-w-screen-xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
             {/* Left: Headline + Quick-Start Form */}
-            <div className="lg:col-span-7 z-10">
-              <span className="inline-block py-1 px-4 rounded-full bg-surface-container-highest text-primary text-[10px] font-bold tracking-[0.2em] uppercase mb-8">
-                ✪ Langsung Buat — Tanpa Daftar
-              </span>
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-primary tracking-tighter leading-[0.9] mb-6">
-                Undangan
-                <br/>
-                <span className="text-on-tertiary-container italic font-light">Pernikahan</span>
-                <br/>
-                Digital Kamu
+            <div className="lg:col-span-7">
+              {/* Overline badge */}
+              <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full" style={{ background: '#FCE7F3', border: '1px solid #FBCFE8' }}>
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#DB2777' }} />
+                <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', color: '#DB2777', textTransform: 'uppercase' }}>Langsung Buat — Tanpa Daftar</span>
+              </div>
+
+              {/* Headline — mix Great Vibes + body */}
+              <h1 className="mb-6" style={{ lineHeight: 1.1 }}>
+                <span className="block" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(2.5rem,6vw,4.5rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#831843' }}>Undangan</span>
+                <span className="block" style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(3.5rem,9vw,7rem)', color: '#DB2777', lineHeight: 1.0 }}>Pernikahan</span>
+                <span className="block" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(2.5rem,6vw,4.5rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#831843' }}>Digital Kamu</span>
               </h1>
-              <p className="text-xl md:text-2xl text-secondary max-w-xl leading-relaxed mb-10 font-light">
-                Isi nama, pilih tema, langsung live. Gratis 15 menit.
-                Bayar <span className="font-semibold text-primary">Rp 49.000</span> untuk selamanya.
+
+              <p className="mb-10" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.25rem', color: '#BE185D', maxWidth: '480px', lineHeight: 1.7, fontWeight: 400 }}>
+                Isi nama, pilih tema, langsung live. Gratis 25 menit.
+                Bayar <strong style={{ color: '#DB2777', fontWeight: 700 }}>Rp 49.000</strong> untuk selamanya.
               </p>
 
-              {/* ── INLINE QUICK-START FORM ─────────────────── */}
-              <div className="bg-white border border-outline-variant/10 rounded-[32px] p-6 md:p-8 shadow-2xl max-w-lg">
+              {/* Quick-Start Form */}
+              <div className="max-w-lg rounded-3xl p-6 md:p-8" style={{ background: '#FFFFFF', border: '1px solid #FBCFE8', boxShadow: '0 10px 40px rgba(219,39,119,0.10)' }}>
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
-                  <span className="text-[10px] font-black tracking-[0.2em] uppercase text-emerald-600">Buat Undangan Sekarang — Gratis</span>
+                  <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: '#22C55E' }} />
+                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', color: '#16A34A', textTransform: 'uppercase' }}>Buat Undangan Sekarang — Gratis</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nama Pria</label>
+                    <label className="block mb-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, color: '#BE185D', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Nama Pria</label>
                     <input
                       type="text"
                       value={groomName}
                       onChange={(e) => setGroomName(e.target.value)}
                       placeholder="Budi"
-                      className="w-full px-4 py-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 text-primary font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                      className="w-full transition-all"
+                      style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #FBCFE8', fontFamily: "'Inter', system-ui, sans-serif", fontSize: '15px', color: '#831843', background: '#FDF2F8', outline: 'none' }}
+                      onFocus={e => { e.currentTarget.style.borderColor = '#DB2777'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(219,39,119,0.12)'; }}
+                      onBlur={e => { e.currentTarget.style.borderColor = '#FBCFE8'; e.currentTarget.style.boxShadow = 'none'; }}
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nama Wanita</label>
+                    <label className="block mb-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, color: '#BE185D', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Nama Wanita</label>
                     <input
                       type="text"
                       value={brideName}
                       onChange={(e) => setBrideName(e.target.value)}
                       placeholder="Ayu"
-                      className="w-full px-4 py-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 text-primary font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
+                      className="w-full transition-all"
+                      style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid #FBCFE8', fontFamily: "'Inter', system-ui, sans-serif", fontSize: '15px', color: '#831843', background: '#FDF2F8', outline: 'none' }}
+                      onFocus={e => { e.currentTarget.style.borderColor = '#DB2777'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(219,39,119,0.12)'; }}
+                      onBlur={e => { e.currentTarget.style.borderColor = '#FBCFE8'; e.currentTarget.style.boxShadow = 'none'; }}
                     />
                   </div>
                 </div>
 
-                {/* Theme Quick-Select */}
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Pilih Tema</label>
+                <label className="block mb-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, color: '#BE185D', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Pilih Tema</label>
                 <div className="flex gap-3 mb-6">
                   {themeOptions.map((t) => (
                     <button
                       key={t.id}
                       onClick={() => setSelectedTheme(t.id)}
-                      className={`flex-1 relative rounded-2xl overflow-hidden h-20 transition-all border-2 ${
-                        selectedTheme === t.id
-                          ? 'border-primary shadow-lg shadow-primary/20 scale-[1.02]'
-                          : 'border-transparent opacity-60 hover:opacity-80'
-                      }`}
+                      className="flex-1 relative overflow-hidden transition-all cursor-pointer"
+                      style={{
+                        height: '80px',
+                        borderRadius: '12px',
+                        border: selectedTheme === t.id ? '2px solid #DB2777' : '2px solid #FBCFE8',
+                        boxShadow: selectedTheme === t.id ? '0 4px 12px rgba(219,39,119,0.20)' : 'none',
+                        opacity: selectedTheme === t.id ? 1 : 0.65,
+                        transform: selectedTheme === t.id ? 'scale(1.02)' : 'scale(1)',
+                      }}
                     >
                       <img src={t.img} alt={t.name} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <span className="absolute bottom-1.5 left-0 right-0 text-center text-white text-[10px] font-bold tracking-wide">{t.name}</span>
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(131,24,67,0.6), transparent)' }} />
+                      <span className="absolute bottom-1.5 left-0 right-0 text-center text-white" style={{ fontSize: '10px', fontWeight: 700, fontFamily: "'Inter', system-ui, sans-serif" }}>{t.name}</span>
                     </button>
                   ))}
                 </div>
 
                 <button
                   onClick={handleQuickStart}
-                  className="w-full bg-primary text-on-primary py-4 rounded-full font-black text-base shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                  className="w-full transition-all duration-200 cursor-pointer"
+                  style={{ background: '#CA8A04', color: '#FFFFFF', padding: '16px', borderRadius: '999px', fontWeight: 700, fontSize: '15px', fontFamily: "'Inter', system-ui, sans-serif", boxShadow: '0 4px 16px rgba(202,138,4,0.30)', letterSpacing: '0.02em' }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '0.92'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                  🚀 Buat Undangan Gratis
+                  Buat Undangan Gratis
                 </button>
-                <p className="text-center text-[11px] text-slate-400 mt-3">Tanpa login · Live dalam 5 menit · Gratis 15 menit</p>
+                <p className="text-center mt-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', color: '#BE185D', opacity: 0.7 }}>Tanpa login · Live dalam 5 menit · Gratis 25 menit</p>
               </div>
             </div>
 
-            {/* Right: Gallery Stack */}
+            {/* Right: Photo stack */}
             <div className="lg:col-span-5 relative hidden lg:block">
-              <div className="relative w-full aspect-[4/5] rounded-[48px] overflow-hidden shadow-2xl rotate-3 translate-x-12 z-20">
-                <img
-                  alt="Undangan Pernikahan Mewah"
-                  className="w-full h-full object-cover"
-                  src="https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80"
-                />
+              <div className="relative w-full aspect-[4/5] overflow-hidden shadow-2xl" style={{ borderRadius: '48px', transform: 'rotate(3deg) translateX(32px)', zIndex: 20 }}>
+                <img alt="Undangan Pernikahan" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80" />
               </div>
-              <div className="absolute -top-12 -left-12 w-2/3 aspect-[4/5] rounded-[40px] overflow-hidden shadow-xl -rotate-6 z-10 bg-surface-container-low border border-white/20 backdrop-blur-xl">
-                <img
-                  alt="Upacara Pernikahan"
-                  className="w-full h-full object-cover opacity-80"
-                  src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80"
-                />
+              <div className="absolute overflow-hidden shadow-xl" style={{ top: '-48px', left: '-48px', width: '66%', aspectRatio: '4/5', borderRadius: '40px', transform: 'rotate(-6deg)', zIndex: 10, border: '1px solid #FBCFE8', background: '#FDF2F8' }}>
+                <img alt="Upacara Pernikahan" className="w-full h-full object-cover" style={{ opacity: 0.85 }} src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80" />
               </div>
-              <div className="absolute -bottom-16 right-0 w-1/2 p-6 rounded-[32px] bg-tertiary text-on-tertiary z-30 shadow-2xl">
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="material-symbols-outlined text-tertiary-fixed-dim" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                  <span className="text-xs font-bold tracking-widest uppercase">Premium Finish</span>
-                </div>
-                <p className="text-sm font-light opacity-90 leading-relaxed">
-                  Setiap undangan dirender dengan desain mewah dan presisi tinggi.
-                </p>
+              {/* Floating badge */}
+              <div className="absolute z-30" style={{ bottom: '-48px', right: 0, padding: '24px', borderRadius: '32px', background: '#DB2777', color: '#FFFFFF', boxShadow: '0 8px 32px rgba(219,39,119,0.30)', minWidth: '200px' }}>
+                <p style={{ fontFamily: "'Great Vibes', cursive", fontSize: '1.5rem', marginBottom: '8px', opacity: 0.9 }}>Premium Finish</p>
+                <p style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '13px', opacity: 0.85, lineHeight: 1.5 }}>Setiap undangan dirender dengan desain mewah dan presisi tinggi.</p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── Features ─────────────────────────────────────── */}
-        <section id="features" className="py-24 px-8 bg-surface-container-low border-y border-outline-variant/10">
-          <div className="max-w-screen-2xl mx-auto">
-            <div className="text-center mb-20">
-              <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Fitur Unggulan</span>
-              <h2 className="text-4xl md:text-6xl font-black text-primary tracking-tighter mt-4">Kenapa undang.io</h2>
-              <p className="text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed font-light">Semua yang kamu butuhkan untuk undangan pernikahan digital yang sempurna.</p>
+        {/* ── Features ──────────────────────────────────────── */}
+        <section id="features" className="py-24 px-8" style={{ background: '#FFFFFF', borderTop: '1px solid #FBCFE8', borderBottom: '1px solid #FBCFE8' }}>
+          <div className="max-w-screen-xl mx-auto">
+            <div className="text-center mb-16">
+              <p className="mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.20em', color: '#DB2777', textTransform: 'uppercase' }}>Fitur Unggulan</p>
+              <h2 style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(2.5rem,6vw,4.5rem)', color: '#831843', lineHeight: 1.1 }}>Kenapa undang.io</h2>
+              <p className="mt-4 mx-auto" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.125rem', color: '#BE185D', maxWidth: '520px', lineHeight: 1.7 }}>Semua yang kamu butuhkan untuk undangan pernikahan digital yang sempurna.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {features.map((f, i) => (
                 <div
                   key={i}
-                  className="group bg-surface-container-lowest p-8 rounded-[32px] border border-outline-variant/10 hover:border-primary/20 hover:shadow-xl hover:translate-y-[-4px] transition-all duration-500"
+                  className="group transition-all duration-300 cursor-default"
+                  style={{ background: '#FDF2F8', padding: '32px', borderRadius: '24px', border: '1px solid #FBCFE8' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 10px 30px rgba(219,39,119,0.12)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-6 group-hover:bg-primary/10 transition-colors">
-                    <span
-                      className="material-symbols-outlined text-primary"
-                      style={{ fontSize: '28px', fontVariationSettings: "'FILL' 1" }}
-                    >
-                      {f.icon}
-                    </span>
+                  <div className="flex items-center justify-center mb-6" style={{ width: '52px', height: '52px', borderRadius: '14px', background: '#FCE7F3', border: '1px solid #FBCFE8' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#DB2777', fontSize: '26px', fontVariationSettings: "'FILL' 1" }}>{f.icon}</span>
                   </div>
-                  <h3 className="text-lg font-bold text-primary mb-3">{f.title}</h3>
-                  <p className="text-sm text-secondary leading-relaxed">{f.desc}</p>
+                  <h3 className="mb-3" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.2rem', fontWeight: 700, color: '#831843' }}>{f.title}</h3>
+                  <p style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1rem', color: '#BE185D', lineHeight: 1.6 }}>{f.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Showcase: Bento Grid ─────────────────────────── */}
-        <section id="showcase" className="py-24 px-8 bg-surface">
-          <div className="max-w-screen-2xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-              <div className="max-w-2xl">
-                <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Koleksi Tema</span>
-                <h2 className="text-4xl md:text-5xl font-black text-primary tracking-tighter mt-4">Tema Pilihan Editorial</h2>
-                <p className="text-secondary text-lg leading-relaxed mt-4">Pilih dari koleksi kurasi yang dirancang dengan standar desain internasional.</p>
+        {/* ── Showcase ──────────────────────────────────────── */}
+        <section id="showcase" className="py-24 px-8" style={{ background: '#FDF2F8' }}>
+          <div className="max-w-screen-xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+              <div className="max-w-xl">
+                <p className="mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.20em', color: '#DB2777', textTransform: 'uppercase' }}>Koleksi Tema</p>
+                <h2 style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(2.5rem,6vw,4.5rem)', color: '#831843', lineHeight: 1.1 }}>Tema Pilihan</h2>
+                <p className="mt-4" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.125rem', color: '#BE185D', lineHeight: 1.7 }}>Pilih dari koleksi kurasi yang dirancang dengan standar desain internasional.</p>
               </div>
               <button
                 onClick={handleBegin}
-                className="flex items-center gap-2 text-primary font-bold group"
+                className="flex items-center gap-2 transition-all cursor-pointer"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif", color: '#DB2777', fontWeight: 700, fontSize: '14px' }}
               >
-                Lihat Semua Koleksi
-                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                Lihat Semua
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_forward</span>
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="md:col-span-2 md:row-span-2 relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
-                <img alt="Tema Jawa Klasik" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-60"></div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div className="md:col-span-2 md:row-span-2 relative group overflow-hidden" style={{ borderRadius: '40px', minHeight: '400px' }}>
+                <img alt="Tema Jawa Klasik" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(131,24,67,0.75) 0%, transparent 60%)' }} />
                 <div className="absolute bottom-10 left-10 text-white">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-3">Budaya</span>
-                  <h3 className="text-3xl font-bold mb-2">Jawa Klasik</h3>
-                  <p className="text-white/80 font-light">Keanggunan tradisi Jawa yang abadi.</p>
+                  <span className="inline-block px-3 py-1 mb-3" style={{ background: 'rgba(219,39,119,0.30)', backdropFilter: 'blur(8px)', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: "'Inter', system-ui, sans-serif" }}>Budaya</span>
+                  <h3 style={{ fontFamily: "'Great Vibes', cursive", fontSize: '2.5rem', lineHeight: 1.1 }}>Jawa Klasik</h3>
+                  <p style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '14px', opacity: 0.85 }}>Keanggunan tradisi Jawa yang abadi.</p>
                 </div>
               </div>
-              <div className="md:col-span-2 h-[300px] relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
-                <img alt="Tema Bali Tropis" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800&q=80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent opacity-40"></div>
+              <div className="md:col-span-2 relative group overflow-hidden" style={{ borderRadius: '40px', height: '260px' }}>
+                <img alt="Tema Bali Tropis" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=800&q=80" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(131,24,67,0.55) 0%, transparent 60%)' }} />
                 <div className="absolute bottom-8 left-8 text-white">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-3">Budaya</span>
-                  <h3 className="text-2xl font-bold">Bali Tropis</h3>
+                  <span className="inline-block px-3 py-1 mb-2" style={{ background: 'rgba(219,39,119,0.30)', backdropFilter: 'blur(8px)', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: "'Inter', system-ui, sans-serif" }}>Budaya</span>
+                  <h3 style={{ fontFamily: "'Great Vibes', cursive", fontSize: '2rem' }}>Bali Tropis</h3>
                 </div>
               </div>
-              <div className="md:col-span-1 h-[300px] relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
-                <img alt="Tema Modern Minimalis" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1522673607200-1648482ce486?w=400&q=80" />
+              <div className="relative group overflow-hidden" style={{ borderRadius: '40px', height: '260px' }}>
+                <img alt="Tema Modern Minimalis" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1522673607200-1648482ce486?w=400&q=80" />
+                <div className="absolute inset-0" style={{ background: 'rgba(219,39,119,0.15)' }} />
                 <div className="absolute bottom-6 left-6 text-white z-10">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-2">Modern</span>
-                  <h3 className="text-xl font-bold">Minimalis</h3>
+                  <span className="inline-block px-3 py-1 mb-2" style={{ background: 'rgba(219,39,119,0.35)', backdropFilter: 'blur(8px)', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: "'Inter', system-ui, sans-serif" }}>Modern</span>
+                  <h3 style={{ fontFamily: "'Great Vibes', cursive", fontSize: '1.8rem' }}>Minimalis</h3>
                 </div>
-                <div className="absolute inset-0 bg-primary/20"></div>
               </div>
-              <div className="md:col-span-1 h-[300px] relative group rounded-[40px] overflow-hidden bg-surface-container-lowest">
-                <img alt="Tema Botanical" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&q=80" />
+              <div className="relative group overflow-hidden" style={{ borderRadius: '40px', height: '260px' }}>
+                <img alt="Tema Botanical" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&q=80" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(131,24,67,0.40) 0%, transparent 60%)' }} />
                 <div className="absolute bottom-6 left-6 text-white z-10">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-widest uppercase mb-2">Nature</span>
-                  <h3 className="text-xl font-bold">Botanical</h3>
+                  <span className="inline-block px-3 py-1 mb-2" style={{ background: 'rgba(219,39,119,0.30)', backdropFilter: 'blur(8px)', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: "'Inter', system-ui, sans-serif" }}>Nature</span>
+                  <h3 style={{ fontFamily: "'Great Vibes', cursive", fontSize: '1.8rem' }}>Botanical</h3>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent"></div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── Testimonials ─────────────────────────────────── */}
-        <section id="testimonials" className="py-24 px-8 bg-surface-container-low">
-          <div className="max-w-screen-2xl mx-auto">
-            <div className="text-center mb-20">
-              <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Testimoni</span>
-              <h2 className="text-4xl md:text-6xl font-black text-primary tracking-tighter mt-4">Kata Mereka</h2>
-              <p className="text-secondary text-lg mt-4 max-w-2xl mx-auto leading-relaxed font-light">Cerita nyata dari pasangan yang sudah mempercayakan undangan digital mereka kepada undang.io.</p>
+        {/* ── Testimonials ──────────────────────────────────── */}
+        <section id="testimonials" className="py-24 px-8" style={{ background: '#FFFFFF', borderTop: '1px solid #FBCFE8' }}>
+          <div className="max-w-screen-xl mx-auto">
+            <div className="text-center mb-16">
+              <p className="mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.20em', color: '#DB2777', textTransform: 'uppercase' }}>Testimoni</p>
+              <h2 style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(2.5rem,6vw,4.5rem)', color: '#831843', lineHeight: 1.1 }}>Kata Mereka</h2>
+              <p className="mt-4 mx-auto" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.125rem', color: '#BE185D', maxWidth: '520px', lineHeight: 1.7 }}>Cerita nyata dari pasangan yang sudah mempercayakan undangan digital mereka kepada undang.io.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((t, i) => (
-                <div key={i} className="bg-surface-container-lowest p-8 rounded-[32px] border border-outline-variant/10 hover:shadow-xl hover:translate-y-[-4px] transition-all duration-500">
-                  <div className="flex gap-1 mb-6">
+                <div
+                  key={i}
+                  className="transition-all duration-300"
+                  style={{ background: '#FDF2F8', padding: '32px', borderRadius: '24px', border: '1px solid #FBCFE8' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 10px 30px rgba(219,39,119,0.10)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
+                >
+                  <div className="flex gap-0.5 mb-5">
                     {[...Array(5)].map((_, j) => (
-                      <span key={j} className="material-symbols-outlined text-amber-400" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>star</span>
+                      <span key={j} className="material-symbols-outlined" style={{ fontSize: '18px', color: '#CA8A04', fontVariationSettings: "'FILL' 1" }}>star</span>
                     ))}
                   </div>
-                  <p className="text-secondary text-sm leading-relaxed mb-8 italic">&ldquo;{t.text}&rdquo;</p>
+                  <p className="mb-6 italic" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.05rem', color: '#BE185D', lineHeight: 1.7 }}>&ldquo;{t.text}&rdquo;</p>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-sm font-black text-primary">{t.initial}</div>
+                    <div className="flex items-center justify-center" style={{ width: '44px', height: '44px', borderRadius: '999px', background: '#FCE7F3', border: '1px solid #FBCFE8', fontSize: '13px', fontWeight: 800, color: '#DB2777', fontFamily: "'Inter', system-ui, sans-serif" }}>{t.initial}</div>
                     <div>
-                      <p className="text-sm font-bold text-primary">{t.name}</p>
-                      <p className="text-xs text-secondary">{t.location}</p>
+                      <p style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1rem', fontWeight: 700, color: '#831843' }}>{t.name}</p>
+                      <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '12px', color: '#BE185D', opacity: 0.7 }}>{t.location}</p>
                     </div>
                   </div>
                 </div>
@@ -363,100 +382,138 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Pricing ──────────────────────────────────────── */}
-        <section id="pricing" className="py-32 px-8 bg-surface">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-24">
-              <span className="text-secondary font-black tracking-[0.3em] uppercase text-xs">Investasi</span>
-              <h2 className="text-5xl md:text-6xl font-black text-primary tracking-tighter mt-4">Simpel & Transparan</h2>
-              <p className="text-secondary text-lg mt-4 max-w-xl mx-auto leading-relaxed font-light">Bayar sekali, live selamanya. Tanpa biaya tersembunyi.</p>
+        {/* ── Pricing ───────────────────────────────────────── */}
+        <section id="pricing" className="py-32 px-8" style={{ background: '#FDF2F8', borderTop: '1px solid #FBCFE8' }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-20">
+              <p className="mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.20em', color: '#DB2777', textTransform: 'uppercase' }}>Investasi</p>
+              <h2 style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(2.5rem,6vw,4.5rem)', color: '#831843', lineHeight: 1.1 }}>Simpel & Transparan</h2>
+              <p className="mt-4 mx-auto" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.125rem', color: '#BE185D', maxWidth: '400px', lineHeight: 1.7 }}>Bayar sekali, live selamanya. Tanpa biaya tersembunyi.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
               {/* Free Trial */}
-              <div className="bg-surface-container-lowest p-10 rounded-[48px] flex flex-col hover:translate-y-[-8px] transition-transform duration-500 shadow-sm">
+              <div className="flex flex-col p-10 transition-all duration-300" style={{ background: '#FFFFFF', borderRadius: '40px', border: '1px solid #FBCFE8', boxShadow: '0 4px 12px rgba(219,39,119,0.06)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-6px)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
+              >
                 <div className="mb-8">
-                  <h3 className="text-xl font-bold text-primary mb-2">Free Trial</h3>
+                  <h3 className="mb-2" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.25rem', fontWeight: 700, color: '#831843' }}>Free Trial</h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-primary">Rp 0</span>
-                    <span className="text-secondary font-medium">/15 menit</span>
+                    <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '2.25rem', fontWeight: 900, color: '#831843' }}>Rp 0</span>
+                    <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '14px', color: '#BE185D' }}>/25 menit</span>
                   </div>
                 </div>
-                <ul className="space-y-4 mb-12 flex-grow">
+                <ul className="space-y-4 mb-10 flex-grow">
                   {['Preview Instan','Semua Fitur Editor','Bagikan via WhatsApp'].map(item => (
-                    <li key={item} className="flex items-center gap-3 text-secondary">
-                      <span className="material-symbols-outlined text-emerald-500 scale-75">check_circle</span>
+                    <li key={item} className="flex items-center gap-3" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1rem', color: '#BE185D' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#22C55E', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       {item}
                     </li>
                   ))}
-                  <li className="flex items-center gap-3 text-secondary opacity-40">
-                    <span className="material-symbols-outlined scale-75">cancel</span>
+                  <li className="flex items-center gap-3" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1rem', color: '#BE185D', opacity: 0.35 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>cancel</span>
                     Live Selamanya
                   </li>
                 </ul>
-                <button onClick={scrollToForm} className="w-full py-4 rounded-full border-2 border-outline-variant text-primary font-bold hover:bg-surface-container-high transition-colors">
+                <button
+                  onClick={scrollToForm}
+                  className="w-full py-4 transition-all cursor-pointer"
+                  style={{ borderRadius: '999px', border: '2px solid #DB2777', color: '#DB2777', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, fontSize: '14px', background: 'transparent' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#FCE7F3'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                >
                   Mulai Gratis
                 </button>
               </div>
-              {/* Full Access (Featured) */}
-              <div className="bg-primary p-10 rounded-[48px] flex flex-col relative overflow-hidden shadow-2xl scale-105 z-10">
-                <div className="absolute top-6 right-10 bg-tertiary-fixed text-on-tertiary-fixed px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Popular</div>
+
+              {/* Full Access — featured */}
+              <div className="flex flex-col p-10 relative overflow-hidden" style={{ background: '#DB2777', borderRadius: '40px', boxShadow: '0 20px 48px rgba(219,39,119,0.30)', transform: 'scale(1.05)', zIndex: 10 }}>
+                <div className="absolute top-6 right-8 px-4 py-1" style={{ background: '#CA8A04', borderRadius: '999px', fontSize: '10px', fontWeight: 700, color: '#FFFFFF', fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.12em', textTransform: 'uppercase' }}>Popular</div>
                 <div className="mb-8">
-                  <h3 className="text-xl font-bold text-on-primary-fixed-variant mb-2">Full Access</h3>
-                  <div className="flex items-baseline gap-1 text-white">
-                    <span className="text-5xl font-black">Rp 49k</span>
-                    <span className="text-on-primary-container font-medium">/undangan</span>
+                  <h3 className="mb-2" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.25rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>Full Access</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '2.75rem', fontWeight: 900, color: '#FFFFFF' }}>Rp 49k</span>
+                    <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '14px', color: 'rgba(255,255,255,0.65)' }}>/undangan</span>
                   </div>
-                  <p className="text-white/50 text-sm line-through mt-1">Rp 99.000</p>
-                  <span className="inline-block mt-2 bg-white/10 text-white text-xs font-bold px-3 py-1 rounded-full">HEMAT 51%</span>
+                  <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.45)', textDecoration: 'line-through', marginTop: '4px' }}>Rp 99.000</p>
+                  <span className="inline-block mt-2 px-3 py-1" style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '999px', fontSize: '11px', fontWeight: 700, color: '#FFFFFF', fontFamily: "'Inter', system-ui, sans-serif" }}>HEMAT 51%</span>
                 </div>
-                <ul className="space-y-4 mb-12 flex-grow">
+                <ul className="space-y-4 mb-10 flex-grow">
                   {['Live Selamanya','RSVP & Buku Tamu Unlimited','Bebas Edit Kapan Saja','Semua Tema Premium','Bagikan via WhatsApp'].map(item => (
-                    <li key={item} className="flex items-center gap-3 text-white">
-                      <span className="material-symbols-outlined text-tertiary-fixed-dim scale-75" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <li key={item} className="flex items-center gap-3" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1rem', color: '#FFFFFF' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#FDE68A', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       {item}
                     </li>
                   ))}
                 </ul>
-                <button onClick={handleBegin} className="w-full py-5 rounded-full bg-gradient-to-r from-tertiary-fixed-dim to-[#ce9e99] text-tertiary font-black shadow-xl shadow-tertiary/40 hover:opacity-90 transition-opacity">
+                <button
+                  onClick={handleBegin}
+                  className="w-full py-5 transition-all cursor-pointer"
+                  style={{ borderRadius: '999px', background: '#CA8A04', color: '#FFFFFF', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, fontSize: '15px', boxShadow: '0 4px 16px rgba(202,138,4,0.40)' }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+                >
                   Dapatkan Akses Penuh
                 </button>
               </div>
+
               {/* Bespoke */}
-              <div className="bg-surface-container-lowest p-10 rounded-[48px] flex flex-col hover:translate-y-[-8px] transition-transform duration-500 shadow-sm">
+              <div className="flex flex-col p-10 transition-all duration-300" style={{ background: '#FFFFFF', borderRadius: '40px', border: '1px solid #FBCFE8', boxShadow: '0 4px 12px rgba(219,39,119,0.06)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-6px)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
+              >
                 <div className="mb-8">
-                  <h3 className="text-xl font-bold text-primary mb-2">Bespoke</h3>
-                  <span className="text-4xl font-black text-primary">Tanya</span>
+                  <h3 className="mb-2" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.25rem', fontWeight: 700, color: '#831843' }}>Bespoke</h3>
+                  <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '2.25rem', fontWeight: 900, color: '#831843' }}>Tanya</span>
                 </div>
-                <ul className="space-y-4 mb-12 flex-grow">
+                <ul className="space-y-4 mb-10 flex-grow">
                   {['Desain Kustom Eksklusif','Dukungan Editor Khusus','Koordinasi Multi-Event'].map(item => (
-                    <li key={item} className="flex items-center gap-3 text-secondary">
-                      <span className="material-symbols-outlined text-primary scale-75">check_circle</span>
+                    <li key={item} className="flex items-center gap-3" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1rem', color: '#BE185D' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#DB2777', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       {item}
                     </li>
                   ))}
                 </ul>
-                <button className="w-full py-4 rounded-full border-2 border-outline-variant text-primary font-bold hover:bg-surface-container-high transition-colors">Hubungi Kami</button>
+                <button
+                  className="w-full py-4 transition-all cursor-pointer"
+                  style={{ borderRadius: '999px', border: '2px solid #DB2777', color: '#DB2777', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, fontSize: '14px', background: 'transparent' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#FCE7F3'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  Hubungi Kami
+                </button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── Final CTA ────────────────────────────────────── */}
-        <section className="py-24 px-8">
-          <div className="max-w-5xl mx-auto rounded-[64px] bg-primary relative overflow-hidden p-16 md:p-24 text-center">
-            <div className="absolute inset-0 opacity-20 overflow-hidden">
-              <div className="absolute -top-1/2 -left-1/4 w-[150%] h-[150%] bg-gradient-to-tr from-[#ce9e99] to-transparent blur-3xl rounded-full"></div>
+        {/* ── Final CTA ─────────────────────────────────────── */}
+        <section className="py-24 px-8" style={{ background: '#FFFFFF', borderTop: '1px solid #FBCFE8' }}>
+          <div className="max-w-4xl mx-auto text-center relative overflow-hidden px-12 py-20" style={{ background: '#DB2777', borderRadius: '64px', boxShadow: '0 20px 60px rgba(219,39,119,0.25)' }}>
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full" style={{ background: 'radial-gradient(circle, rgba(202,138,4,0.20) 0%, transparent 70%)' }} />
+              <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(244,114,182,0.25) 0%, transparent 70%)' }} />
             </div>
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8">
-                Siap buat undangan<br/>yang tak terlupakan?
-              </h2>
-              <p className="text-on-primary-container text-xl max-w-2xl mx-auto mb-16 font-light">Mulai gratis. Live dalam 5 menit. Tanpa coding. Bergabunglah dengan ribuan pasangan yang memilih undang.io.</p>
-              <div className="flex flex-col sm:flex-row justify-center gap-6">
-                <button onClick={scrollToForm} className="bg-white text-primary px-12 py-5 rounded-full font-black text-lg shadow-2xl hover:scale-105 transition-transform">
+              <h2 className="mb-6" style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(2.5rem,7vw,5rem)', color: '#FFFFFF', lineHeight: 1.1 }}>Siap membuat undangan tak terlupakan?</h2>
+              <p className="mb-10 mx-auto" style={{ fontFamily: "'Cormorant Infant', Georgia, serif", fontSize: '1.2rem', color: 'rgba(255,255,255,0.85)', maxWidth: '480px', lineHeight: 1.7 }}>Mulai gratis. Live dalam 5 menit. Tanpa coding. Bergabunglah dengan ribuan pasangan yang memilih undang.io.</p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button
+                  onClick={scrollToForm}
+                  className="transition-all cursor-pointer"
+                  style={{ background: '#CA8A04', color: '#FFFFFF', padding: '16px 40px', borderRadius: '999px', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, fontSize: '15px', boxShadow: '0 4px 16px rgba(202,138,4,0.40)' }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
                   Mulai Sekarang
                 </button>
-                <button onClick={() => router.push('/register')} className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-12 py-5 rounded-full font-bold text-lg hover:bg-white/20 transition-colors">
+                <button
+                  onClick={() => router.push('/register')}
+                  className="transition-all cursor-pointer"
+                  style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.25)', padding: '16px 40px', borderRadius: '999px', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 600, fontSize: '15px' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
+                >
                   Daftar Akun
                 </button>
               </div>
@@ -465,18 +522,17 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="w-full py-12 px-8 bg-surface-container-low border-t border-outline-variant/10">
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto space-y-8 md:space-y-0 text-secondary">
-          <div className="text-lg font-black text-primary">undang.io</div>
-          <div className="flex flex-wrap justify-center gap-8 text-xs font-light tracking-wide uppercase">
-            <a className="hover:text-primary transition-colors cursor-pointer">Kebijakan Privasi</a>
-            <a className="hover:text-primary transition-colors cursor-pointer">Syarat & Ketentuan</a>
-            <a className="hover:text-primary transition-colors cursor-pointer">Kontak</a>
-            <a className="hover:text-primary transition-colors cursor-pointer">Galeri Undangan</a>
+      {/* ── Footer ────────────────────────────────────────── */}
+      <footer className="py-12 px-8" style={{ background: '#500724', borderTop: '1px solid rgba(219,39,119,0.20)' }}>
+        <div className="flex flex-col md:flex-row justify-between items-center max-w-screen-xl mx-auto gap-6">
+          <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: '1.75rem', color: '#F9A8D4' }}>undang.io</div>
+          <div className="flex flex-wrap justify-center gap-8">
+            {['Kebijakan Privasi','Syarat & Ketentuan','Kontak','Galeri Undangan'].map(item => (
+              <a key={item} className="transition-colors cursor-pointer hover:text-pink-300" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '12px', color: '#F9A8D4', opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{item}</a>
+            ))}
           </div>
-          <div className="text-xs font-light tracking-wide">
-            © 2026 undang.io — Bikin undangan pernikahan digital, langsung jadi.
+          <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '12px', color: '#F9A8D4', opacity: 0.5 }}>
+            © 2026 undang.io
           </div>
         </div>
       </footer>
