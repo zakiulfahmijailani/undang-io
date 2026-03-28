@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 
 /* ─── Data Arrays ──────────────────────────────────────────────── */
 
@@ -60,17 +61,33 @@ const testimonials = [
   },
 ];
 
-const themeOptions = [
-  { id: 'theme-jawa-klasik', name: 'Jawa Klasik', cat: 'Budaya', img: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=560&fit=crop&q=80' },
-  { id: 'theme-bali-tropis', name: 'Bali Tropis', cat: 'Budaya', img: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&h=560&fit=crop&q=80' },
-  { id: 'theme-modern-minimalis', name: 'Modern Minimalis', cat: 'Modern', img: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=560&fit=crop&q=80' },
-];
-
 export default function LandingPage() {
   const router = useRouter();
   const [groomName, setGroomName] = useState('');
   const [brideName, setBrideName] = useState('');
-  const [selectedTheme, setSelectedTheme] = useState('theme-jawa-klasik');
+  const [selectedTheme, setSelectedTheme] = useState('');
+  
+  const [themeOptions, setThemeOptions] = useState<any[]>([
+    { id: 'loading-1', name: 'Loading...', img: '' },
+    { id: 'loading-2', name: 'Loading...', img: '' },
+    { id: 'loading-3', name: 'Loading...', img: '' },
+  ]);
+
+  useEffect(() => {
+    async function loadThemes() {
+      const supabase = createBrowserSupabaseClient();
+      const { data } = await supabase.from('themes').select('*').eq('is_published', true).limit(3);
+      if (data && data.length > 0) {
+        setThemeOptions(data.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          img: t.preview_url || 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=560&fit=crop&q=80'
+        })));
+        setSelectedTheme(data[0].id);
+      }
+    }
+    loadThemes();
+  }, []);
 
   const handleBegin = () => {
     router.push('/buat');
@@ -80,14 +97,18 @@ export default function LandingPage() {
     // Save minimal draft info
     if (groomName || brideName) {
       sessionStorage.setItem('undang_draft', JSON.stringify({
-        groomFullName: '',
-        groomNickname: groomName,
-        brideFullName: '',
-        brideNickname: brideName,
+        groom_full_name: '',
+        groom_name: groomName,
+        bride_full_name: '',
+        bride_name: brideName,
         themeId: selectedTheme
       }));
     }
-    router.push(`/buat?theme=${selectedTheme}`);
+    if (selectedTheme) {
+      router.push(`/buat/${selectedTheme}`);
+    } else {
+      router.push('/buat');
+    }
   };
 
   return (
