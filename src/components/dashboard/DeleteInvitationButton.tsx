@@ -3,17 +3,7 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Modal } from "@/components/ui/modal";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -24,6 +14,7 @@ interface DeleteInvitationButtonProps {
 }
 
 export default function DeleteInvitationButton({ invitationId, invitationTitle }: DeleteInvitationButtonProps) {
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
@@ -42,6 +33,7 @@ export default function DeleteInvitationButton({ invitationId, invitationTitle }
                 toast.success("Undangan berhasil dihapus", {
                     description: `"${invitationTitle}" telah dihapus.`,
                 });
+                setOpen(false);
                 router.refresh();
             }
         } catch (e: any) {
@@ -52,34 +44,40 @@ export default function DeleteInvitationButton({ invitationId, invitationTitle }
     };
 
     return (
-        <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button
-                    variant="secondary"
-                    className="shrink-0 h-9 w-9 p-0 text-destructive border border-destructive/20 hover:bg-destructive/10 cursor-pointer"
-                    disabled={loading}
-                >
-                    <Trash2 className="w-4 h-4" />
-                </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Hapus Undangan?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Undangan <span className="font-semibold text-foreground">&ldquo;{invitationTitle}&rdquo;</span> akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel className="cursor-pointer">Batal</AlertDialogCancel>
-                    <AlertDialogAction
+        <>
+            <Button
+                variant="secondary"
+                className="shrink-0 h-9 w-9 p-0 text-destructive border border-destructive/20 hover:bg-destructive/10 cursor-pointer"
+                onClick={() => setOpen(true)}
+                disabled={loading}
+            >
+                <Trash2 className="w-4 h-4" />
+            </Button>
+
+            <Modal
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                title="Hapus Undangan?"
+                description={`Undangan "${invitationTitle}" akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+            >
+                <div className="flex justify-end gap-3 pt-2">
+                    <Button
+                        variant="secondary"
+                        onClick={() => setOpen(false)}
+                        disabled={loading}
+                        className="cursor-pointer"
+                    >
+                        Batal
+                    </Button>
+                    <Button
                         onClick={handleDelete}
                         disabled={loading}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
                     >
                         {loading ? "Menghapus..." : "Ya, Hapus"}
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+                    </Button>
+                </div>
+            </Modal>
+        </>
     );
 }
