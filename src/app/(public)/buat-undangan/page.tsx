@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, ChevronLeft, ChevronRight, AlertTriangle, Check } from "lucide-react";
@@ -64,6 +64,30 @@ export default function BuatUndangan() {
   });
 
   const update = (key: string, val: string) => setForm((prev) => ({ ...prev, [key]: val }));
+
+  // Pick up quick-start data from landing page
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('quickstart_data');
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (data.groomNickname || data.brideNickname) {
+          setForm((prev) => ({
+            ...prev,
+            groomNickname: data.groomNickname || '',
+            brideNickname: data.brideNickname || '',
+          }));
+        }
+        if (data.selectedThemeId) {
+          setSelectedThemeId(data.selectedThemeId);
+          setStep(2); // Skip theme selection — already chosen on landing page
+        }
+        sessionStorage.removeItem('quickstart_data');
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }, []);
 
   const handlePublish = async () => {
     const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
