@@ -43,13 +43,15 @@ const activeThemes = [
   }
 ];
 
+/** 25 menit dalam milliseconds */
+const PREVIEW_DURATION_MS = 25 * 60 * 1000;
+
 function generateSlug(groomNick: string, brideNick: string) {
   const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
   const year = new Date().getFullYear();
   return `${clean(groomNick)}-${clean(brideNick)}-${year}`;
 }
 
-// ── Inner component yang boleh pakai useSearchParams ──────────────────────────
 function BuatUndanganContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,7 +97,7 @@ function BuatUndanganContent() {
   const handlePublish = async () => {
     const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
     const sessionToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + PREVIEW_DURATION_MS).toISOString();
 
     try {
       const response = await fetch("/api/guest-sessions", {
@@ -113,7 +115,7 @@ function BuatUndanganContent() {
       localStorage.setItem("guest_return_slug", slug);
 
       toast.success("🚀 Undangan berhasil dipublikasikan!", {
-        description: "Undangan kamu live selama 15 menit. Daftar untuk simpan selamanya!",
+        description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya!",
       });
 
       router.push(`/u/${slug}`);
@@ -150,7 +152,6 @@ function BuatUndanganContent() {
       </nav>
 
       <div className="mx-auto max-w-4xl px-4 py-8">
-        {/* Step 1: Choose Theme */}
         {step === 1 && (
           <div>
             <h1 className="mb-2 text-2xl font-bold text-foreground">Pilih Tema Undangan</h1>
@@ -187,7 +188,6 @@ function BuatUndanganContent() {
           </div>
         )}
 
-        {/* Step 2: Fill Form */}
         {step === 2 && (
           <div>
             <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mb-4 cursor-pointer">
@@ -278,7 +278,6 @@ function BuatUndanganContent() {
           </div>
         )}
 
-        {/* Step 3: Publish */}
         {step === 3 && (
           <div className="mx-auto max-w-lg text-center">
             <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="mb-4 cursor-pointer">
@@ -296,7 +295,7 @@ function BuatUndanganContent() {
             <Alert className="mb-6 border-accent/40 bg-accent/10 text-left">
               <AlertTriangle className="h-4 w-4 text-accent" />
               <AlertDescription className="text-sm">
-                Undangan akan <strong>live selama 15 menit</strong>. Untuk menyimpan selamanya, daftar akun dan bayar Rp 49.000.
+                Undangan akan <strong>live selama 25 menit</strong>. Jika tidak dibayar, undangan akan <strong>otomatis terhapus</strong> setelah waktu habis. Bayar Rp 49.000 untuk menyimpan selamanya.
               </AlertDescription>
             </Alert>
             <Button size="lg" className="w-full gap-2 text-base cursor-pointer" onClick={handlePublish}>
@@ -314,7 +313,6 @@ function BuatUndanganContent() {
   );
 }
 
-// ── Page export: wrap dengan Suspense ────────────────────────────────────────
 export default function BuatUndangan() {
   return (
     <Suspense fallback={null}>
