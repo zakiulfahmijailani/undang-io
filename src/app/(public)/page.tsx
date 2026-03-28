@@ -73,19 +73,21 @@ export default function LandingPage() {
   const [selectedTheme, setSelectedTheme] = useState('theme-jawa-klasik');
 
   const handleBegin = () => {
-    router.push('/buat-undangan');
+    router.push('/buat');
   };
 
   const handleQuickStart = () => {
-    // Store draft data in sessionStorage so buat-undangan can pick it up
+    // Save minimal draft info
     if (groomName || brideName) {
-      sessionStorage.setItem('quickstart_data', JSON.stringify({
+      sessionStorage.setItem('undang_draft', JSON.stringify({
+        groomFullName: '',
         groomNickname: groomName,
+        brideFullName: '',
         brideNickname: brideName,
-        selectedThemeId: selectedTheme,
+        themeId: selectedTheme
       }));
     }
-    router.push('/buat-undangan');
+    router.push(`/buat?theme=${selectedTheme}`);
   };
 
   return (
