@@ -108,7 +108,7 @@ function LoginForm() {
       // Always read directly from localStorage at click time — don't rely on state
       const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
 
-      let redirectTo = `${window.location.origin}/api/auth/callback`;
+      let redirectTo = `${window.location.origin}/auth/callback`;
       if (token) {
         redirectTo += `?guest_session_token=${token}`;
       }

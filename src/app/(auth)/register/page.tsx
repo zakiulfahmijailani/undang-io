@@ -111,7 +111,7 @@ function RegisterForm() {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
 
-      let redirectTo = `${window.location.origin}/api/auth/callback`;
+      let redirectTo = `${window.location.origin}/auth/callback`;
       if (guestSessionToken) {
         redirectTo += `?guest_session_token=${guestSessionToken}`;
       }
