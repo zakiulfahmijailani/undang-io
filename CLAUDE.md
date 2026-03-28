@@ -184,6 +184,179 @@ create table themes (
 
 ---
 
+## Theme Slot Specification v1
+
+> **Sumber**: Hasil audit langsung dari repo referensi https://github.com/NgodingSolusi/the-wedding-of-rehan-maulidan
+> **Tanggal audit**: 28 Maret 2026
+> **Tujuan**: Dokumen ini adalah kontrak resmi antara template renderer, dashboard user, dan dashboard admin/owner.
+> Setiap perubahan pada slot ini HARUS diupdate di file ini dan di `src/types/theme.ts`.
+
+---
+
+### 🔵 USER-SLOT — Diisi Pembeli Undangan
+
+Aset unik per pasangan. Diisi via form wizard `dashboard/undangan/baru/` dan halaman edit `dashboard/undangan/[id]/`.
+
+#### Foto Mempelai
+
+| Slot Key | File Asal (Rehan) | Format | Wajib | Keterangan |
+|----------|-------------------|--------|-------|------------|
+| `photo_groom` | `images/rehan-square.jpg` | JPG/PNG, rasio 1:1 | ✅ | Foto solo mempelai pria |
+| `photo_bride` | `images/molid-square.jpg` | JPG/PNG, rasio 1:1 | ✅ | Foto solo mempelai wanita |
+| `photo_couple_1` | `images/couple-1.jpg` | JPG, landscape | ✅ | Foto berdua utama (tampil di hero cover) |
+| `photo_couple_2` | `images/couple-2.jpg` | JPG | ❌ | Foto berdua untuk section "Cerita Kita" |
+| `photo_couple_3` | `images/couple-3.jpg` | JPG | ❌ | Foto berdua tambahan |
+| `photo_gallery[]` | `images/gallery-1.jpg` s/d `gallery-9.jpg` | JPG/PNG | ❌ | Galeri foto (maksimal 9 slot) |
+
+#### Data Teks Mempelai
+
+| Slot Key | Tipe | Wajib | Keterangan |
+|----------|------|-------|------------|
+| `name_groom` | String | ✅ | Nama lengkap mempelai pria |
+| `name_bride` | String | ✅ | Nama lengkap mempelai wanita |
+| `name_groom_short` | String | ✅ | Nama panggilan / singkat pria |
+| `name_bride_short` | String | ✅ | Nama panggilan / singkat wanita |
+| `parent_groom` | String | ✅ | Nama ayah & ibu pria (contoh: "Bpk. Ahmad & Ibu Sari") |
+| `parent_bride` | String | ✅ | Nama ayah & ibu wanita |
+| `bio_groom` | String | ❌ | Kalimat singkat tentang pria (opsional) |
+| `bio_bride` | String | ❌ | Kalimat singkat tentang wanita (opsional) |
+
+#### Data Acara
+
+| Slot Key | Tipe | Wajib | Keterangan |
+|----------|------|-------|------------|
+| `date_akad` | DateTime | ✅ | Tanggal + jam akad nikah |
+| `date_resepsi` | DateTime | ✅ | Tanggal + jam resepsi |
+| `venue_akad_name` | String | ✅ | Nama gedung/tempat akad |
+| `venue_akad_address` | String | ✅ | Alamat lengkap akad |
+| `venue_resepsi_name` | String | ✅ | Nama gedung/tempat resepsi |
+| `venue_resepsi_address` | String | ✅ | Alamat lengkap resepsi |
+| `gmaps_akad_url` | URL | ✅ | Link Google Maps akad |
+| `gmaps_resepsi_url` | URL | ✅ | Link Google Maps resepsi |
+| `love_story[]` | Array `{date, title, description}` | ❌ | Timeline perjalanan cinta |
+
+#### Amplop Digital
+
+| Slot Key | Tipe | Wajib | Keterangan |
+|----------|------|-------|------------|
+| `qris_image` | PNG | ❌ | Foto QRIS untuk amplop digital |
+| `rekening[]` | Array `{bank, account_name, account_number}` | ❌ | Data rekening bank |
+
+---
+
+### 🟡 THEME-SLOT — Diisi Admin / Owner via Dashboard
+
+Aset konsisten per tema. Digenerate via AI (Midjourney, Adobe Firefly) lalu diupload oleh admin/owner ke Supabase Storage bucket `theme-assets`.
+
+#### Background Sections (5 layer fullscreen)
+
+| Slot Key | File Asal (Rehan) | Format | Ukuran Ideal | Keterangan |
+|----------|-------------------|--------|-------------|------------|
+| `bg_cover` | `images/img_bg_1.jpg` | JPG | 1920×1080px | Background utama halaman cover/hero (fullscreen) |
+| `bg_section_2` | `images/img_bg_2.jpg` | JPG | 1920×1080px | Background section profil mempelai |
+| `bg_section_3` | `images/img_bg_3.jpg` | JPG | 1920×1080px | Background section info acara & countdown |
+| `bg_section_4` | `images/img_bg_4.jpg` | JPG | 1920×1080px | Background section cerita cinta & galeri |
+| `bg_section_5` | `images/img_bg_5.jpg` | JPG | 1920×1080px | Background section ucapan, RSVP & footer |
+| `bg_groom_panel` | `images/groom.jpg` | JPG | 800×1200px | Background panel sisi kiri profil pria |
+
+#### Ornamen Dekoratif (PNG Transparan)
+
+| Slot Key | File Asal (Rehan) | Format | Keterangan |
+|----------|-------------------|--------|------------|
+| `ornament_half_circle` | `images/half circle flower-500.png` | **PNG transparan** | Ornamen setengah lingkaran bunga — muncul di pojok hero dan section transisi |
+| `ornament_overlay` | `images/overlay.JPG` | JPG/PNG | Overlay tekstur di atas hero cover (opacity ~30%) |
+| `ornament_bismillah` | `images/bismillah.svg` | **SVG** | Kaligrafi/teks pembuka — bisa swap per tema (bismillah, salib, om, dll) |
+| `ornament_divider` | *(tidak ada di Rehan, perlu dibuat)* | **SVG/PNG transparan** | Pemisah dekoratif antar section |
+| `ornament_corner_tl` | *(tidak ada di Rehan, perlu dibuat)* | **PNG transparan** | Ornamen pojok kiri atas |
+| `ornament_corner_br` | *(tidak ada di Rehan, perlu dibuat)* | **PNG transparan** | Ornamen pojok kanan bawah |
+
+#### Audio & Animasi
+
+| Slot Key | File Asal (Rehan) | Format | Keterangan |
+|----------|-------------------|--------|------------|
+| `bg_music` | `images/audio/` | MP3, maks 5MB | Musik latar undangan (autoplay muted, toggle oleh tamu) |
+| `loader_asset` | `images/loader.gif` | GIF / Lottie JSON | Animasi loading screen saat undangan pertama dibuka |
+| `particle_type` | JS custom di repo | enum string | Tipe partikel animasi: `'petals'` \| `'sparkle'` \| `'bubbles'` \| `'leaves'` \| `'snow'` \| `'none'` |
+| `particle_color` | *(derived dari palette)* | HEX string | Override warna partikel (opsional, default ikut `color_primary`) |
+
+#### Palette Warna
+
+| Slot Key | Tipe | Keterangan |
+|----------|------|------------|
+| `color_primary` | HEX | Warna dominan tema (untuk teks heading, aksen) |
+| `color_secondary` | HEX | Warna aksen pendukung |
+| `color_accent` | HEX | Warna highlight / CTA button |
+| `color_bg_page` | HEX | Warna background halaman (biasanya cream/putih) |
+| `color_text_body` | HEX | Warna teks isi konten |
+| `color_overlay` | HEX + opacity | Warna overlay di atas background (contoh: `#00000040`) |
+
+#### Tipografi
+
+| Slot Key | Tipe | Keterangan |
+|----------|------|------------|
+| `font_display` | Google Font name | Font untuk nama mempelai & heading utama (contoh: `"Great Vibes"`, `"Cinzel"`) |
+| `font_body` | Google Font name | Font untuk teks isi & konten (contoh: `"Cormorant Infant"`, `"Lora"`) |
+
+---
+
+### 📐 Section Map — Struktur Halaman Pakem
+
+Urutan section dari atas ke bawah. **Jangan ubah urutan ini tanpa diskusi** — ini adalah UX flow yang sudah terbukti dari template referensi.
+
+```
+Section 1 — Cover / Envelope
+  Aset: bg_cover, ornament_overlay, ornament_half_circle, photo_couple_1
+  Data: name_groom_short, name_bride_short, date_akad
+  Fitur: animasi masuk (amplop terbuka), loader_asset, bg_music toggle
+
+Section 2 — Profil Mempelai
+  Aset: bg_section_2, bg_groom_panel, ornament_half_circle
+  Data: photo_groom, photo_bride, name_groom, name_bride, parent_groom, parent_bride, bio_groom, bio_bride
+
+Section 3 — Countdown & Info Acara
+  Aset: bg_section_3, ornament_divider
+  Data: date_akad, date_resepsi, venue_akad_name, venue_akad_address, venue_resepsi_name, venue_resepsi_address, gmaps_akad_url, gmaps_resepsi_url
+  Fitur: countdown timer real-time, tombol "Simpan ke Kalender", tombol "Buka Maps"
+
+Section 4 — Cerita Cinta
+  Aset: bg_section_4, ornament_corner_tl
+  Data: love_story[], photo_couple_2, photo_couple_3
+  Fitur: timeline scroll animation (AOS / Framer Motion)
+
+Section 5 — Galeri Foto
+  Aset: *(tidak ada theme-slot khusus, pakai bg_section_4 atau transparan)*
+  Data: photo_gallery[] (maks 9)
+  Fitur: lightbox / masonry grid
+
+Section 6 — Ucapan & RSVP
+  Aset: bg_section_5
+  Data: *(diisi tamu, bukan user/admin)*
+  Fitur: form RSVP (hadir/tidak), form ucapan, live feed ucapan
+
+Section 7 — Amplop Digital
+  Aset: *(tidak ada theme-slot, UI polos)*
+  Data: qris_image, rekening[]
+  Fitur: copy rekening ke clipboard, tampilkan QRIS
+
+Section 8 — Footer & Musik
+  Aset: bg_section_5 (shared), ornament_bismillah, bg_music
+  Data: name_groom_short, name_bride_short
+  Fitur: musik player toggle, credit "Dibuat dengan undang.io"
+```
+
+---
+
+### ⚠️ Aturan Penting Theme Slot
+
+- **PNG ornamen HARUS transparan** — background harus removed sebelum upload, bukan JPG biasa
+- **Rasio bg_cover wajib 16:9** (landscape) — template didesain untuk layar penuh mobile
+- **Ukuran file maks**: bg images 500KB, ornamen PNG 200KB, audio 5MB, loader GIF 200KB
+- **Semua URL aset disimpan di kolom `assets` JSONB** di tabel `themes` — tidak ada path hardcoded
+- **Slot opsional yang kosong (null)** → template harus gracefully hide elemen tersebut, JANGAN tampilkan broken image
+- **`ornament_bismillah`** adalah slot yang paling sensitif secara agama/budaya — untuk tema non-Islam, slot ini bisa diisi dengan ornamen netral atau dikosongkan
+
+---
+
 ## Produk Roadmap Jangka Menengah
 
 | Milestone | Deskripsi | Status |
@@ -208,5 +381,5 @@ create table themes (
 ---
 
 *CLAUDE.md — undang.io*
-*Terakhir diupdate: 28 Maret 2026*
+*Terakhir diupdate: 28 Maret 2026 — ditambahkan Theme Slot Specification v1*
 *Update file ini setiap akhir sprint atau saat visi proyek berubah.*
