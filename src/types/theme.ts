@@ -2,6 +2,7 @@
 // undang-io — Theme Engine Types
 // Phase 2a: Parallax Theme System Extension
 // Phase 2b: Classic (Rehan-style) Full-Page Theme System
+// Synced: Step 4 (Hero/Cover) + Step 5 (Couple) + Step 6 (Event)
 // ============================================================
 
 // ─────────────────────────────────────────
@@ -380,12 +381,12 @@ export const SLOT_ZINDEX_PRESETS: Partial<Record<ParallaxSlotKey, number>> = {
 // CLASSIC THEME SYSTEM — Phase 2b
 // Based on: NgodingSolusi/the-wedding-of-rehan-maulidan
 // Spec: CLAUDE.md § "Theme Slot Specification v1"
-// Maps to: Supabase table `classic_themes` (to be migrated)
+// Maps to: Supabase table `classic_themes`
+// Synced: Step 4 (Hero/Cover) · Step 5 (Couple) · Step 6 (Event)
 // ─────────────────────────────────────────
 
 /**
  * Particle animation type for the classic theme.
- * Rendered as floating elements over the page via canvas or CSS animation.
  */
 export type ClassicParticleType =
   | 'petals'
@@ -397,32 +398,36 @@ export type ClassicParticleType =
 
 /**
  * THEME-SLOT keys — assets prepared by admin/owner.
- * These are consistent per theme, stored in `classic_themes.assets` JSONB.
- * Images uploaded to Supabase Storage bucket: `theme-assets`
+ * Stored in `classic_themes.assets` JSONB.
+ * Uploaded to Supabase Storage bucket: `theme-assets`
  */
 export type ClassicThemeSlotKey =
-  // Backgrounds (fullscreen JPG, 1920×1080px recommended)
-  | 'bg_cover'          // Cover / hero section — section 1
-  | 'bg_section_2'      // Profil mempelai section
-  | 'bg_section_3'      // Countdown & info acara section
-  | 'bg_section_4'      // Cerita cinta & galeri section
-  | 'bg_section_5'      // Ucapan, RSVP & footer section
-  | 'bg_groom_panel'    // Panel sisi kiri foto pria (portrait, 800×1200px)
-  // Ornaments (PNG transparent)
-  | 'ornament_half_circle'  // Setengah lingkaran bunga — pojok hero & transisi
-  | 'ornament_overlay'      // Tekstur di atas hero cover (opacity ~30%)
-  | 'ornament_bismillah'    // Kaligrafi / teks pembuka — swap per tema / agama
-  | 'ornament_divider'      // Pemisah dekoratif antar section
-  | 'ornament_corner_tl'    // Ornamen pojok kiri atas
-  | 'ornament_corner_br'    // Ornamen pojok kanan bawah
+  // Backgrounds
+  | 'bg_cover'
+  | 'bg_section_2'
+  | 'bg_section_3'
+  | 'bg_section_4'
+  | 'bg_section_5'
+  | 'bg_groom_panel'
+  // Ornaments
+  | 'ornament_half_circle'
+  | 'ornament_overlay'
+  | 'ornament_bismillah'
+  | 'ornament_divider'
+  | 'ornament_corner_tl'
+  | 'ornament_corner_br'
+  // Flowers (per-section decorative PNGs)
+  | 'flower_top_right'
+  | 'flower_top_left'
+  | 'flower_bottom_right'
+  | 'flower_bottom_left'
+  | 'flower_right'
+  | 'flower_left'
+  | 'flower_top_center'
   // Audio & animation
-  | 'bg_music'          // MP3 background music (max 5MB)
-  | 'loader_asset';     // GIF / Lottie JSON loading screen
+  | 'bg_music'
+  | 'loader_asset';
 
-/**
- * Human-readable label for each THEME-SLOT key.
- * Used in admin dashboard upload form.
- */
 export const CLASSIC_THEME_SLOT_LABELS: Record<ClassicThemeSlotKey, string> = {
   bg_cover:             'Background Cover / Hero',
   bg_section_2:         'Background Section 2 — Profil Mempelai',
@@ -436,14 +441,17 @@ export const CLASSIC_THEME_SLOT_LABELS: Record<ClassicThemeSlotKey, string> = {
   ornament_divider:     'Pemisah Section Dekoratif',
   ornament_corner_tl:   'Ornamen Pojok Kiri Atas',
   ornament_corner_br:   'Ornamen Pojok Kanan Bawah',
+  flower_top_right:     'Bunga Pojok Kanan Atas',
+  flower_top_left:      'Bunga Pojok Kiri Atas',
+  flower_bottom_right:  'Bunga Pojok Kanan Bawah',
+  flower_bottom_left:   'Bunga Pojok Kiri Bawah',
+  flower_right:         'Bunga Sisi Kanan (vertikal)',
+  flower_left:          'Bunga Sisi Kiri (vertikal)',
+  flower_top_center:    'Bunga Tengah Atas',
   bg_music:             'Musik Latar Undangan',
   loader_asset:         'Animasi Loading Screen',
 };
 
-/**
- * Required flag per theme slot.
- * Slots marked false → template gracefully hides when null.
- */
 export const CLASSIC_THEME_SLOT_REQUIRED: Record<ClassicThemeSlotKey, boolean> = {
   bg_cover:             true,
   bg_section_2:         true,
@@ -453,21 +461,33 @@ export const CLASSIC_THEME_SLOT_REQUIRED: Record<ClassicThemeSlotKey, boolean> =
   bg_groom_panel:       false,
   ornament_half_circle: false,
   ornament_overlay:     false,
-  ornament_bismillah:   false,  // agama-sensitive — wajib nullable
+  ornament_bismillah:   false,
   ornament_divider:     false,
   ornament_corner_tl:   false,
   ornament_corner_br:   false,
+  flower_top_right:     false,
+  flower_top_left:      false,
+  flower_bottom_right:  false,
+  flower_bottom_left:   false,
+  flower_right:         false,
+  flower_left:          false,
+  flower_top_center:    false,
   bg_music:             false,
   loader_asset:         false,
 };
 
 /**
  * All THEME-SLOT assets for one classic theme.
- * Stored as `assets` JSONB column in `classic_themes` table.
- * All values are Supabase Storage public URLs (or null if not uploaded).
+ * Stored as `assets` JSONB in `classic_themes` table.
+ *
+ * Sections:
+ *  A. Legacy backgrounds & ornaments
+ *  B. Flower decoration slots (Step 4–6)
+ *  C. Section-specific bg & colors (Step 4–6)
+ *  D. Palette & typography
  */
 export interface ClassicThemeAssets {
-  // Backgrounds
+  // ── A. Backgrounds ──────────────────────────────────────────
   bg_cover:             string;
   bg_section_2:         string;
   bg_section_3:         string;
@@ -475,71 +495,119 @@ export interface ClassicThemeAssets {
   bg_section_5:         string;
   bg_groom_panel:       string | null;
 
-  // Ornaments (PNG transparent)
+  // ── A. Ornaments (PNG transparent) ──────────────────────────
   ornament_half_circle: string | null;
   ornament_overlay:     string | null;
-  /** Swap per cultural/religious theme. Set to null for non-Islamic themes. */
+  /** Swap per cultural/religious theme. null = non-Islamic. */
   ornament_bismillah:   string | null;
   ornament_divider:     string | null;
   ornament_corner_tl:   string | null;
   ornament_corner_br:   string | null;
 
-  // Audio & animation
-  bg_music:             string | null;
-  loader_asset:         string | null;
+  // ── B. Flower decoration slots (Step 4–6) ───────────────────
+  /** Pojok kanan atas — digunakan di Cover Overlay & Hero Section */
+  flower_top_right_url?:    string | null;
+  /** Pojok kiri atas — digunakan di Cover Overlay & Hero Section */
+  flower_top_left_url?:     string | null;
+  /** Pojok kanan bawah — digunakan di Cover Overlay */
+  flower_bottom_right_url?: string | null;
+  /** Pojok kiri bawah — digunakan di Cover Overlay */
+  flower_bottom_left_url?:  string | null;
+  /** Sisi kanan vertikal — digunakan di Couple Section */
+  flower_right_url?:        string | null;
+  /** Sisi kiri vertikal — digunakan di Couple Section */
+  flower_left_url?:         string | null;
+  /** Tengah atas — digunakan di Event Section */
+  flower_top_center_url?:   string | null;
 
-  // Particles
+  // ── C. Section-specific overrides (Step 4–6) ────────────────
+  /** Warna bg Cover Overlay (hex). Default: #faf6f1 */
+  cover_bg_color?:          string | null;
+  /** Pattern bg Cover Overlay (URL repeating) */
+  cover_bg_pattern_url?:    string | null;
+
+  /** Foto bulat pasangan / ornamen setengah lingkaran di Hero & Cover */
+  couple_main_image_url?:   string | null;
+  /** Warna bg Hero Section (hex). Default: #fdfaf6 */
+  hero_bg_color?:           string | null;
+  /** Pattern bg Hero Section (URL repeating) */
+  hero_bg_pattern_url?:     string | null;
+
+  /** Gambar Bismillah SVG di Couple Section */
+  bismillah_image_url?:     string | null;
+  /** Warna bg Couple Section (hex) */
+  couple_bg_color?:         string | null;
+  /** Pattern bg Couple Section (URL repeating, e.g. so-white.png) */
+  couple_bg_pattern_url?:   string | null;
+
+  /** Warna bg Event Section (hex) */
+  event_bg_color?:          string | null;
+  /** Warna bg tiap card Akad/Resepsi (hex). Default: #fffdf9 */
+  event_card_bg_color?:     string | null;
+  /** Gambar divider ornamen di dalam event card */
+  event_divider_image_url?: string | null;
+
+  // ── D. Particles ─────────────────────────────────────────────
   particle_type:        ClassicParticleType;
   /** HEX — override warna partikel. null = ikut color_primary */
   particle_color:       string | null;
 
-  // Palette
-  color_primary:        string;  // HEX — warna dominan (heading, aksen)
-  color_secondary:      string;  // HEX — aksen pendukung
-  color_accent:         string;  // HEX — highlight / CTA
-  color_bg_page:        string;  // HEX — background halaman
-  color_text_body:      string;  // HEX — teks isi
-  /** HEX + alpha, contoh: "#00000040" */
+  // ── D. Palette (HEX) ─────────────────────────────────────────
+  color_primary:        string;   // Warna dominan (heading, aksen, border)
+  color_secondary:      string;   // Aksen pendukung / background ringan
+  /** Alias color_secondary — digunakan sebagai warna muted text subtle */
+  color_text_muted?:    string | null;
+  color_accent:         string;   // Highlight / CTA button
+  color_bg_page:        string;   // Background halaman
+  color_text_body:      string;   // Teks isi
+  /** HEX + alpha, e.g. "#00000040" */
   color_overlay:        string | null;
 
-  // Typography (Google Font names)
-  font_display:         string;  // Untuk nama mempelai & heading utama
-  font_body:            string;  // Untuk teks isi
+  // ── D. Typography (Google Font names) ────────────────────────
+  font_display:         string;   // Nama mempelai & heading utama
+  font_body:            string;   // Teks isi paragraf
+  /** Script/cursive font — digunakan di nama pasangan & sub-heading */
+  font_script?:         string | null;
+  /** Display font untuk judul section ALL-CAPS (e.g. Oswald) */
+  font_heading?:        string | null;
+  /** Arabic/kaligrafi font untuk teks Arab (e.g. Scheherazade New) */
+  font_arabic?:         string | null;
+
+  // ── A. Audio & animation ─────────────────────────────────────
+  bg_music:             string | null;
+  loader_asset:         string | null;
 }
 
 /**
- * Classic theme record — represents one purchasable/selectable theme.
+ * Classic theme record — represents one selectable theme.
  * Mapped to `classic_themes` Supabase table.
  */
 export interface ClassicTheme {
-  id:               string;          // uuid
-  slug:             string;          // 'jawa-batik' | 'minang-emas' | ...
-  name:             string;          // Display name di halaman pilih tema
+  id:               string;
+  slug:             string;
+  name:             string;
   description:      string | null;
-  thumbnail_url:    string | null;   // Preview card image
+  thumbnail_url:    string | null;
   is_published:     boolean;
   cultural_category: CulturalCategory | null;
   target_event:     'wedding' | 'aqiqah' | 'graduation' | 'all';
   assets:           ClassicThemeAssets;
   tags:             string[];
-  created_by:       string | null;   // uuid → auth.users
-  created_at:       string;          // ISO timestamp
+  created_by:       string | null;
+  created_at:       string;
   updated_at:       string;
 }
 
 /**
  * USER-SLOT keys — assets & data provided by the invitation buyer.
- * These are unique per couple. Stored in the `invitations` table (or joined).
  */
 export type ClassicUserSlotKey =
-  // Photos
   | 'photo_groom'
   | 'photo_bride'
   | 'photo_couple_1'
   | 'photo_couple_2'
   | 'photo_couple_3'
-  | 'photo_gallery'   // array — up to 9 items
-  // Text — mempelai
+  | 'photo_gallery'
   | 'name_groom'
   | 'name_bride'
   | 'name_groom_short'
@@ -548,7 +616,6 @@ export type ClassicUserSlotKey =
   | 'parent_bride'
   | 'bio_groom'
   | 'bio_bride'
-  // Event
   | 'date_akad'
   | 'date_resepsi'
   | 'venue_akad_name'
@@ -558,79 +625,137 @@ export type ClassicUserSlotKey =
   | 'gmaps_akad_url'
   | 'gmaps_resepsi_url'
   | 'love_story'
-  // Digital gift
   | 'qris_image'
   | 'rekening';
 
-/**
- * One entry in the love story timeline.
- */
 export interface LoveStoryEntry {
-  date:        string;  // ISO date or free-text (e.g. "Agustus 2019")
+  date:        string;
   title:       string;
   description: string;
-  photo?:      string;  // optional supporting photo URL
+  photo?:      string;
 }
 
-/**
- * Bank account for digital gift.
- */
 export interface RekeningEntry {
-  bank:           string;  // e.g. "BCA", "Mandiri", "GoPay"
+  bank:           string;
   account_name:   string;
   account_number: string;
 }
 
 /**
  * All USER-SLOT data for one classic wedding invitation.
- * This is the complete data contract fed into `<ClassicThemeRenderer>`.
- * Mirrors and extends the existing `InvitationData` in `invitation.ts`.
+ * Fed into `<ClassicThemeRenderer>` and all Classic section components.
  *
- * Note: For new code, prefer this type over the legacy `InvitationData`.
+ * Naming convention:
+ *  - `*_full_name`   → nama lengkap  (e.g. "Rayhan Yulanda")
+ *  - `*_nickname`    → nama panggilan (e.g. "Rehan") — untuk heading hero
+ *  - `*_photo_url`   → URL foto persegi
+ *  - `*_datetime`    → ISO datetime string
+ *  - `*_location_*`  → info venue
+ *  - `*_maps_url`    → Google Maps link
+ *
+ * Legacy aliases (snake_case flat) preserved for backward compat.
  */
 export interface ClassicInvitationData {
-  // === FOTO MEMPELAI ===
-  photo_groom:      string;          // URL — square 1:1
-  photo_bride:      string;          // URL — square 1:1
-  photo_couple_1:   string;          // URL — landscape, hero cover
-  photo_couple_2?:  string | null;   // URL — cerita kita section
-  photo_couple_3?:  string | null;   // URL — tambahan
-  photo_gallery?:   string[];        // URL[] — maks 9
+  // ── Foto mempelai ────────────────────────────────────────────
+  /** URL foto mempelai pria — square 1:1 (used by ClassicCoupleSection) */
+  groom_photo_url?:     string | null;
+  /** URL foto mempelai wanita — square 1:1 */
+  bride_photo_url?:     string | null;
+  /** @deprecated alias → groom_photo_url */
+  photo_groom?:         string;
+  /** @deprecated alias → bride_photo_url */
+  photo_bride?:         string;
+  photo_couple_1?:      string;
+  photo_couple_2?:      string | null;
+  photo_couple_3?:      string | null;
+  photo_gallery?:       string[];
 
-  // === DATA TEKS MEMPELAI ===
-  name_groom:        string;
-  name_bride:        string;
-  name_groom_short:  string;
-  name_bride_short:  string;
-  parent_groom:      string;         // e.g. "Bpk. Ahmad & Ibu Sari"
-  parent_bride:      string;
-  bio_groom?:        string | null;
-  bio_bride?:        string | null;
+  // ── Nama mempelai ────────────────────────────────────────────
+  /** Nama lengkap mempelai pria (ClassicCoupleSection heading) */
+  groom_full_name:      string;
+  /** Nama lengkap mempelai wanita */
+  bride_full_name:      string;
+  /** Nama panggilan pria — ditampilkan di Hero & Cover overlay */
+  groom_nickname?:      string | null;
+  /** Nama panggilan wanita */
+  bride_nickname?:      string | null;
+  /** @deprecated alias → groom_full_name */
+  name_groom?:          string;
+  /** @deprecated alias → bride_full_name */
+  name_bride?:          string;
+  name_groom_short?:    string;
+  name_bride_short?:    string;
 
-  // === DATA ACARA ===
-  date_akad:             string;     // ISO datetime
-  date_resepsi:          string;     // ISO datetime
-  venue_akad_name:       string;
-  venue_akad_address:    string;
-  venue_resepsi_name:    string;
-  venue_resepsi_address: string;
-  gmaps_akad_url:        string;
-  gmaps_resepsi_url:     string;
-  love_story?:           LoveStoryEntry[];
+  // ── Data orang tua ───────────────────────────────────────────
+  /** Nama ayah mempelai pria */
+  groom_father_name?:   string | null;
+  /** Nama ibu mempelai pria */
+  groom_mother_name?:   string | null;
+  /** Urutan anak pria, e.g. "Putra Pertama" */
+  groom_child_order?:   string | null;
+  /** Nama ayah mempelai wanita */
+  bride_father_name?:   string | null;
+  /** Nama ibu mempelai wanita */
+  bride_mother_name?:   string | null;
+  /** Urutan anak wanita, e.g. "Putri Keempat" */
+  bride_child_order?:   string | null;
+  /** @deprecated alias → "{groom_child_order} dari {groom_father_name} & {groom_mother_name}" */
+  parent_groom?:        string;
+  /** @deprecated alias */
+  parent_bride?:        string;
+  bio_groom?:           string | null;
+  bio_bride?:           string | null;
 
-  // === AMPLOP DIGITAL ===
-  qris_image?:  string | null;       // URL — foto QRIS PNG
-  rekening?:    RekeningEntry[];     // daftar rekening bank
+  // ── Data acara ───────────────────────────────────────────────
+  /** ISO datetime Akad Nikah (ClassicHeroSection countdown + ClassicEventSection) */
+  akad_datetime?:             string | null;
+  /** ISO datetime Resepsi / Walimatul Ursy */
+  resepsi_datetime?:          string | null;
+  /** @deprecated alias → akad_datetime */
+  date_akad?:                 string;
+  /** @deprecated alias → resepsi_datetime */
+  date_resepsi?:              string;
+
+  /** Nama venue akad (ClassicEventSection card) */
+  akad_location_name?:        string | null;
+  /** Alamat lengkap venue akad */
+  akad_location_address?:     string | null;
+  /** Google Maps URL akad — tombol "Petunjuk Lokasi" */
+  akad_maps_url?:             string | null;
+  /** @deprecated alias → akad_location_name */
+  venue_akad_name?:           string;
+  /** @deprecated alias → akad_location_address */
+  venue_akad_address?:        string;
+  /** @deprecated alias → akad_maps_url */
+  gmaps_akad_url?:            string;
+
+  /** Nama venue resepsi */
+  resepsi_location_name?:     string | null;
+  /** Alamat lengkap venue resepsi */
+  resepsi_location_address?:  string | null;
+  /** Google Maps URL resepsi */
+  resepsi_maps_url?:          string | null;
+  /** @deprecated alias → resepsi_location_name */
+  venue_resepsi_name?:        string;
+  /** @deprecated alias → resepsi_location_address */
+  venue_resepsi_address?:     string;
+  /** @deprecated alias → resepsi_maps_url */
+  gmaps_resepsi_url?:         string;
+
+  love_story?:                LoveStoryEntry[];
+
+  // ── Amplop digital ───────────────────────────────────────────
+  qris_image?:  string | null;
+  rekening?:    RekeningEntry[];
 }
 
 /**
  * The complete render props for the ClassicThemeRenderer component.
- * Combines theme assets (admin-managed) + invitation data (user-provided).
  */
 export interface ClassicThemeRenderProps {
   theme:      ClassicTheme;
   data:       ClassicInvitationData;
-  /** Guest name passed via query param ?to=NamaTamu */
+  /** Guest name from query param ?to=NamaTamu */
   guestName?: string;
   /** Preview mode — disables music autoplay, shows placeholder photos */
   isPreview?: boolean;
@@ -638,7 +763,6 @@ export interface ClassicThemeRenderProps {
 
 /**
  * Supabase raw row for `classic_themes` table (snake_case).
- * Used for direct DB mapping before transformation.
  */
 export interface SupabaseClassicThemeRow {
   id:               string;
@@ -649,7 +773,7 @@ export interface SupabaseClassicThemeRow {
   is_published:     boolean;
   cultural_category: string | null;
   target_event:     string;
-  assets:           ClassicThemeAssets;  // stored as JSONB
+  assets:           ClassicThemeAssets;
   tags:             string[] | null;
   created_by:       string | null;
   created_at:       string;
