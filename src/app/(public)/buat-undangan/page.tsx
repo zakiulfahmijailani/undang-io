@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Heart, ChevronLeft, ChevronRight, AlertTriangle, Check } from "lucide-react";
@@ -49,13 +49,13 @@ function generateSlug(groomNick: string, brideNick: string) {
   return `${clean(groomNick)}-${clean(brideNick)}-${year}`;
 }
 
-export default function BuatUndangan() {
+// ── Inner component yang boleh pakai useSearchParams ──────────────────────────
+function BuatUndanganContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
 
-  // Form state
   const [form, setForm] = useState({
     groomFullName: "", groomNickname: "", groomFather: "", groomMother: "",
     brideFullName: "", brideNickname: "", brideFather: "", brideMother: "",
@@ -64,9 +64,7 @@ export default function BuatUndangan() {
     quote: QUOTE_PRESETS[0].text, quoteSource: QUOTE_PRESETS[0].source,
   });
 
-  // ── Hydrate dari sessionStorage & URL query param ──────────────
   useEffect(() => {
-    // 1. Baca ?theme= dari URL → pre-select tema & lompat ke step 2
     const themeFromUrl = searchParams.get("theme");
     if (themeFromUrl) {
       const match = activeThemes.find((t) => t.id === themeFromUrl);
@@ -76,7 +74,6 @@ export default function BuatUndangan() {
       }
     }
 
-    // 2. Baca draft dari sessionStorage → isi nama pria & wanita
     try {
       const raw = sessionStorage.getItem("undang_draft");
       if (raw) {
@@ -88,7 +85,6 @@ export default function BuatUndangan() {
           brideFullName: draft.bride_name || draft.bride_full_name || prev.brideFullName,
           brideNickname: draft.bride_name || prev.brideNickname,
         }));
-        // Hapus draft supaya tidak terpakai ulang
         sessionStorage.removeItem("undang_draft");
       }
     } catch (_) {}
@@ -98,7 +94,6 @@ export default function BuatUndangan() {
 
   const handlePublish = async () => {
     const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
-
     const sessionToken = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
@@ -106,13 +101,7 @@ export default function BuatUndangan() {
       const response = await fetch("/api/guest-sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionToken,
-          slug,
-          themeId: selectedThemeId,
-          expiresAt,
-          invitationData: form,
-        }),
+        body: JSON.stringify({ sessionToken, slug, themeId: selectedThemeId, expiresAt, invitationData: form }),
       });
 
       if (!response.ok) {
@@ -120,10 +109,7 @@ export default function BuatUndangan() {
         throw new Error(errorData.error?.message || "Gagal mempublikasikan undangan.");
       }
 
-      localStorage.setItem(
-        "guest_session",
-        JSON.stringify({ sessionToken, slug, expiresAt })
-      );
+      localStorage.setItem("guest_session", JSON.stringify({ sessionToken, slug, expiresAt }));
       localStorage.setItem("guest_return_slug", slug);
 
       toast.success("🚀 Undangan berhasil dipublikasikan!", {
@@ -133,33 +119,24 @@ export default function BuatUndangan() {
       router.push(`/u/${slug}`);
     } catch (error: any) {
       console.error("Publish Error:", error);
-      toast.error("Gagal publikasi", {
-        description: error.message || "Terjadi kesalahan sistem.",
-      });
+      toast.error("Gagal publikasi", { description: error.message || "Terjadi kesalahan sistem." });
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <Heart className="h-5 w-5 text-accent" fill="currentColor" />
-            <span className="font-bold text-foreground">
-              undang<span className="text-accent">.io</span>
-            </span>
+            <span className="font-bold text-foreground">undang<span className="text-accent">.io</span></span>
           </Link>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {[1, 2, 3].map((s) => (
               <div key={s} className={`flex items-center gap-1 ${s === step ? "font-semibold text-foreground" : ""}`}>
                 <span
                   className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-                    s < step
-                      ? "bg-accent text-accent-foreground"
-                      : s === step
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                    s < step ? "bg-accent text-accent-foreground" : s === step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {s < step ? <Check className="h-3 w-3" /> : s}
@@ -188,12 +165,7 @@ export default function BuatUndangan() {
                   onClick={() => setSelectedThemeId(theme.id)}
                 >
                   <div className="aspect-[9/16] max-h-52 overflow-hidden">
-                    <img
-                      src={theme.thumbnailUrl || "/placeholder.svg"}
-                      alt={theme.name}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
+                    <img src={theme.thumbnailUrl || "/placeholder.svg"} alt={theme.name} className="h-full w-full object-cover" loading="lazy" />
                   </div>
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between">
@@ -202,9 +174,7 @@ export default function BuatUndangan() {
                         <Badge className="bg-accent text-accent-foreground">Dipilih</Badge>
                       )}
                     </div>
-                    <Badge variant="secondary" className="mt-1 capitalize">
-                      {theme.culturalCategory}
-                    </Badge>
+                    <Badge variant="secondary" className="mt-1 capitalize">{theme.culturalCategory}</Badge>
                   </CardContent>
                 </Card>
               ))}
@@ -227,11 +197,8 @@ export default function BuatUndangan() {
             <Alert className="mb-6 border-accent/40 bg-accent/10">
               <AlertTriangle className="h-4 w-4 text-accent" />
               <AlertDescription className="text-sm cursor-pointer">
-                <strong>Perhatian:</strong> Data yang kamu isi di sini <strong>tidak akan tersimpan</strong> jika kamu
-                tidak mendaftar. Jika ingin menyimpan undangan dan mengaksesnya kapan saja, silakan{" "}
-                <Link href="/register" className="font-semibold text-accent underline">
-                  Daftar Gratis
-                </Link>{" "}
+                <strong>Perhatian:</strong> Data yang kamu isi di sini <strong>tidak akan tersimpan</strong> jika kamu tidak mendaftar. Jika ingin menyimpan undangan dan mengaksesnya kapan saja, silakan{" "}
+                <Link href="/register" className="font-semibold text-accent underline">Daftar Gratis</Link>{" "}
                 terlebih dahulu.
               </AlertDescription>
             </Alert>
@@ -239,195 +206,63 @@ export default function BuatUndangan() {
             <h1 className="mb-6 text-2xl font-bold text-foreground">Isi Data Undangan</h1>
 
             <div className="space-y-8">
-              {/* Mempelai Pria */}
               <Card>
                 <CardContent className="p-6">
                   <h2 className="mb-4 font-semibold text-foreground">👤 Mempelai Pria</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Nama Lengkap *</Label>
-                      <Input
-                        value={form.groomFullName}
-                        onChange={(e) => update("groomFullName", e.target.value)}
-                        placeholder="Budi Santoso, S.T."
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Panggilan *</Label>
-                      <Input
-                        value={form.groomNickname}
-                        onChange={(e) => update("groomNickname", e.target.value)}
-                        placeholder="Budi"
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Ayah</Label>
-                      <Input
-                        value={form.groomFather}
-                        onChange={(e) => update("groomFather", e.target.value)}
-                        placeholder="Bapak H. Ahmad Santoso"
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Ibu</Label>
-                      <Input
-                        value={form.groomMother}
-                        onChange={(e) => update("groomMother", e.target.value)}
-                        placeholder="Ibu Hj. Siti Aminah"
-                      />
-                    </div>
+                    <div><Label>Nama Lengkap *</Label><Input value={form.groomFullName} onChange={(e) => update("groomFullName", e.target.value)} placeholder="Budi Santoso, S.T." /></div>
+                    <div><Label>Nama Panggilan *</Label><Input value={form.groomNickname} onChange={(e) => update("groomNickname", e.target.value)} placeholder="Budi" /></div>
+                    <div><Label>Nama Ayah</Label><Input value={form.groomFather} onChange={(e) => update("groomFather", e.target.value)} placeholder="Bapak H. Ahmad Santoso" /></div>
+                    <div><Label>Nama Ibu</Label><Input value={form.groomMother} onChange={(e) => update("groomMother", e.target.value)} placeholder="Ibu Hj. Siti Aminah" /></div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Mempelai Wanita */}
               <Card>
                 <CardContent className="p-6">
                   <h2 className="mb-4 font-semibold text-foreground">👤 Mempelai Wanita</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Nama Lengkap *</Label>
-                      <Input
-                        value={form.brideFullName}
-                        onChange={(e) => update("brideFullName", e.target.value)}
-                        placeholder="Ayu Pratiwi, S.Pd."
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Panggilan *</Label>
-                      <Input
-                        value={form.brideNickname}
-                        onChange={(e) => update("brideNickname", e.target.value)}
-                        placeholder="Ayu"
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Ayah</Label>
-                      <Input
-                        value={form.brideFather}
-                        onChange={(e) => update("brideFather", e.target.value)}
-                        placeholder="Bapak H. Surya Pratama"
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Ibu</Label>
-                      <Input
-                        value={form.brideMother}
-                        onChange={(e) => update("brideMother", e.target.value)}
-                        placeholder="Ibu Hj. Ratna Dewi"
-                      />
-                    </div>
+                    <div><Label>Nama Lengkap *</Label><Input value={form.brideFullName} onChange={(e) => update("brideFullName", e.target.value)} placeholder="Ayu Pratiwi, S.Pd." /></div>
+                    <div><Label>Nama Panggilan *</Label><Input value={form.brideNickname} onChange={(e) => update("brideNickname", e.target.value)} placeholder="Ayu" /></div>
+                    <div><Label>Nama Ayah</Label><Input value={form.brideFather} onChange={(e) => update("brideFather", e.target.value)} placeholder="Bapak H. Surya Pratama" /></div>
+                    <div><Label>Nama Ibu</Label><Input value={form.brideMother} onChange={(e) => update("brideMother", e.target.value)} placeholder="Ibu Hj. Ratna Dewi" /></div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Acara */}
               <Card>
                 <CardContent className="p-6">
                   <h2 className="mb-4 font-semibold text-foreground">📅 Akad Nikah</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Tanggal</Label>
-                      <Input
-                        type="date"
-                        value={form.akadDate}
-                        onChange={(e) => update("akadDate", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Jam</Label>
-                      <Input
-                        type="time"
-                        value={form.akadTime}
-                        onChange={(e) => update("akadTime", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Gedung/Tempat</Label>
-                      <Input
-                        value={form.akadVenue}
-                        onChange={(e) => update("akadVenue", e.target.value)}
-                        placeholder="Masjid Agung Al-Azhar"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Alamat</Label>
-                      <Input
-                        value={form.akadAddress}
-                        onChange={(e) => update("akadAddress", e.target.value)}
-                        placeholder="Jl. Sisingamangaraja..."
-                      />
-                    </div>
+                    <div><Label>Tanggal</Label><Input type="date" value={form.akadDate} onChange={(e) => update("akadDate", e.target.value)} /></div>
+                    <div><Label>Jam</Label><Input type="time" value={form.akadTime} onChange={(e) => update("akadTime", e.target.value)} /></div>
+                    <div><Label>Nama Gedung/Tempat</Label><Input value={form.akadVenue} onChange={(e) => update("akadVenue", e.target.value)} placeholder="Masjid Agung Al-Azhar" /></div>
+                    <div className="sm:col-span-2"><Label>Alamat</Label><Input value={form.akadAddress} onChange={(e) => update("akadAddress", e.target.value)} placeholder="Jl. Sisingamangaraja..." /></div>
                   </div>
 
                   <h2 className="mb-4 mt-8 font-semibold text-foreground">🎉 Resepsi</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Tanggal</Label>
-                      <Input
-                        type="date"
-                        value={form.receptionDate}
-                        onChange={(e) => update("receptionDate", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Jam</Label>
-                      <Input
-                        type="time"
-                        value={form.receptionTime}
-                        onChange={(e) => update("receptionTime", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Nama Gedung/Tempat</Label>
-                      <Input
-                        value={form.receptionVenue}
-                        onChange={(e) => update("receptionVenue", e.target.value)}
-                        placeholder="Balai Kartini"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Alamat</Label>
-                      <Input
-                        value={form.receptionAddress}
-                        onChange={(e) => update("receptionAddress", e.target.value)}
-                        placeholder="Jl. Gatot Subroto..."
-                      />
-                    </div>
+                    <div><Label>Tanggal</Label><Input type="date" value={form.receptionDate} onChange={(e) => update("receptionDate", e.target.value)} /></div>
+                    <div><Label>Jam</Label><Input type="time" value={form.receptionTime} onChange={(e) => update("receptionTime", e.target.value)} /></div>
+                    <div><Label>Nama Gedung/Tempat</Label><Input value={form.receptionVenue} onChange={(e) => update("receptionVenue", e.target.value)} placeholder="Balai Kartini" /></div>
+                    <div className="sm:col-span-2"><Label>Alamat</Label><Input value={form.receptionAddress} onChange={(e) => update("receptionAddress", e.target.value)} placeholder="Jl. Gatot Subroto..." /></div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Quote */}
               <Card>
                 <CardContent className="p-6">
                   <h2 className="mb-4 font-semibold text-foreground">✨ Ayat / Quote</h2>
                   <div className="mb-4 flex flex-wrap gap-2">
                     {QUOTE_PRESETS.map((q, i) => (
-                      <Badge
-                        key={i}
-                        variant={form.quote === q.text ? "default" : "secondary"}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          update("quote", q.text);
-                          update("quoteSource", q.source);
-                        }}
-                      >
+                      <Badge key={i} variant={form.quote === q.text ? "default" : "secondary"} className="cursor-pointer"
+                        onClick={() => { update("quote", q.text); update("quoteSource", q.source); }}>
                         {q.source}
                       </Badge>
                     ))}
                   </div>
-                  <Textarea
-                    value={form.quote}
-                    onChange={(e) => update("quote", e.target.value)}
-                    rows={3}
-                  />
-                  <Input
-                    className="mt-2"
-                    value={form.quoteSource}
-                    onChange={(e) => update("quoteSource", e.target.value)}
-                    placeholder="Sumber"
-                  />
+                  <Textarea value={form.quote} onChange={(e) => update("quote", e.target.value)} rows={3} />
+                  <Input className="mt-2" value={form.quoteSource} onChange={(e) => update("quoteSource", e.target.value)} placeholder="Sumber" />
                 </CardContent>
               </Card>
             </div>
@@ -436,12 +271,7 @@ export default function BuatUndangan() {
               <Button variant="secondary" onClick={() => setStep(1)} className="cursor-pointer">
                 <ChevronLeft className="mr-1 h-4 w-4" /> Kembali
               </Button>
-              <Button
-                size="lg"
-                disabled={!form.groomFullName || !form.brideFullName}
-                onClick={() => setStep(3)}
-                className="cursor-pointer"
-              >
+              <Button size="lg" disabled={!form.groomFullName || !form.brideFullName} onClick={() => setStep(3)} className="cursor-pointer">
                 Lanjut ke Publish <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
@@ -454,7 +284,6 @@ export default function BuatUndangan() {
             <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="mb-4 cursor-pointer">
               <ChevronLeft className="mr-1 h-4 w-4" /> Kembali ke Data
             </Button>
-
             <Heart className="mx-auto mb-4 h-16 w-16 text-accent" />
             <h1 className="mb-2 text-2xl font-bold text-foreground">Undangan Siap Dipublikasikan!</h1>
             <p className="mb-2 text-muted-foreground">
@@ -464,29 +293,32 @@ export default function BuatUndangan() {
             <p className="mb-8 text-sm text-muted-foreground">
               Tema: <strong>{activeThemes.find((t) => t.id === selectedThemeId)?.name}</strong>
             </p>
-
             <Alert className="mb-6 border-accent/40 bg-accent/10 text-left">
               <AlertTriangle className="h-4 w-4 text-accent" />
               <AlertDescription className="text-sm">
-                Undangan akan <strong>live selama 15 menit</strong>. Untuk menyimpan selamanya, daftar akun dan bayar Rp
-                49.000.
+                Undangan akan <strong>live selama 15 menit</strong>. Untuk menyimpan selamanya, daftar akun dan bayar Rp 49.000.
               </AlertDescription>
             </Alert>
-
             <Button size="lg" className="w-full gap-2 text-base cursor-pointer" onClick={handlePublish}>
               🚀 Publikasikan Undangan Sekarang
             </Button>
-
             <p className="mt-4 text-xs text-muted-foreground">
               Belum punya akun?{" "}
-              <Link href="/register" className="text-accent underline">
-                Daftar gratis
-              </Link>{" "}
+              <Link href="/register" className="text-accent underline">Daftar gratis</Link>{" "}
               untuk menyimpan undangan.
             </p>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+// ── Page export: wrap dengan Suspense ────────────────────────────────────────
+export default function BuatUndangan() {
+  return (
+    <Suspense fallback={null}>
+      <BuatUndanganContent />
+    </Suspense>
   );
 }
