@@ -9,6 +9,7 @@ import {
     Users, MailOpen, MessageSquareHeart, LayoutTemplate, Clock, CreditCard
 } from "lucide-react";
 import Link from "next/link";
+import { AutoClaimSession } from "./AutoClaimSession";
 
 export default async function MyInvitationsPage() {
     const supabase = await createServerSupabaseClient();
@@ -63,15 +64,18 @@ export default async function MyInvitationsPage() {
         return { id: inv.id, slug: inv.slug, title, date, status: inv.status, statusLabel, statusStyle, views: 0, rsvps: 0, messages: 0, isPermanent: true };
     });
 
-    // 2. Fetch claimed guest sessions — belum bayar, belum expired
+    // 2. Fetch guest sessions milik user ini — status 'preview' (belum diclaim) ATAU 'claimed' (sudah login, belum bayar)
+    // Bug sebelumnya: hanya ambil 'claimed', padahal session dibuat dengan status='preview'
+    // Fix: ambil keduanya selama belum expired dan belum dikonversi ke undangan permanen
     let claimedSessions: any[] = [];
     const adminClient = getAdminClient();
     if (adminClient) {
         const { data: guestSessions, error: gsError } = await adminClient
             .from('guest_sessions')
-            .select('id, slug, invitation_data, expires_at, created_at')
+            .select('id, slug, invitation_data, expires_at, created_at, status, session_token')
             .eq('user_id', user.id)
-            .eq('status', 'claimed')
+            .in('status', ['preview', 'claimed'])
+            .is('converted_to_invitation_id', null)
             .gt('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false });
 
@@ -85,9 +89,11 @@ export default async function MyInvitationsPage() {
             const brideName = inv.brideNickname || inv.brideFullName || 'Mempelai Wanita';
             const expiresAt = new Date(gs.expires_at);
             const minutesLeft = Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 60000));
+            // Tampilkan sebagai 'claimed' di UI agar konsisten (status preview = belum diclaim tapi user sudah login)
             return {
                 id: gs.id,
                 slug: gs.slug,
+                sessionToken: gs.session_token,
                 title: `${groomName} & ${brideName}`,
                 date: 'Tanggal belum ditentukan',
                 status: 'claimed',
@@ -96,15 +102,25 @@ export default async function MyInvitationsPage() {
                 views: 0, rsvps: 0, messages: 0,
                 isPermanent: false,
                 minutesLeft,
+                needsClaim: gs.status === 'preview', // masih perlu di-claim untuk extend timer
             };
         });
     }
 
-    // Merge: claimed sessions first, then permanent invitations
+    // Merge: guest sessions first (tampilkan yang perlu dibayar di atas), then permanent invitations
     const allItems = [...claimedSessions, ...permanentInvitations];
+
+    // Kumpulkan session tokens yang masih 'preview' untuk di-auto-claim oleh client
+    const previewTokensToAutoClaim = claimedSessions
+        .filter((s: any) => s.needsClaim)
+        .map((s: any) => s.sessionToken)
+        .filter(Boolean);
 
     return (
         <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-10">
+            {/* Auto-claim: panggil endpoint claim untuk session yang masih 'preview' agar timer di-extend */}
+            <AutoClaimSession tokens={previewTokensToAutoClaim} />
+
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
