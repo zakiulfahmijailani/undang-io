@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Clock, Eye, CreditCard, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface GuestSessionCardProps {
     guestSession: {
@@ -50,65 +54,70 @@ export default function GuestSessionCard({ guestSession }: GuestSessionCardProps
     const brideName = inv?.brideNickname || inv?.brideFullName || "Mempelai Wanita";
 
     return (
-        <div className={`rounded-[32px] overflow-hidden border transition-all duration-500 relative ${
-            isUrgent ? "border-amber-400 bg-amber-50/30" : "border-outline-variant/10 bg-white"
-        }`}>
-            {/* Urgency Overlay */}
-            {isUrgent && (
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400 rotate-45 translate-x-16 -translate-y-16 opacity-10 pointer-events-none"></div>
-            )}
+        <Card className="border-amber-200 bg-amber-50/40 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            {/* Timer badge top right */}
+            <div className="absolute top-3 right-3">
+                {isExpired ? (
+                    <Badge variant="destructive" className="flex items-center gap-1 text-xs">
+                        <AlertTriangle className="h-3 w-3" /> Expired
+                    </Badge>
+                ) : (
+                    <Badge
+                        className={`flex items-center gap-1 text-xs font-mono ${
+                            isUrgent
+                                ? "bg-red-500 text-white"
+                                : "bg-amber-500 text-white"
+                        }`}
+                    >
+                        <Clock className="h-3 w-3" />
+                        {display}
+                    </Badge>
+                )}
+            </div>
 
-            <div className="p-8">
-                <div className="flex justify-between items-start mb-6">
-                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm ${
-                        isUrgent ? "bg-amber-400 text-white animate-pulse" : "bg-primary-fixed text-on-primary-fixed"
-                    }`}>
-                        {isExpired ? "Expired" : "Free Trial Active"}
+            <CardContent className="p-5 pt-5">
+                {/* Label sementara */}
+                <div className="mb-3">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                        Belum Dipublikasikan
                     </span>
-                    
-                    {!isExpired && (
-                        <div className="flex items-center gap-2 font-mono text-sm font-bold text-primary">
-                            <span className="material-symbols-outlined text-sm">schedule</span>
-                            {display}
-                        </div>
-                    )}
                 </div>
 
-                <h3 className="text-2xl font-black text-primary tracking-tighter italic font-light mb-2">
+                {/* Nama pasangan */}
+                <h3 className="font-serif text-xl font-bold text-stone-800 mb-1">
                     {groomName} & {brideName}
                 </h3>
-                <p className="text-slate-400 text-xs font-['Inter'] mb-8 leading-relaxed">
-                   Undangan ini bersifat sementara. Amankan mahakarya Anda ke lisensi permanen sebelum waktu habis.
+                <p className="text-sm text-stone-500 mb-4">
+                    {isExpired
+                        ? "Undangan ini sudah kadaluarsa."
+                        : `Bayar sebelum timer habis untuk mempublikasikan permanen.`}
                 </p>
 
-                <div className="flex items-center gap-3">
-                    {!isExpired ? (
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 flex-wrap">
+                    {!isExpired && (
                         <>
-                            <Link 
-                                href={`/pembayaran/${guestSession.slug}`}
-                                className="flex-1 bg-tertiary text-on-tertiary rounded-2xl py-4 flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-tertiary/20"
-                            >
-                                <span className="material-symbols-outlined text-lg">payments</span>
-                                Pay & Publish
-                            </Link>
-                            <Link 
-                                href={`/u/${guestSession.slug}`}
-                                className="px-6 border border-outline-variant/20 rounded-2xl py-4 flex items-center justify-center text-primary hover:bg-surface-container-low transition-colors"
-                            >
-                                <span className="material-symbols-outlined text-xl">visibility</span>
-                            </Link>
+                            <Button size="sm" className="gap-1 cursor-pointer" asChild>
+                                <Link href={`/pembayaran/${guestSession.slug}`}>
+                                    <CreditCard className="h-3.5 w-3.5" />
+                                    Bayar Rp 45.000
+                                </Link>
+                            </Button>
+                            <Button size="sm" variant="secondary" className="gap-1 cursor-pointer" asChild>
+                                <Link href={`/u/${guestSession.slug}`}>
+                                    <Eye className="h-3.5 w-3.5" />
+                                    Lihat Preview
+                                </Link>
+                            </Button>
                         </>
-                    ) : (
-                        <Link 
-                            href="/buat-undangan"
-                            className="w-full bg-surface-container-high text-primary rounded-2xl py-4 flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest"
-                        >
-                            <span className="material-symbols-outlined">restart_alt</span>
-                            Start Over
-                        </Link>
+                    )}
+                    {isExpired && (
+                        <Button size="sm" variant="secondary" className="cursor-pointer" asChild>
+                            <Link href="/buat-undangan">Buat Ulang</Link>
+                        </Button>
                     )}
                 </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 }

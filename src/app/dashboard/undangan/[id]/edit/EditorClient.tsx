@@ -33,10 +33,10 @@ interface EditorClientProps {
 // ── Reusable field wrapper ──────────────────────────────────────
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
     return (
-        <div className="space-y-2 group">
-            <label className="block text-[13px] font-bold text-secondary-stitch tracking-wide transition-colors group-hover:text-primary-stitch">{label}</label>
+        <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-stone-700">{label}</label>
             {children}
-            {hint && <p className="text-[11px] text-outline-stitch font-medium">{hint}</p>}
+            {hint && <p className="text-xs text-stone-400">{hint}</p>}
         </div>
     );
 }
@@ -44,17 +44,13 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 // ── Section block ───────────────────────────────────────────────
 function Section({ title, accent, children }: { title: string; accent?: "amber" | "rose"; children: React.ReactNode }) {
     const dot = accent === "rose" ? "bg-rose-400" : "bg-amber-400";
-    const bg = accent === "rose" ? "bg-rose-50/30 border-rose-100" : "bg-amber-50/30 border-amber-100";
     return (
-        <div className={`space-y-5 p-6 rounded-[2rem] border relative overflow-hidden transition-all duration-300 hover:shadow-sm ${bg}`}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/40 to-transparent rounded-bl-full -z-10" />
-            <div className="flex items-center gap-2.5 mb-2">
-                <span className={`w-2 h-2 rounded-full ${dot} shadow-sm`} />
-                <h3 className="font-bold text-secondary-stitch text-[10px] uppercase tracking-[0.25em]">{title}</h3>
+        <div className="space-y-4 p-4 bg-stone-50 rounded-2xl border border-stone-100">
+            <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${dot}`} />
+                <h3 className="font-bold text-stone-700 text-sm uppercase tracking-wide">{title}</h3>
             </div>
-            <div className="space-y-5">
-                {children}
-            </div>
+            {children}
         </div>
     );
 }
@@ -70,13 +66,13 @@ function SectionToggle({ sectionId, visibility, onChange }: {
         <button
             type="button"
             onClick={() => onChange({ ...visibility, [sectionId]: !isVisible })}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[10px] font-black tracking-widest uppercase transition-all ${isVisible
-                ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${isVisible
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                : "bg-stone-100 border-stone-200 text-stone-400"
                 }`}
         >
-            <span className={`relative w-9 h-5 rounded-full transition-colors duration-300 flex-shrink-0 ${isVisible ? "bg-emerald-500" : "bg-slate-300"}`}>
-                <span className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isVisible ? "translate-x-4" : "translate-x-0"}`} />
+            <span className={`w-7 h-4 rounded-full relative transition-colors ${isVisible ? "bg-emerald-500" : "bg-stone-300"}`}>
+                <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-3.5" : "translate-x-0.5"}`} />
             </span>
             {isVisible ? "Ditampilkan" : "Disembunyikan"}
         </button>
@@ -101,54 +97,58 @@ function SortableTabItem({ tab, isActive, isLocked, isVisible, canDrag, onSelect
         <div
             ref={setNodeRef}
             style={{ transform: CSS.Transform.toString(transform), transition }}
-            className={`flex items-center relative mb-0.5 group transition-all duration-200 ${isActive ? "bg-surface-stitch" : "bg-transparent hover:bg-surface-container-stitch/40"} ${isDragging ? "opacity-50 z-50 ring-2 ring-primary-stitch/30 rounded-lg" : ""}`}
+            className={`flex items-center relative bg-white ${isDragging ? "opacity-50 z-50" : ""}`}
         >
-            {/* Left column: drag handle — fixed width */}
-            <div className="w-8 flex-shrink-0 flex items-center justify-center">
-                {canDrag ? (
-                    <button
-                        {...attributes}
-                        {...listeners}
-                        className="p-1 text-outline-variant-stitch hover:text-secondary-stitch cursor-grab active:cursor-grabbing touch-none"
-                    >
-                        <GripVertical className="w-4 h-4" />
-                    </button>
-                ) : (
-                    <span className="w-4" />
-                )}
-            </div>
+            {/* Drag handle — hanya muncul kalau bisa di-drag */}
+            {canDrag ? (
+                <button
+                    {...attributes}
+                    {...listeners}
+                    className="pl-2 pr-1 py-3 text-stone-200 hover:text-stone-400 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+                >
+                    <GripVertical className="w-3.5 h-3.5" />
+                </button>
+            ) : (
+                <span className="pl-2 pr-1 py-3 w-7 flex-shrink-0" />
+            )}
 
-            {/* Middle column: tab label — fills remaining space */}
+            {/* Tombol tab utama */}
             <button
                 onClick={onSelect}
-                className={`flex-1 min-w-0 flex items-center gap-2.5 py-3 text-sm transition-all text-left relative ${isActive
-                    ? "text-primary-stitch font-black tracking-tight"
-                    : "text-secondary-stitch hover:text-primary-stitch font-semibold"
+                className={`flex-1 flex items-center gap-2 py-3 pr-2 text-sm font-medium transition-all text-left relative ${isActive
+                    ? "text-amber-800 font-semibold"
+                    : "text-stone-600 hover:text-stone-900"
                     }`}
             >
                 {isActive && (
-                    <span className="absolute -left-8 top-1 bottom-1 w-1.5 bg-tertiary-stitch rounded-r-full shadow-sm shadow-tertiary-stitch/30" />
+                    <span className="absolute -left-7 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
                 )}
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-tertiary-stitch" : "text-outline-stitch"}`} />
-                <span className="truncate tracking-tight">{tab.label}</span>
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-amber-500" : "text-stone-400"}`} />
+                <span className="truncate text-xs">{tab.label}</span>
             </button>
 
-            {/* Right column: toggle/lock — FIXED width so all rows align */}
-            <div className="w-14 flex-shrink-0 flex items-center justify-center">
-                {onToggle && !isLocked ? (
-                    <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); onToggle(); }}
-                        title={isVisible ? "Sembunyikan section" : "Tampilkan section"}
-                    >
-                        <span className={`relative w-9 h-5 rounded-full block transition-colors duration-300 ${isVisible ? "bg-emerald-500" : "bg-slate-300"}`}>
-                            <span className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${isVisible ? "translate-x-4" : "translate-x-0"}`} />
-                        </span>
-                    </button>
-                ) : isLocked ? (
-                    <Lock className="w-3.5 h-3.5 text-outline-variant-stitch" />
-                ) : null}
-            </div>
+            {/* Toggle on/off — kalau tidak locked */}
+            {onToggle && !isLocked && (
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                    className="pr-2 flex-shrink-0"
+                    title={isVisible ? "Sembunyikan section" : "Tampilkan section"}
+                >
+                    <span className={`w-7 h-4 rounded-full relative flex items-center transition-colors ${isVisible ? "bg-emerald-400" : "bg-stone-200"
+                        }`}>
+                        <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${isVisible ? "translate-x-3.5" : "translate-x-0.5"
+                            }`} />
+                    </span>
+                </button>
+            )}
+
+            {/* Lock icon — kalau wajib tampil */}
+            {isLocked && (
+                <span className="pr-2 flex-shrink-0" title="Wajib tampil">
+                    <Lock className="w-3 h-3 text-stone-300" />
+                </span>
+            )}
         </div>
     );
 }
@@ -165,7 +165,7 @@ const ALL_TABS = [
     { id: "ayat", label: "Ayat & Quote", icon: Type, sectionId: "quote" },
     { id: "musik", label: "Musik", icon: Music, sectionId: "music" },
 ];
-const LOCKED_TABS = ["mempelai", "fotocover", "musik"];
+const LOCKED_TABS = ["mempelai", "fotocover"];
 const NO_REORDER_TABS = ["mempelai", "fotocover", "musik"];
 
 
@@ -332,31 +332,31 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
 
     return (
-        <div className="flex flex-col h-full bg-surface-stitch min-h-screen">
+        <div className="flex flex-col h-full bg-stone-50 min-h-screen">
 
             {/* ── Sticky Header ── */}
-            <div className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl bg-gradient-to-b from-slate-200/20 to-transparent border-b border-outline-variant-stitch/20 px-6 py-4">
-                <div className="max-w-full mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between">
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <Link href={`/dashboard/undangan/${initialData.id}`} className="p-2.5 rounded-full text-secondary-stitch hover:text-primary-stitch hover:bg-surface-container-stitch transition-all">
+            <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200 px-4 py-3 shadow-sm">
+                <div className="max-w-full mx-auto flex flex-col sm:flex-row gap-3 items-center justify-between">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <Link href={`/dashboard/undangan/${initialData.id}`} className="p-1.5 rounded-lg text-stone-500 hover:text-amber-600 hover:bg-amber-50 transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <div>
-                            <h1 className="font-headline font-black text-xl text-primary-stitch tracking-tight line-clamp-1 truncate max-w-[200px] md:max-w-xs">
+                            <h1 className="font-serif font-bold text-lg text-stone-800 line-clamp-1 truncate max-w-[200px] md:max-w-xs">
                                 Edit: {coupleName}
                             </h1>
-                            <p className="text-[10px] text-outline-stitch font-mono tracking-wider ml-0.5">undang.io/invite/{formData.slug}</p>
+                            <p className="text-xs text-stone-400 font-mono">undang.io/invite/{formData.slug}</p>
                         </div>
                     </div>
-                    <div className="flex w-full sm:w-auto items-center gap-3">
+                    <div className="flex w-full sm:w-auto items-center gap-2">
                         {/* Mobile only — Edit/Preview toggle */}
-                        <div className="md:hidden flex flex-1 rounded-2xl border border-outline-variant-stitch/30 bg-surface-container-stitch p-0.5 shrink-0">
+                        <div className="md:hidden flex rounded-xl border border-stone-200 bg-stone-100 p-0.5 flex-shrink-0">
                             <button
                                 type="button"
                                 onClick={() => setMobileMode("edit")}
-                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all ${mobileMode === "edit"
-                                    ? "bg-surface-container-lowest-stitch text-primary-stitch shadow-sm"
-                                    : "text-outline-stitch"
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mobileMode === "edit"
+                                    ? "bg-white text-stone-800 shadow-sm"
+                                    : "text-stone-400"
                                     }`}
                             >
                                 ✏️ Edit
@@ -364,9 +364,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                             <button
                                 type="button"
                                 onClick={() => setMobileMode("preview")}
-                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all ${mobileMode === "preview"
-                                    ? "bg-surface-container-lowest-stitch text-primary-stitch shadow-sm"
-                                    : "text-outline-stitch"
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mobileMode === "preview"
+                                    ? "bg-white text-stone-800 shadow-sm"
+                                    : "text-stone-400"
                                     }`}
                             >
                                 👁 Preview
@@ -374,21 +374,21 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                         </div>
                         <Button
                             variant="secondary"
-                            className="hidden md:flex h-11 border-outline-variant-stitch/40 text-secondary-stitch bg-transparent hover:bg-surface-container-stitch rounded-full px-6 text-sm font-semibold transition-all"
+                            className="hidden md:flex h-9 border-stone-200 text-stone-600 bg-white hover:bg-stone-50 text-sm"
                             onClick={() => setShowPreview(p => !p)}
                         >
                             {showPreview
-                                ? <><EyeOff className="w-4 h-4 mr-2" />Sembunyikan Preview</>
-                                : <><Eye className="w-4 h-4 mr-2" />Tampilkan Preview</>}
+                                ? <><EyeOff className="w-4 h-4 mr-1.5" />Sembunyikan Preview</>
+                                : <><Eye className="w-4 h-4 mr-1.5" />Tampilkan Preview</>}
                         </Button>
                         <Button
                             onClick={handleSaveAll}
                             disabled={isSaving}
-                            className="flex-1 sm:flex-none h-11 bg-primary-stitch text-on-primary-stitch rounded-full px-8 py-2 font-bold shadow-lg shadow-primary-stitch/20 hover:opacity-90 transition-all active:scale-95 border-0"
+                            className="flex-1 sm:flex-none h-9 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md border-0 font-semibold"
                         >
                             {isSaving
-                                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Menyimpan...</>
-                                : <><Save className="w-4 h-4 mr-2" />Simpan Semua</>}
+                                ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" />Menyimpan...</>
+                                : <><Save className="w-4 h-4 mr-1.5" />Simpan Semua</>}
                         </Button>
                     </div>
                 </div>
@@ -398,16 +398,16 @@ export default function EditorClient({ initialData }: EditorClientProps) {
             <div className="flex flex-col md:flex-row flex-1" style={{ minHeight: "calc(100vh - 64px)" }}>
 
                 {/* LEFT — Editor Form */}
-                <div className={`flex flex-col overflow-hidden bg-surface-container-low-stitch transition-all duration-300 md:sticky md:top-0 md:h-[calc(100vh-80px)]
+                <div className={`flex flex-col overflow-hidden bg-stone-50 transition-all duration-300 md:sticky md:top-0 md:h-screen
     ${mobileMode === "preview" ? "hidden md:flex" : "flex"}
-    ${showPreview ? "w-full md:w-[640px] lg:w-[720px] md:flex-shrink-0 shadow-2xl shadow-primary-stitch/5 z-10" : "w-full"}
+    ${showPreview ? "w-full md:w-[420px] lg:w-[460px] md:flex-shrink-0" : "w-full"}
 `}>
 
                     {/* Tab Nav — vertical sidebar style */}
-                    <div className="flex md:flex-row overflow-x-auto md:overflow-visible flex-shrink-0 border-b border-outline-variant-stitch/20 bg-surface-container-lowest-stitch">
-                        <nav className="flex md:flex-col w-full md:w-auto md:border-r md:border-outline-variant-stitch/20 md:bg-surface-container-lowest-stitch overflow-x-auto scrollbar-hide">
+                    <div className="flex md:flex-row overflow-x-auto md:overflow-visible flex-shrink-0 border-b border-stone-200 bg-white">
+                        <nav className="flex md:flex-col w-full md:w-auto md:border-r md:border-stone-200 md:bg-white overflow-x-auto scrollbar-hide">
                             {/* Mobile: horizontal scroll pills with reorder */}
-                            <div className="md:hidden flex gap-2 px-4 py-4 overflow-x-auto scrollbar-hide">
+                            <div className="md:hidden flex gap-1 px-3 py-2.5 overflow-x-auto scrollbar-hide">
                                 {tabs.map((tab) => {
                                     const Icon = tab.icon;
                                     const isActive = activeTab === tab.id;
@@ -441,9 +441,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                     return (
                                         <div
                                             key={tab.id}
-                                            className={`flex-shrink-0 flex items-center rounded-2xl border text-[10px] font-black tracking-widest uppercase transition-all overflow-hidden ${isActive
-                                                ? "bg-primary-stitch border-primary-stitch text-on-primary-stitch shadow-lg shadow-primary-stitch/20"
-                                                : "bg-surface-container-stitch border-outline-variant-stitch/30 text-secondary-stitch"
+                                            className={`flex-shrink-0 flex items-center rounded-2xl border text-xs font-semibold transition-all overflow-hidden ${isActive
+                                                ? "bg-stone-900 border-stone-900 text-white"
+                                                : "bg-stone-100 border-stone-200 text-stone-600"
                                                 }`}
                                         >
                                             {/* Tombol reorder — hanya untuk yang bisa dipindah */}
@@ -492,15 +492,15 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                             [sectionId]: !current,
                                                         });
                                                     }}
-                                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 mx-1 rounded-xl border text-[10px] font-bold transition-all flex-shrink-0 ${isVisible !== false
-                                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-                                                        : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
+                                                    className={`flex items-center gap-1 px-2 py-1.5 mx-1 rounded-xl border text-[10px] font-bold transition-all flex-shrink-0 ${isVisible !== false
+                                                        ? "bg-emerald-500 border-emerald-500 text-white"
+                                                        : "bg-stone-200 border-stone-300 text-stone-400"
                                                         }`}
                                                     title={isVisible !== false ? "Tampil" : "Disembunyikan"}
                                                 >
-                                                    <span className={`relative w-7 h-4 rounded-full transition-colors duration-300 flex-shrink-0 block ${isVisible !== false ? "bg-emerald-500" : "bg-slate-300"
+                                                    <span className={`w-5 h-3 rounded-full relative flex items-center transition-colors ${isVisible !== false ? "bg-white/30" : "bg-stone-300/40"
                                                         }`}>
-                                                        <span className={`absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-300 ${isVisible !== false ? "translate-x-3" : "translate-x-0"
+                                                        <span className={`absolute top-0.5 w-2 h-2 bg-white rounded-full shadow transition-transform ${isVisible !== false ? "translate-x-2.5" : "translate-x-0.5"
                                                             }`} />
                                                     </span>
                                                     {isVisible !== false ? "ON" : "OFF"}
@@ -517,7 +517,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                     <div className="flex flex-1 overflow-hidden">
 
                         {/* Vertical tab list — desktop only, draggable */}
-                        <nav className="hidden md:flex flex-col w-52 flex-shrink-0 border-r border-outline-variant-stitch/20 bg-surface-container-lowest-stitch overflow-y-auto py-4">
+                        <nav className="hidden md:flex flex-col w-44 flex-shrink-0 border-r border-stone-200 bg-white overflow-y-auto py-2">
                             <DndContext
                                 sensors={useSensors(
                                     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -577,19 +577,15 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                         </nav>
 
                         {/* Tab content area */}
-                        <div className="flex-1 overflow-y-auto bg-surface-stitch relative">
-                            {/* Decorative background accent */}
-                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-stitch/[0.02] rounded-full blur-[100px] pointer-events-none" />
-                            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tertiary-stitch/[0.03] rounded-full blur-[100px] pointer-events-none" />
-
-                            <div className="p-6 md:p-8 space-y-8 max-w-2xl mx-auto relative z-10 pb-24">
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="p-5 space-y-6">
 
                                 {/* ── INFO DASAR ── */}
                                 {activeTab === "infodasar" && (
-                                    <div className="space-y-8 animate-in fade-in duration-300">
+                                    <div className="space-y-6 animate-in fade-in duration-200">
                                         <div>
-                                            <h2 className="text-2xl font-headline font-black text-primary-stitch tracking-tight">Informasi Dasar</h2>
-                                            <p className="text-xs text-outline-stitch mt-1 tracking-wide uppercase font-bold">Nama panggilan dan status halaman publik.</p>
+                                            <h2 className="text-xl font-serif font-bold text-stone-800">Informasi Dasar</h2>
+                                            <p className="text-sm text-stone-400 mt-1">Nama panggilan dan status halaman publik.</p>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-3">
@@ -598,7 +594,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                     value={formData.groom_name}
                                                     onChange={e => handleChange("groom_name", e.target.value)}
                                                     placeholder="Budi"
-                                                    className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm"
+                                                    className="text-base py-3"
                                                 />
                                             </Field>
                                             <Field label="Panggilan Wanita">
@@ -606,15 +602,13 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                     value={formData.bride_name}
                                                     onChange={e => handleChange("bride_name", e.target.value)}
                                                     placeholder="Ayu"
-                                                    className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm"
+                                                    className="text-base py-3"
                                                 />
                                             </Field>
                                         </div>
 
                                         <Field label="Status Undangan" hint="Ubah ke Aktif agar tamu bisa melihat undangan.">
-                                            <Select id="status" value={formData.status} onChange={e => handleChange("status", e.target.value)}
-                                                className="rounded-2xl border border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm"
-                                            >
+                                            <Select id="status" value={formData.status} onChange={e => handleChange("status", e.target.value)}>
                                                 <option value="unpaid">Belum Aktif (Draft)</option>
                                                 <option value="active">Aktif (Publik)</option>
                                                 <option value="expired">Kedaluwarsa</option>
@@ -626,7 +620,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                 <Input
                                                     value={`undang.io/invite/${formData.slug}`}
                                                     readOnly
-                                                    className="bg-surface-container-stitch text-outline-stitch text-xs font-mono border-outline-variant-stitch/20"
+                                                    className="bg-stone-50 text-stone-500 text-sm font-mono"
                                                 />
                                                 <Button
                                                     variant="secondary"
@@ -643,16 +637,20 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                 {/* ── FOTO & COVER ── */}
                                 {activeTab === "fotocover" && (
-                                    <div className="space-y-6 animate-in fade-in duration-300">
-
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Foto & Cover</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Upload foto utama pasangan.</p>
+                                            </div></div>
 
                                         {formData.couple_photo_url && (
-                                            <div className="relative w-full rounded-[2.5rem] overflow-hidden border border-outline-variant-stitch/20 shadow-xl shadow-primary-stitch/5">
+                                            <div className="relative w-full rounded-2xl overflow-hidden border border-stone-200 shadow-sm">
                                                 <Image
                                                     src={formData.couple_photo_url}
                                                     alt="Foto pasangan"
                                                     width={480} height={280}
-                                                    className="w-full object-cover max-h-64"
+                                                    className="w-full object-cover max-h-52"
                                                     unoptimized={formData.couple_photo_url.startsWith("http://localhost") || formData.couple_photo_url.startsWith("/uploads")}
                                                 />
                                                 <button
@@ -666,9 +664,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                         <div
                                             onClick={() => !isUploading && fileInputRef.current?.click()}
-                                            className={`flex flex-col items-center justify-center gap-4 p-10 rounded-[2.5rem] border-2 border-dashed cursor-pointer transition-all ${isUploading
-                                                ? "border-tertiary-stitch bg-surface-container-stitch cursor-wait"
-                                                : "border-outline-variant-stitch/50 hover:border-primary-stitch hover:bg-surface-container-lowest-stitch"
+                                            className={`flex flex-col items-center justify-center gap-3 p-8 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${isUploading
+                                                ? "border-amber-300 bg-amber-50 cursor-wait"
+                                                : "border-stone-300 hover:border-amber-400 hover:bg-amber-50/40"
                                                 }`}
                                         >
                                             {isUploading ? (
@@ -699,32 +697,37 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                 {/* ── DATA MEMPELAI ── */}
                                 {activeTab === "mempelai" && (
-                                    <div className="space-y-6 animate-in fade-in duration-300">
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Data Mempelai</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Nama lengkap dan nama orang tua.</p>
+                                            </div></div>
 
                                         <Section title="Pengantin Pria" accent="amber">
                                             <Field label="Nama Lengkap">
-                                                <Input value={formData.groom_full_name} onChange={e => handleChange("groom_full_name", e.target.value)} placeholder="Mohammad Andi Pratama" className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm" />
+                                                <Input value={formData.groom_full_name} onChange={e => handleChange("groom_full_name", e.target.value)} placeholder="Mohammad Andi Pratama" className="text-base py-3" />
                                             </Field>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <Field label="Nama Ayah">
-                                                    <Input value={formData.groom_father} onChange={e => handleChange("groom_father", e.target.value)} placeholder="Fauzi" className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm" />
+                                                    <Input value={formData.groom_father} onChange={e => handleChange("groom_father", e.target.value)} placeholder="Fauzi" className="text-base py-3" />
                                                 </Field>
                                                 <Field label="Nama Ibu">
-                                                    <Input value={formData.groom_mother} onChange={e => handleChange("groom_mother", e.target.value)} placeholder="Siti" className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm" />
+                                                    <Input value={formData.groom_mother} onChange={e => handleChange("groom_mother", e.target.value)} placeholder="Siti" className="text-base py-3" />
                                                 </Field>
                                             </div>
                                         </Section>
 
                                         <Section title="Pengantin Wanita" accent="rose">
                                             <Field label="Nama Lengkap">
-                                                <Input value={formData.bride_full_name} onChange={e => handleChange("bride_full_name", e.target.value)} placeholder="Rina Angelina Putri" className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm" />
+                                                <Input value={formData.bride_full_name} onChange={e => handleChange("bride_full_name", e.target.value)} placeholder="Rina Angelina Putri" className="text-base py-3" />
                                             </Field>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <Field label="Nama Ayah">
-                                                    <Input value={formData.bride_father} onChange={e => handleChange("bride_father", e.target.value)} placeholder="Hasan" className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm" />
+                                                    <Input value={formData.bride_father} onChange={e => handleChange("bride_father", e.target.value)} placeholder="Hasan" className="text-base py-3" />
                                                 </Field>
                                                 <Field label="Nama Ibu">
-                                                    <Input value={formData.bride_mother} onChange={e => handleChange("bride_mother", e.target.value)} placeholder="Rahayu" className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm" />
+                                                    <Input value={formData.bride_mother} onChange={e => handleChange("bride_mother", e.target.value)} placeholder="Rahayu" className="text-base py-3" />
                                                 </Field>
                                             </div>
                                         </Section>
@@ -733,7 +736,12 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                 {/* ── ACARA ── */}
                                 {activeTab === "acara" && (
-                                    <div className="space-y-6 animate-in fade-in duration-300">
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Detail Acara</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Waktu dan lokasi akad serta resepsi.</p>
+                                            </div></div>
 
                                         <Section title="Akad Nikah" accent="amber">
                                             <Field label="Tanggal & Waktu">
@@ -745,7 +753,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                             <Field label="Alamat Lengkap">
                                                 <textarea
                                                     rows={3}
-                                                    className="flex w-full rounded-2xl border border-outline-variant-stitch/40 text-base bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch placeholder:text-outline-stitch focus:outline-none focus:ring-2 focus:ring-primary-stitch/20 focus:border-primary-stitch resize-none transition-all"
+                                                    className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
                                                     value={formData.akad_address}
                                                     onChange={e => handleChange("akad_address", e.target.value)}
                                                     placeholder="Jl. Masjid No. 1, Bandung"
@@ -766,39 +774,40 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                             <Field label="Alamat Lengkap">
                                                 <textarea
                                                     rows={3}
-                                                    className="flex w-full rounded-2xl border border-outline-variant-stitch/40 text-base bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch placeholder:text-outline-stitch focus:outline-none focus:ring-2 focus:ring-primary-stitch/20 focus:border-primary-stitch resize-none transition-all"
+                                                    className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
                                                     value={formData.reception_address}
                                                     onChange={e => handleChange("reception_address", e.target.value)}
                                                     placeholder="Jl. Tamansari No. 73, Bandung"
                                                 />
                                             </Field>
                                             <Field label="Link Google Maps">
-                                                <Input value={formData.reception_maps} onChange={e => handleChange("reception_maps", e.target.value)} placeholder="https://maps.app.goo.gl/..." className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm" />
+                                                <Input value={formData.reception_maps} onChange={e => handleChange("reception_maps", e.target.value)} placeholder="https://maps.app.goo.gl/..." className="text-base py-3" />
                                             </Field>
                                         </Section>
                                     </div>
                                 )}
                                 {/* ── KISAH CINTA ── */}
                                 {activeTab === "lovestory" && (
-                                    <div className="space-y-6 animate-in fade-in duration-300">
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
+                                                <p className="text-sm text-stone-400 mt-1">
+                                                    Ceritakan perjalanan kalian. Maks. 5 momen, tiap cerita maks. 120 karakter.
+                                                </p>
+                                            </div>
+                                        </div>
 
-                                        <div className="space-y-4">
+                                        <div className="space-y-3">
                                             {(formData.love_story as any[]).map((story, i) => (
-                                                <div key={i} className="p-5 bg-surface-container-stitch/40 rounded-[2rem] border border-outline-variant-stitch/20 space-y-4 relative">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const updated = (formData.love_story as any[]).filter((_, idx) => idx !== i);
-                                                            handleChange("love_story", updated);
-                                                        }}
-                                                        className="absolute top-4 right-4 p-2 rounded-full hover:bg-error-stitch/10 text-outline-stitch hover:text-error-stitch transition-all"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </button>
-
-                                                    <div className="grid grid-cols-3 gap-3">
-                                                        <div className="space-y-1.5">
-                                                            <label className="block text-[10px] font-bold tracking-widest uppercase text-secondary-stitch">Tahun</label>
+                                                <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-100 space-y-3">
+                                                    <div>
+                                                        <h2 className="text-xl font-serif font-bold text-stone-800">Kisah Cinta</h2>
+                                                        <p className="text-sm text-stone-400 mt-1">Ceritakan perjalanan kalian.</p>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div className="space-y-1">
+                                                            <label className="block text-xs font-semibold text-stone-600">Tahun</label>
                                                             <Input
                                                                 value={story.year}
                                                                 onChange={e => {
@@ -811,8 +820,8 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                                 className="text-base py-3"
                                                             />
                                                         </div>
-                                                        <div className="col-span-2 space-y-1.5">
-                                                            <label className="block text-[10px] font-bold tracking-widest uppercase text-secondary-stitch">Judul <span className="text-outline-stitch font-normal normal-case ml-1 tracking-normal">maks. 30</span></label>
+                                                        <div className="col-span-2 space-y-1">
+                                                            <label className="block text-xs font-semibold text-stone-600">Judul <span className="text-stone-300 font-normal">maks. 30 karakter</span></label>
                                                             <Input
                                                                 value={story.title}
                                                                 onChange={e => {
@@ -827,17 +836,17 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="space-y-1.5">
+                                                    <div className="space-y-1">
                                                         <div className="flex items-center justify-between">
-                                                            <label className="block text-[10px] font-bold tracking-widest uppercase text-secondary-stitch">Cerita singkat</label>
-                                                            <span className={`text-[10px] font-mono ${story.description?.length > 100 ? "text-error-stitch" : "text-outline-stitch"}`}>
+                                                            <label className="block text-xs font-semibold text-stone-600">Cerita singkat</label>
+                                                            <span className={`text-xs ${story.description?.length > 100 ? "text-amber-500" : "text-stone-300"}`}>
                                                                 {story.description?.length || 0}/120
                                                             </span>
                                                         </div>
                                                         <textarea
                                                             rows={2}
                                                             maxLength={120}
-                                                            className="flex w-full rounded-2xl border border-outline-variant-stitch/40 text-base bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch placeholder:text-outline-stitch focus:outline-none focus:ring-2 focus:ring-primary-stitch/20 focus:border-primary-stitch resize-none transition-all"
+                                                            className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
                                                             value={story.description}
                                                             onChange={e => {
                                                                 if (e.target.value.length > 120) return;
@@ -845,7 +854,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                                 updated[i] = { ...updated[i], description: e.target.value };
                                                                 handleChange("love_story", updated);
                                                             }}
-                                                            placeholder="Ceritakan momen ini..."
+                                                            placeholder="Ceritakan momen ini secara singkat..."
                                                         />
                                                     </div>
                                                 </div>
@@ -859,15 +868,15 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                     const updated = [...(formData.love_story as any[]), { year: "", title: "", description: "" }];
                                                     handleChange("love_story", updated);
                                                 }}
-                                                className="w-full py-4 rounded-[2rem] border-2 border-dashed border-outline-variant-stitch/50 text-secondary-stitch hover:border-primary-stitch hover:text-primary-stitch hover:bg-surface-container-stitch/40 transition-all text-[10px] font-black tracking-[0.2em] uppercase flex items-center justify-center gap-2"
+                                                className="w-full py-3 rounded-2xl border-2 border-dashed border-stone-200 text-stone-400 hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50/40 transition-all text-sm font-semibold flex items-center justify-center gap-2"
                                             >
                                                 <span className="text-lg leading-none">+</span> Tambah Momen
-                                                <span className="text-[10px] font-normal text-outline-stitch normal-case tracking-normal">({(formData.love_story as any[]).length}/5)</span>
+                                                <span className="text-xs font-normal text-stone-300">({(formData.love_story as any[]).length}/5)</span>
                                             </button>
                                         )}
 
                                         {(formData.love_story as any[]).length >= 5 && (
-                                            <p className="text-center text-[10px] font-bold tracking-wider uppercase text-outline-stitch py-4 bg-surface-container-stitch/20 rounded-2xl border border-outline-variant-stitch/10">
+                                            <p className="text-center text-xs text-stone-400 py-2">
                                                 ✓ Maksimal 5 momen untuk tampilan terbaik
                                             </p>
                                         )}
@@ -884,12 +893,16 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                 {/* ── GALERI ── */}
                                 {activeTab === "galeri" && (
-                                    <div className="space-y-6 animate-in fade-in duration-300">
-
-                                        <div className="space-y-4">
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Galeri Foto</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Tambahkan URL foto prewedding (maks. 8 foto).</p>
+                                            </div></div>
+                                        <div className="space-y-3">
                                             {((formData.gallery_photos as string[]).length === 0) && (
-                                                <p className="text-[10px] font-bold tracking-widest uppercase text-outline-stitch text-center py-10 bg-surface-container-stitch/20 rounded-[2rem] border-2 border-dashed border-outline-variant-stitch/30">
-                                                    Belum ada foto
+                                                <p className="text-sm text-stone-400 text-center py-6 bg-stone-50 rounded-2xl border border-dashed border-stone-200">
+                                                    Belum ada foto. Tambahkan URL foto di bawah.
                                                 </p>
                                             )}
                                             {(formData.gallery_photos as string[]).map((url, i) => (
@@ -903,7 +916,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                             handleChange("gallery_photos", updated);
                                                         }}
                                                         placeholder="https://..."
-                                                        className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm flex-1"
+                                                        className="text-base py-3 flex-1"
                                                     />
                                                     <button
                                                         type="button"
@@ -911,9 +924,9 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                             const updated = (formData.gallery_photos as string[]).filter((_, idx) => idx !== i);
                                                             handleChange("gallery_photos", updated);
                                                         }}
-                                                        className="p-3 text-outline-variant-stitch hover:text-error-stitch transition-all"
+                                                        className="p-2 text-stone-300 hover:text-red-500 transition-colors"
                                                     >
-                                                        <X className="w-5 h-5" />
+                                                        <X className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             ))}
@@ -922,10 +935,10 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                             <button
                                                 type="button"
                                                 onClick={() => handleChange("gallery_photos", [...(formData.gallery_photos as string[]), ""])}
-                                                className="w-full py-4 rounded-[2rem] border-2 border-dashed border-outline-variant-stitch/50 text-secondary-stitch hover:border-primary-stitch hover:text-primary-stitch hover:bg-surface-container-stitch/40 transition-all text-[10px] font-black tracking-[0.2em] uppercase flex items-center justify-center gap-2"
+                                                className="w-full py-3 rounded-2xl border-2 border-dashed border-stone-200 text-stone-400 hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50/40 transition-all text-sm font-semibold flex items-center justify-center gap-2"
                                             >
                                                 <span className="text-lg leading-none">+</span> Tambah Foto
-                                                <span className="text-[10px] font-normal text-outline-stitch normal-case tracking-normal">({(formData.gallery_photos as string[]).length}/8)</span>
+                                                <span className="text-xs font-normal text-stone-300">({(formData.gallery_photos as string[]).length}/8)</span>
                                             </button>
                                         )}
                                     </div>
@@ -933,8 +946,12 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                 {/* ── AMPLOP DIGITAL ── */}
                                 {activeTab === "amplop" && (
-                                    <div className="space-y-6 animate-in fade-in duration-300">
-
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Amplop Digital</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Informasi rekening dan pengiriman hadiah.</p>
+                                            </div></div>
 
                                         <Section title="Transfer Bank / E-Wallet" accent="amber">
                                             <Field label="Nama Bank / E-Wallet">
@@ -951,7 +968,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                         inputMode="numeric"
                                                         pattern="[0-9]*"
                                                         placeholder="1234567890"
-                                                        className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm"
+                                                        className="text-base py-3"
                                                     />
                                                 </Field>
                                                 <Field label="Atas Nama">
@@ -964,10 +981,10 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                             <Field label="Alamat Lengkap">
                                                 <textarea
                                                     rows={3}
-                                                    className="flex w-full rounded-2xl border border-outline-variant-stitch/40 text-base bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch placeholder:text-outline-stitch focus:outline-none focus:ring-2 focus:ring-primary-stitch/20 focus:border-primary-stitch resize-none transition-all"
+                                                    className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
                                                     value={formData.gift_shipping_address || ""}
                                                     onChange={e => handleChange("gift_shipping_address", e.target.value)}
-                                                    placeholder="Alamat lengkap tujuan kado..."
+                                                    placeholder="Jl. Contoh No. 1, Kota, Kode Pos"
                                                 />
                                             </Field>
                                         </Section>
@@ -976,12 +993,16 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                                 {/* ── AYAT & QUOTE ── */}
                                 {activeTab === "ayat" && (
-                                    <div className="space-y-6 animate-in fade-in duration-300">
-
+                                    <div className="space-y-5 animate-in fade-in duration-200">
+                                        <div>
+                                            <div>
+                                                <h2 className="text-xl font-serif font-bold text-stone-800">Ayat & Quote</h2>
+                                                <p className="text-sm text-stone-400 mt-1">Kutipan pembuka undangan.</p>
+                                            </div></div>
                                         <Field label="Teks Kutipan">
                                             <textarea
                                                 rows={4}
-                                                className="flex w-full rounded-2xl border border-outline-variant-stitch/40 text-base bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch placeholder:text-outline-stitch focus:outline-none focus:ring-2 focus:ring-primary-stitch/20 focus:border-primary-stitch resize-none transition-all"
+                                                className="flex w-full rounded-xl border border-stone-200 text-base bg-white px-3 py-3 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 resize-none transition-all"
                                                 value={formData.greeting_text}
                                                 onChange={e => handleChange("greeting_text", e.target.value)}
                                                 placeholder="Dan di antara tanda-tanda kekuasaan-Nya..."
@@ -992,7 +1013,7 @@ export default function EditorClient({ initialData }: EditorClientProps) {
                                                 value={formData.quote_source || ""}
                                                 onChange={e => handleChange("quote_source", e.target.value)}
                                                 placeholder="QS. Ar-Rum: 21"
-                                                className="rounded-2xl border-outline-variant-stitch/40 bg-surface-container-lowest-stitch px-4 py-3 text-on-surface-stitch focus:ring-primary-stitch/20 focus:border-primary-stitch transition-all text-sm"
+                                                className="text-base py-3"
                                             />
                                         </Field>
                                     </div>
@@ -1007,20 +1028,20 @@ export default function EditorClient({ initialData }: EditorClientProps) {
 
                 {/* RIGHT — Live Preview */}
                 {(showPreview || mobileMode === "preview") && (
-                    <div className="flex flex-col flex-1 overflow-hidden border-t md:border-t-0 md:border-l border-outline-variant-stitch/20 bg-surface-container-stitch min-h-[600px] md:min-h-0">
-                        <div className="flex items-center gap-3 px-6 py-4 bg-surface-container-lowest-stitch border-b border-outline-variant-stitch/10 flex-shrink-0">
-                            <div className="flex gap-2">
-                                <span className="w-3 h-3 rounded-full bg-error-stitch/30" />
-                                <span className="w-3 h-3 rounded-full bg-tertiary-stitch/30" />
-                                <span className="w-3 h-3 rounded-full bg-primary-stitch/10" />
+                    <div className="flex flex-col flex-1 overflow-hidden border-t md:border-t-0 md:border-l border-stone-200 bg-stone-100 min-h-[600px] md:min-h-0">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-stone-200 flex-shrink-0">
+                            <div className="flex gap-1.5">
+                                <span className="w-3 h-3 rounded-full bg-red-400" />
+                                <span className="w-3 h-3 rounded-full bg-amber-400" />
+                                <span className="w-3 h-3 rounded-full bg-green-400" />
                             </div>
                             <div className="flex-1 mx-3 text-center">
-                                <span className="text-[10px] font-mono font-bold text-outline-stitch bg-surface-container-stitch px-4 py-1.5 rounded-full tracking-wider">
-                                    UNDANG.IO / INVITE / {formData.slug?.toUpperCase()}
+                                <span className="text-xs text-stone-500 bg-stone-100 px-3 py-1 rounded-full font-mono">
+                                    /invite/{formData.slug} — Live Preview
                                 </span>
                             </div>
-                            <span className="text-[10px] font-black tracking-widest uppercase text-tertiary-stitch bg-tertiary-stitch/10 px-3 py-1 rounded-full border border-tertiary-stitch/20">
-                                ● REALTIME
+                            <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                ● LIVE
                             </span>
                         </div>
                         <div className="flex-1 overflow-y-auto">

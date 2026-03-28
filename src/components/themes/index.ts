@@ -1,2 +1,2 @@
-export { ParallaxThemeRenderer } from './parallax/ParallaxThemeRenderer';
-export type { ParallaxThemeRendererProps } from './parallax/ParallaxThemeRenderer';
+export { ParallaxThemeRenderer } from './ParallaxThemeRenderer';
+export type { ParallaxThemeRendererProps } from './ParallaxThemeRenderer';

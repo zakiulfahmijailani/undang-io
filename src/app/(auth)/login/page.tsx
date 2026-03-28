@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { FaGoogle } from "react-icons/fa";
 import { toast } from "sonner";
@@ -37,7 +36,7 @@ function getGuestTokenFromStorage(searchParams: URLSearchParams): string | null 
   return searchParams.get('guest_token');
 }
 
-function LoginForm() {
+export default function Login() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -108,7 +107,7 @@ function LoginForm() {
       // Always read directly from localStorage at click time — don't rely on state
       const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
 
-      let redirectTo = `${window.location.origin}/auth/callback`;
+      let redirectTo = `${window.location.origin}/api/auth/callback`;
       if (token) {
         redirectTo += `?guest_session_token=${token}`;
       }
@@ -217,17 +216,5 @@ function LoginForm() {
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-export default function Login() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 }

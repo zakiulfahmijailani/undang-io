@@ -6,7 +6,7 @@ export async function GET(request: Request) {
     const code = searchParams.get('code')
     const guestSessionToken = searchParams.get('guest_session_token')
 
-    const next = '/dashboard'
+    let next = '/dashboard'
 
     if (code) {
         const supabase = await createServerSupabaseClient()

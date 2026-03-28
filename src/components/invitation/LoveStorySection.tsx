@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 
 interface LoveStorySectionProps {
-    stories: Array<{ date?: string; year?: string; title: string; description: string }>;
+    stories: Array<{ year: string; title: string; description: string }>;
 }
 
 const LoveStorySection = ({ stories }: LoveStorySectionProps) => (
@@ -46,7 +46,7 @@ const LoveStorySection = ({ stories }: LoveStorySectionProps) => (
                         <div className={`skeu-card bg-white rounded-2xl p-5 max-w-xs ${
                             i % 2 === 0 ? "text-right" : "text-left"
                         }`}>
-                            <span className="text-xs font-bold text-wedding-gold tracking-widest uppercase">{story.year || story.date}</span>
+                            <span className="text-xs font-bold text-wedding-gold tracking-widest uppercase">{story.year}</span>
                             <h4 className="font-serif font-bold text-stone-800 mt-1 mb-2">{story.title}</h4>
                             <p className="text-sm text-stone-500 leading-relaxed">{story.description}</p>
                         </div>

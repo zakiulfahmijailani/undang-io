@@ -206,7 +206,7 @@ export function useTheme(options: UseThemeOptions): UseThemeResult {
         return () => {
             cancelled = true;
         };
-    }, [options.slug, options.id, fetchCount]);  
+    }, [options.slug, options.id, fetchCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return { theme, isLoading, error, refetch };
 }

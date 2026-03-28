@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, MailOpen, MessageSquareHeart, ShieldCheck, HeartPulse } from "lucide-react";
 import InvitationCard from "@/components/dashboard/InvitationCard";
 import NewInvitationDialog from "@/components/dashboard/NewInvitationDialog";
 import GuestConversion from "./components/GuestConversion";
@@ -21,9 +23,9 @@ export default async function DashboardPage() {
         .eq('id', user.id)
         .single();
 
-    const userName = profile?.full_name?.split(' ')[0] || 'Concierge';
+    const userName = profile?.full_name?.split(' ')[0] || 'Kak';
 
-    // 1. Fetch permanent invitations
+    // 1. Fetch permanent invitations — query flat columns (no invitation_details relation)
     const { data: invitationsRaw, error: invitationsError } = await supabase
         .from('invitations')
         .select(`
@@ -46,6 +48,7 @@ export default async function DashboardPage() {
         console.error('[dashboard] invitations query error:', invitationsError);
     }
 
+    // Map flat columns → shape that InvitationCard expects
     const typedInvitations = (invitationsRaw || []).map((inv: any) => ({
         id: inv.id,
         slug: inv.slug,
@@ -60,7 +63,7 @@ export default async function DashboardPage() {
         },
     }));
 
-    // 2. Fetch claimed guest sessions
+    // 2. Fetch claimed guest sessions (belum bayar, belum jadi permanent)
     let claimedGuestSessions: any[] = [];
     const adminClient = getAdminClient();
     if (adminClient) {
@@ -79,92 +82,115 @@ export default async function DashboardPage() {
         claimedGuestSessions = (guestSessions || []) as any[];
     }
 
+    // Real stats — will show 0 until analytics tables are created
     const totalViews = 0;
     const totalRsvps = 0;
     const newMessages = 0;
+
     const totalInvitations = typedInvitations.length + claimedGuestSessions.length;
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 pb-24">
+        <>
             <GuestConversion />
-
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+            <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-4xl font-black text-primary tracking-tighter mb-2 italic font-light">
-                        Welcome back, <br/>
-                        <span className="text-on-tertiary-container not-italic font-black">{userName}</span>
-                    </h2>
-                    <p className="text-slate-400 font-['Inter'] text-xs uppercase tracking-[0.3em]">Titanium Membership</p>
+                    <h1 className="text-3xl font-serif font-bold text-foreground">Halo, {userName}! 👋</h1>
+                    <p className="text-muted-foreground mt-1 text-lg">
+                        {totalInvitations > 0
+                            ? "Berikut adalah ringkasan performa undangan digitalmu."
+                            : "Mulai perjalanan pernikahanmu dengan undangan digital elegan."}
+                    </p>
                 </div>
-                <NewInvitationDialog />
+                {totalInvitations > 0 && (
+                    <NewInvitationDialog />
+                )}
             </div>
 
-            {/* Statistics Bento Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="md:col-span-2 bg-primary p-8 rounded-[40px] text-white relative overflow-hidden group">
-                   <div className="relative z-10 flex flex-col h-full justify-between">
-                        <div className="flex justify-between items-start">
-                            <span className="material-symbols-outlined text-tertiary-fixed-dim text-4xl">insights</span>
-                            <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Real-time Performance</span>
-                        </div>
-                        <div className="mt-12">
-                            <p className="text-5xl font-black tracking-tighter mb-1">{totalViews}</p>
-                            <p className="text-sm text-on-primary-container font-light">Total Digital Interactions Captured</p>
-                        </div>
-                   </div>
-                   <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/5 to-transparent skew-x-12 translate-x-24 group-hover:translate-x-12 transition-transform duration-1000"></div>
-                </div>
-
-                <div className="bg-surface-container-highest p-8 rounded-[40px] flex flex-col justify-between border border-outline-variant/10 shadow-sm">
-                    <span className="material-symbols-outlined text-primary text-3xl">mail_lock</span>
-                    <div>
-                        <p className="text-3xl font-black text-primary tracking-tighter">{totalRsvps}</p>
-                        <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mt-2">RSVP Responses</p>
-                    </div>
-                </div>
-
-                <div className="bg-tertiary p-8 rounded-[40px] flex flex-col justify-between text-on-tertiary shadow-xl shadow-tertiary/20">
-                    <div className="flex justify-between">
-                         <span className="material-symbols-outlined text-tertiary-fixed-dim text-3xl">chat_bubble</span>
-                         {newMessages > 0 && <span className="w-3 h-3 rounded-full bg-error animate-ping"></span>}
-                    </div>
-                    <div>
-                        <p className="text-3xl font-black tracking-tighter">{newMessages}</p>
-                        <p className="text-xs text-white/60 uppercase tracking-widest font-bold mt-2">New Messages</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Invitations List */}
             {totalInvitations === 0 ? (
-                <div className="py-24 rounded-[64px] bg-white border-2 border-dashed border-outline-variant/20 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center mb-8">
-                        <span className="material-symbols-outlined text-primary text-5xl">edit_note</span>
+                <div className="flex flex-col items-center justify-center py-20 px-4 mt-8 bg-card rounded-3xl border border-border shadow-sm text-center">
+                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                        <HeartPulse className="w-12 h-12 text-primary" />
                     </div>
-                    <h3 className="text-3xl font-black text-primary tracking-tighter mb-4">No invitations found</h3>
-                    <p className="text-slate-400 max-w-sm mb-12 font-light italic">Your design legacy is waiting to be written. Start your first masterpiece today.</p>
+                    <h2 className="text-2xl font-serif font-bold text-foreground mb-3">Belum ada undangan</h2>
+                    <p className="text-muted-foreground max-w-md mb-8">
+                        Mulai buat undangan pernikahan digitalmu sekarang dan bagikan ke semua tamu spesialmu.
+                    </p>
                     <NewInvitationDialog />
                 </div>
             ) : (
-                <div className="space-y-8">
-                    <div className="flex items-center gap-4">
-                        <h3 className="text-2xl font-black text-primary tracking-tighter">Your Masterpieces</h3>
-                        <div className="h-px flex-1 bg-outline-variant/10"></div>
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                        <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Total Tayangan</CardTitle>
+                                <Users className="w-4 h-4 text-primary" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{totalViews}</div>
+                                <p className="text-xs text-muted-foreground mt-1">Total di semua undangan</p>
+                            </CardContent>
+                        </Card>
+                        <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Total RSVP</CardTitle>
+                                <MailOpen className="w-4 h-4 text-primary" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{totalRsvps}</div>
+                                <p className="text-xs text-muted-foreground mt-1">Konfirmasi kehadiran</p>
+                            </CardContent>
+                        </Card>
+                        <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                    Ucapan Baru
+                                    {newMessages > 0 && (
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{newMessages}</span>
+                                    )}
+                                </CardTitle>
+                                <MessageSquareHeart className="w-4 h-4 text-primary" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{newMessages}</div>
+                                <p className="text-xs text-muted-foreground mt-1">Belum dibaca</p>
+                            </CardContent>
+                        </Card>
+                        <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow bg-secondary/30 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-400/20 to-transparent rounded-bl-full" />
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Status Paket</CardTitle>
+                                <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2">
+                                <div className="text-xl font-bold text-foreground">Basic</div>
+                                <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">Mulai dengan gratis</p>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Claimed guest sessions (Trial phase) */}
-                        {claimedGuestSessions.map((gs) => (
-                            <GuestSessionCard key={gs.id} guestSession={gs} />
-                        ))}
-                        {/* Permanent invitations */}
-                        {typedInvitations.map((invitation: any) => (
-                            <InvitationCard key={invitation.id} invitation={invitation} />
-                        ))}
+                    <div className="flex flex-col gap-4 mt-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-serif font-bold text-foreground">Undangan Saya</h2>
+                                <p className="text-muted-foreground text-sm mt-1">Kelola undangan pernikahan digitalmu.</p>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-6 md:grid-cols-2">
+                            {/* Claimed guest sessions — belum bayar, ada timer */}
+                            {claimedGuestSessions.map((gs) => (
+                                <GuestSessionCard key={gs.id} guestSession={gs} />
+                            ))}
+                            {/* Permanent invitations */}
+                            {typedInvitations.map((invitation) => (
+                                <InvitationCard key={invitation.id} invitation={invitation} />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
+    </>
     );
 }

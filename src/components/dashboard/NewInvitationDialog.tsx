@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 export default function NewInvitationDialog({ children }: { children?: React.ReactNode }) {
     const [open, setOpen] = useState(false);
@@ -20,7 +20,7 @@ export default function NewInvitationDialog({ children }: { children?: React.Rea
         setError(null);
 
         if (!groomName.trim() || !brideName.trim()) {
-            setError("Both names are required for your masterpiece.");
+            setError("Kedua nama mempelai wajib diisi.");
             return;
         }
 
@@ -36,13 +36,20 @@ export default function NewInvitationDialog({ children }: { children?: React.Rea
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.error?.message || "An error occurred while manifesting your invitation.");
+                // If the error message comes from our standard envelope format
+                throw new Error(result.error?.message || "Terjadi kesalahan saat membuat undangan.");
             }
 
+            // Success! Close modal and navigate
             setOpen(false);
+
+            // Toasts could be added here if you have a toast library like Sonner configured.
+            // toast.success("Undangan berhasil dibuat! Silakan lengkapi informasi undanganmu.");
+            alert("Undangan berhasil dibuat! Silakan lengkapi informasi undanganmu."); // Temporary fallback
+
             router.push(`/dashboard/undangan/${result.data.id}/edit`);
         } catch (err: any) {
-            setError(err.message || "Failed to reach the concierge.");
+            setError(err.message || "Gagal menghubungi server.");
         } finally {
             setIsLoading(false);
         }
@@ -52,72 +59,58 @@ export default function NewInvitationDialog({ children }: { children?: React.Rea
         <>
             <div onClick={() => setOpen(true)}>
                 {children ? children : (
-                    <button className="bg-primary text-on-primary rounded-full py-4 px-8 flex items-center justify-center gap-3 font-['Inter'] text-[10px] font-black uppercase tracking-[0.2em] hover:opacity-90 transition-all active:scale-95 shadow-2xl shadow-primary/20 cursor-pointer">
-                        <span className="material-symbols-outlined text-lg">add_circle</span>
-                        Manifest New Invitation
-                    </button>
+                    <Button variant="primary" className="gap-2 h-11 px-6 shadow-lg shadow-primary/20">
+                        <Plus className="w-5 h-5" /> Buat Undangan Baru
+                    </Button>
                 )}
             </div>
 
             <Modal
                 isOpen={open}
                 onClose={() => setOpen(false)}
-                title="Begin Your Narrative"
-                description="Enter the names of the couple. You can refine these editorial details later."
+                title="Mulai Buat Undangan"
+                description="Masukkan nama panggilan kedua mempelai. Kamu bisa mengubahnya nanti."
             >
-                <form onSubmit={handleSubmit} className="space-y-8 pt-6">
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input
-                                id="groom_name"
-                                label="Groom Nickname"
-                                placeholder="e.g., Alexander"
-                                value={groomName}
-                                onChange={(e) => setGroomName(e.target.value)}
-                                disabled={isLoading}
-                                maxLength={100}
-                                required
-                                className="bg-surface-container-low border-outline-variant/10 rounded-2xl"
-                            />
-                            <Input
-                                id="bride_name"
-                                label="Bride Nickname"
-                                placeholder="e.g., Isabella"
-                                value={brideName}
-                                onChange={(e) => setBrideName(e.target.value)}
-                                disabled={isLoading}
-                                maxLength={100}
-                                required
-                                className="bg-surface-container-low border-outline-variant/10 rounded-2xl"
-                            />
-                        </div>
+                <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+                    <div className="space-y-4">
+                        <Input
+                            id="groom_name"
+                            label="Nama Mempelai Pria"
+                            placeholder="Cth: Budi"
+                            value={groomName}
+                            onChange={(e) => setGroomName(e.target.value)}
+                            disabled={isLoading}
+                            maxLength={100}
+                            required
+                        />
+                        <Input
+                            id="bride_name"
+                            label="Nama Mempelai Wanita"
+                            placeholder="Cth: Ani"
+                            value={brideName}
+                            onChange={(e) => setBrideName(e.target.value)}
+                            disabled={isLoading}
+                            maxLength={100}
+                            required
+                        />
                         {error && (
-                            <p className="text-xs text-error font-bold uppercase tracking-widest animate-pulse">{error}</p>
+                            <p className="text-sm text-[var(--color-error-base)] font-medium">{error}</p>
                         )}
                     </div>
-                    <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant/10">
-                        <button 
-                            type="button" 
-                            onClick={() => setOpen(false)} 
-                            disabled={isLoading}
-                            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button 
-                            type="submit" 
-                            disabled={isLoading} 
-                            className="bg-primary text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-                        >
+                    <div className="flex justify-end gap-2 pt-4">
+                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={isLoading}>
+                            Batal
+                        </Button>
+                        <Button type="submit" variant="primary" disabled={isLoading} className="bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-600 hover:to-amber-700 text-white border-0 shadow-md">
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="h-4 w-4 animate-spin text-tertiary" />
-                                    Manifesting...
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Menyimpan...
                                 </>
                             ) : (
-                                "Begin Creation"
+                                "Buat Sekarang"
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </Modal>

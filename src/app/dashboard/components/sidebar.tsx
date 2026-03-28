@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
+import { Home, Mail, FileText, LayoutTemplate, User, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
@@ -21,85 +23,72 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
     }
 
     const navItems = [
-        { name: "Dashboard", href: "/dashboard", icon: "dashboard" },
-        { name: "Invitations", href: "/dashboard/undangan", icon: "auto_awesome" },
-        { name: "Analytics", href: "/dashboard/analytics", icon: "insights" },
-        { name: "Settings", href: "/dashboard/akun", icon: "settings" },
+        { name: "Beranda Dashboard", href: "/dashboard", icon: Home },
+        { name: "Undangan Saya", href: "/dashboard/undangan", icon: Mail },
+        { name: "Buat Undangan Baru", href: "/dashboard/undangan/baru", icon: FileText },
+        { name: "Pilih Tema", href: "/dashboard/tema", icon: LayoutTemplate },
+        { name: "Akun & Langganan", href: "/dashboard/akun", icon: User },
     ]
 
     return (
         <>
-            {/* Desktop Sidebar (Authority: Shared Components JSON inspired) */}
+            {/* Desktop Sidebar */}
             <aside
-                className={`h-screen flex-shrink-0 fixed left-0 top-0 bg-surface-container-low dark:bg-primary flex flex-col p-6 space-y-8 shadow-2xl shadow-primary/10 z-50 transition-all duration-300 ease-in-out overflow-hidden ${
-                    isOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 border-none'
-                }`}
+                className={`relative hidden md:flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out bg-card text-card-foreground border-r overflow-hidden ${isOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 border-none'}`}
             >
-                <div className="mb-4">
-                    <span className="text-xl font-bold text-primary dark:text-on-tertiary-container">Undang-io</span>
+                {/* Logo Area */}
+                <div className="flex flex-col items-center justify-center p-6 min-h-[100px] w-64 border-b">
+                    <Link href="/dashboard" className="flex flex-col items-center gap-4 group">
+                        <Image src="/logo.png" alt="umuman logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-105" />
+                        <span className="font-serif text-3xl font-bold text-primary tracking-tight">umuman</span>
+                    </Link>
                 </div>
 
-                <button 
-                    onClick={() => router.push('/buat-undangan')}
-                    className="w-full bg-primary text-on-primary rounded-full py-3 px-6 flex items-center justify-center gap-2 font-['Inter'] text-sm font-semibold uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/20"
-                >
-                    <span className="material-symbols-outlined text-sm">add</span>
-                    Create New
-                </button>
-
-                <nav className="flex-1 space-y-2">
+                {/* Navigation Items */}
+                <nav className="flex-1 px-3 py-6 flex flex-col gap-2 w-64">
                     {navItems.map((item) => {
-                        const isActive = pathname === item.href
+                        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                        const Icon = item.icon
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`rounded-xl px-4 py-3 flex items-center gap-3 transition-all duration-200 hover:translate-x-1 ${
-                                    isActive 
-                                    ? "bg-tertiary-container/20 text-tertiary border-r-4 border-on-tertiary-container font-semibold" 
-                                    : "text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5"
-                                }`}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all justify-start ${isActive ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
                             >
-                                <span className="material-symbols-outlined text-xl">{item.icon}</span>
-                                <span className="font-['Inter'] text-sm uppercase tracking-widest">{item.name}</span>
+                                <Icon className="w-5 h-5 shrink-0" />
+                                <span className="text-sm">
+                                    {item.name}
+                                </span>
                             </Link>
                         )
                     })}
                 </nav>
 
-                <div className="pt-8 mt-auto border-t border-outline-variant/10">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-on-tertiary-container overflow-hidden">
-                           <span className="material-symbols-outlined">person</span>
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-primary dark:text-slate-200">Titanium Account</p>
-                            <p className="text-[10px] text-slate-400 uppercase tracking-widest">Premium Plan</p>
-                        </div>
-                    </div>
-                    
+                {/* Bottom Actions */}
+                <div className="p-4 mt-auto border-t w-64">
                     <button 
                         onClick={handleLogout}
-                        className="w-full text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl px-4 py-3 flex items-center gap-3 transition-all hover:translate-x-1 cursor-pointer"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 w-full cursor-pointer relative z-50"
                     >
-                        <span className="material-symbols-outlined">logout</span>
-                        <span className="font-['Inter'] text-sm font-semibold uppercase tracking-widest">Logout</span>
+                        <LogOut className="w-5 h-5 shrink-0" />
+                        <span className="text-sm font-medium">Keluar</span>
                     </button>
                 </div>
             </aside>
 
             {/* Mobile Sidebar (Bottom Nav) */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant/10 px-2 py-4 flex justify-around items-center z-50 shadow-2xl rounded-t-[32px]">
-                {navItems.map((item) => {
-                    const isActive = pathname === item.href
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t px-2 py-2 flex justify-around items-center z-50 shadow-lg">
+                {navItems.slice(0, 5).map((item) => {
+                    const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                    const Icon = item.icon
                     return (
                         <Link
                             key={item.name}
                             href={item.href}
-                            className={`flex flex-col items-center gap-1 p-2 transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`}
+                            className={`flex flex-col items-center gap-1 p-2 rounded-lg ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
                         >
-                            <span className="material-symbols-outlined text-2xl">{item.icon}</span>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">{item.name}</span>
+                            <Icon className={`w-5 h-5 ${isActive ? 'fill-current opacity-20' : ''}`} />
+                            <span className="text-[10px] font-medium text-center leading-tight max-w-[60px] truncate">{item.name}</span>
                         </Link>
                     )
                 })}
