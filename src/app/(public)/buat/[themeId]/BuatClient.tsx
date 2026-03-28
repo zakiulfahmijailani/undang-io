@@ -100,7 +100,11 @@ export default function BuatClient({ themeId }: BuatClientProps) {
     checkAuthAndAutoSave();
   }, [themeId]);
 
-  // Derive InvitationData for the preview EXACTLY like EditorClient
+  // Derive InvitationData for the preview EXACTLY like EditorClient.
+  // Fallback order untuk fullName:
+  //   1. Nama lengkap (jika diisi)
+  //   2. Nama panggilan (selalu ada begitu user mulai ketik)
+  //   3. Demo data (hanya jika dua-duanya kosong)
   const liveData = {
     ...demoData,
     coupleShortName: `${formData.groom_name || demoData.coupleShortName.split(" & ")[0]} & ${formData.bride_name || demoData.coupleShortName.split(" & ")[1]}`,
@@ -108,14 +112,14 @@ export default function BuatClient({ themeId }: BuatClientProps) {
     heroPhoto: formData.couple_photo_url || demoData.heroPhoto,
     groom: {
         ...demoData.groom,
-        fullName: formData.groom_full_name || demoData.groom.fullName,
+        fullName: formData.groom_full_name || formData.groom_name || demoData.groom.fullName,
         father: formData.groom_father ? `Bapak ${formData.groom_father}` : demoData.groom.father,
         mother: formData.groom_mother ? `Ibu ${formData.groom_mother}` : demoData.groom.mother,
         photo: formData.couple_photo_url || demoData.groom.photo,
     },
     bride: {
         ...demoData.bride,
-        fullName: formData.bride_full_name || demoData.bride.fullName,
+        fullName: formData.bride_full_name || formData.bride_name || demoData.bride.fullName,
         father: formData.bride_father ? `Bapak ${formData.bride_father}` : demoData.bride.father,
         mother: formData.bride_mother ? `Ibu ${formData.bride_mother}` : demoData.bride.mother,
     },
