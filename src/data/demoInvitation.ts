@@ -74,9 +74,9 @@ export const demoData = {
     ],
     giftAddress: "Jl. Kebon Jeruk No. 45, RT 03/RW 07, Kebon Jeruk, Jakarta Barat 11530",
     rsvpMessages: [
-        { name: "Rina Marlina", attendance: "hadir", message: "Selamat menempuh hidup baru! Semoga menjadi keluarga sakinah mawaddah warahmah 🌸", createdAt: "2026-06-01T10:00:00" },
-        { name: "Dimas Prasetyo", attendance: "hadir", message: "Barakallahu lakuma wa baraka 'alaikuma. Semoga bahagia selalu!", createdAt: "2026-06-02T14:30:00" },
-        { name: "Sari Wulandari", attendance: "ragu", message: "Insya Allah hadir ya. Selamat untuk kalian berdua! 💕", createdAt: "2026-06-03T09:15:00" },
+        { id: "demo-1", guestName: "Rina Marlina", attendance: "hadir" as const, message: "Selamat menempuh hidup baru! Semoga menjadi keluarga sakinah mawaddah warahmah 🌸", createdAt: "2026-06-01T10:00:00" },
+        { id: "demo-2", guestName: "Dimas Prasetyo", attendance: "hadir" as const, message: "Barakallahu lakuma wa baraka 'alaikuma. Semoga bahagia selalu!", createdAt: "2026-06-02T14:30:00" },
+        { id: "demo-3", guestName: "Sari Wulandari", attendance: "tidak_hadir" as const, message: "Insya Allah hadir ya. Selamat untuk kalian berdua! 💕", createdAt: "2026-06-03T09:15:00" },
     ],
     calendarUrl: "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Pernikahan+Ayu+%26+Budi&dates=20260615T010000Z/20260615T070000Z&details=Undangan+Pernikahan+Ayu+%26+Budi&location=Balai+Kartini%2C+Jakarta+Selatan",
 };

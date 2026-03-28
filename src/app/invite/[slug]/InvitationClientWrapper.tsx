@@ -35,8 +35,8 @@ interface InvitationData {
     rsvpMessages: RsvpMessage[];
     calendarUrl: string;
     musicUrl?: string | null;
-    sectionsOrder?: string[];                           // ← tambah ini
-    sectionsVisibility?: Record<string, boolean>;       // ← dan ini
+    sectionsOrder?: string[];
+    sectionsVisibility?: Record<string, boolean>;
 }
 
 interface WrapperProps {
@@ -56,7 +56,6 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
 
     const handleOpen = () => {
         setIsOpened(true);
-        // Only play if a music URL is set
         if (audioRef.current && data.musicUrl) {
             audioRef.current.play().then(() => {
                 setIsMusicPlaying(true);
@@ -74,7 +73,6 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
         setIsMusicPlaying(!isMusicPlaying);
     };
 
-    // Safe quote fallback
     const safeQuote = data.quote && data.quote.text
         ? data.quote
         : { text: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya.", source: "QS. Ar-Rum: 21" };
@@ -83,7 +81,6 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
 
     return (
         <div className="min-h-screen bg-background text-foreground">
-            {/* Audio element — preload=none until opened, then auto */}
             {hasMusicUrl && (
                 <audio
                     ref={audioRef}
@@ -147,14 +144,13 @@ export default function InvitationClientWrapper({ data, theme, invitationId }: W
                                             giftAddress={data.giftAddress}
                                         />
                                     );
-                                    case "rsvp": return <RsvpSection key={id} initialMessages={data.rsvpMessages} />;
+                                    case "rsvp": return <RsvpSection key={id} existingMessages={data.rsvpMessages} invitationId={invitationId} />;
                                     default: return null;
                                 }
                             });
                         })()}
                         <div className="h-20" />
                         <BottomNavbar />
-                        {/* Only render music button if a music URL is configured */}
                         {hasMusicUrl && (
                             <MusicButton isPlaying={isMusicPlaying} onToggle={toggleMusic} />
                         )}
