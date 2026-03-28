@@ -144,9 +144,63 @@ export default function BuatClient({ themeId }: BuatClientProps) {
     }
 
     if (!currentUserId) {
-      // Not logged in -> save to storage and redirect
-      sessionStorage.setItem("undang_draft", JSON.stringify(formData));
-      router.push(`/auth/login?redirect=/buat/${themeId}&reason=simpan-undangan`);
+      // Not logged in -> create a 15-minute guest session
+      try {
+        const sessionToken = crypto.randomUUID();
+        const baseSlug = `${forceData.groom_name || 'pria'}-${forceData.bride_name || 'wanita'}`.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+        // Maps our formData to keys expected by GuestInvitationView
+        const invitationData = {
+          groomNickname: forceData.groom_name,
+          groomFullName: forceData.groom_full_name,
+          groomFather: forceData.groom_father,
+          groomMother: forceData.groom_mother,
+          brideNickname: forceData.bride_name,
+          brideFullName: forceData.bride_full_name,
+          brideFather: forceData.bride_father,
+          brideMother: forceData.bride_mother,
+          akadDate: forceData.akad_date,
+          akadVenue: forceData.akad_venue,
+          akadAddress: forceData.akad_address,
+          receptionDate: forceData.reception_date,
+          receptionVenue: forceData.reception_venue,
+          receptionAddress: forceData.reception_address,
+          coverPhoto: forceData.couple_photo_url
+        };
+
+        const res = await fetch("/api/invitations/guest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionToken,
+            slug,
+            themeId: forceData.themeId,
+            expiresAt,
+            invitationData
+          })
+        });
+
+        const { data, error } = await res.json();
+        
+        if (error) {
+          alert('Gagal menyusun sesi dummy: ' + (error.message || 'Unknown error'));
+          setIsSaving(false);
+          return;
+        }
+
+        // Simpan referensi kepemilikan lokal untuk konversi kelak
+        localStorage.setItem("guest_session", JSON.stringify({ sessionToken, slug }));
+        
+        // Buang draft, langsung giring ke public URL 15-live-timer
+        sessionStorage.removeItem("undang_draft");
+        router.push(`/u/${slug}`);
+        
+      } catch (err) {
+        alert("Terjadi kesalahan jaringan saat membangun sesi anonim.");
+        setIsSaving(false);
+      }
       return;
     }
 
