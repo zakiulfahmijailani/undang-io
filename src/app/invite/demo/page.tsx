@@ -23,13 +23,10 @@ export default function InviteDemoPage() {
 
     const handleOpen = () => {
         setIsOpened(true);
-        // Try to play music
         if (audioRef.current) {
             audioRef.current.play().then(() => {
                 setIsMusicPlaying(true);
-            }).catch(() => {
-                // Browser blocked autoplay, that's fine
-            });
+            }).catch(() => {});
         }
     };
 
@@ -45,7 +42,6 @@ export default function InviteDemoPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground">
-            {/* Background audio - using a royalty-free placeholder URL */}
             <audio
                 ref={audioRef}
                 loop
@@ -53,7 +49,6 @@ export default function InviteDemoPage() {
                 src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
             />
 
-            {/* Cover Gate */}
             {!isOpened && (
                 <CoverSection
                     coupleShortName={demoData.coupleShortName}
@@ -62,7 +57,6 @@ export default function InviteDemoPage() {
                 />
             )}
 
-            {/* Main content - only visible after opening */}
             <AnimatePresence>
                 {isOpened && (
                     <motion.div
@@ -81,7 +75,7 @@ export default function InviteDemoPage() {
 
                         <CoupleSection groom={demoData.groom} bride={demoData.bride} />
 
-                        <QuoteSection text={demoData.quote.text} source={demoData.quote.source} />
+                        <QuoteSection quote={demoData.quote} />
 
                         <LoveStorySection stories={demoData.loveStory} />
 
@@ -100,9 +94,8 @@ export default function InviteDemoPage() {
                             giftAddress={demoData.giftAddress}
                         />
 
-                        <RsvpSection initialMessages={demoData.rsvpMessages} />
+                        <RsvpSection existingMessages={demoData.rsvpMessages} />
 
-                        {/* Bottom padding for navbar */}
                         <div className="h-20" />
 
                         <BottomNavbar />
