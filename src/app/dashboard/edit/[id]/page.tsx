@@ -1,35 +1,37 @@
 "use client"
 
-import { useState, useEffect, use, useRef, useCallback } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import {
-  ChevronRight, ChevronLeft, Save, Sparkles,
+  Save, Sparkles,
   Image as ImageIcon, Plus, Trash2, Loader2,
-  ToggleLeft, ToggleRight, MapPin, Search, X,
+  ToggleLeft, ToggleRight, MapPin, X,
   Check, ExternalLink
 } from "lucide-react"
 import { VenueAutocomplete } from "@/components/ui/VenueAutocomplete"
 
-// ─── Primitives (shared with create page) ─────────────────────────────────────────────
+// ─── Primitives ───────────────────────────────────────────────────────────────
 function ToggleSection({ enabled, onToggle, label, children }: {
   enabled: boolean; onToggle: () => void; label: string; children: React.ReactNode
 }) {
   return (
     <div className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-      enabled ? "border-[#D4A91C]/40 shadow-sm" : "border-[#EDE6D6]"
+      enabled ? "border-accent/40 shadow-sm" : "border-border"
     }`}>
       <button type="button" onClick={onToggle}
-        className="w-full flex items-center justify-between px-5 py-4 bg-[#FDFCF9] hover:bg-[#FAF8F3] transition-colors">
+        className="w-full flex items-center justify-between px-5 py-4 bg-card hover:bg-secondary/50 transition-colors">
         <div className="flex items-center gap-3">
-          <span className="font-medium text-[#1E1B18] text-sm">{label}</span>
+          <span className="font-medium text-foreground text-sm">{label}</span>
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-            enabled ? "bg-[#D4A91C]/15 text-[#7D5C0C]" : "bg-[#EDE6D6] text-[#9A9390]"
+            enabled ? "bg-accent/15 text-accent" : "bg-secondary text-muted-foreground"
           }`}>Opsional</span>
         </div>
-        {enabled ? <ToggleRight className="w-5 h-5 text-[#D4A91C]" /> : <ToggleLeft className="w-5 h-5 text-[#C2BEB8]" />}
+        {enabled
+          ? <ToggleRight className="w-5 h-5 text-accent" />
+          : <ToggleLeft className="w-5 h-5 text-muted-foreground" />}
       </button>
       {enabled && (
-        <div className="px-5 pb-5 pt-1 bg-white flex flex-col gap-4 border-t border-[#EDE6D6]">{children}</div>
+        <div className="px-5 pb-5 pt-1 bg-background flex flex-col gap-4 border-t border-border">{children}</div>
       )}
     </div>
   )
@@ -37,8 +39,8 @@ function ToggleSection({ enabled, onToggle, label, children }: {
 
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <label className="block text-xs font-semibold uppercase tracking-wider text-[#726C67] mb-1.5">
-      {children}{required && <span className="text-[#E05555] ml-1">*</span>}
+    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+      {children}{required && <span className="text-destructive ml-1">*</span>}
     </label>
   )
 }
@@ -50,7 +52,7 @@ function TInput({ label, value, onChange, placeholder, type = "text", required }
     <div>
       {label && <Label required={required}>{label}</Label>}
       <input type={type}
-        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all"
+        className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
         placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
     </div>
   )
@@ -63,7 +65,7 @@ function TTextarea({ label, value, onChange, placeholder, rows = 4 }: {
     <div>
       {label && <Label>{label}</Label>}
       <textarea rows={rows}
-        className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-3 text-sm text-[#1E1B18] placeholder:text-[#C2BEB8] focus:outline-none focus:border-[#D4A91C] focus:ring-2 focus:ring-[#D4A91C]/20 transition-all resize-none"
+        className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all resize-none"
         value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
     </div>
   )
@@ -72,9 +74,9 @@ function TTextarea({ label, value, onChange, placeholder, rows = 4 }: {
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3 py-1">
-      <div className="h-px flex-1 bg-[#EDE6D6]" />
-      <span className="text-[10px] font-bold uppercase tracking-widest text-[#C2BEB8]">{label}</span>
-      <div className="h-px flex-1 bg-[#EDE6D6]" />
+      <div className="h-px flex-1 bg-border" />
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</span>
+      <div className="h-px flex-1 bg-border" />
     </div>
   )
 }
@@ -96,7 +98,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [slug, setSlug] = useState("")
 
-  // ── Compulsory fields (match DB column names from GET /api/invitations/[id]) ──
   const [f, setF] = useState({
     groomFullName: "", groomNickname: "",
     brideFullName: "", brideNickname: "",
@@ -107,7 +108,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
   })
   const upF = (p: Partial<typeof f>) => { setF(prev => ({ ...prev, ...p })); setIsDirty(true); }
 
-  // ── Optional toggles ──
   const [opt, setOpt] = useState({
     groomParents: false, brideParents: false,
     groomPhoto: false, bridePhoto: false,
@@ -120,7 +120,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
   })
   const toggleOpt = (k: keyof typeof opt) => { setOpt(p => ({ ...p, [k]: !p[k] })); setIsDirty(true); }
 
-  // ── Optional field values ──
   const [x, setX] = useState({
     groomFather: "", groomMother: "",
     brideFather: "", brideMother: "",
@@ -142,7 +141,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
   const updateStory = (i: number, p: Partial<typeof x.loveStory[0]>) =>
     { upX({ loveStory: x.loveStory.map((e, n) => n === i ? { ...e, ...p } : e) }); setIsDirty(true); }
 
-  // ── Load existing data from API ──
   useEffect(() => {
     const load = async () => {
       try {
@@ -151,7 +149,6 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
         if (!res.ok) throw new Error(json.error?.message || 'Gagal memuat')
         const d = json.data || {}
 
-        // The GET returns flat DB columns directly
         upF({
           groomFullName:    d.groom_full_name || "",
           groomNickname:    d.groom_nickname || "",
@@ -166,20 +163,17 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
           receptionVenue:   d.resepsi_location_name || "",
           receptionAddress: d.resepsi_location_address || "",
           greetingText:     d.quote_text || "",
-          // Infer event type
           eventType: d.akad_datetime && d.resepsi_datetime ? "akad_resepsi"
             : d.akad_datetime ? "akad"
             : "resepsi",
         })
 
-        // Hydrate optional fields & auto-open their toggles
         setOpt(p => ({
           ...p,
           groomParents: !!(d.groom_father_name),
           brideParents: !!(d.bride_father_name),
           giftBank:     !!(d.gift_bank_account),
           giftAddress:  !!(d.gift_shipping_address),
-          showGallery:  !!(d.show_prewed_gallery),
           mapsUrl:      !!(d.akad_maps_url || d.resepsi_maps_url),
         }))
         upX({
@@ -207,11 +201,9 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
     load()
   }, [id, router])
 
-  // ── Save ──
   const handleSave = async () => {
     setIsSubmitting(true)
     try {
-      // PATCH with flat field names matching the PATCH API contract
       const res = await fetch(`/api/invitations/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -245,7 +237,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
 
       const result = await res.json()
       if (!res.ok) throw new Error(result.error?.message || 'Gagal menyimpan undangan')
-      
+
       setIsDirty(false)
       setShowSaveSuccess(true)
       setTimeout(() => setShowSaveSuccess(false), 3000)
@@ -265,28 +257,28 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
 
   if (isLoading) return (
     <div className="flex justify-center items-center min-h-[40vh]">
-      <Loader2 className="w-6 h-6 animate-spin text-[#D4A91C]" />
+      <Loader2 className="w-6 h-6 animate-spin text-accent" />
     </div>
   )
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-8 pb-32">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-white/80 backdrop-blur-md py-4 border-b border-[#EDE6D6]/60">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-background/80 backdrop-blur-md py-4 border-b border-border/60">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="font-display text-2xl font-light text-[#1E1B18]">Edit Undangan</h1>
-            <p className="text-xs text-[#726C67]">Kustomisasi data dan fitur undangan Anda.</p>
+            <h1 className="font-display text-2xl font-light text-foreground">Edit Undangan</h1>
+            <p className="text-xs text-muted-foreground">Kustomisasi data dan fitur undangan Anda.</p>
           </div>
           {showSaveSuccess && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold animate-in fade-in slide-in-from-left-2 transition-all">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold animate-in fade-in slide-in-from-left-2">
               <Check className="w-3.5 h-3.5" /> Tersimpan ✓
             </div>
           )}
         </div>
         <div className="flex items-center gap-3">
           <a href={`/invite/${slug}?preview=true`} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#EDE6D6] text-sm font-medium text-[#1E1B18] hover:bg-[#FAF8F3] transition-colors">
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors">
             <ExternalLink className="w-4 h-4" /> Preview
           </a>
         </div>
@@ -297,10 +289,10 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
         <div className="hidden md:flex flex-col w-56 sticky top-24 gap-1">
           {TABS.map((tab, idx) => (
             <button key={tab.id} onClick={() => setActiveTab(idx)}
-              className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                activeTab === idx 
-                ? "bg-[#1E1B18] text-[#FDFCF9] shadow-md shadow-black/10" 
-                : "text-[#726C67] hover:bg-[#FAF8F3] hover:text-[#1E1B18]"
+              className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                activeTab === idx
+                  ? "bg-foreground text-background shadow-md"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}>
               {tab.label}
             </button>
@@ -311,10 +303,10 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
         <div className="md:hidden w-full flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {TABS.map((tab, idx) => (
             <button key={tab.id} onClick={() => setActiveTab(idx)}
-              className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
-                activeTab === idx 
-                ? "bg-[#1E1B18] text-[#FDFCF9] border-[#1E1B18]" 
-                : "bg-white text-[#726C67] border-[#EDE6D6]"
+              className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border cursor-pointer ${
+                activeTab === idx
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-card text-muted-foreground border-border"
               }`}>
               {tab.label}
             </button>
@@ -322,9 +314,9 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 w-full bg-white rounded-3xl border border-[#EDE6D6] shadow-sm overflow-hidden p-6 md:p-8">
-          <h2 className="font-display text-2xl font-light text-[#1E1B18] mb-8">{TABS[activeTab].label}</h2>
-          
+        <div className="flex-1 w-full bg-card rounded-3xl border border-border shadow-sm overflow-hidden p-6 md:p-8">
+          <h2 className="font-display text-2xl font-light text-foreground mb-8">{TABS[activeTab].label}</h2>
+
           <div className="flex flex-col gap-6">
             {activeTab === 0 && (
               <>
@@ -369,7 +361,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
               <>
                 <div>
                   <Label required>Jenis Acara</Label>
-                  <select className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm text-[#1E1B18] focus:outline-none focus:border-[#D4A91C] transition-all"
+                  <select className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent transition-all"
                     value={f.eventType} onChange={e => upF({ eventType: e.target.value as any })}>
                     <option value="akad">Akad Nikah Saja</option>
                     <option value="resepsi">Resepsi Saja</option>
@@ -396,14 +388,14 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                       }}
                     />
                     {x.akadMapsUrl && (
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FAF8F3] border border-[#EDE6D6]">
-                        <MapPin className="w-3.5 h-3.5 text-[#D4A91C]" />
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary border border-border">
+                        <MapPin className="w-3.5 h-3.5 text-accent" />
                         <a href={x.akadMapsUrl} target="_blank" rel="noopener noreferrer"
-                           className="text-xs text-[#D4A91C] hover:underline truncate">
+                           className="text-xs text-accent hover:underline truncate">
                           Buka di Google Maps
                         </a>
                         <button type="button" onClick={() => upX({ akadMapsUrl: '' })} className="ml-auto">
-                          <X className="w-3 h-3 text-[#C2BEB8]" />
+                          <X className="w-3 h-3 text-muted-foreground" />
                         </button>
                       </div>
                     )}
@@ -430,14 +422,14 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                       }}
                     />
                     {x.receptionMapsUrl && (
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FAF8F3] border border-[#EDE6D6]">
-                        <MapPin className="w-3.5 h-3.5 text-[#D4A91C]" />
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary border border-border">
+                        <MapPin className="w-3.5 h-3.5 text-accent" />
                         <a href={x.receptionMapsUrl} target="_blank" rel="noopener noreferrer"
-                           className="text-xs text-[#D4A91C] hover:underline truncate">
+                           className="text-xs text-accent hover:underline truncate">
                           Buka di Google Maps
                         </a>
                         <button type="button" onClick={() => upX({ receptionMapsUrl: '' })} className="ml-auto">
-                          <X className="w-3 h-3 text-[#C2BEB8]" />
+                          <X className="w-3 h-3 text-muted-foreground" />
                         </button>
                       </div>
                     )}
@@ -445,7 +437,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                   </>
                 )}
                 <ToggleSection enabled={opt.mapsUrl} onToggle={() => toggleOpt('mapsUrl')} label="Override Link Maps Manual">
-                  <p className="text-xs text-[#9A9390]">Isi manual jika link otomatis tidak akurat.</p>
+                  <p className="text-xs text-muted-foreground">Isi manual jika link otomatis tidak akurat.</p>
                   {(f.eventType === "akad" || f.eventType === "akad_resepsi") &&
                     <TInput label="Maps URL Akad" value={x.akadMapsUrl} onChange={v => upX({ akadMapsUrl: v })} placeholder="https://maps.app.goo.gl/..." />}
                   {(f.eventType === "resepsi" || f.eventType === "akad_resepsi") &&
@@ -460,7 +452,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
             {activeTab === 2 && (
               <>
                 <TTextarea label="Teks Sambutan" value={f.greetingText} onChange={v => upF({ greetingText: v })} rows={5} />
-                <button type="button" className="-mt-3 flex items-center gap-1.5 text-xs font-semibold text-[#D4A91C] hover:text-[#B88E14] transition-colors">
+                <button type="button" className="-mt-3 flex items-center gap-1.5 text-xs font-semibold text-accent hover:text-accent/70 transition-colors cursor-pointer">
                   <Sparkles className="w-3.5 h-3.5" /> Bantu tulis dengan AI
                 </button>
                 <ToggleSection enabled={opt.openingQuote} onToggle={() => toggleOpt('openingQuote')} label="Ayat / Quote Pembuka">
@@ -468,10 +460,10 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                   <TInput label="Sumber" value={x.quoteSource} onChange={v => upX({ quoteSource: v })} placeholder="QS. Ar-Rum: 21" />
                 </ToggleSection>
                 <ToggleSection enabled={opt.gallery} onToggle={() => toggleOpt('gallery')} label="Galeri Foto">
-                  <div className="border border-dashed border-[#EDE6D6] rounded-xl p-8 flex flex-col items-center text-center bg-[#FDFCF9]">
-                    <ImageIcon className="w-8 h-8 text-[#C2BEB8] mb-2" />
-                    <p className="text-sm font-medium text-[#4A4540]">Upload Foto Galeri</p>
-                    <button type="button" className="mt-4 px-4 py-2 rounded-full border border-[#EDE6D6] text-xs font-semibold hover:border-[#D4A91C] transition-colors">Pilih File</button>
+                  <div className="border border-dashed border-border rounded-xl p-8 flex flex-col items-center text-center bg-card">
+                    <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
+                    <p className="text-sm font-medium text-foreground">Upload Foto Galeri</p>
+                    <button type="button" className="mt-4 px-4 py-2 rounded-full border border-border text-xs font-semibold hover:border-accent transition-colors cursor-pointer">Pilih File</button>
                   </div>
                 </ToggleSection>
                 <ToggleSection enabled={opt.music} onToggle={() => toggleOpt('music')} label="Musik Latar">
@@ -480,10 +472,10 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                 <ToggleSection enabled={opt.loveStory} onToggle={() => toggleOpt('loveStory')} label="Timeline Kisah Cinta">
                   <div className="flex flex-col gap-3">
                     {x.loveStory.map((ev, i) => (
-                      <div key={i} className="rounded-xl border border-[#EDE6D6] bg-[#FDFCF9] p-4 flex flex-col gap-3">
+                      <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col gap-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#D4A91C]">Peristiwa {i+1}</span>
-                          <button type="button" onClick={() => removeStory(i)}><Trash2 className="w-4 h-4 text-[#C2BEB8]" /></button>
+                          <span className="text-xs font-bold text-accent">Peristiwa {i+1}</span>
+                          <button type="button" onClick={() => removeStory(i)} className="cursor-pointer"><Trash2 className="w-4 h-4 text-muted-foreground" /></button>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <TInput label="Tahun" value={ev.year} onChange={v => updateStory(i, { year: v })} />
@@ -493,7 +485,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                       </div>
                     ))}
                     <button type="button" onClick={addStory}
-                      className="flex items-center gap-2 justify-center py-3 rounded-xl border border-dashed border-[#D4A91C]/40 text-sm text-[#D4A91C] font-medium hover:bg-[#D4A91C]/5 transition-colors">
+                      className="flex items-center gap-2 justify-center py-3 rounded-xl border border-dashed border-accent/40 text-sm text-accent font-medium hover:bg-accent/5 transition-colors cursor-pointer">
                       <Plus className="w-4 h-4" /> Tambah Peristiwa
                     </button>
                   </div>
@@ -508,7 +500,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                     <TInput label="Batas RSVP" type="date" value={x.rsvpDeadline} onChange={v => upX({ rsvpDeadline: v })} />
                     <div>
                       <Label>Maks. Tamu per Link</Label>
-                      <select className="w-full rounded-xl border border-[#EDE6D6] bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[#D4A91C] transition-all"
+                      <select className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm focus:outline-none focus:border-accent transition-all"
                         value={x.rsvpMaxGuests} onChange={e => upX({ rsvpMaxGuests: e.target.value })}>
                         <option value="1">1 orang</option>
                         <option value="2">2 orang</option>
@@ -520,7 +512,7 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
                   <TTextarea label="Pesan RSVP" value={x.rsvpMessage} onChange={v => upX({ rsvpMessage: v })} rows={2} />
                 </ToggleSection>
                 <ToggleSection enabled={opt.guestbook} onToggle={() => toggleOpt('guestbook')} label="Buku Tamu & Ucapan">
-                  <p className="text-xs text-[#9A9390]">Tamu dapat menulis ucapan langsung di halaman undangan.</p>
+                  <p className="text-xs text-muted-foreground">Tamu dapat menulis ucapan langsung di halaman undangan.</p>
                 </ToggleSection>
 
                 <SectionDivider label="Amplop Digital" />
@@ -546,13 +538,13 @@ export default function EditInvitationWizard({ params }: { params: Promise<{ id:
       {/* Floating Save Bar */}
       {isDirty && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50 animate-in fade-in slide-in-from-bottom-8 duration-500">
-          <div className="bg-[#1E1B18] rounded-2xl shadow-2xl p-4 flex items-center justify-between border border-white/10">
+          <div className="bg-foreground rounded-2xl shadow-2xl p-4 flex items-center justify-between border border-white/10">
             <div className="flex flex-col">
-              <span className="text-white text-sm font-semibold">Ada perubahan belum disimpan</span>
-              <button onClick={handleCancelChanges} className="text-[#9A9390] text-[10px] hover:text-white transition-colors text-left uppercase tracking-widest font-bold">Batalkan</button>
+              <span className="text-background text-sm font-semibold">Ada perubahan belum disimpan</span>
+              <button onClick={handleCancelChanges} className="text-background/50 text-[10px] hover:text-background transition-colors text-left uppercase tracking-widest font-bold cursor-pointer">Batalkan</button>
             </div>
             <button onClick={handleSave} disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#D4A91C] text-[#1E1B18] text-sm font-bold hover:bg-[#F0C129] transition-all disabled:opacity-50">
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent text-accent-foreground text-sm font-bold hover:bg-accent/80 transition-all disabled:opacity-50 cursor-pointer">
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Simpan
             </button>

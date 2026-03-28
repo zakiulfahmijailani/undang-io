@@ -54,7 +54,7 @@ export default function GuestSessionCard({ guestSession }: GuestSessionCardProps
     const brideName = inv?.brideNickname || inv?.brideFullName || "Mempelai Wanita";
 
     return (
-        <Card className="border-amber-200 bg-amber-50/40 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+        <Card className="border-accent/30 bg-accent/5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
             {/* Timer badge top right */}
             <div className="absolute top-3 right-3">
                 {isExpired ? (
@@ -65,8 +65,8 @@ export default function GuestSessionCard({ guestSession }: GuestSessionCardProps
                     <Badge
                         className={`flex items-center gap-1 text-xs font-mono ${
                             isUrgent
-                                ? "bg-red-500 text-white"
-                                : "bg-amber-500 text-white"
+                                ? "bg-destructive text-destructive-foreground"
+                                : "bg-accent text-accent-foreground"
                         }`}
                     >
                         <Clock className="h-3 w-3" />
@@ -78,16 +78,16 @@ export default function GuestSessionCard({ guestSession }: GuestSessionCardProps
             <CardContent className="p-5 pt-5">
                 {/* Label sementara */}
                 <div className="mb-3">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-accent bg-accent/15 px-2 py-0.5 rounded-full">
                         Belum Dipublikasikan
                     </span>
                 </div>
 
                 {/* Nama pasangan */}
-                <h3 className="font-serif text-xl font-bold text-stone-800 mb-1">
+                <h3 className="font-serif text-xl font-bold text-foreground mb-1">
                     {groomName} & {brideName}
                 </h3>
-                <p className="text-sm text-stone-500 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                     {isExpired
                         ? "Undangan ini sudah kadaluarsa."
                         : `Bayar sebelum timer habis untuk mempublikasikan permanen.`}
