@@ -8,10 +8,12 @@ import NewInvitationDialog from "@/components/dashboard/NewInvitationDialog";
 import GuestConversion from "./components/GuestConversion";
 import GuestSessionCard from "./components/GuestSessionCard";
 
+type InvitationStatus = "draft" | "active" | "unpaid" | "expired";
+
 type InvitationItem = {
     id: string;
     slug: string;
-    status: string;
+    status: InvitationStatus;
     created_at: string;
     invitation_details: {
         groom_name: string | null;
@@ -19,7 +21,7 @@ type InvitationItem = {
         couple_photo_url: string | null;
         akad_date: string | null;
         reception_date: string | null;
-    };
+    } | null;
 };
 
 export default async function DashboardPage() {
@@ -62,11 +64,13 @@ export default async function DashboardPage() {
         console.error('[dashboard] invitations query error:', invitationsError);
     }
 
+    const validStatuses: InvitationStatus[] = ["draft", "active", "unpaid", "expired"];
+
     // Map flat columns → shape that InvitationCard expects
     const typedInvitations: InvitationItem[] = (invitationsRaw || []).map((inv: any) => ({
         id: inv.id as string,
         slug: inv.slug as string,
-        status: inv.status as string,
+        status: (validStatuses.includes(inv.status) ? inv.status : "draft") as InvitationStatus,
         created_at: inv.created_at as string,
         invitation_details: {
             groom_name: inv.groom_nickname || inv.groom_full_name || null,
@@ -197,7 +201,7 @@ export default async function DashboardPage() {
                                 <GuestSessionCard key={gs.id} guestSession={gs} />
                             ))}
                             {/* Permanent invitations */}
-                            {typedInvitations.map((invitation: InvitationItem) => (
+                            {typedInvitations.map((invitation) => (
                                 <InvitationCard key={invitation.id} invitation={invitation} />
                             ))}
                         </div>
