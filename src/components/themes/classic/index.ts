@@ -6,3 +6,4 @@ export { ClassicLoveStorySection } from "./ClassicLoveStorySection";
 export { ClassicGallerySection } from "./ClassicGallerySection";
 export { ClassicGiftSection } from "./ClassicGiftSection";
 export { ClassicThemeRenderer } from "./ClassicThemeRenderer";
+export { ClassicRsvpSection } from "./ClassicRsvpSection";

@@ -10,6 +10,7 @@ import { ClassicLoveStorySection } from './ClassicLoveStorySection';
 import { ClassicGallerySection } from './ClassicGallerySection';
 import { ClassicGiftSection } from './ClassicGiftSection';
 import type { ClassicThemeRenderProps } from "@/types/theme";
+import { ClassicRsvpSection } from './ClassicRsvpSection';
 
 // ─── Google Fonts dynamic loader ────────────────────────────────────────────────
 function useDynamicFonts(fonts: (string | null | undefined)[]) {
@@ -343,11 +344,11 @@ export function ClassicThemeRenderer({
             {/* 6. Gift / Amplop Digital — Step 12 ✓ */}
             <ClassicGiftSection assets={assets} data={data} />
 
-            {/* 7. RSVP & Ucapan — coming Step 13 */}
-            <PlaceholderSection
-              id="classic-rsvp"
-              label="RSVP & Ucapan Selamat"
-              bgColor={assets.bg_section_5}
+            {/* 7. RSVP & Ucapan — Step 13 ✓ */}
+            <ClassicRsvpSection
+              assets={assets}
+              data={data}
+              invitationId={data.slug ?? data.id ?? ""}
             />
 
             {/* 8. Footer */}
