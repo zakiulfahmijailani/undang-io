@@ -1,15 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { ClassicThemeAssets, InvitationData } from "@/types/theme";
+import type { ClassicThemeAssets, ClassicInvitationData, LoveStoryEntry } from "@/types/theme";
 
 interface Props {
   assets: ClassicThemeAssets;
-  data: InvitationData;
+  data: ClassicInvitationData;
 }
 
 export function ClassicLoveStorySection({ assets, data }: Props) {
-  const stories = data.loveStory;
+  const stories = data.love_story as LoveStoryEntry[];
   if (!stories || stories.length === 0) return null;
 
   return (
@@ -76,12 +76,12 @@ export function ClassicLoveStorySection({ assets, data }: Props) {
                     color: assets.color_text_body ?? "#3d2e1e",
                   }}
                 >
-                  {story.year && (
+                  {story.date && (
                     <p
                       className="mb-1 text-xs font-semibold tracking-widest uppercase"
                       style={{ color: assets.color_primary ?? "#8b6c42" }}
                     >
-                      {story.year}
+                      {story.date}
                     </p>
                   )}
                   <h3

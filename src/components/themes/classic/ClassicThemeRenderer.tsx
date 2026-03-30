@@ -344,7 +344,7 @@ export function ClassicThemeRenderer({
 
             {/* 4. Love Story — coming Step 9 */}
 
-            {data.loveStory && data.loveStory.length > 0 && (
+            {data.love_story && data.love_story.length > 0 && (
               <ClassicLoveStorySection
                 assets={assets}
                 data={data}
