@@ -7,7 +7,7 @@ import { ClassicHeroSection } from "./ClassicHeroSection";
 import { ClassicCoupleSection } from "./ClassicCoupleSection";
 import { ClassicEventSection } from "./ClassicEventSection";
 import type { ClassicThemeRenderProps } from "@/types/theme";
-import { ClassicLoveStorySection } from './sections/ClassicLoveStorySection';
+import { ClassicLoveStorySection } from './ClassicLoveStorySection'; // ✅ sama level
 
 // ─── Google Fonts dynamic loader ─────────────────────────────────────────────
 function useDynamicFonts(fonts: (string | null | undefined)[]) {
