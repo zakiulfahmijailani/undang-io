@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ClassicCoverOverlay }  from "./ClassicCoverOverlay";
-import { ClassicHeroSection }   from "./ClassicHeroSection";
+import { ClassicCoverOverlay } from "./ClassicCoverOverlay";
+import { ClassicHeroSection } from "./ClassicHeroSection";
 import { ClassicCoupleSection } from "./ClassicCoupleSection";
-import { ClassicEventSection }  from "./ClassicEventSection";
+import { ClassicEventSection } from "./ClassicEventSection";
 import type { ClassicThemeRenderProps } from "@/types/theme";
+import { ClassicLoveStorySection } from './sections/ClassicLoveStorySection';
 
 // ─── Google Fonts dynamic loader ─────────────────────────────────────────────
 function useDynamicFonts(fonts: (string | null | undefined)[]) {
@@ -20,7 +21,7 @@ function useDynamicFonts(fonts: (string | null | undefined)[]) {
     const href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
     if (document.querySelector(`link[href="${href}"]`)) return;
     const link = document.createElement("link");
-    link.rel  = "stylesheet";
+    link.rel = "stylesheet";
     link.href = href;
     document.head.appendChild(link);
   }, [fonts]);
@@ -34,7 +35,7 @@ function useBgMusic(musicUrl: string | null | undefined, enabled: boolean) {
   useEffect(() => {
     if (!musicUrl || !enabled) return;
     const audio = new Audio(musicUrl);
-    audio.loop   = true;
+    audio.loop = true;
     audio.volume = 0.4;
     audioRef.current = audio;
     return () => { audio.pause(); audio.src = ""; };
@@ -44,13 +45,13 @@ function useBgMusic(musicUrl: string | null | undefined, enabled: boolean) {
     const audio = audioRef.current;
     if (!audio) return;
     if (isPlaying) { audio.pause(); setIsPlaying(false); }
-    else           { audio.play().then(() => setIsPlaying(true)).catch(() => {}); }
+    else { audio.play().then(() => setIsPlaying(true)).catch(() => { }); }
   }, [isPlaying]);
 
   // autoplay setelah user tap "Buka Undangan"
   const autoplay = useCallback(() => {
     if (!audioRef.current || !enabled) return;
-    audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    audioRef.current.play().then(() => setIsPlaying(true)).catch(() => { });
   }, [enabled]);
 
   return { isPlaying, toggle, autoplay };
@@ -71,28 +72,28 @@ function ParticleCanvas({
   useEffect(() => {
     if (type === "none" || !canvasRef.current) return;
     const canvas = canvasRef.current;
-    const ctx    = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resize = () => {
-      canvas.width  = window.innerWidth;
+      canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
     resize();
     window.addEventListener("resize", resize);
 
-    const c   = color ?? "#bf9b73";
-    const N   = 28;
+    const c = color ?? "#bf9b73";
+    const N = 28;
     type P = { x: number; y: number; r: number; speed: number; opacity: number; wobble: number; phase: number };
 
     const particles: P[] = Array.from({ length: N }, () => ({
-      x:       Math.random() * window.innerWidth,
-      y:       Math.random() * window.innerHeight,
-      r:       2 + Math.random() * 5,
-      speed:   0.4 + Math.random() * 0.8,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: 2 + Math.random() * 5,
+      speed: 0.4 + Math.random() * 0.8,
       opacity: 0.3 + Math.random() * 0.5,
-      wobble:  (Math.random() - 0.5) * 0.8,
-      phase:   Math.random() * Math.PI * 2,
+      wobble: (Math.random() - 0.5) * 0.8,
+      phase: Math.random() * Math.PI * 2,
     }));
 
     let raf: number;
@@ -104,7 +105,7 @@ function ParticleCanvas({
       for (const p of particles) {
         ctx.save();
         ctx.globalAlpha = p.opacity;
-        ctx.fillStyle   = c;
+        ctx.fillStyle = c;
         ctx.beginPath();
 
         if (type === "petals" || type === "leaves") {
@@ -287,15 +288,15 @@ export function ClassicThemeRenderer({
   // Set CSS var global biar bisa dipakai di mana-mana via var(--classic-primary)
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--classic-primary",   assets.color_primary  ?? "#8b6c42");
+    root.style.setProperty("--classic-primary", assets.color_primary ?? "#8b6c42");
     root.style.setProperty("--classic-secondary", assets.color_secondary ?? "#f5ede0");
-    root.style.setProperty("--classic-accent",    assets.color_accent    ?? "#c9a97a");
-    root.style.setProperty("--classic-bg",        assets.color_bg_page   ?? "#fdfaf6");
-    root.style.setProperty("--classic-text",      assets.color_text_body ?? "#3d2e1e");
-    root.style.setProperty("--classic-muted",     assets.color_text_muted ?? assets.color_secondary ?? "#9a8060");
+    root.style.setProperty("--classic-accent", assets.color_accent ?? "#c9a97a");
+    root.style.setProperty("--classic-bg", assets.color_bg_page ?? "#fdfaf6");
+    root.style.setProperty("--classic-text", assets.color_text_body ?? "#3d2e1e");
+    root.style.setProperty("--classic-muted", assets.color_text_muted ?? assets.color_secondary ?? "#9a8060");
     root.style.setProperty("--classic-font-display", `'${assets.font_display}', serif`);
-    root.style.setProperty("--classic-font-body",    `'${assets.font_body}', sans-serif`);
-    root.style.setProperty("--classic-font-script",  assets.font_script  ? `'${assets.font_script}', cursive` : "cursive");
+    root.style.setProperty("--classic-font-body", `'${assets.font_body}', sans-serif`);
+    root.style.setProperty("--classic-font-script", assets.font_script ? `'${assets.font_script}', cursive` : "cursive");
   }, [assets]);
 
   return (
@@ -342,11 +343,13 @@ export function ClassicThemeRenderer({
             <ClassicEventSection assets={assets} data={data} />
 
             {/* 4. Love Story — coming Step 9 */}
-            <PlaceholderSection
-              id="classic-lovestory"
-              label="Cerita Cinta"
-              bgColor={assets.bg_section_4}
-            />
+
+            {data.loveStory && data.loveStory.length > 0 && (
+              <ClassicLoveStorySection
+                assets={assets}
+                data={data}
+              />
+            )}
 
             {/* 5. Gallery — coming Step 10 */}
             <PlaceholderSection
