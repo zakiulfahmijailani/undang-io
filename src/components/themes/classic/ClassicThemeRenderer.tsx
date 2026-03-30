@@ -8,6 +8,7 @@ import { ClassicCoupleSection } from "./ClassicCoupleSection";
 import { ClassicEventSection } from "./ClassicEventSection";
 import { ClassicLoveStorySection } from './ClassicLoveStorySection';
 import { ClassicGallerySection } from './ClassicGallerySection';
+import { ClassicGiftSection } from './ClassicGiftSection';
 import type { ClassicThemeRenderProps } from "@/types/theme";
 
 // ─── Google Fonts dynamic loader ────────────────────────────────────────────────
@@ -339,12 +340,8 @@ export function ClassicThemeRenderer({
             {/* 5. Gallery — Step 11 ✓ */}
             <ClassicGallerySection assets={assets} data={data} />
 
-            {/* 6. Gift / Amplop Digital — coming Step 12 */}
-            <PlaceholderSection
-              id="classic-gift"
-              label="Amplop Digital"
-              bgColor={assets.bg_section_5}
-            />
+            {/* 6. Gift / Amplop Digital — Step 12 ✓ */}
+            <ClassicGiftSection assets={assets} data={data} />
 
             {/* 7. RSVP & Ucapan — coming Step 13 */}
             <PlaceholderSection
