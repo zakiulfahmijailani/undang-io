@@ -6,10 +6,11 @@ import { ClassicCoverOverlay } from "./ClassicCoverOverlay";
 import { ClassicHeroSection } from "./ClassicHeroSection";
 import { ClassicCoupleSection } from "./ClassicCoupleSection";
 import { ClassicEventSection } from "./ClassicEventSection";
+import { ClassicLoveStorySection } from './ClassicLoveStorySection';
+import { ClassicGallerySection } from './ClassicGallerySection';
 import type { ClassicThemeRenderProps } from "@/types/theme";
-import { ClassicLoveStorySection } from './ClassicLoveStorySection'; // ✅ sama level
 
-// ─── Google Fonts dynamic loader ─────────────────────────────────────────────
+// ─── Google Fonts dynamic loader ────────────────────────────────────────────────
 function useDynamicFonts(fonts: (string | null | undefined)[]) {
   useEffect(() => {
     const unique = [...new Set(fonts.filter(Boolean))] as string[];
@@ -48,7 +49,6 @@ function useBgMusic(musicUrl: string | null | undefined, enabled: boolean) {
     else { audio.play().then(() => setIsPlaying(true)).catch(() => { }); }
   }, [isPlaying]);
 
-  // autoplay setelah user tap "Buka Undangan"
   const autoplay = useCallback(() => {
     if (!audioRef.current || !enabled) return;
     audioRef.current.play().then(() => setIsPlaying(true)).catch(() => { });
@@ -57,7 +57,7 @@ function useBgMusic(musicUrl: string | null | undefined, enabled: boolean) {
   return { isPlaying, toggle, autoplay };
 }
 
-// ─── Particle canvas (ringan, pure CSS/canvas) ────────────────────────────────
+// ─── Particle canvas ──────────────────────────────────────────────────────────────
 type ParticleType = "petals" | "sparkle" | "bubbles" | "leaves" | "snow" | "none";
 
 function ParticleCanvas({
@@ -109,7 +109,6 @@ function ParticleCanvas({
         ctx.beginPath();
 
         if (type === "petals" || type === "leaves") {
-          // Ellipse miring
           ctx.translate(p.x, p.y);
           ctx.rotate(Math.sin(t + p.phase) * 0.6);
           ctx.scale(1, 0.55);
@@ -117,7 +116,6 @@ function ParticleCanvas({
         } else if (type === "snow") {
           ctx.arc(p.x, p.y, p.r * 0.7, 0, Math.PI * 2);
         } else if (type === "sparkle") {
-          // Bintang 4 sudut
           ctx.translate(p.x, p.y);
           for (let i = 0; i < 4; i++) {
             ctx.rotate(Math.PI / 2);
@@ -131,7 +129,6 @@ function ParticleCanvas({
         ctx.fill();
         ctx.restore();
 
-        // Jatuh ke bawah + wobble horizontal
         p.y += p.speed;
         p.x += Math.sin(t * 0.8 + p.phase) * p.wobble;
         if (p.y > canvas.height + 20) {
@@ -161,7 +158,7 @@ function ParticleCanvas({
   );
 }
 
-// ─── Section placeholder (sections belum diport) ──────────────────────────────
+// ─── Section placeholder ───────────────────────────────────────────────────────────
 function PlaceholderSection({
   id,
   label,
@@ -187,7 +184,7 @@ function PlaceholderSection({
   );
 }
 
-// ─── Preview banner ───────────────────────────────────────────────────────────
+// ─── Preview banner ──────────────────────────────────────────────────────────────
 function PreviewBanner() {
   return (
     <div
@@ -200,7 +197,7 @@ function PreviewBanner() {
   );
 }
 
-// ─── Scroll-to-top button ──────────────────────────────────────────────────────
+// ─── Scroll-to-top button ────────────────────────────────────────────────────────────
 function ScrollToTopButton({ color }: { color?: string | null }) {
   const [visible, setVisible] = useState(false);
 
@@ -229,7 +226,7 @@ function ScrollToTopButton({ color }: { color?: string | null }) {
   );
 }
 
-// ─── Music toggle button ──────────────────────────────────────────────────────
+// ─── Music toggle button ───────────────────────────────────────────────────────────
 function MusicToggleButton({
   isPlaying,
   onToggle,
@@ -254,7 +251,7 @@ function MusicToggleButton({
   );
 }
 
-// ─── MAIN RENDERER ────────────────────────────────────────────────────────────
+// ─── MAIN RENDERER ───────────────────────────────────────────────────────────────
 export function ClassicThemeRenderer({
   theme,
   data,
@@ -264,7 +261,6 @@ export function ClassicThemeRenderer({
   const { assets } = theme;
   const [isOpen, setIsOpen] = useState(false);
 
-  // Load Google Fonts dari assets
   useDynamicFonts([
     assets.font_display,
     assets.font_body,
@@ -273,19 +269,16 @@ export function ClassicThemeRenderer({
     assets.font_arabic,
   ]);
 
-  // Music
   const { isPlaying, toggle, autoplay } = useBgMusic(
     assets.bg_music,
     !isPreview
   );
 
-  // Handler buka undangan: state + autoplay musik
   const handleOpen = useCallback(() => {
     setIsOpen(true);
     autoplay();
   }, [autoplay]);
 
-  // Set CSS var global biar bisa dipakai di mana-mana via var(--classic-primary)
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--classic-primary", assets.color_primary ?? "#8b6c42");
@@ -301,10 +294,8 @@ export function ClassicThemeRenderer({
 
   return (
     <>
-      {/* ── Preview mode banner ── */}
       {isPreview && <PreviewBanner />}
 
-      {/* ── Particle overlay (fixed, atas semua section) ── */}
       {isOpen && (
         <ParticleCanvas
           type={assets.particle_type}
@@ -312,7 +303,6 @@ export function ClassicThemeRenderer({
         />
       )}
 
-      {/* ── Cover Overlay (fullscreen, z-50, hilang setelah dibuka) ── */}
       <ClassicCoverOverlay
         assets={assets}
         data={data}
@@ -321,7 +311,6 @@ export function ClassicThemeRenderer({
         guestName={guestName}
       />
 
-      {/* ── Main content (muncul setelah overlay tutup) ── */}
       <AnimatePresence>
         {isOpen && (
           <motion.main
@@ -342,30 +331,22 @@ export function ClassicThemeRenderer({
             {/* 3. Event — Akad & Resepsi cards */}
             <ClassicEventSection assets={assets} data={data} />
 
-            {/* 4. Love Story — coming Step 9 */}
-
+            {/* 4. Love Story */}
             {data.love_story && data.love_story.length > 0 && (
-              <ClassicLoveStorySection
-                assets={assets}
-                data={data}
-              />
+              <ClassicLoveStorySection assets={assets} data={data} />
             )}
 
-            {/* 5. Gallery — coming Step 10 */}
-            <PlaceholderSection
-              id="classic-gallery"
-              label="Galeri Foto"
-              bgColor={assets.bg_section_4}
-            />
+            {/* 5. Gallery — Step 11 ✓ */}
+            <ClassicGallerySection assets={assets} data={data} />
 
-            {/* 6. Gift / Amplop Digital — coming Step 11 */}
+            {/* 6. Gift / Amplop Digital — coming Step 12 */}
             <PlaceholderSection
               id="classic-gift"
               label="Amplop Digital"
               bgColor={assets.bg_section_5}
             />
 
-            {/* 7. RSVP & Ucapan — coming Step 12 */}
+            {/* 7. RSVP & Ucapan — coming Step 13 */}
             <PlaceholderSection
               id="classic-rsvp"
               label="RSVP & Ucapan Selamat"
@@ -396,7 +377,6 @@ export function ClassicThemeRenderer({
         )}
       </AnimatePresence>
 
-      {/* ── Float buttons (muncul setelah buka) ── */}
       {isOpen && !isPreview && (
         <MusicToggleButton
           isPlaying={isPlaying}
