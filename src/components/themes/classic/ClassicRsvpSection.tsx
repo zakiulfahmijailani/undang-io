@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { createClient } from "@/lib/supabase/client";
+import { createBrowserSupabaseClient as createClient } from "@/lib/supabase/client";
 import type { ClassicThemeAssets, ClassicInvitationData } from "@/types/theme";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

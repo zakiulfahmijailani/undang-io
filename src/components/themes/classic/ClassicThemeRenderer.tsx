@@ -348,7 +348,7 @@ export function ClassicThemeRenderer({
             <ClassicRsvpSection
               assets={assets}
               data={data}
-              invitationId={data.slug ?? data.id ?? ""}
+              invitationId={theme.slug ?? theme.id ?? ""}
             />
 
             {/* 8. Footer */}

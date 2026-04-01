@@ -175,7 +175,7 @@ export default function MusicPickerTab({ invitationId, currentMusicUrl, onChange
                                             ? 'bg-amber-500 text-white hover:bg-amber-600 border-0'
                                             : 'bg-white text-stone-700 border border-stone-300 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700'
                                     }`}
-                                    variant={isSelected ? 'default' : 'secondary'}
+                                    variant={isSelected ? 'primary' : 'secondary'}
                                 >
                                     {isSelected ? (
                                         <><Check className="w-3 h-3 mr-1" />Dipilih</>

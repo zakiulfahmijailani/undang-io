@@ -33,27 +33,32 @@ export const demoData = {
     dressCode: {
         description: "Sage Green & Earth Tones",
         colors: ["#87986a", "#c8b88a", "#d4c5a9", "#a3b18a"],
+        note: "Sage Green & Earth Tones",
     },
     loveStory: [
         {
+            year: "September 2020",
             date: "September 2020",
             title: "Pertama Bertemu",
             description: "Kami pertama kali bertemu di acara seminar kampus. Senyummu yang hangat membuat hari itu berbeda.",
             photo: "https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=600&h=400&fit=crop",
         },
         {
+            year: "Februari 2021",
             date: "Februari 2021",
             title: "Mulai Dekat",
             description: "Setelah berbulan-bulan saling bertukar pesan, kami mulai sering menghabiskan waktu bersama.",
             photo: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=600&h=400&fit=crop",
         },
         {
+            year: "Desember 2022",
             date: "Desember 2022",
             title: "Lamaran",
             description: "Di bawah langit malam yang bertabur bintang, aku berlutut dan mengucapkan kata-kata yang telah lama kusimpan.",
             photo: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=600&h=400&fit=crop",
         },
         {
+            year: "Juni 2026",
             date: "Juni 2026",
             title: "Hari Bahagia",
             description: "Hari di mana kami memulai babak baru kehidupan bersama, selamanya.",
