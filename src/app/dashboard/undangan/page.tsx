@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import DeleteInvitationButton from "@/components/dashboard/DeleteInvitationButton";
+import InvitationList from "@/components/dashboard/InvitationList";
 
 export default async function MyInvitationsPage() {
     const supabase = await createServerSupabaseClient();
@@ -66,6 +67,27 @@ export default async function MyInvitationsPage() {
 
         return { id: inv.id, slug: inv.slug, title, date, status: inv.status, statusLabel, statusVariant, statusClass, views: 0, rsvps: 0, messages: 0, isPermanent: true };
     });
+
+    // Fetch real RSVP counts per invitation (query by slug)
+    const slugs = permanentInvitations.map((inv: { slug: string }) => inv.slug).filter(Boolean);
+    if (slugs.length > 0) {
+        const { data: rsvpRows } = await supabase
+            .from('rsvp_messages')
+            .select('invitation_id')
+            .in('invitation_id', slugs);
+
+        if (rsvpRows) {
+            const countMap: Record<string, number> = {};
+            for (const row of rsvpRows) {
+                countMap[row.invitation_id] = (countMap[row.invitation_id] || 0) + 1;
+            }
+            for (const inv of permanentInvitations) {
+                const count = countMap[inv.slug] || 0;
+                inv.rsvps = count;
+                inv.messages = count;
+            }
+        }
+    }
 
     let claimedSessions: any[] = [];
     const adminClient = getAdminClient();
@@ -138,94 +160,7 @@ export default async function MyInvitationsPage() {
                     </Link>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-                    {allItems.map((item) => (
-                        <Card
-                            key={item.id}
-                            className={`overflow-hidden border-border/50 shadow-sm hover:shadow-md transition-shadow flex flex-col bg-card ${
-                                item.status === 'claimed' ? 'border-amber-200 bg-amber-50/20' : ''
-                            }`}
-                        >
-                            {/* Status & Tanggal */}
-                            <div className="p-5 pb-0 flex justify-between items-start">
-                                <Badge
-                                    variant="secondary"
-                                    className={`font-semibold px-2.5 py-0.5 rounded-full text-xs border ${item.statusClass}`}
-                                >
-                                    {item.status === 'claimed' && <Clock className="w-3 h-3 inline mr-1" />}
-                                    {item.statusLabel}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
-                                    {item.status === 'claimed' ? (
-                                        <span className="text-amber-600 font-semibold flex items-center gap-1">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            {item.minutesLeft} menit tersisa
-                                        </span>
-                                    ) : (
-                                        <><Calendar className="w-3.5 h-3.5" />{item.date}</>
-                                    )}
-                                </span>
-                            </div>
-
-                            <CardContent className="p-5 flex-1 flex flex-col">
-                                <h3 className="font-serif text-2xl font-bold text-foreground mt-2 mb-4 leading-tight">
-                                    {item.title}
-                                </h3>
-
-                                {/* Statistik */}
-                                <div className="grid grid-cols-3 gap-2 py-4 border-y border-border/50 mb-auto bg-secondary/10 rounded-lg px-2">
-                                    <div className="flex flex-col items-center justify-center text-center">
-                                        <Users className="w-4 h-4 text-muted-foreground mb-1" />
-                                        <span className="text-sm font-bold text-foreground">{item.views}</span>
-                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mt-0.5">Tayangan</span>
-                                    </div>
-                                    <div className="flex flex-col items-center justify-center text-center border-l col-start-2 border-border/50">
-                                        <MailOpen className="w-4 h-4 text-muted-foreground mb-1" />
-                                        <span className="text-sm font-bold text-foreground">{item.rsvps}</span>
-                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mt-0.5">RSVP</span>
-                                    </div>
-                                    <div className="flex flex-col items-center justify-center text-center border-l col-start-3 border-border/50">
-                                        <MessageSquareHeart className="w-4 h-4 text-muted-foreground mb-1" />
-                                        <span className="text-sm font-bold text-foreground">{item.messages}</span>
-                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mt-0.5">Ucapan</span>
-                                    </div>
-                                </div>
-
-                                {/* Tombol Aksi */}
-                                <div className="flex flex-wrap items-center gap-2 mt-5">
-                                    {item.status === 'claimed' ? (
-                                        <>
-                                            <Link href={`/pembayaran/${item.slug}`} className="flex-1">
-                                                <Button className="w-full text-xs gap-1.5 bg-amber-500 hover:bg-amber-600 text-white cursor-pointer">
-                                                    <CreditCard className="w-3.5 h-3.5" /> Bayar Rp 45.000
-                                                </Button>
-                                            </Link>
-                                            <Link href={`/u/${item.slug}`} target="_blank">
-                                                <Button variant="secondary" className="shrink-0 h-9 w-9 p-0 cursor-pointer">
-                                                    <Eye className="w-4 h-4" />
-                                                </Button>
-                                            </Link>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Link href={`/u/${item.slug}`} target="_blank" className="flex-1">
-                                                <Button variant="secondary" className="w-full text-xs gap-1.5 bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10 cursor-pointer">
-                                                    <Eye className="w-3.5 h-3.5" /> Lihat Undangan
-                                                </Button>
-                                            </Link>
-                                            <Link href={`/dashboard/undangan/${item.id}/edit`}>
-                                                <Button variant="secondary" className="shrink-0 h-9 w-9 p-0 text-accent border border-accent/20 hover:bg-accent/10 cursor-pointer">
-                                                    <Edit className="w-4 h-4" />
-                                                </Button>
-                                            </Link>
-                                            <DeleteInvitationButton invitationId={item.id} invitationTitle={item.title} />
-                                        </>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                <InvitationList items={allItems} />
             )}
         </div>
     );

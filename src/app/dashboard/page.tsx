@@ -99,10 +99,20 @@ export default async function DashboardPage() {
         claimedGuestSessions = (guestSessions || []) as any[];
     }
 
-    // Real stats — will show 0 until analytics tables are created
-    const totalViews = 0;
-    const totalRsvps = 0;
-    const newMessages = 0;
+    // Real stats — query rsvp_messages by invitation slugs
+    let totalRsvps = 0;
+    let newMessages = 0;
+    const totalViews = 0; // TODO: connect when invitation_views table is ready
+
+    const allSlugs = typedInvitations.map(inv => inv.slug).filter(Boolean);
+    if (allSlugs.length > 0) {
+        const { count: rsvpCount } = await supabase
+            .from('rsvp_messages')
+            .select('*', { count: 'exact', head: true })
+            .in('invitation_id', allSlugs);
+        totalRsvps = rsvpCount || 0;
+        newMessages = totalRsvps; // Each RSVP includes a message
+    }
 
     const totalInvitations = typedInvitations.length + claimedGuestSessions.length;
 

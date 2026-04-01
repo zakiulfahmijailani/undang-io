@@ -1,74 +1,84 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
-import { id as localeId } from "date-fns/locale";
-import { CheckCircle2, XCircle, HelpCircle, ChevronDown, ChevronUp, MailOpen } from "lucide-react";
+import { CheckCircle2, XCircle, HelpCircle, ChevronDown, ChevronUp, MailOpen, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+type AttendanceStatus = "hadir" | "tidak_hadir" | "masih_ragu";
 
 interface RsvpMessage {
     id: string;
-    guest_name: string;
-    attendance: 'hadir' | 'tidak_hadir' | 'ragu';
+    name: string;
+    attendance: AttendanceStatus;
     message: string | null;
     created_at: string;
-    is_read: boolean;
+}
+
+const ATTENDANCE_CONFIG: Record<AttendanceStatus | "default", { text: string; className: string }> = {
+    hadir: { text: "Hadir", className: "bg-green-50 text-green-700 border-green-200" },
+    tidak_hadir: { text: "Tidak Hadir", className: "bg-red-50 text-red-700 border-red-200" },
+    masih_ragu: { text: "Masih Ragu", className: "bg-amber-50 text-amber-700 border-amber-200" },
+    default: { text: "Belum Pasti", className: "bg-secondary text-muted-foreground border-border" },
+};
+
+const ATTENDANCE_ICON: Record<AttendanceStatus | "default", React.ReactNode> = {
+    hadir: <CheckCircle2 className="w-4 h-4" />,
+    tidak_hadir: <XCircle className="w-4 h-4" />,
+    masih_ragu: <HelpCircle className="w-4 h-4" />,
+    default: <HelpCircle className="w-4 h-4" />,
+};
+
+function formatDate(dateStr: string): string {
+    try {
+        return new Date(dateStr).toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    } catch {
+        return dateStr;
+    }
 }
 
 export default function RsvpClientTable({
     initialMessages,
-    invitationId,
-    totalCount
+    invitationSlug,
+    totalCount,
 }: {
     initialMessages: RsvpMessage[];
-    invitationId: string;
+    invitationSlug: string;
     totalCount: number;
 }) {
     const [messages, setMessages] = useState<RsvpMessage[]>(initialMessages);
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
     const [page, setPage] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [filterStatus, setFilterStatus] = useState<AttendanceStatus | "all">("all");
     const limit = 10;
     const totalPages = Math.ceil(totalCount / limit);
 
-    const toggleExpand = async (message: RsvpMessage) => {
-        const isExpanded = expandedIds.has(message.id);
+    const toggleExpand = (message: RsvpMessage) => {
         const newExpanded = new Set(expandedIds);
-
-        if (isExpanded) {
+        if (newExpanded.has(message.id)) {
             newExpanded.delete(message.id);
         } else {
             newExpanded.add(message.id);
-            // Mark as read if it's currently unread
-            if (!message.is_read) {
-                markAsRead(message.id);
-            }
         }
         setExpandedIds(newExpanded);
-    };
-
-    const markAsRead = async (messageId: string) => {
-        try {
-            // Optimistic update
-            setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_read: true } : m));
-
-            await fetch(`/api/invitations/${invitationId}/messages`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messageIds: [messageId], markAs: 'read' })
-            });
-        } catch (error) {
-            console.error("Failed to mark as read", error);
-        }
     };
 
     const loadPage = async (newPage: number) => {
         setIsLoading(true);
         try {
-            const res = await fetch(`/api/invitations/${invitationId}/messages?page=${newPage}&limit=${limit}`);
+            const filterParam = filterStatus !== "all" ? `&attendance=${filterStatus}` : "";
+            const res = await fetch(
+                `/api/public/invitations/${invitationSlug}/messages?page=${newPage}&limit=${limit}${filterParam}`
+            );
             const json = await res.json();
             if (json.data) {
-                setMessages(json.data.items);
+                setMessages(json.data.items || json.data);
                 setPage(newPage);
                 setExpandedIds(new Set());
             }
@@ -79,48 +89,62 @@ export default function RsvpClientTable({
         }
     };
 
-    const getAttendanceConfig = (status: string) => {
-        switch (status) {
-            case 'hadir': return {
-                icon: <CheckCircle2 className="w-4 h-4" />,
-                className: "bg-green-100 text-green-700 border-green-200",
-                text: "Hadir"
-            };
-            case 'tidak_hadir': return {
-                icon: <XCircle className="w-4 h-4" />,
-                className: "bg-red-100 text-red-700 border-red-200",
-                text: "Tidak Hadir"
-            };
-            case 'ragu': return {
-                icon: <HelpCircle className="w-4 h-4" />,
-                className: "bg-yellow-100 text-yellow-700 border-yellow-200",
-                text: "Masih Ragu"
-            };
-            default: return {
-                icon: <HelpCircle className="w-4 h-4" />,
-                className: "bg-stone-100 text-stone-700 border-stone-200",
-                text: "Belum Pasti"
-            };
-        }
-    };
+    const filteredMessages =
+        filterStatus === "all"
+            ? messages
+            : messages.filter((m) => m.attendance === filterStatus);
+
+    const getAttConfig = (status: string) =>
+        ATTENDANCE_CONFIG[status as AttendanceStatus] ?? ATTENDANCE_CONFIG.default;
+
+    const getAttIcon = (status: string) =>
+        ATTENDANCE_ICON[status as AttendanceStatus] ?? ATTENDANCE_ICON.default;
 
     if (totalCount === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 px-4 bg-white border border-stone-200 rounded-3xl text-center shadow-sm">
-                <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mb-4">
-                    <MailOpen className="w-8 h-8 text-stone-400" />
+            <div className="flex flex-col items-center justify-center py-16 px-4 bg-card border border-border rounded-3xl text-center shadow-sm">
+                <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                    <MailOpen className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-serif font-bold text-stone-800">Belum Ada RSVP</h3>
-                <p className="text-stone-500 max-w-sm mt-2 text-sm">Masih belum ada tamu yang mengonfirmasi kehadiran atau memberikan ucapan.</p>
+                <h3 className="text-lg font-serif font-bold text-foreground">Belum Ada RSVP</h3>
+                <p className="text-muted-foreground max-w-sm mt-2 text-sm">
+                    Masih belum ada tamu yang mengonfirmasi kehadiran atau memberikan ucapan.
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white border border-stone-200 rounded-2xl md:rounded-3xl shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-card border border-border rounded-2xl md:rounded-3xl shadow-sm overflow-hidden flex flex-col">
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-2 p-4 border-b border-border bg-secondary/30 overflow-x-auto">
+                <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                {(["all", "hadir", "tidak_hadir", "masih_ragu"] as const).map((status) => {
+                    const isActive = filterStatus === status;
+                    const label =
+                        status === "all"
+                            ? `Semua (${totalCount})`
+                            : ATTENDANCE_CONFIG[status].text;
+                    return (
+                        <button
+                            key={status}
+                            onClick={() => setFilterStatus(status)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
+                                isActive
+                                    ? "bg-primary/10 text-primary border-primary/30"
+                                    : "bg-card text-muted-foreground border-border hover:border-primary/20 hover:text-foreground"
+                            }`}
+                        >
+                            {label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Table */}
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
-                    <thead className="bg-stone-50/80 border-b border-stone-200 text-stone-600">
+                    <thead className="bg-secondary/50 border-b border-border text-muted-foreground">
                         <tr>
                             <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Nama Tamu</th>
                             <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Kehadiran</th>
@@ -128,49 +152,55 @@ export default function RsvpClientTable({
                             <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Tanggal</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-100">
-                        {messages.map((msg) => {
-                            const att = getAttendanceConfig(msg.attendance);
+                    <tbody className="divide-y divide-border/50">
+                        {filteredMessages.map((msg) => {
+                            const att = getAttConfig(msg.attendance);
+                            const attIcon = getAttIcon(msg.attendance);
                             const isExpanded = expandedIds.has(msg.id);
                             const hasMessage = !!msg.message?.trim();
 
                             return (
                                 <tr
                                     key={msg.id}
-                                    className={`group transition-colors ${!msg.is_read ? 'bg-gold-50/30 font-medium' : 'hover:bg-stone-50'} ${hasMessage ? 'cursor-pointer' : ''}`}
+                                    className={`group transition-colors hover:bg-secondary/30 ${hasMessage ? "cursor-pointer" : ""}`}
                                     onClick={() => hasMessage && toggleExpand(msg)}
                                 >
-                                    <td className="px-6 py-4 flex items-center gap-3">
-                                        {!msg.is_read && (
-                                            <span className="w-2 h-2 rounded-full bg-gold-500 shadow-[0_0_8px_rgba(234,179,8,0.5)] flex-shrink-0" />
-                                        )}
-                                        <div className="font-semibold text-stone-800">{msg.guest_name}</div>
+                                    <td className="px-6 py-4">
+                                        <div className="font-semibold text-foreground">{msg.name}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${att.className}`}>
-                                            {att.icon}
+                                        <span
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${att.className}`}
+                                        >
+                                            {attIcon}
                                             {att.text}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-stone-600 min-w-[200px]">
+                                    <td className="px-6 py-4 text-muted-foreground min-w-[200px]">
                                         {hasMessage ? (
                                             <div className="flex flex-col items-start gap-1">
-                                                <div className={`transition-all duration-300 relative ${isExpanded ? 'line-clamp-none whitespace-pre-wrap' : 'line-clamp-1 italic text-stone-500 pr-6'}`}>
-                                                    "{msg.message}"
+                                                <div
+                                                    className={`transition-all duration-300 relative ${
+                                                        isExpanded
+                                                            ? "line-clamp-none whitespace-pre-wrap"
+                                                            : "line-clamp-1 italic text-muted-foreground pr-6"
+                                                    }`}
+                                                >
+                                                    &ldquo;{msg.message}&rdquo;
                                                     {!isExpanded && (
-                                                        <ChevronDown className="w-4 h-4 absolute right-0 top-0.5 text-stone-400 group-hover:text-gold-500" />
+                                                        <ChevronDown className="w-4 h-4 absolute right-0 top-0.5 text-muted-foreground group-hover:text-primary" />
                                                     )}
                                                     {isExpanded && (
-                                                        <ChevronUp className="w-4 h-4 ml-2 inline text-stone-400" />
+                                                        <ChevronUp className="w-4 h-4 ml-2 inline text-muted-foreground" />
                                                     )}
                                                 </div>
                                             </div>
                                         ) : (
-                                            <span className="text-stone-400 italic text-xs">- Tanpa pesan -</span>
+                                            <span className="text-muted-foreground italic text-xs">- Tanpa pesan -</span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-right text-stone-500 text-xs text-nowrap">
-                                        {format(new Date(msg.created_at), "dd MMM yyyy, HH:mm", { locale: localeId })}
+                                    <td className="px-6 py-4 text-right text-muted-foreground text-xs text-nowrap">
+                                        {formatDate(msg.created_at)}
                                     </td>
                                 </tr>
                             );
@@ -181,8 +211,8 @@ export default function RsvpClientTable({
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-                <div className="border-t border-stone-200 bg-stone-50/50 p-4 flex items-center justify-between">
-                    <p className="text-xs text-stone-500 font-medium">
+                <div className="border-t border-border bg-secondary/30 p-4 flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground font-medium">
                         Halaman {page} dari {totalPages}
                     </p>
                     <div className="flex items-center gap-2">
@@ -191,7 +221,7 @@ export default function RsvpClientTable({
                             size="sm"
                             disabled={page === 1 || isLoading}
                             onClick={() => loadPage(page - 1)}
-                            className="h-8 text-xs border-stone-200"
+                            className="h-8 text-xs"
                         >
                             Sebelumnya
                         </Button>
@@ -200,7 +230,7 @@ export default function RsvpClientTable({
                             size="sm"
                             disabled={page === totalPages || isLoading}
                             onClick={() => loadPage(page + 1)}
-                            className="h-8 text-xs border-stone-200"
+                            className="h-8 text-xs"
                         >
                             Selanjutnya
                         </Button>
