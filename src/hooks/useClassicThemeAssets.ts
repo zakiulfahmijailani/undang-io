@@ -17,7 +17,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import type { ClassicThemeAssets, AssetKind } from "@/types/theme";
 
 // ─── Supabase row shape ───────────────────────────────────────────────────────
@@ -79,7 +79,14 @@ export function useClassicThemeAssets(
 
     async function fetchAssets() {
       try {
-        const supabase = createClient();
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) {
+          // Supabase env vars not set — fallback to baseAssets
+          setAssets(baseAssets);
+          setIsLoading(false);
+          return;
+        }
+
         const { data, error: sbError } = await supabase
           .from("theme_assets")
           .select("id, theme_key, kind, label, image_url, is_global, created_at")
