@@ -14,12 +14,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getAdminClient } from '@/lib/supabase/admin';
 
-async function requireAdminUser(req: NextRequest) {
+async function requireAdminUser(_req: NextRequest) {
+  // 1. Verify session using the user-scoped client (validates JWT cookie)
   const supabase = await createServerSupabaseClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return null;
 
-  const { data: profile } = await supabase
+  // 2. Look up role via admin client to bypass any RLS restrictions on profiles
+  const admin = getAdminClient();
+  if (!admin) return null;
+
+  const { data: profile } = await admin
     .from('profiles')
     .select('role')
     .eq('id', user.id)
