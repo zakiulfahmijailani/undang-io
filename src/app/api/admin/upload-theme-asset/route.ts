@@ -3,15 +3,13 @@
  *
  * Server-side upload handler for theme assets.
  * Uses getAdminClient() (SERVICE_ROLE_KEY) to:
- *   1. Verify the user session (required)
- *   2. Optionally check role in public.profiles (admin | owner)
- *      - If profiles table doesn't exist or user has no role row yet,
- *        falls back to allowing any authenticated user (safe for solo-owner dev)
+ *   1. Verify the user session — must be authenticated
+ *   2. Check role in public.profiles — must be 'admin' or 'owner'
  *   3. Upload the file to Supabase Storage bucket 'theme-assets'
  *   4. Insert a row into public.theme_assets
  *
  * This bypasses Storage RLS entirely on the server side, which is safe
- * because we enforce auth checks before any storage operation.
+ * because we enforce auth + role checks before any storage operation.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -28,15 +26,10 @@ function getExt(filename: string): string {
 }
 
 /**
- * Returns the authenticated user, or null if not logged in.
- *
- * Role check against public.profiles:
- * - If profiles row exists with role 'admin' or 'owner' → allowed ✅
- * - If profiles row doesn't exist / table missing / role is something else →
- *   falls back to allowing ANY authenticated user (solo-owner / dev scenario)
- *   and logs a warning so you can see it in Vercel function logs.
+ * Verifies the request comes from an authenticated user with role 'admin' or 'owner'.
+ * Returns the user object if authorized, null otherwise.
  */
-async function requireAuthUser() {
+async function requireAdminUser() {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -50,66 +43,45 @@ async function requireAuthUser() {
 
   const admin = getAdminClient();
   if (!admin) {
-    // If admin client can't be created (missing env), still allow authenticated user
-    console.warn('[upload-theme-asset] Admin client unavailable (check SUPABASE_SERVICE_ROLE_KEY). Falling back to auth-only check.');
-    return user;
+    console.error('[upload-theme-asset] Admin client unavailable — check SUPABASE_SERVICE_ROLE_KEY env var.');
+    return null;
   }
 
-  // Try to read role from profiles table
   const { data: profile, error: profileError } = await admin
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .maybeSingle(); // maybeSingle: returns null (not error) if no row found
+    .maybeSingle();
 
   if (profileError) {
-    // Table might not exist yet, or other DB error — fall back to auth-only
-    console.warn(
-      `[upload-theme-asset] Could not read profiles.role for user ${user.id}:`,
-      profileError.message,
-      '→ Falling back to auth-only check (any logged-in user can upload).'
-    );
-    return user;
+    console.error('[upload-theme-asset] Failed to read profiles.role:', profileError.message);
+    return null;
   }
 
   if (!profile) {
-    // User has no profiles row yet — fall back to auth-only
-    console.warn(
-      `[upload-theme-asset] No profiles row found for user ${user.id}.`,
-      '→ Falling back to auth-only check.',
-      'To enforce strict role gating, insert a row: INSERT INTO public.profiles (id, role) VALUES (\'<uid>\', \'admin\');'
-    );
-    return user;
+    console.warn(`[upload-theme-asset] No profiles row for user ${user.id}. Denied.`);
+    return null;
   }
 
   if (!['admin', 'owner'].includes(profile.role)) {
-    // Profile exists but role is not admin/owner — still fall back in solo-owner mode
-    console.warn(
-      `[upload-theme-asset] User ${user.id} has role "${profile.role}" (not admin/owner).`,
-      '→ Falling back to auth-only check for solo-owner dev mode.',
-      'Update the role: UPDATE public.profiles SET role = \'owner\' WHERE id = \'<uid>\';'
-    );
-    return user;
+    console.warn(`[upload-theme-asset] User ${user.id} has role "${profile.role}" — not authorized.`);
+    return null;
   }
 
-  // ✅ Strict path: role is confirmed admin or owner
   return user;
 }
 
 export async function POST(req: NextRequest) {
-  // 1. Auth guard (with graceful role fallback)
-  const user = await requireAuthUser();
+  // 1. Auth + role guard — only admin/owner
+  const user = await requireAdminUser();
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized: kamu harus login terlebih dahulu.' }, { status: 401 });
-  }
-
-  const admin = getAdminClient();
-  if (!admin) {
     return NextResponse.json(
-      { error: 'Server misconfiguration: SUPABASE_SERVICE_ROLE_KEY tidak ditemukan di environment variables.' },
-      { status: 500 }
+      { error: 'Unauthorized: hanya admin atau owner yang dapat mengupload aset tema.' },
+      { status: 401 }
     );
   }
+
+  const admin = getAdminClient()!;
 
   // 2. Parse multipart form
   let formData: FormData;
