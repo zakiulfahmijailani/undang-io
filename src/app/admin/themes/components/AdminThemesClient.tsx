@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Eye, Pencil, Copy, Trash2, Search, Filter, AlertTriangle } from 'lucide-react';
+import { Plus, Eye, Pencil, Copy, Trash2, Search, Filter, AlertTriangle, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
@@ -75,13 +75,12 @@ export default function AdminThemesClient({ initialThemes, fetchError }: Props) 
     }
 
     const handleDelete = async (id: string) => {
+        if (!confirm("Yakin ingin menghapus tema ini?")) return;
         setActionError(null)
         const { error } = await supabase.from('themes').delete().eq('id', id)
         if (error) { setActionError(`Gagal menghapus: ${error.message}`); return }
         setThemes((prev) => prev.filter((t) => t.id !== id))
     }
-
-    const totalSlots = THEME_SLOT_DEFINITIONS.length
 
     return (
         <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-10">
@@ -166,14 +165,14 @@ export default function AdminThemesClient({ initialThemes, fetchError }: Props) 
                                     </p>
                                     <p className="text-xs text-gray-500 mb-4 line-clamp-2">{theme.description ?? ''}</p>
                                     <div className="flex gap-2">
-                                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/themes/${theme.id}/preview`)} className="gap-1 flex-1 text-xs">
+                                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/themes/${theme.id}/preview`)} className="gap-1 flex-1 text-xs px-2">
                                             <Eye className="w-3 h-3" /> Preview
                                         </Button>
-                                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/themes/${theme.id}/edit`)} className="gap-1 flex-1 text-xs">
-                                            <Pencil className="w-3 h-3" /> Edit
+                                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/themes/new?edit=${theme.id}`)} className="gap-1 flex-1 text-xs px-2">
+                                            <Pencil className="w-3 h-3" /> Config
                                         </Button>
-                                        <Button variant="secondary" size="sm" onClick={() => handleDuplicate(theme)} className="px-2">
-                                            <Copy className="w-3 h-3" />
+                                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/themes/${theme.id}/assets`)} className="gap-1 flex-1 text-xs px-2">
+                                            <Layers className="w-3 h-3" /> Assets
                                         </Button>
                                         <Button variant="secondary" size="sm" onClick={() => handleDelete(theme.id)} className="px-2 text-red-600 hover:text-red-700">
                                             <Trash2 className="w-3 h-3" />

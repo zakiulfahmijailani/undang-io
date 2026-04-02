@@ -1,17 +1,15 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Save, Upload, Trash2, Check, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { ArrowLeft, Save, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import {
     ThemeColors, ThemeTypography, ThemeAnimationSettings, ThemeStyleSettings,
     CulturalCategory, ThemeStatus, CULTURAL_LABELS,
     HeroAnimation, AnimationIntensity, BorderRadiusStyle, ShadowStyle
 } from '@/types/theme';
-import { THEME_SLOT_DEFINITIONS, REQUIRED_SLOTS_FOR_ACTIVATION } from '@/data/themeSlots';
+import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 
 const fontOptions = ['Great Vibes', 'Dancing Script', 'Cormorant Garamond', 'Source Sans Pro', 'Source Serif Pro', 'Playfair Display', 'Lora', 'Montserrat'];
 
@@ -24,18 +22,20 @@ const tabs = [
     { key: 'info', label: 'Info Dasar' },
     { key: 'visual', label: 'Identitas Visual' },
     { key: 'animation', label: 'Animasi' },
-    { key: 'media', label: 'Media' },
-    { key: 'slots', label: 'Slot Gambar' },
 ];
 
 export default function AdminThemeEditorForm() {
-    const params = useParams();
     const router = useRouter();
-    const supabase = createBrowserSupabaseClient();
-    const themeId = params?.themeId as string | undefined;
-    const isNew = !themeId;
+    const params = useParams();
+    const searchParams = useSearchParams();
+    
+    // Support both /admin/themes/[themeId]/edit and /admin/themes/new?edit=[id]
+    const editId = (params?.themeId as string) || searchParams.get('edit');
+    const isNew = !editId || params?.themeId === 'new';
 
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('info');
+    
     const [name, setName] = useState('');
     const [slug, setSlug] = useState('');
     const [description, setDescription] = useState('');
@@ -45,11 +45,46 @@ export default function AdminThemeEditorForm() {
     const [typography, setTypography] = useState<ThemeTypography>(emptyTypo);
     const [animSettings, setAnimSettings] = useState<ThemeAnimationSettings>(emptyAnim);
     const [styleSettings, setStyleSettings] = useState<ThemeStyleSettings>(emptyStyle);
-    const [slotFiles, setSlotFiles] = useState<Record<string, string>>({});
-    const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
+    
     const [saving, setSaving] = useState(false);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [missingSlots, setMissingSlots] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchTheme = async () => {
+            if (isNew) {
+                setLoading(false);
+                return;
+            }
+            const supabase = createBrowserSupabaseClient();
+            const { data, error } = await supabase.from('themes').select('*').eq('id', editId).single();
+            if (error || !data) {
+                // If not found by ID, try slug
+                const { data: dataBySlug, error: errorBySlug } = await supabase.from('themes').select('*').eq('slug', editId).single();
+                if (errorBySlug || !dataBySlug) {
+                    alert('Tema tidak ditemukan');
+                    router.push('/admin/themes');
+                    return;
+                }
+                fillForm(dataBySlug);
+            } else {
+                fillForm(data);
+            }
+            setLoading(false);
+        };
+
+        const fillForm = (data: any) => {
+            setName(data.name || '');
+            setSlug(data.slug || '');
+            setDescription(data.description || '');
+            setCategory((data.cultural_category as CulturalCategory) || 'modern');
+            setStatus((data.status as ThemeStatus) || 'draft');
+            if (data.colors) setColors(data.colors as any);
+            if (data.typography) setTypography(data.typography as any);
+            if (data.animation_settings) setAnimSettings(data.animation_settings as any);
+            if (data.config?.styleSettings) setStyleSettings(data.config.styleSettings);
+        };
+
+        fetchTheme();
+    }, [editId, isNew, router]);
 
     const autoSlug = (n: string) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
@@ -58,151 +93,43 @@ export default function AdminThemeEditorForm() {
         if (isNew) setSlug(autoSlug(v));
     };
 
-    const handleSlotUpload = (slotKey: string, file: File) => {
-        const previewUrl = URL.createObjectURL(file);
-        setSlotFiles((prev) => ({ ...prev, [slotKey]: previewUrl }));
-        setPendingFiles((prev) => ({ ...prev, [slotKey]: file }));
-        setMissingSlots((prev) => prev.filter((k) => k !== slotKey));
-        setErrorMsg(null);
-    };
-
-    const handleSlotRemove = (slotKey: string) => {
-        setSlotFiles((prev) => { const n = { ...prev }; delete n[slotKey]; return n; });
-        setPendingFiles((prev) => { const n = { ...prev }; delete n[slotKey]; return n; });
-    };
-
-    const uploadPendingFiles = async (resolvedThemeId: string): Promise<Record<string, string>> => {
-        if (!supabase) throw new Error('Supabase client tidak tersedia.');
-        const uploadedUrls: Record<string, string> = { ...slotFiles };
-
-        for (const [slotKey, file] of Object.entries(pendingFiles)) {
-            const ext = file.name.split('.').pop() ?? 'jpg';
-            const path = `themes/${resolvedThemeId}/${slotKey}.${ext}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('theme-assets')
-                .upload(path, file, { upsert: true, contentType: file.type });
-
-            if (uploadError) throw new Error(`Gagal upload ${slotKey}: ${uploadError.message}`);
-
-            const { data: publicData } = supabase.storage
-                .from('theme-assets')
-                .getPublicUrl(path);
-
-            uploadedUrls[slotKey] = publicData.publicUrl;
-        }
-
-        return uploadedUrls;
-    };
-
     const handleSave = async (activate: boolean) => {
-        setErrorMsg(null);
-        setMissingSlots([]);
-
-        if (!supabase) {
-            setErrorMsg('Supabase client tidak tersedia. Periksa environment variables.');
+        if (!name.trim() || !slug.trim()) {
+            alert('Nama dan slug wajib diisi');
             return;
         }
-
-        if (!name.trim()) {
-            setErrorMsg('Nama tema tidak boleh kosong.');
-            setActiveTab('info');
-            return;
-        }
-        if (!slug.trim()) {
-            setErrorMsg('Slug tema tidak boleh kosong.');
-            setActiveTab('info');
-            return;
-        }
-
-        if (activate) {
-            const missing = REQUIRED_SLOTS_FOR_ACTIVATION.filter((k) => !slotFiles[k]);
-            if (missing.length > 0) {
-                setMissingSlots(missing);
-                setActiveTab('slots');
-                const missingLabels = missing.map((k) => {
-                    const def = THEME_SLOT_DEFINITIONS.find((d) => d.slotKey === k);
-                    return def?.slotLabel ?? k;
-                });
-                setErrorMsg(`Slot wajib belum diisi: ${missingLabels.join(', ')}`);
-                return;
-            }
-        }
-
         setSaving(true);
+        
+        const supabase = createBrowserSupabaseClient();
+        const payload = {
+            name: name.trim(),
+            slug: slug.trim(),
+            description: description.trim(),
+            cultural_category: category,
+            status: activate ? 'active' : status,
+            is_active: activate || status === 'active',
+            is_published: activate || status === 'active',
+            colors,
+            typography,
+            animation_settings: animSettings,
+            config: { styleSettings }
+        };
 
-        try {
-            const finalStatus: ThemeStatus = activate ? 'active' : 'draft';
-            let resolvedThemeId = themeId ?? '';
+        let err;
+        if (isNew) {
+            const { error } = await supabase.from('themes').insert([payload]);
+            err = error;
+        } else {
+            const { error } = await supabase.from('themes').update(payload).eq('id', editId);
+            err = error;
+        }
 
-            if (isNew) {
-                // Insert ke tabel `themes` yang benar
-                const { data: inserted, error: insertError } = await supabase
-                    .from('themes')
-                    .insert({
-                        name: name.trim(),
-                        slug: slug.trim(),
-                        description: description.trim(),
-                        cultural_category: category,
-                        status: finalStatus,
-                        is_active: finalStatus === 'active',
-                        is_published: finalStatus === 'active',
-                        colors,
-                        typography,
-                        animation_settings: animSettings,
-                        config: { styleSettings },
-                        tags: [],
-                    })
-                    .select('id')
-                    .single();
-
-                if (insertError) throw new Error(`Gagal menyimpan tema: ${insertError.message}`);
-                resolvedThemeId = inserted.id as string;
-            } else {
-                const { error: updateError } = await supabase
-                    .from('themes')
-                    .update({
-                        name: name.trim(),
-                        slug: slug.trim(),
-                        description: description.trim(),
-                        cultural_category: category,
-                        status: finalStatus,
-                        is_active: finalStatus === 'active',
-                        is_published: finalStatus === 'active',
-                        colors,
-                        typography,
-                        animation_settings: animSettings,
-                        config: { styleSettings },
-                    })
-                    .eq('id', resolvedThemeId);
-
-                if (updateError) throw new Error(`Gagal memperbarui tema: ${updateError.message}`);
-            }
-
-            // Upload file aset ke Storage lalu simpan URL ke kolom config
-            const uploadedUrls = await uploadPendingFiles(resolvedThemeId);
-
-            const assetSlotsPayload = THEME_SLOT_DEFINITIONS.map((def) => ({
-                slotKey: def.slotKey,
-                slotLabel: def.slotLabel,
-                assetUrl: uploadedUrls[def.slotKey] ?? null,
-            }));
-
-            const { error: slotsError } = await supabase
-                .from('themes')
-                .update({ config: { styleSettings, assetSlots: assetSlotsPayload } })
-                .eq('id', resolvedThemeId);
-
-            if (slotsError) throw new Error(`Gagal menyimpan slot aset: ${slotsError.message}`);
-
+        setSaving(false);
+        if (err) {
+            alert('Gagal menyimpan tema: ' + err.message);
+        } else {
             router.push('/admin/themes');
             router.refresh();
-
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Terjadi kesalahan tidak terduga.';
-            setErrorMsg(message);
-        } finally {
-            setSaving(false);
         }
     };
 
@@ -210,32 +137,36 @@ export default function AdminThemeEditorForm() {
     const selectCls = "w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#14213D]/30 bg-white";
     const labelCls = "text-sm font-medium text-gray-700 mb-1 block";
 
+    if (loading) {
+        return (
+            <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-10 min-h-[50vh] justify-center items-center">
+                <div className="w-8 h-8 border-2 border-gray-300 border-t-[#14213d] rounded-full animate-spin mb-4" />
+                <p className="text-sm font-medium text-gray-500">Memuat konfigurasi...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-4xl mx-auto pb-12">
+            {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <Button variant="secondary" size="sm" onClick={() => router.push('/admin/themes')}>
                         <ArrowLeft className="w-4 h-4 mr-1" /> Kembali
                     </Button>
-                    <h1 className="text-xl font-bold text-[#14213D]">{isNew ? 'Buat Tema Baru' : `Edit Tema — ${name}`}</h1>
+                    <h1 className="text-xl font-bold text-[#14213D]">{isNew ? 'Buat Tema Baru' : `Config Tema — ${name}`}</h1>
                 </div>
                 <div className="flex gap-2">
                     <Button variant="secondary" onClick={() => handleSave(false)} disabled={saving}>
                         <Save className="w-4 h-4 mr-1" /> {saving ? 'Menyimpan...' : 'Simpan Draft'}
                     </Button>
                     <Button onClick={() => handleSave(true)} disabled={saving} className="bg-[#14213D] hover:bg-[#1a2b50] text-white">
-                        <Check className="w-4 h-4 mr-1" /> {saving ? 'Menyimpan...' : 'Simpan & Aktifkan'}
+                        <Check className="w-4 h-4 mr-1" /> Simpan & Aktifkan
                     </Button>
                 </div>
             </div>
 
-            {errorMsg && (
-                <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                    <span>{errorMsg}</span>
-                </div>
-            )}
-
+            {/* Tabs */}
             <div className="flex gap-1 mb-6 border-b">
                 {tabs.map((tab) => (
                     <button
@@ -252,6 +183,7 @@ export default function AdminThemeEditorForm() {
                 ))}
             </div>
 
+            {/* Tab Content */}
             {activeTab === 'info' && (
                 <div className="space-y-4">
                     <div><label className={labelCls}>Nama Tema</label><input value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="contoh: Jawa Klasik" className={inputCls} /></div>
@@ -361,10 +293,10 @@ export default function AdminThemeEditorForm() {
                             <div key={key} className="flex items-center justify-between py-2 border-b border-gray-100">
                                 <label className="text-sm text-gray-700">{label}</label>
                                 <button
-                                    onClick={() => setAnimSettings((p) => ({ ...p, [key]: !p[key] }))}
-                                    className={`w-10 h-6 rounded-full transition-colors relative ${animSettings[key] ? 'bg-[#14213D]' : 'bg-gray-300'}`}
+                                    onClick={() => setAnimSettings((p) => ({ ...p, [key]: !p[key as keyof ThemeAnimationSettings] }))}
+                                    className={`w-10 h-6 rounded-full transition-colors relative ${animSettings[key as keyof ThemeAnimationSettings] ? 'bg-[#14213D]' : 'bg-gray-300'}`}
                                 >
-                                    <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${animSettings[key] ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                                    <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${animSettings[key as keyof ThemeAnimationSettings] ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                                 </button>
                             </div>
                         ))}
@@ -372,72 +304,6 @@ export default function AdminThemeEditorForm() {
                 </div>
             )}
 
-            {activeTab === 'media' && (
-                <div className="space-y-4">
-                    <div>
-                        <label className={labelCls}>Musik Default (maks 2 menit)</label>
-                        <input type="file" accept="audio/*" className={inputCls + " py-1.5"} />
-                    </div>
-                    <div>
-                        <label className={labelCls}>Video Intro Opsional (maks 1 menit)</label>
-                        <input type="file" accept="video/*" className={inputCls + " py-1.5"} />
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'slots' && (
-                <div className="space-y-6">
-                    {THEME_SLOT_DEFINITIONS.map((slot) => {
-                        const isRequired = REQUIRED_SLOTS_FOR_ACTIVATION.includes(slot.slotKey);
-                        const isMissing = missingSlots.includes(slot.slotKey);
-                        const currentUrl = slotFiles[slot.slotKey];
-                        return (
-                            <div
-                                key={slot.slotKey}
-                                className={`rounded-xl border bg-white p-4 transition-colors ${isMissing ? 'border-red-400 bg-red-50' : ''}`}
-                            >
-                                <div className="flex items-start justify-between mb-2">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <h4 className="font-semibold text-[#14213D] text-sm">{slot.slotLabel}</h4>
-                                            {isRequired && <Badge variant="destructive" className="text-[10px]">Wajib</Badge>}
-                                            {currentUrl && <Badge className="text-[10px] bg-green-100 text-green-700">Terisi</Badge>}
-                                            {isMissing && <Badge className="text-[10px] bg-red-100 text-red-700">Belum diisi</Badge>}
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-0.5">{slot.slotDescription}</p>
-                                    </div>
-                                    <span className="text-xs text-gray-400 shrink-0">{slot.widthCm}×{slot.heightCm} cm · {slot.aspectRatio}</span>
-                                </div>
-
-                                {currentUrl ? (
-                                    <div className="flex items-end gap-3">
-                                        <img src={currentUrl} alt={slot.slotLabel} className="h-24 rounded-lg border object-cover" />
-                                        <div className="flex gap-2">
-                                            <label className="cursor-pointer">
-                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleSlotUpload(slot.slotKey, e.target.files[0]); }} />
-                                                <span className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border bg-white hover:bg-gray-50 transition-colors">
-                                                    <Upload className="w-3 h-3" /> Ganti
-                                                </span>
-                                            </label>
-                                            <Button variant="secondary" size="sm" onClick={() => handleSlotRemove(slot.slotKey)} className="text-red-600 hover:text-red-700">
-                                                <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <label className="cursor-pointer block">
-                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleSlotUpload(slot.slotKey, e.target.files[0]); }} />
-                                        <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-[#14213D]/30 transition-colors ${isMissing ? 'border-red-400' : 'border-gray-200'}`}>
-                                            <Upload className="w-6 h-6 mx-auto text-gray-400 mb-2" />
-                                            <p className="text-xs text-gray-500">Klik untuk upload • {slot.aspectRatio} • {slot.assetType === 'png_transparent' ? 'PNG transparan' : 'JPG/PNG'}</p>
-                                        </div>
-                                    </label>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
         </div>
     );
 }
