@@ -5,12 +5,14 @@ import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from './InvitationClientWrapper';
 import ViewTracker from './ViewTracker';
 import ParallaxWrapper from './ParallaxWrapper';
+import { fetchClassicTheme, mapInvitationToClassicData } from '@/lib/classic-theme-loader';
+import ClassicThemeRendererWrapper from './ClassicThemeRendererWrapper';
 
 export const revalidate = 0;
 
 interface InvitePageProps {
     params: Promise<{ slug: string }>;
-    searchParams: Promise<{ preview?: string }>;
+    searchParams: Promise<{ preview?: string; to?: string }>;
 }
 
 export async function generateMetadata({ params }: InvitePageProps): Promise<Metadata> {
@@ -42,6 +44,7 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     const resolvedSearch = await searchParams;
     const { slug } = resolvedParams;
     const isPreview = resolvedSearch.preview === 'true';
+    const guestName = resolvedSearch.to || undefined;
 
     if (slug === '404') notFound();
 
@@ -62,6 +65,7 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
             id,
             slug,
             status,
+            theme_key,
             created_at,
             active_theme_id,
             groom_full_name,
@@ -109,6 +113,29 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         );
     }
 
+    // ── Classic Theme Route ─────────────────────────────────────────────
+    const themeKey = (invitation as any).theme_key as string | null;
+
+    if (themeKey && themeKey.startsWith('classic')) {
+        const classicTheme = await fetchClassicTheme(themeKey);
+        if (classicTheme) {
+            const classicData = mapInvitationToClassicData(invitation);
+            return (
+                <>
+                    <ClassicThemeRendererWrapper
+                        theme={classicTheme}
+                        data={classicData}
+                        guestName={guestName}
+                        isPreview={isPreview}
+                    />
+                    <ViewTracker slug={slug} isPreview={isPreview} />
+                </>
+            );
+        }
+        // If classic theme not found in DB, fall through to legacy flow
+    }
+
+    // ── Legacy Parallax / Flat Flow ────────────────────────────────────
     const data: any = { ...demoData };
 
     const groomNick = invitation.groom_nickname || 'Mempelai Pria';
@@ -141,7 +168,6 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         data.quote = { text: invitation.quote_text, source: 'Mempelai' };
     }
 
-    // Pass music URL — used by InvitationClientWrapper for the background audio
     data.musicUrl = invitation.music_url || null;
 
     return (
