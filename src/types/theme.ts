@@ -779,3 +779,33 @@ export interface SupabaseClassicThemeRow {
   created_at:       string;
   updated_at:       string;
 }
+
+export type AssetKind =
+  | 'background'
+  | 'ornament_top'
+  | 'ornament_bottom_left'
+  | 'ornament_bottom_right'
+  | 'ornament_corner'
+  | 'frame'
+  | 'pattern'
+  | 'divider'
+  | 'music'
+
+export interface ThemeAsset {
+  id: string
+  theme_key: string
+  kind: AssetKind
+  label: string
+  image_url: string
+  is_global: boolean
+  created_by: string | null
+  created_at: string
+}
+
+export interface ThemeAssetInsert {
+  theme_key: string
+  kind: AssetKind
+  label: string
+  image_url: string
+  is_global?: boolean
+}

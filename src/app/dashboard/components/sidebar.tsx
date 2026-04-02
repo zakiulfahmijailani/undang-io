@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { Home, Mail, FileText, LayoutTemplate, User, LogOut } from "lucide-react"
+import { Home, Mail, FileText, LayoutTemplate, User, LogOut, ImageIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
@@ -27,6 +27,7 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
         { name: "Undangan Saya", href: "/dashboard/undangan", icon: Mail },
         { name: "Buat Undangan Baru", href: "/dashboard/undangan/baru", icon: FileText },
         { name: "Pilih Tema", href: "/dashboard/tema", icon: LayoutTemplate },
+        { name: "Aset Tema", href: "/dashboard/assets", icon: ImageIcon },
         { name: "Akun & Langganan", href: "/dashboard/akun", icon: User },
     ]
 
