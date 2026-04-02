@@ -9,8 +9,9 @@ import { ClassicEventSection } from "./ClassicEventSection";
 import { ClassicLoveStorySection } from './ClassicLoveStorySection';
 import { ClassicGallerySection } from './ClassicGallerySection';
 import { ClassicGiftSection } from './ClassicGiftSection';
-import type { ClassicThemeRenderProps } from "@/types/theme";
 import { ClassicRsvpSection } from './ClassicRsvpSection';
+import type { ClassicThemeRenderProps } from "@/types/theme";
+import { useClassicThemeAssets } from "@/hooks/useClassicThemeAssets";
 
 // ─── Google Fonts dynamic loader ────────────────────────────────────────────────
 function useDynamicFonts(fonts: (string | null | undefined)[]) {
@@ -253,14 +254,63 @@ function MusicToggleButton({
   );
 }
 
+// ─── Assets loading skeleton ──────────────────────────────────────────────────
+function AssetsLoadingSkeleton({ primaryColor }: { primaryColor?: string }) {
+  const c = primaryColor ?? "#8b6c42";
+  return (
+    <div
+      className="flex min-h-screen flex-col items-center justify-center gap-4 px-8"
+      style={{ backgroundColor: "#fdfaf6" }}
+      aria-label="Memuat tema undangan..."
+      role="status"
+    >
+      {/* Ornament shimmer */}
+      <div
+        className="h-24 w-24 rounded-full animate-pulse"
+        style={{ backgroundColor: `${c}22` }}
+      />
+      {/* Text shimmer rows */}
+      {["w-48", "w-32", "w-40"].map((w, i) => (
+        <div
+          key={i}
+          className={`h-3 rounded-full animate-pulse ${w}`}
+          style={{ backgroundColor: `${c}33`, animationDelay: `${i * 120}ms` }}
+        />
+      ))}
+      <p
+        className="mt-4 text-xs tracking-widest opacity-40"
+        style={{ color: c, fontFamily: "serif" }}
+      >
+        Memuat tema undangan...
+      </p>
+    </div>
+  );
+}
+
 // ─── MAIN RENDERER ───────────────────────────────────────────────────────────────
+/**
+ * ClassicThemeRenderer — Step 16A
+ *
+ * Perubahan dari versi sebelumnya:
+ * - Menerima prop opsional `themeKey` (e.g. "classic_jawa")
+ * - Jika themeKey disediakan, hook useClassicThemeAssets akan fetch
+ *   rows dari tabel `theme_assets` dan merge ke props.theme.assets
+ * - Skeleton loading ditampilkan selama fetch berlangsung
+ * - Fallback: jika fetch gagal / themeKey kosong, assets dari props
+ *   digunakan apa adanya (zero breaking change)
+ */
 export function ClassicThemeRenderer({
   theme,
   data,
   guestName,
   isPreview = false,
 }: ClassicThemeRenderProps) {
-  const { assets } = theme;
+  // Step 16A: fetch DB assets, merge ke props.theme.assets
+  const { assets: resolvedAssets, isLoading: assetsLoading } =
+    useClassicThemeAssets(theme.slug ?? null, theme.assets);
+
+  const assets = resolvedAssets ?? theme.assets;
+
   const [isOpen, setIsOpen] = useState(false);
 
   useDynamicFonts([
@@ -293,6 +343,11 @@ export function ClassicThemeRenderer({
     root.style.setProperty("--classic-font-body", `'${assets.font_body}', sans-serif`);
     root.style.setProperty("--classic-font-script", assets.font_script ? `'${assets.font_script}', cursive` : "cursive");
   }, [assets]);
+
+  // Show skeleton while DB assets are loading (only on first render)
+  if (assetsLoading) {
+    return <AssetsLoadingSkeleton primaryColor={theme.assets.color_primary} />;
+  }
 
   return (
     <>
