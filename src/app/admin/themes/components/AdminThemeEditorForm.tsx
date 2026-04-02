@@ -12,7 +12,6 @@ import {
     HeroAnimation, AnimationIntensity, BorderRadiusStyle, ShadowStyle
 } from '@/types/theme';
 import { THEME_SLOT_DEFINITIONS, REQUIRED_SLOTS_FOR_ACTIVATION } from '@/data/themeSlots';
-import { dummyThemes } from '@/data/dummyThemes';
 
 const fontOptions = ['Great Vibes', 'Dancing Script', 'Cormorant Garamond', 'Source Sans Pro', 'Source Serif Pro', 'Playfair Display', 'Lora', 'Montserrat'];
 
@@ -36,25 +35,17 @@ export default function AdminThemeEditorForm() {
     const themeId = params?.themeId as string | undefined;
     const isNew = !themeId;
 
-    const existingTheme = !isNew ? dummyThemes.find((t) => t.id === themeId) : undefined;
-
     const [activeTab, setActiveTab] = useState('info');
-    const [name, setName] = useState(existingTheme?.name || '');
-    const [slug, setSlug] = useState(existingTheme?.slug || '');
-    const [description, setDescription] = useState(existingTheme?.description || '');
-    const [category, setCategory] = useState<CulturalCategory>(existingTheme?.culturalCategory || 'modern');
-    const [status, setStatus] = useState<ThemeStatus>(existingTheme?.status || 'draft');
-    const [colors, setColors] = useState<ThemeColors>(existingTheme?.colors || emptyColors);
-    const [typography, setTypography] = useState<ThemeTypography>(existingTheme?.typography || emptyTypo);
-    const [animSettings, setAnimSettings] = useState<ThemeAnimationSettings>(existingTheme?.animationSettings || emptyAnim);
-    const [styleSettings, setStyleSettings] = useState<ThemeStyleSettings>(existingTheme?.styleSettings || emptyStyle);
-    const [slotFiles, setSlotFiles] = useState<Record<string, string>>(
-        () => {
-            const map: Record<string, string> = {};
-            existingTheme?.assetSlots.forEach((s) => { if (s.assetUrl) map[s.slotKey] = s.assetUrl; });
-            return map;
-        }
-    );
+    const [name, setName] = useState('');
+    const [slug, setSlug] = useState('');
+    const [description, setDescription] = useState('');
+    const [category, setCategory] = useState<CulturalCategory>('modern');
+    const [status, setStatus] = useState<ThemeStatus>('draft');
+    const [colors, setColors] = useState<ThemeColors>(emptyColors);
+    const [typography, setTypography] = useState<ThemeTypography>(emptyTypo);
+    const [animSettings, setAnimSettings] = useState<ThemeAnimationSettings>(emptyAnim);
+    const [styleSettings, setStyleSettings] = useState<ThemeStyleSettings>(emptyStyle);
+    const [slotFiles, setSlotFiles] = useState<Record<string, string>>({});
     const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
     const [saving, setSaving] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -81,7 +72,7 @@ export default function AdminThemeEditorForm() {
     };
 
     const uploadPendingFiles = async (resolvedThemeId: string): Promise<Record<string, string>> => {
-        if (!supabase) throw new Error('Supabase client tidak tersedia. Periksa environment variables.');
+        if (!supabase) throw new Error('Supabase client tidak tersedia.');
         const uploadedUrls: Record<string, string> = { ...slotFiles };
 
         for (const [slotKey, file] of Object.entries(pendingFiles)) {
@@ -145,20 +136,22 @@ export default function AdminThemeEditorForm() {
             let resolvedThemeId = themeId ?? '';
 
             if (isNew) {
+                // Insert ke tabel `themes` yang benar
                 const { data: inserted, error: insertError } = await supabase
-                    .from('classic_themes')
+                    .from('themes')
                     .insert({
                         name: name.trim(),
                         slug: slug.trim(),
                         description: description.trim(),
                         cultural_category: category,
                         status: finalStatus,
+                        is_active: finalStatus === 'active',
                         is_published: finalStatus === 'active',
                         colors,
                         typography,
                         animation_settings: animSettings,
-                        style_settings: styleSettings,
-                        asset_slots: [],
+                        config: { styleSettings },
+                        tags: [],
                     })
                     .select('id')
                     .single();
@@ -167,24 +160,26 @@ export default function AdminThemeEditorForm() {
                 resolvedThemeId = inserted.id as string;
             } else {
                 const { error: updateError } = await supabase
-                    .from('classic_themes')
+                    .from('themes')
                     .update({
                         name: name.trim(),
                         slug: slug.trim(),
                         description: description.trim(),
                         cultural_category: category,
                         status: finalStatus,
+                        is_active: finalStatus === 'active',
                         is_published: finalStatus === 'active',
                         colors,
                         typography,
                         animation_settings: animSettings,
-                        style_settings: styleSettings,
+                        config: { styleSettings },
                     })
                     .eq('id', resolvedThemeId);
 
                 if (updateError) throw new Error(`Gagal memperbarui tema: ${updateError.message}`);
             }
 
+            // Upload file aset ke Storage lalu simpan URL ke kolom config
             const uploadedUrls = await uploadPendingFiles(resolvedThemeId);
 
             const assetSlotsPayload = THEME_SLOT_DEFINITIONS.map((def) => ({
@@ -194,8 +189,8 @@ export default function AdminThemeEditorForm() {
             }));
 
             const { error: slotsError } = await supabase
-                .from('classic_themes')
-                .update({ asset_slots: assetSlotsPayload })
+                .from('themes')
+                .update({ config: { styleSettings, assetSlots: assetSlotsPayload } })
                 .eq('id', resolvedThemeId);
 
             if (slotsError) throw new Error(`Gagal menyimpan slot aset: ${slotsError.message}`);
