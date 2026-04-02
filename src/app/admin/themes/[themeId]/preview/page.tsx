@@ -5,42 +5,72 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { Theme } from '@/types/theme';
+import { themeJawa } from '@/data/dummyThemes';
 import MasterInvitationRenderer from '@/components/invitation/MasterInvitationRenderer';
 import { demoData } from '@/data/demoInvitation';
+
+/** Minimal safe Theme base — used when DB row doesn't have full Theme shape */
+const BASE_THEME: Theme = themeJawa;
 
 export default function AdminThemePreviewPage() {
     const params = useParams();
     const router = useRouter();
     const themeId = params.themeId as string;
 
-    const [theme, setTheme] = useState<any>(null);
+    const [theme, setTheme] = useState<Theme | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
 
     useEffect(() => {
         if (!themeId) return;
 
+        // Try DB first
         const supabase = createBrowserSupabaseClient();
-
         supabase
             .from('themes')
             .select('*')
             .eq('id', themeId)
             .single()
             .then(({ data, error }) => {
-                if (error || !data) {
-                    setNotFound(true);
-                } else {
-                    setTheme(data);
+                if (!error && data) {
+                    // Merge DB row on top of base — DB only has id/name/status/is_active
+                    // All other required fields (colors, animationSettings, assetSlots…)
+                    // fall back to BASE_THEME so MasterInvitationRenderer never crashes
+                    setTheme({
+                        ...BASE_THEME,
+                        id: data.id,
+                        name: data.name,
+                        status: data.status ?? BASE_THEME.status,
+                        // carry over any extra JSON columns if they exist
+                        ...(data.colors && { colors: data.colors }),
+                        ...(data.animation_settings && { animationSettings: data.animation_settings }),
+                        ...(data.typography && { typography: data.typography }),
+                        ...(data.music_url !== undefined && { musicUrl: data.music_url }),
+                        ...(data.thumbnail_url !== undefined && { thumbnailUrl: data.thumbnail_url }),
+                    });
+                    setIsLoading(false);
+                    return;
                 }
-                setIsLoading(false);
+
+                // Fallback: check dummyThemes in case themeId is a slug-style id
+                // (for legacy dummy themes like "theme-jawa-klasik")
+                import('@/data/dummyThemes').then(({ dummyThemes }) => {
+                    const dummy = dummyThemes.find((t) => t.id === themeId);
+                    if (dummy) {
+                        setTheme(dummy);
+                    } else {
+                        setNotFound(true);
+                    }
+                    setIsLoading(false);
+                });
             });
     }, [themeId]);
 
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center text-muted-foreground animate-pulse">
+                <div className="text-center text-muted-foreground animate-pulse text-sm">
                     Memuat preview tema...
                 </div>
             </div>
