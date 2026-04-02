@@ -77,67 +77,38 @@ export default function ThemeAssetsPage() {
         fetchAssets();
     }, [fetchAssets]);
 
-    // ── Upload handler ───────────────────────────────────────────────────────
+    // ── Upload handler — via server API route (bypasses Storage RLS) ─────────
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!supabase || !userId) {
+        if (!userId) {
             toast.error("Kamu belum login.");
             return;
         }
-        if (!label.trim()) {
-            toast.error("Label wajib diisi.");
-            return;
-        }
-        if (!themeKey.trim()) {
-            toast.error("Theme key wajib diisi.");
-            return;
-        }
-        if (!file) {
-            toast.error("Pilih file untuk diupload.");
-            return;
-        }
+        if (!label.trim()) { toast.error("Label wajib diisi."); return; }
+        if (!themeKey.trim()) { toast.error("Theme key wajib diisi."); return; }
+        if (!file) { toast.error("Pilih file untuk diupload."); return; }
 
         setIsUploading(true);
 
         try {
-            // 1. Upload to Supabase Storage
-            const safeName = file.name.replace(/\s+/g, "_").toLowerCase();
-            const storagePath = `${userId}/${themeKey.trim()}/${kind}/${safeName}`;
+            const fd = new FormData();
+            fd.append("file", file);
+            fd.append("label", label.trim());
+            fd.append("theme_key", themeKey.trim());
+            fd.append("kind", kind);
 
-            const { error: uploadError } = await supabase.storage
-                .from("theme-assets")
-                .upload(storagePath, file, {
-                    cacheControl: "3600",
-                    upsert: true,
-                });
+            const res = await fetch("/api/admin/upload-theme-asset", {
+                method: "POST",
+                body: fd,
+            });
 
-            if (uploadError) throw uploadError;
+            const json = await res.json();
 
-            // 2. Get public URL
-            const { data: urlData } = supabase.storage
-                .from("theme-assets")
-                .getPublicUrl(storagePath);
-
-            const publicUrl = urlData.publicUrl;
-
-            // 3. Insert row into theme_assets
-            const { error: insertError } = await supabase
-                .from("theme_assets")
-                .insert({
-                    theme_key: themeKey.trim(),
-                    kind,
-                    label: label.trim(),
-                    image_url: publicUrl,
-                    asset_url: publicUrl,
-                    asset_type: file.type.startsWith("audio/") ? "audio" : "image",
-                    slot: kind,
-                    is_global: false,
-                    created_by: userId,
-                });
-
-            if (insertError) throw insertError;
+            if (!res.ok) {
+                throw new Error(json.error || "Gagal mengupload aset.");
+            }
 
             toast.success("Aset berhasil diupload! 🎉");
 
@@ -147,11 +118,15 @@ export default function ThemeAssetsPage() {
             setKind("background");
             setFile(null);
 
-            // Refresh list
+            // Reset file input visually
+            const fileInput = document.getElementById("asset_file") as HTMLInputElement | null;
+            if (fileInput) fileInput.value = "";
+
             await fetchAssets();
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Gagal mengupload aset.";
             console.error("[assets] upload error:", err);
-            toast.error(err.message || "Gagal mengupload aset.");
+            toast.error(message);
         } finally {
             setIsUploading(false);
         }
@@ -174,9 +149,10 @@ export default function ThemeAssetsPage() {
 
             setAssets((prev) => prev.filter((a) => a.id !== deleteTarget.id));
             toast.success("Aset berhasil dihapus.");
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Gagal menghapus aset.";
             console.error("[assets] delete error:", err);
-            toast.error(err.message || "Gagal menghapus aset.");
+            toast.error(message);
         } finally {
             setIsDeleting(false);
             setDeleteTarget(null);
