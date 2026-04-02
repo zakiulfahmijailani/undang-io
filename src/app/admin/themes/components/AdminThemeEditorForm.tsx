@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save, Upload, Trash2, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { createClient } from '@/lib/supabase/client';
+import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import {
     ThemeColors, ThemeTypography, ThemeAnimationSettings, ThemeStyleSettings,
     CulturalCategory, ThemeStatus, CULTURAL_LABELS,
@@ -32,7 +32,7 @@ const tabs = [
 export default function AdminThemeEditorForm() {
     const params = useParams();
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = createBrowserSupabaseClient();
     const themeId = params?.themeId as string | undefined;
     const isNew = !themeId;
 
@@ -85,6 +85,7 @@ export default function AdminThemeEditorForm() {
 
     // Upload all pending files to Supabase Storage, return map of slotKey -> publicUrl
     const uploadPendingFiles = async (resolvedThemeId: string): Promise<Record<string, string>> => {
+        if (!supabase) throw new Error('Supabase client tidak tersedia. Periksa environment variables.');
         const uploadedUrls: Record<string, string> = { ...slotFiles };
 
         for (const [slotKey, file] of Object.entries(pendingFiles)) {
@@ -112,6 +113,11 @@ export default function AdminThemeEditorForm() {
     const handleSave = async (activate: boolean) => {
         setErrorMsg(null);
         setMissingSlots([]);
+
+        if (!supabase) {
+            setErrorMsg('Supabase client tidak tersedia. Periksa environment variables.');
+            return;
+        }
 
         // --- Validation ---
         if (!name.trim()) {
