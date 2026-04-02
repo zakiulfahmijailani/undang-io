@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Save, Upload, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Trash2, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { createClient } from '@/lib/supabase/client';
 import {
     ThemeColors, ThemeTypography, ThemeAnimationSettings, ThemeStyleSettings,
     CulturalCategory, ThemeStatus, CULTURAL_LABELS,
@@ -31,6 +32,7 @@ const tabs = [
 export default function AdminThemeEditorForm() {
     const params = useParams();
     const router = useRouter();
+    const supabase = createClient();
     const themeId = params?.themeId as string | undefined;
     const isNew = !themeId;
 
@@ -53,7 +55,11 @@ export default function AdminThemeEditorForm() {
             return map;
         }
     );
+    // Pending File objects — staged locally, uploaded to Storage on save
+    const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
     const [saving, setSaving] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [missingSlots, setMissingSlots] = useState<string[]>([]);
 
     const autoSlug = (n: string) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
@@ -62,41 +68,152 @@ export default function AdminThemeEditorForm() {
         if (isNew) setSlug(autoSlug(v));
     };
 
-    const handleSlotUpload = async (slotKey: string, file: File) => {
-        // Upload to local API
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('type', 'themes');
-
-        try {
-            const res = await fetch('/api/upload', { method: 'POST', body: formData });
-            const json = await res.json();
-            if (json.data?.url) {
-                setSlotFiles((prev) => ({ ...prev, [slotKey]: json.data.url }));
-            } else {
-                // Fallback to object URL
-                setSlotFiles((prev) => ({ ...prev, [slotKey]: URL.createObjectURL(file) }));
-            }
-        } catch {
-            setSlotFiles((prev) => ({ ...prev, [slotKey]: URL.createObjectURL(file) }));
-        }
+    // Stage file locally — actual upload happens on save
+    const handleSlotUpload = (slotKey: string, file: File) => {
+        const previewUrl = URL.createObjectURL(file);
+        setSlotFiles((prev) => ({ ...prev, [slotKey]: previewUrl }));
+        setPendingFiles((prev) => ({ ...prev, [slotKey]: file }));
+        // Clear missing marker for this slot immediately
+        setMissingSlots((prev) => prev.filter((k) => k !== slotKey));
+        setErrorMsg(null);
     };
 
     const handleSlotRemove = (slotKey: string) => {
         setSlotFiles((prev) => { const n = { ...prev }; delete n[slotKey]; return n; });
+        setPendingFiles((prev) => { const n = { ...prev }; delete n[slotKey]; return n; });
     };
 
-    const handleSave = (activate: boolean) => {
-        if (!name.trim()) return;
+    // Upload all pending files to Supabase Storage, return map of slotKey -> publicUrl
+    const uploadPendingFiles = async (resolvedThemeId: string): Promise<Record<string, string>> => {
+        const uploadedUrls: Record<string, string> = { ...slotFiles };
+
+        for (const [slotKey, file] of Object.entries(pendingFiles)) {
+            const ext = file.name.split('.').pop() ?? 'jpg';
+            const path = `themes/${resolvedThemeId}/${slotKey}.${ext}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('theme-assets')
+                .upload(path, file, { upsert: true, contentType: file.type });
+
+            if (uploadError) {
+                throw new Error(`Gagal upload ${slotKey}: ${uploadError.message}`);
+            }
+
+            const { data: publicData } = supabase.storage
+                .from('theme-assets')
+                .getPublicUrl(path);
+
+            uploadedUrls[slotKey] = publicData.publicUrl;
+        }
+
+        return uploadedUrls;
+    };
+
+    const handleSave = async (activate: boolean) => {
+        setErrorMsg(null);
+        setMissingSlots([]);
+
+        // --- Validation ---
+        if (!name.trim()) {
+            setErrorMsg('Nama tema tidak boleh kosong.');
+            setActiveTab('info');
+            return;
+        }
+        if (!slug.trim()) {
+            setErrorMsg('Slug tema tidak boleh kosong.');
+            setActiveTab('info');
+            return;
+        }
+
         if (activate) {
             const missing = REQUIRED_SLOTS_FOR_ACTIVATION.filter((k) => !slotFiles[k]);
-            if (missing.length > 0) return;
+            if (missing.length > 0) {
+                setMissingSlots(missing);
+                setActiveTab('slots');
+                const missingLabels = missing.map((k) => {
+                    const def = THEME_SLOT_DEFINITIONS.find((d) => d.slotKey === k);
+                    return def?.slotLabel ?? k;
+                });
+                setErrorMsg(`Slot wajib belum diisi: ${missingLabels.join(', ')}`);
+                return;
+            }
         }
+
         setSaving(true);
-        setTimeout(() => {
-            setSaving(false);
+
+        try {
+            const finalStatus: ThemeStatus = activate ? 'active' : 'draft';
+            let resolvedThemeId = themeId ?? '';
+
+            if (isNew) {
+                // INSERT new theme row
+                const { data: inserted, error: insertError } = await supabase
+                    .from('classic_themes')
+                    .insert({
+                        name: name.trim(),
+                        slug: slug.trim(),
+                        description: description.trim(),
+                        cultural_category: category,
+                        status: finalStatus,
+                        colors,
+                        typography,
+                        animation_settings: animSettings,
+                        style_settings: styleSettings,
+                        asset_slots: [],
+                    })
+                    .select('id')
+                    .single();
+
+                if (insertError) throw new Error(`Gagal menyimpan tema: ${insertError.message}`);
+                resolvedThemeId = inserted.id as string;
+            } else {
+                // UPDATE existing theme row
+                const { error: updateError } = await supabase
+                    .from('classic_themes')
+                    .update({
+                        name: name.trim(),
+                        slug: slug.trim(),
+                        description: description.trim(),
+                        cultural_category: category,
+                        status: finalStatus,
+                        colors,
+                        typography,
+                        animation_settings: animSettings,
+                        style_settings: styleSettings,
+                    })
+                    .eq('id', resolvedThemeId);
+
+                if (updateError) throw new Error(`Gagal memperbarui tema: ${updateError.message}`);
+            }
+
+            // Upload pending slot files to Supabase Storage
+            const uploadedUrls = await uploadPendingFiles(resolvedThemeId);
+
+            // Build asset_slots JSONB payload
+            const assetSlotsPayload = THEME_SLOT_DEFINITIONS.map((def) => ({
+                slotKey: def.slotKey,
+                slotLabel: def.slotLabel,
+                assetUrl: uploadedUrls[def.slotKey] ?? null,
+            }));
+
+            // Persist asset_slots to DB
+            const { error: slotsError } = await supabase
+                .from('classic_themes')
+                .update({ asset_slots: assetSlotsPayload })
+                .eq('id', resolvedThemeId);
+
+            if (slotsError) throw new Error(`Gagal menyimpan slot aset: ${slotsError.message}`);
+
+            // Done — navigate back to themes list
             router.push('/admin/themes');
-        }, 1000);
+            router.refresh();
+
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Terjadi kesalahan tidak terduga.';
+            setErrorMsg(message);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const inputCls = "w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#14213D]/30";
@@ -118,10 +235,18 @@ export default function AdminThemeEditorForm() {
                         <Save className="w-4 h-4 mr-1" /> {saving ? 'Menyimpan...' : 'Simpan Draft'}
                     </Button>
                     <Button onClick={() => handleSave(true)} disabled={saving} className="bg-[#14213D] hover:bg-[#1a2b50] text-white">
-                        <Check className="w-4 h-4 mr-1" /> Simpan & Aktifkan
+                        <Check className="w-4 h-4 mr-1" /> {saving ? 'Menyimpan...' : 'Simpan & Aktifkan'}
                     </Button>
                 </div>
             </div>
+
+            {/* Error Banner */}
+            {errorMsg && (
+                <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>{errorMsg}</span>
+                </div>
+            )}
 
             {/* Tabs */}
             <div className="flex gap-1 mb-6 border-b">
@@ -278,15 +403,20 @@ export default function AdminThemeEditorForm() {
                 <div className="space-y-6">
                     {THEME_SLOT_DEFINITIONS.map((slot) => {
                         const isRequired = REQUIRED_SLOTS_FOR_ACTIVATION.includes(slot.slotKey);
+                        const isMissing = missingSlots.includes(slot.slotKey);
                         const currentUrl = slotFiles[slot.slotKey];
                         return (
-                            <div key={slot.slotKey} className="rounded-xl border bg-white p-4">
+                            <div
+                                key={slot.slotKey}
+                                className={`rounded-xl border bg-white p-4 transition-colors ${isMissing ? 'border-red-400 bg-red-50' : ''}`}
+                            >
                                 <div className="flex items-start justify-between mb-2">
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h4 className="font-semibold text-[#14213D] text-sm">{slot.slotLabel}</h4>
                                             {isRequired && <Badge variant="destructive" className="text-[10px]">Wajib</Badge>}
                                             {currentUrl && <Badge className="text-[10px] bg-green-100 text-green-700">Terisi</Badge>}
+                                            {isMissing && <Badge className="text-[10px] bg-red-100 text-red-700">Belum diisi</Badge>}
                                         </div>
                                         <p className="text-xs text-gray-500 mt-0.5">{slot.slotDescription}</p>
                                     </div>
@@ -311,7 +441,7 @@ export default function AdminThemeEditorForm() {
                                 ) : (
                                     <label className="cursor-pointer block">
                                         <input type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleSlotUpload(slot.slotKey, e.target.files[0]); }} />
-                                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-[#14213D]/30 transition-colors">
+                                        <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-[#14213D]/30 transition-colors ${isMissing ? 'border-red-400' : 'border-gray-200'}`}>
                                             <Upload className="w-6 h-6 mx-auto text-gray-400 mb-2" />
                                             <p className="text-xs text-gray-500">Klik untuk upload • {slot.aspectRatio} • {slot.assetType === 'png_transparent' ? 'PNG transparan' : 'JPG/PNG'}</p>
                                         </div>
