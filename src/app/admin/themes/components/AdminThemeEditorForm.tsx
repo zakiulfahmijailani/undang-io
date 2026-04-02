@@ -55,7 +55,6 @@ export default function AdminThemeEditorForm() {
             return map;
         }
     );
-    // Pending File objects — staged locally, uploaded to Storage on save
     const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
     const [saving, setSaving] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -68,12 +67,10 @@ export default function AdminThemeEditorForm() {
         if (isNew) setSlug(autoSlug(v));
     };
 
-    // Stage file locally — actual upload happens on save
     const handleSlotUpload = (slotKey: string, file: File) => {
         const previewUrl = URL.createObjectURL(file);
         setSlotFiles((prev) => ({ ...prev, [slotKey]: previewUrl }));
         setPendingFiles((prev) => ({ ...prev, [slotKey]: file }));
-        // Clear missing marker for this slot immediately
         setMissingSlots((prev) => prev.filter((k) => k !== slotKey));
         setErrorMsg(null);
     };
@@ -83,7 +80,6 @@ export default function AdminThemeEditorForm() {
         setPendingFiles((prev) => { const n = { ...prev }; delete n[slotKey]; return n; });
     };
 
-    // Upload all pending files to Supabase Storage, return map of slotKey -> publicUrl
     const uploadPendingFiles = async (resolvedThemeId: string): Promise<Record<string, string>> => {
         if (!supabase) throw new Error('Supabase client tidak tersedia. Periksa environment variables.');
         const uploadedUrls: Record<string, string> = { ...slotFiles };
@@ -96,9 +92,7 @@ export default function AdminThemeEditorForm() {
                 .from('theme-assets')
                 .upload(path, file, { upsert: true, contentType: file.type });
 
-            if (uploadError) {
-                throw new Error(`Gagal upload ${slotKey}: ${uploadError.message}`);
-            }
+            if (uploadError) throw new Error(`Gagal upload ${slotKey}: ${uploadError.message}`);
 
             const { data: publicData } = supabase.storage
                 .from('theme-assets')
@@ -119,7 +113,6 @@ export default function AdminThemeEditorForm() {
             return;
         }
 
-        // --- Validation ---
         if (!name.trim()) {
             setErrorMsg('Nama tema tidak boleh kosong.');
             setActiveTab('info');
@@ -152,7 +145,6 @@ export default function AdminThemeEditorForm() {
             let resolvedThemeId = themeId ?? '';
 
             if (isNew) {
-                // INSERT new theme row
                 const { data: inserted, error: insertError } = await supabase
                     .from('classic_themes')
                     .insert({
@@ -161,6 +153,7 @@ export default function AdminThemeEditorForm() {
                         description: description.trim(),
                         cultural_category: category,
                         status: finalStatus,
+                        is_published: finalStatus === 'active',
                         colors,
                         typography,
                         animation_settings: animSettings,
@@ -173,7 +166,6 @@ export default function AdminThemeEditorForm() {
                 if (insertError) throw new Error(`Gagal menyimpan tema: ${insertError.message}`);
                 resolvedThemeId = inserted.id as string;
             } else {
-                // UPDATE existing theme row
                 const { error: updateError } = await supabase
                     .from('classic_themes')
                     .update({
@@ -182,6 +174,7 @@ export default function AdminThemeEditorForm() {
                         description: description.trim(),
                         cultural_category: category,
                         status: finalStatus,
+                        is_published: finalStatus === 'active',
                         colors,
                         typography,
                         animation_settings: animSettings,
@@ -192,17 +185,14 @@ export default function AdminThemeEditorForm() {
                 if (updateError) throw new Error(`Gagal memperbarui tema: ${updateError.message}`);
             }
 
-            // Upload pending slot files to Supabase Storage
             const uploadedUrls = await uploadPendingFiles(resolvedThemeId);
 
-            // Build asset_slots JSONB payload
             const assetSlotsPayload = THEME_SLOT_DEFINITIONS.map((def) => ({
                 slotKey: def.slotKey,
                 slotLabel: def.slotLabel,
                 assetUrl: uploadedUrls[def.slotKey] ?? null,
             }));
 
-            // Persist asset_slots to DB
             const { error: slotsError } = await supabase
                 .from('classic_themes')
                 .update({ asset_slots: assetSlotsPayload })
@@ -210,7 +200,6 @@ export default function AdminThemeEditorForm() {
 
             if (slotsError) throw new Error(`Gagal menyimpan slot aset: ${slotsError.message}`);
 
-            // Done — navigate back to themes list
             router.push('/admin/themes');
             router.refresh();
 
@@ -228,7 +217,6 @@ export default function AdminThemeEditorForm() {
 
     return (
         <div className="max-w-4xl mx-auto pb-12">
-            {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <Button variant="secondary" size="sm" onClick={() => router.push('/admin/themes')}>
@@ -246,7 +234,6 @@ export default function AdminThemeEditorForm() {
                 </div>
             </div>
 
-            {/* Error Banner */}
             {errorMsg && (
                 <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -254,7 +241,6 @@ export default function AdminThemeEditorForm() {
                 </div>
             )}
 
-            {/* Tabs */}
             <div className="flex gap-1 mb-6 border-b">
                 {tabs.map((tab) => (
                     <button
@@ -271,7 +257,6 @@ export default function AdminThemeEditorForm() {
                 ))}
             </div>
 
-            {/* Tab Content */}
             {activeTab === 'info' && (
                 <div className="space-y-4">
                     <div><label className={labelCls}>Nama Tema</label><input value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="contoh: Jawa Klasik" className={inputCls} /></div>
