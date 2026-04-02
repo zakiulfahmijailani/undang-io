@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Search, Eye, Ban, ShieldCheck, Filter, AlertTriangle } from "lucide-react"
@@ -13,7 +13,7 @@ interface UserRow {
 }
 
 export default async function AdminUsersPage() {
-    const supabase = await createClient()
+    const supabase = await createServerSupabaseClient()
 
     const { data: users, error } = await supabase
         .from("profiles")
