@@ -4,7 +4,7 @@
 
 -- 1. classic_themes — stores full ClassicThemeAssets as JSONB
 create table if not exists public.classic_themes (
-  id                text primary key default gen_random_uuid()::text,
+  id                uuid primary key default gen_random_uuid(),
   slug              text not null unique,
   name              text not null,
   description       text,
@@ -56,9 +56,8 @@ alter table public.invitations
   add column if not exists theme_key text default 'classic-default';
 
 -- 3. Seed: classic-default theme
-insert into public.classic_themes (id, slug, name, description, is_published, cultural_category, target_event, assets, tags)
+insert into public.classic_themes (slug, name, description, is_published, cultural_category, target_event, assets, tags)
 values (
-  'classic-default-001',
   'classic-default',
   'Classic Default',
   'Tema klasik elegan dengan dominasi warna gold dan dekorasi floral. Cocok untuk semua jenis pernikahan.',
