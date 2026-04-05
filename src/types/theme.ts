@@ -780,32 +780,66 @@ export interface SupabaseClassicThemeRow {
   updated_at:       string;
 }
 
-export type AssetKind =
-  | 'background'
-  | 'ornament_top'
-  | 'ornament_bottom_left'
-  | 'ornament_bottom_right'
-  | 'ornament_corner'
-  | 'frame'
-  | 'pattern'
-  | 'divider'
-  | 'music'
+export type AssetKind = 
+  | 'cover_scene' | 'left_panel_alt' 
+  | 'corner_tl' | 'corner_tr' | 'corner_bl' | 'corner_br'
+  | 'divider_main' | 'divider_alt'
+  | 'frame_couple'
+  | 'pattern_main' | 'pattern_alt'
+  | 'icon_venue' | 'illustration_iconic' | 'banner_top'
+  | 'footer_scene' | 'music';
 
-export interface ThemeAsset {
-  id: string
-  theme_key: string
-  kind: AssetKind
-  label: string
-  image_url: string
-  is_global: boolean
-  created_by: string | null
-  created_at: string
+export type InvitationSection = 
+  | 'cover' | 'ayat' | 'couple' | 'countdown' 
+  | 'love_story' | 'acara' | 'gallery' | 'gift' | 'rsvp' | 'footer';
+
+export interface SectionConfig {
+  show_foto_cover: boolean;
+  show_data_mempelai: boolean;
+  show_ayat_quote: boolean;
+  show_kisah_cinta: boolean;
+  show_acara: boolean;
+  show_galeri_foto: boolean;
+  show_amplop_digital: boolean;
+  show_musik: boolean;
 }
 
-export interface ThemeAssetInsert {
-  theme_key: string
-  kind: AssetKind
-  label: string
-  image_url: string
-  is_global?: boolean
+export interface AdminTheme {
+  id: string;
+  theme_key: string;
+  display_name: string;
+  culture?: string;
+  color_primary?: string;
+  color_accent?: string;
+  color_text?: string;
+  color_cta?: string;
+  mood_keywords?: string[];
+  is_active: boolean;
+  is_premium: boolean;
+  section_config?: SectionConfig;
+  created_at: string;
+  updated_at: string;
 }
+
+export interface AdminThemeAsset {
+  id: string;
+  theme_id: string;
+  theme_key: string;
+  slot: AssetKind;
+  file_url?: string;
+  storage_path?: string;
+  file_size_bytes?: number;
+  mime_type?: string;
+  width_px?: number;
+  height_px?: number;
+  is_transparent: boolean;
+  alt_text?: string;
+  uploaded_at: string;
+}
+
+export interface ActionResult {
+  success: boolean;
+  error?: string;
+  data?: any;
+}
+
