@@ -33,7 +33,6 @@ function getGuestTokenFromStorage(searchParams: URLSearchParams): string | null 
   return searchParams.get('guest_token');
 }
 
-// ── Komponen utama yang pakai useSearchParams ──────────────────
 function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -51,6 +50,18 @@ function LoginForm() {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // --- MOCK ADMIN LOGIN ---
+    if (email === 'admin' && password === 'admin') {
+      const res = await fetch('/api/admin-mock-login', { method: 'POST' });
+      if (res.ok) {
+        router.push('/admin/themes');
+      } else {
+        toast.error('Mock login gagal.');
+        setLoading(false);
+      }
+      return;
+    }
 
     const supabase = createBrowserSupabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -178,7 +189,6 @@ function LoginForm() {
                 placeholder="nama@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
           </div>
@@ -213,7 +223,6 @@ function LoginForm() {
   );
 }
 
-// ── Page wrapper — LoginForm dibungkus Suspense ────────────────
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
