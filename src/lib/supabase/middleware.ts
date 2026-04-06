@@ -22,7 +22,7 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
                     supabaseResponse = NextResponse.next({
                         request,
                     })
@@ -34,12 +34,20 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
+    // IMPORTANT: Do not add logic between createServerClient and auth.getUser()
+    // A simple mistake could make it very hard to debug issues with users being
+    // randomly logged out.
     const {
         data: { user },
     } = await supabase.auth.getUser()
 
-    const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
-    const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/api/dashboard')
+    const pathname = request.nextUrl.pathname
+    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register')
+    const isProtectedRoute =
+        pathname.startsWith('/dashboard') ||
+        pathname.startsWith('/api/dashboard') ||
+        pathname.startsWith('/admin') ||
+        pathname.startsWith('/owner')
 
     // Not logged in and trying to access protected route -> redirect to login
     if (!user && isProtectedRoute) {
