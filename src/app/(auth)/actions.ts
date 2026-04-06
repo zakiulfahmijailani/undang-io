@@ -12,7 +12,7 @@ export async function login(formData: FormData) {
     if (email === 'admin' && password === 'admin') {
         const cookieStore = await cookies()
         cookieStore.set('nikahku-mock-session', 'true', { path: '/' })
-        redirect('/dashboard')
+        redirect('/admin/themes')
     }
 
     const supabase = await createServerSupabaseClient()
