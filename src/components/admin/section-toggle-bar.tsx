@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { SectionConfig } from '@/types/theme'
-import { updateSectionConfig } from '@/app/(admin)/admin/themes/actions'
+import { updateSectionConfig } from '@/app/dashboard/themes/actions'
 
 interface Props {
   themeKey: string;

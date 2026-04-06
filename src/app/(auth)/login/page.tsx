@@ -51,21 +51,6 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
 
-    if (email === "admin" && password === "admin") {
-      try {
-        const res = await fetch("/api/admin-mock-login", { 
-          method: "POST", 
-          credentials: "include" 
-        });
-        if (res.ok) {
-          window.location.href = "/admin/themes";
-          return;
-        }
-      } catch (err) {
-        console.error("Mock login fetch failed:", err);
-      }
-    }
-
     const supabase = createBrowserSupabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 

@@ -9,7 +9,7 @@ import { ThemeAssetRow } from '@/components/admin/theme-asset-row'
 import { ThemePreviewPanel } from '@/components/admin/theme-preview-panel'
 import { SectionToggleBar } from '@/components/admin/section-toggle-bar'
 import { ThemeInfoForm } from '@/components/admin/theme-info-form'
-import { toggleThemeActive, deleteThemeAsset } from '@/app/(admin)/admin/themes/actions'
+import { toggleThemeActive, deleteThemeAsset } from '@/app/dashboard/themes/actions'
 
 interface Props {
   theme: AdminTheme;
@@ -129,11 +129,11 @@ export function ThemeAssetDashboard({ theme, assets }: Props) {
         {/* Header */}
         <div className="p-4 border-b border-white/5 bg-surface-2 z-10 sticky top-0">
           <div className="flex items-center gap-2 text-sm text-white/50 mb-4">
-             <Link href="/admin/themes" className="hover:text-white flex items-center">
-               <ChevronLeft className="w-4 h-4 mr-1" /> Admin
+             <Link href="/dashboard/themes" className="hover:text-white flex items-center">
+               <ChevronLeft className="w-4 h-4 mr-1" /> Dashboard
              </Link>
              <span>/</span>
-             <Link href="/admin/themes" className="hover:text-white">Themes</Link>
+             <Link href="/dashboard/themes" className="hover:text-white">Tema</Link>
              <span>/</span>
              <span className="text-white font-medium truncate max-w-[200px]">{theme.display_name}</span>
           </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Save, CheckCircle2 } from 'lucide-react'
 import { AdminTheme } from '@/types/theme'
-import { updateThemeInfo } from '@/app/(admin)/admin/themes/actions'
+import { updateThemeInfo } from '@/app/dashboard/themes/actions'
 import { useThemePreviewStore } from '@/stores/theme-preview-store'
 
 interface Props {

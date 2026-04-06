@@ -32,9 +32,7 @@ const navGroups = [
     {
         label: "🛡️ DASHBOARD ADMIN",
         links: [
-            { name: "Manajemen Pengguna", href: "/admin/users" },
-            { name: "Kelola Tema", href: "/admin/themes" },
-            { name: "Moderasi Ucapan", href: "/admin/messages" },
+            { name: "Kelola Tema", href: "/dashboard/themes" },
         ],
     },
     {

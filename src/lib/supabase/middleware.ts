@@ -8,30 +8,9 @@ export async function updateSession(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname
     const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register')
-    const isAdminRoute = pathname.startsWith('/admin')
     const isProtectedRoute =
         pathname.startsWith('/dashboard') ||
-        pathname.startsWith('/api/dashboard') ||
-        isAdminRoute ||
         pathname.startsWith('/owner')
-
-    // --- MOCK SESSION BYPASS ---
-    // If mock session cookie is present, treat as authenticated superadmin
-    const isMockSession = request.cookies.get('nikahku-mock-session')?.value === 'true'
-    if (isMockSession) {
-        // Mock user is logged in — if they try to go to /login, redirect to /admin
-        if (isAuthRoute) {
-            const url = request.nextUrl.clone()
-            url.pathname = '/admin/themes'
-            return NextResponse.redirect(url)
-        }
-        // Allow access to admin without supabase auth
-        if (isAdminRoute) {
-             return supabaseResponse
-        }
-        // Allow access to protected
-        return supabaseResponse
-    }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -78,15 +57,6 @@ export async function updateSession(request: NextRequest) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
-    }
-
-    // Role check for admin route if using actual Supabase login
-    if (user && isAdminRoute) {
-        if (user.user_metadata?.role !== 'superadmin') {
-            const url = request.nextUrl.clone()
-            url.pathname = '/dashboard'
-            return NextResponse.redirect(url)
-        }
     }
 
     return supabaseResponse

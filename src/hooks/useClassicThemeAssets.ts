@@ -34,14 +34,15 @@ interface ThemeAssetRow {
 // ─── Map AssetKind → ClassicThemeAssets key(s) ────────────────────────────────
 // Satu kind bisa map ke beberapa slot jika diperlukan.
 const KIND_TO_SLOT: Partial<Record<AssetKind, (keyof ClassicThemeAssets)[]>> = {
-  background:            ["bg_section_2"],          // admin upload → override bg_section_2
-  ornament_top:         ["flower_top_center_url"],
-  ornament_bottom_left:  ["flower_bottom_left_url"],
-  ornament_bottom_right: ["flower_bottom_right_url"],
-  ornament_corner:      ["ornament_corner_tl"],
-  frame:                ["ornament_half_circle"],
-  pattern:              ["cover_bg_pattern_url"],
-  divider:              ["ornament_divider"],
+  cover_scene:          ["bg_cover"],
+  left_panel_alt:       ["bg_groom_panel"],
+  corner_tl:            ["flower_top_left_url"],
+  corner_tr:            ["flower_top_right_url"],
+  corner_bl:            ["flower_bottom_left_url"],
+  corner_br:            ["flower_bottom_right_url"],
+  frame_couple:         ["ornament_half_circle"],
+  pattern_main:         ["cover_bg_pattern_url"],
+  divider_main:         ["ornament_divider"],
   music:                ["bg_music"],
 };
 

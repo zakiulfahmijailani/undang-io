@@ -1,47 +1,33 @@
 'use server'
 
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { ActionResult, AdminTheme, SectionConfig, AssetKind } from '@/types/theme'
+import { ActionResult, SectionConfig, AssetKind } from '@/types/theme'
 
-// We need to set up the supabase client safely
-async function getSupabase() {
-  const cookieStore = await cookies()
+const ADMIN_ROLES = ['admin', 'owner']
 
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
+async function getAuthorizedUser() {
+  const supabase = await createServerSupabaseClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { supabase, user: null, authorized: false }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const authorized = !!profile && ADMIN_ROLES.includes(profile.role)
+  return { supabase, user, authorized }
 }
 
 // 1. Buat tema baru
 export async function createTheme(formData: FormData): Promise<ActionResult> {
   try {
-    const supabase = await getSupabase()
-    
-    // Check if user is superadmin
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || user.user_metadata?.role !== 'superadmin') {
-      return { success: false, error: 'Unauthorized: Superadmin access required' }
+    const { supabase, user, authorized } = await getAuthorizedUser()
+    if (!user || !authorized) {
+      return { success: false, error: 'Unauthorized: Admin/Owner access required' }
     }
 
     const theme_key = formData.get('theme_key') as string
@@ -53,17 +39,13 @@ export async function createTheme(formData: FormData): Promise<ActionResult> {
 
     const { data, error } = await supabase
       .from('themes')
-      .insert({
-        theme_key,
-        display_name,
-        // Defaults automatically applied by DB schema
-      })
+      .insert({ theme_key, display_name })
       .select()
       .single()
 
     if (error) throw error
 
-    revalidatePath('/admin/themes')
+    revalidatePath('/dashboard/themes')
     return { success: true, data }
   } catch (error: any) {
     console.error('Error creating theme:', error)
@@ -85,12 +67,8 @@ export interface UpdateThemeData {
 // 2. Update info tema
 export async function updateThemeInfo(themeKey: string, data: UpdateThemeData): Promise<ActionResult> {
   try {
-    const supabase = await getSupabase()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.user_metadata?.role !== 'superadmin') {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const { supabase, user, authorized } = await getAuthorizedUser()
+    if (!user || !authorized) return { success: false, error: 'Unauthorized' }
 
     const { data: updatedTheme, error } = await supabase
       .from('themes')
@@ -101,7 +79,7 @@ export async function updateThemeInfo(themeKey: string, data: UpdateThemeData): 
 
     if (error) throw error
 
-    revalidatePath(`/admin/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
     return { success: true, data: updatedTheme }
   } catch (error: any) {
     console.error('Error updating theme:', error)
@@ -112,12 +90,8 @@ export async function updateThemeInfo(themeKey: string, data: UpdateThemeData): 
 // 3. Toggle aktif/nonaktif tema
 export async function toggleThemeActive(themeKey: string, is_active: boolean): Promise<ActionResult> {
   try {
-    const supabase = await getSupabase()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.user_metadata?.role !== 'superadmin') {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const { supabase, user, authorized } = await getAuthorizedUser()
+    if (!user || !authorized) return { success: false, error: 'Unauthorized' }
 
     const { data, error } = await supabase
       .from('themes')
@@ -128,8 +102,8 @@ export async function toggleThemeActive(themeKey: string, is_active: boolean): P
 
     if (error) throw error
 
-    revalidatePath(`/admin/themes/${themeKey}/assets`)
-    revalidatePath('/admin/themes')
+    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
+    revalidatePath('/dashboard/themes')
     return { success: true, data }
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to toggle theme status' }
@@ -139,12 +113,8 @@ export async function toggleThemeActive(themeKey: string, is_active: boolean): P
 // 4. Hapus aset dari storage + database
 export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promise<ActionResult> {
   try {
-    const supabase = await getSupabase()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.user_metadata?.role !== 'superadmin') {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const { supabase, user, authorized } = await getAuthorizedUser()
+    if (!user || !authorized) return { success: false, error: 'Unauthorized' }
 
     // Identify the asset
     const { data: asset, error: fetchError } = await supabase
@@ -159,18 +129,16 @@ export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promi
     }
 
     if (asset && asset.storage_path) {
-      // Remove from storage bucket
       const { error: storageError } = await supabase
         .storage
         .from('theme-assets')
         .remove([asset.storage_path])
-        
+
       if (storageError) {
         console.error('Failed to remove from storage, continuing to delete DB record', storageError)
       }
     }
 
-    // Delete database record
     const { error: deleteError } = await supabase
       .from('theme_assets')
       .delete()
@@ -179,7 +147,7 @@ export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promi
 
     if (deleteError) throw deleteError
 
-    revalidatePath(`/admin/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
     return { success: true }
   } catch (error: any) {
     console.error('Error deleting asset:', error)
@@ -187,15 +155,11 @@ export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promi
   }
 }
 
-// 5. Update section config (yang bisa di-on/off)
+// 5. Update section config
 export async function updateSectionConfig(themeKey: string, section_config: SectionConfig): Promise<ActionResult> {
   try {
-    const supabase = await getSupabase()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.user_metadata?.role !== 'superadmin') {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const { supabase, user, authorized } = await getAuthorizedUser()
+    if (!user || !authorized) return { success: false, error: 'Unauthorized' }
 
     const { data, error } = await supabase
       .from('themes')
@@ -206,18 +170,18 @@ export async function updateSectionConfig(themeKey: string, section_config: Sect
 
     if (error) throw error
 
-    revalidatePath(`/admin/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
     return { success: true, data }
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to update section config' }
   }
 }
 
-// Helper to save uploaded asset metadata to database (called from client after successful raw storage upload)
+// 6. Save uploaded asset metadata
 export async function saveUploadedAsset(
-  themeKey: string, 
-  slot: AssetKind, 
-  fileUrl: string, 
+  themeKey: string,
+  slot: AssetKind,
+  fileUrl: string,
   storagePath: string,
   extra: {
     mime_type?: string;
@@ -228,15 +192,10 @@ export async function saveUploadedAsset(
   }
 ): Promise<ActionResult> {
   try {
-    const supabase = await getSupabase()
-    
-    // Check if user is superadmin
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.user_metadata?.role !== 'superadmin') {
-      return { success: false, error: 'Unauthorized' }
-    }
+    const { supabase, user, authorized } = await getAuthorizedUser()
+    if (!user || !authorized) return { success: false, error: 'Unauthorized' }
 
-    // First get the theme uuid
+    // Get theme uuid
     const { data: theme, error: themeError } = await supabase
       .from('themes')
       .select('id')
@@ -245,7 +204,6 @@ export async function saveUploadedAsset(
 
     if (themeError) throw themeError
 
-    // Upsert the asset mapping
     const { data, error } = await supabase
       .from('theme_assets')
       .upsert({
@@ -263,7 +221,7 @@ export async function saveUploadedAsset(
 
     if (error) throw error
 
-    revalidatePath(`/admin/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
     return { success: true, data }
   } catch (error: any) {
     console.error('Error saving asset metadata:', error)

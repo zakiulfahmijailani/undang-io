@@ -4,7 +4,7 @@ import { useState, useRef, ChangeEvent, DragEvent } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { UploadCloud, FileAudio, Trash2, RefreshCw, Image as ImageIcon } from 'lucide-react'
 import { AssetKind, AdminThemeAsset } from '@/types/theme'
-import { saveUploadedAsset } from '@/app/(admin)/admin/themes/actions'
+import { saveUploadedAsset } from '@/app/dashboard/themes/actions'
 
 interface ThemeAssetRowProps {
   themeKey: string;

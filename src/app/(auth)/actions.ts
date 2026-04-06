@@ -2,18 +2,11 @@
 
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 
 export async function login(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const guestSessionToken = formData.get('guestSessionToken') as string | null
-
-    if (email === 'admin' && password === 'admin') {
-        const cookieStore = await cookies()
-        cookieStore.set('nikahku-mock-session', 'true', { path: '/' })
-        redirect('/admin/themes')
-    }
 
     const supabase = await createServerSupabaseClient()
     if (!supabase) redirect('/login?message=Supabase is not configured')
@@ -77,9 +70,6 @@ export async function signup(formData: FormData) {
 }
 
 export async function signOut() {
-    const cookieStore = await cookies()
-    cookieStore.delete('nikahku-mock-session')
-
     const supabase = await createServerSupabaseClient()
     if (supabase) {
         await supabase.auth.signOut()
