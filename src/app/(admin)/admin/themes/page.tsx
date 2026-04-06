@@ -1,23 +1,11 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { CreateThemeModal } from './_components/create-theme-modal'
 import { Image as ImageIcon } from 'lucide-react'
 
 export default async function AdminThemesPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-      },
-    }
-  )
+  const supabase = await createServerSupabaseClient()
 
   // Auth Guard
   const { data: { user }, error: authError } = await supabase.auth.getUser()
