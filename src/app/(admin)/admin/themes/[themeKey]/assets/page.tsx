@@ -1,22 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { ThemeAssetDashboard } from './_components/theme-asset-dashboard'
 
 export default async function ThemeAssetsPage({ params }: { params: Promise<{ themeKey: string }> }) {
   const resolvedParams = await params;
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-      },
-    }
-  )
+  const supabase = await createServerSupabaseClient()
 
   // Auth Guard
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -36,7 +24,7 @@ export default async function ThemeAssetsPage({ params }: { params: Promise<{ th
   }
 
   // Fetch Assets
-  const { data: assets, error: assetsError } = await supabase
+  const { data: assets } = await supabase
     .from('theme_assets')
     .select('*')
     .eq('theme_key', resolvedParams.themeKey)
