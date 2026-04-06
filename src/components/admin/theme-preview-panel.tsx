@@ -90,6 +90,7 @@ export function ThemePreviewPanel({ initialTheme }: PreviewPanelProps) {
           .preview-text-body { color: var(--color-text); }
           .preview-bg-primary { background-color: var(--color-primary); }
           .preview-bg-accent { background-color: var(--color-accent); }
+          .preview-border-primary { border-color: var(--color-primary); }
         `}} />
 
         {/* 1. Cover Section */}
@@ -142,7 +143,7 @@ export function ThemePreviewPanel({ initialTheme }: PreviewPanelProps) {
             
             <h3 className="preview-text-primary text-xl font-serif mb-4 relative z-10">Ar-Rum: 21</h3>
             <p className="preview-text-body text-sm relative z-10">
-              "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu isteri-isteri dari jenismu sendiri..."
+              &ldquo;Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu isteri-isteri dari jenismu sendiri...&rdquo;
             </p>
           </div>
         )}
@@ -172,7 +173,7 @@ export function ThemePreviewPanel({ initialTheme }: PreviewPanelProps) {
                 </div>
                 
                 <h3 className="preview-text-primary text-2xl font-serif">Romeo Montague</h3>
-                <p className="preview-text-body text-xs mt-2">Putra dari Bpk. Montague & Ibu Montague</p>
+                <p className="preview-text-body text-xs mt-2">Putra dari Bpk. Montague &amp; Ibu Montague</p>
               </div>
             </div>
           </div>
@@ -299,7 +300,7 @@ export function ThemePreviewPanel({ initialTheme }: PreviewPanelProps) {
                <span className="text-white/20 text-sm">Footer Scene Illustration</span>
              )}
              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center text-center">
-                <h2 className="text-2xl font-serif text-white shadow-black drop-shadow-md">Romeo & Juliet</h2>
+                <h2 className="text-2xl font-serif text-white shadow-black drop-shadow-md">Romeo &amp; Juliet</h2>
                 <p className="text-white/60 text-xs mt-2 font-mono">undang.io</p>
              </div>
            </div>
