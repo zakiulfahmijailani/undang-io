@@ -34,9 +34,9 @@ export async function createServerSupabaseClient() {
     // MOCK SESSION SUPPORT
     if (cookieStore.get('nikahku-mock-session')?.value === 'true') {
         const mockUser = {
-            id: '00000000-0000-0000-0000-000000000000', // Fixed UUID for mock admin
+            id: '00000000-0000-0000-0000-000000000000',
             email: 'admin@local.test',
-            user_metadata: { full_name: 'Administrator' },
+            user_metadata: { full_name: 'Administrator', role: 'superadmin' },
             aud: 'authenticated',
             role: 'authenticated',
         }
