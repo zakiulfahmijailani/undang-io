@@ -52,7 +52,7 @@ export default async function AdminThemesPage() {
           <CreateThemeModal />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 ml:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {themes?.map((theme: any) => {
             const assetCount = theme.theme_assets?.length || 0
             const progressPct = Math.round((assetCount / TOTAL_SLOTS) * 100)
