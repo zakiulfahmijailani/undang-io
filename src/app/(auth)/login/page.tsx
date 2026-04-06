@@ -51,16 +51,19 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
 
-    // --- MOCK ADMIN LOGIN ---
-    if (email === 'admin' && password === 'admin') {
-      const res = await fetch('/api/admin-mock-login', { method: 'POST' });
-      if (res.ok) {
-        router.push('/admin/themes');
-      } else {
-        toast.error('Mock login gagal.');
-        setLoading(false);
+    if (email === "admin" && password === "admin") {
+      try {
+        const res = await fetch("/api/admin-mock-login", { 
+          method: "POST", 
+          credentials: "include" 
+        });
+        if (res.ok) {
+          window.location.href = "/admin/themes";
+          return;
+        }
+      } catch (err) {
+        console.error("Mock login fetch failed:", err);
       }
-      return;
     }
 
     const supabase = createBrowserSupabaseClient();

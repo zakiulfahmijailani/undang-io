@@ -8,10 +8,11 @@ export async function updateSession(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname
     const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register')
+    const isAdminRoute = pathname.startsWith('/admin')
     const isProtectedRoute =
         pathname.startsWith('/dashboard') ||
         pathname.startsWith('/api/dashboard') ||
-        pathname.startsWith('/admin') ||
+        isAdminRoute ||
         pathname.startsWith('/owner')
 
     // --- MOCK SESSION BYPASS ---
@@ -24,7 +25,11 @@ export async function updateSession(request: NextRequest) {
             url.pathname = '/admin/themes'
             return NextResponse.redirect(url)
         }
-        // Allow all other routes including /admin
+        // Allow access to admin without supabase auth
+        if (isAdminRoute) {
+             return supabaseResponse
+        }
+        // Allow access to protected
         return supabaseResponse
     }
 
@@ -73,6 +78,15 @@ export async function updateSession(request: NextRequest) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
+    }
+
+    // Role check for admin route if using actual Supabase login
+    if (user && isAdminRoute) {
+        if (user.user_metadata?.role !== 'superadmin') {
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard'
+            return NextResponse.redirect(url)
+        }
     }
 
     return supabaseResponse
