@@ -26,9 +26,12 @@ export function SectionToggleBar({ themeKey, initialConfig, onConfigChange }: Pr
   const [isSaving, setIsSaving] = useState(false)
 
   // simple debounce
-  const debounce = (func: Function, delay: number) => {
+  const debounce = <T extends unknown[]>(
+    func: (...args: T) => void,
+    delay: number
+  ) => {
     let timeoutId: NodeJS.Timeout
-    return (...args: any[]) => {
+    return (...args: T) => {
       clearTimeout(timeoutId)
       timeoutId = setTimeout(() => func(...args), delay)
     }
