@@ -24,18 +24,18 @@ export default async function DashboardThemeAssetsPage({
     redirect('/dashboard')
   }
 
-  // Fetch Theme
+  // Fetch Theme — using `slug` (the correct DB column)
   const { data: theme, error: themeError } = await supabase
     .from('themes')
     .select('*')
-    .eq('theme_key', themeKey)
+    .eq('slug', themeKey)
     .single()
 
   if (themeError || !theme) {
     notFound()
   }
 
-  // Fetch Assets
+  // Fetch Assets — theme_key in theme_assets still maps to slug value
   const { data: assets } = await supabase
     .from('theme_assets')
     .select('*')
