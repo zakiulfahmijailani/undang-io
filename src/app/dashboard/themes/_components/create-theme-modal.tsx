@@ -22,7 +22,7 @@ export function CreateThemeModal() {
       const res = await createTheme(formData)
       if (res.success && res.data) {
         setIsOpen(false)
-        router.push(`/dashboard/themes/${res.data.theme_key}/assets`)
+        router.push(`/dashboard/themes/${res.data.slug}/assets`)
       } else {
         setError(res.error || 'Failed to create theme')
       }

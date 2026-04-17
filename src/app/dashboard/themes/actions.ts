@@ -30,16 +30,16 @@ export async function createTheme(formData: FormData): Promise<ActionResult> {
       return { success: false, error: 'Unauthorized: Admin/Owner access required' }
     }
 
-    const theme_key = formData.get('theme_key') as string
-    const display_name = formData.get('display_name') as string
+    const slug = formData.get('theme_key') as string
+    const name = formData.get('display_name') as string
 
-    if (!theme_key || !display_name) {
+    if (!slug || !name) {
       return { success: false, error: 'theme_key and display_name are required' }
     }
 
     const { data, error } = await supabase
       .from('themes')
-      .insert({ theme_key, display_name })
+      .insert({ slug, name })
       .select()
       .single()
 
@@ -54,18 +54,21 @@ export async function createTheme(formData: FormData): Promise<ActionResult> {
 }
 
 export interface UpdateThemeData {
-  display_name?: string;
-  culture?: string;
-  color_primary?: string;
-  color_accent?: string;
-  color_text?: string;
-  color_cta?: string;
-  mood_keywords?: string[];
-  is_premium?: boolean;
+  name?: string;
+  description?: string;
+  colors?: Record<string, string>;
+  config?: Record<string, any>;
+  is_active?: boolean;
+  is_published?: boolean;
+  cultural_category?: string;
+  tags?: string[];
+  thumbnail_url?: string;
+  preview_url?: string;
+  music_url?: string;
 }
 
 // 2. Update info tema
-export async function updateThemeInfo(themeKey: string, data: UpdateThemeData): Promise<ActionResult> {
+export async function updateThemeInfo(themeSlug: string, data: UpdateThemeData): Promise<ActionResult> {
   try {
     const { supabase, user, authorized } = await getAuthorizedUser()
     if (!user || !authorized) return { success: false, error: 'Unauthorized' }
@@ -73,13 +76,13 @@ export async function updateThemeInfo(themeKey: string, data: UpdateThemeData): 
     const { data: updatedTheme, error } = await supabase
       .from('themes')
       .update(data)
-      .eq('theme_key', themeKey)
+      .eq('slug', themeSlug)
       .select()
       .single()
 
     if (error) throw error
 
-    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeSlug}/assets`)
     return { success: true, data: updatedTheme }
   } catch (error: any) {
     console.error('Error updating theme:', error)
@@ -88,7 +91,7 @@ export async function updateThemeInfo(themeKey: string, data: UpdateThemeData): 
 }
 
 // 3. Toggle aktif/nonaktif tema
-export async function toggleThemeActive(themeKey: string, is_active: boolean): Promise<ActionResult> {
+export async function toggleThemeActive(themeSlug: string, is_active: boolean): Promise<ActionResult> {
   try {
     const { supabase, user, authorized } = await getAuthorizedUser()
     if (!user || !authorized) return { success: false, error: 'Unauthorized' }
@@ -96,13 +99,13 @@ export async function toggleThemeActive(themeKey: string, is_active: boolean): P
     const { data, error } = await supabase
       .from('themes')
       .update({ is_active })
-      .eq('theme_key', themeKey)
+      .eq('slug', themeSlug)
       .select()
       .single()
 
     if (error) throw error
 
-    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeSlug}/assets`)
     revalidatePath('/dashboard/themes')
     return { success: true, data }
   } catch (error: any) {
@@ -111,7 +114,7 @@ export async function toggleThemeActive(themeKey: string, is_active: boolean): P
 }
 
 // 4. Hapus aset dari storage + database
-export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promise<ActionResult> {
+export async function deleteThemeAsset(themeSlug: string, slot: AssetKind): Promise<ActionResult> {
   try {
     const { supabase, user, authorized } = await getAuthorizedUser()
     if (!user || !authorized) return { success: false, error: 'Unauthorized' }
@@ -120,7 +123,7 @@ export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promi
     const { data: asset, error: fetchError } = await supabase
       .from('theme_assets')
       .select('*')
-      .eq('theme_key', themeKey)
+      .eq('theme_key', themeSlug)
       .eq('slot', slot)
       .single()
 
@@ -142,12 +145,12 @@ export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promi
     const { error: deleteError } = await supabase
       .from('theme_assets')
       .delete()
-      .eq('theme_key', themeKey)
+      .eq('theme_key', themeSlug)
       .eq('slot', slot)
 
     if (deleteError) throw deleteError
 
-    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeSlug}/assets`)
     return { success: true }
   } catch (error: any) {
     console.error('Error deleting asset:', error)
@@ -156,21 +159,21 @@ export async function deleteThemeAsset(themeKey: string, slot: AssetKind): Promi
 }
 
 // 5. Update section config
-export async function updateSectionConfig(themeKey: string, section_config: SectionConfig): Promise<ActionResult> {
+export async function updateSectionConfig(themeSlug: string, section_config: SectionConfig): Promise<ActionResult> {
   try {
     const { supabase, user, authorized } = await getAuthorizedUser()
     if (!user || !authorized) return { success: false, error: 'Unauthorized' }
 
     const { data, error } = await supabase
       .from('themes')
-      .update({ section_config })
-      .eq('theme_key', themeKey)
+      .update({ config: section_config })
+      .eq('slug', themeSlug)
       .select()
       .single()
 
     if (error) throw error
 
-    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeSlug}/assets`)
     return { success: true, data }
   } catch (error: any) {
     return { success: false, error: error.message || 'Failed to update section config' }
@@ -179,7 +182,7 @@ export async function updateSectionConfig(themeKey: string, section_config: Sect
 
 // 6. Save uploaded asset metadata
 export async function saveUploadedAsset(
-  themeKey: string,
+  themeSlug: string,
   slot: AssetKind,
   fileUrl: string,
   storagePath: string,
@@ -199,7 +202,7 @@ export async function saveUploadedAsset(
     const { data: theme, error: themeError } = await supabase
       .from('themes')
       .select('id')
-      .eq('theme_key', themeKey)
+      .eq('slug', themeSlug)
       .single()
 
     if (themeError) throw themeError
@@ -208,7 +211,7 @@ export async function saveUploadedAsset(
       .from('theme_assets')
       .upsert({
         theme_id: theme.id,
-        theme_key: themeKey,
+        theme_key: themeSlug,
         slot,
         file_url: fileUrl,
         storage_path: storagePath,
@@ -221,7 +224,7 @@ export async function saveUploadedAsset(
 
     if (error) throw error
 
-    revalidatePath(`/dashboard/themes/${themeKey}/assets`)
+    revalidatePath(`/dashboard/themes/${themeSlug}/assets`)
     return { success: true, data }
   } catch (error: any) {
     console.error('Error saving asset metadata:', error)
