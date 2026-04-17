@@ -70,8 +70,8 @@ export function SectionToggleBar({ themeKey, initialConfig, onConfigChange }: Pr
   ]
 
   return (
-    <div className="w-full bg-surface-2 border-b border-white/5 py-3 px-4 overflow-x-auto custom-scrollbar flex items-center justify-between">
-      <div className="flex gap-2 min-w-max">
+    <div className="flex items-center gap-1.5 p-2.5 px-4 bg-black/30 border-b border-white/[0.06] flex-wrap">
+      <div className="flex items-center gap-1.5 flex-wrap flex-1">
         {sections.map(s => {
           const isActive = s.disable ? true : config[s.key as keyof SectionConfig]
           
@@ -81,12 +81,12 @@ export function SectionToggleBar({ themeKey, initialConfig, onConfigChange }: Pr
               disabled={s.disable}
               onClick={() => s.key && toggle(s.key)}
               className={`
-                px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                px-3 py-1.5 rounded-full text-[11px] font-medium transition-all
                 ${s.disable 
-                  ? 'bg-white/10 text-white/50 cursor-not-allowed' 
+                  ? 'bg-white/[0.08] text-white/40 cursor-not-allowed' 
                   : isActive 
                     ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30' 
-                    : 'bg-black/40 text-white/50 border border-white/5 hover:bg-white/10 hover:text-white/80'
+                    : 'text-white/40 hover:text-white/70 hover:bg-white/[0.05] border border-transparent'
                 }
               `}
             >
@@ -96,9 +96,11 @@ export function SectionToggleBar({ themeKey, initialConfig, onConfigChange }: Pr
         })}
       </div>
       
-      <div className="text-[10px] text-white/30 ml-4 shrink-0 mt-0.5">
-        {isSaving ? 'Saving...' : 'Saved'}
-      </div>
+      <span className={`text-[10px] shrink-0 transition-colors ${
+        isSaving ? 'text-amber-400/60' : 'text-white/20'
+      }`}>
+        {isSaving ? '● Saving...' : '● Saved'}
+      </span>
     </div>
   )
 }

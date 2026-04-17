@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, ExternalLink, Layers, Info } from 'lucide-react'
 import { AdminTheme, AdminThemeAsset, AssetKind, SectionConfig } from '@/types/theme'
 import { useThemePreviewStore } from '@/stores/theme-preview-store'
 import { ThemeAssetRow } from '@/components/admin/theme-asset-row'
@@ -48,6 +48,7 @@ const ASSET_SLOTS: Array<{ slot: AssetKind, label: string, description: string, 
 
 export function ThemeAssetDashboard({ theme, assets }: Props) {
   const store = useThemePreviewStore();
+  const [activeTab, setActiveTab] = useState<'info' | 'assets'>('assets')
 
   // Initialize store on mount
   useEffect(() => {
@@ -120,96 +121,177 @@ export function ThemeAssetDashboard({ theme, assets }: Props) {
   // Grouping
   const groups = Array.from(new Set(ASSET_SLOTS.map(a => a.group)));
 
+  // Count filled assets per group for progress indication
+  const filledCount = assets.length;
+  const totalCount = ASSET_SLOTS.length;
+
   return (
-    <div className="flex h-screen w-full bg-[#0F0F0F] text-[#E5E5E5] overflow-hidden font-sans">
+    <div className="flex flex-col h-screen w-full bg-[#0A0A0A] text-[#E5E5E5] overflow-hidden font-sans">
       
-      {/* Panel Kiri: Form & Asset List */}
-      <div className="w-[480px] shrink-0 border-r border-white/5 flex flex-col bg-[#1A1A1A]">
-        
-        {/* Header */}
-        <div className="p-4 border-b border-white/5 bg-surface-2 z-10 sticky top-0">
-          <div className="flex items-center gap-2 text-sm text-white/50 mb-4">
-             <Link href="/dashboard/themes" className="hover:text-white flex items-center">
-               <ChevronLeft className="w-4 h-4 mr-1" /> Dashboard
-             </Link>
-             <span>/</span>
-             <Link href="/dashboard/themes" className="hover:text-white">Tema</Link>
-             <span>/</span>
-             <span className="text-white font-medium truncate max-w-[200px]">{theme.display_name}</span>
-          </div>
+      {/* ── Sticky Header ─────────────────────────────────────── */}
+      <header className="h-14 shrink-0 flex items-center justify-between px-5 border-b border-white/[0.06] bg-[#0A0A0A] z-20">
+        {/* Left: Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm min-w-0">
+          <Link 
+            href="/dashboard/themes" 
+            className="flex items-center gap-1 text-white/40 hover:text-white transition-colors shrink-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Themes</span>
+          </Link>
+          <span className="text-white/20">/</span>
+          <span className="text-white font-medium truncate max-w-[240px]">{theme.display_name}</span>
+          {theme.is_premium && (
+            <span className="bg-amber-500/15 text-amber-400 text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0">
+              Premium
+            </span>
+          )}
+        </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-semibold text-white">{theme.display_name}</h1>
-              {theme.is_premium && (
-                <span className="bg-amber-500/20 text-amber-500 text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-amber-500/30">Premium</span>
-              )}
-            </div>
+        {/* Right: Status + Toggle + Preview Link */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Status Badge */}
+          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
+            theme.is_active 
+              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' 
+              : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+          }`}>
+            {theme.is_active ? 'ACTIVE' : 'DRAFT'}
+          </span>
+          
+          {/* Active Toggle */}
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" checked={theme.is_active} onChange={handleToggleActive} />
+            <div className="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
 
-            <div className="flex items-center gap-3">
-              <span className={`text-[10px] font-bold px-2 py-1 rounded-full border ${
-                theme.is_active 
-                  ? 'bg-emerald-950 text-emerald-400 border-emerald-800' 
-                  : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+          {/* Divider */}
+          <div className="w-px h-5 bg-white/[0.08]" />
+
+          {/* Preview Link */}
+          <Link
+            href={`/preview/${theme.theme_key}`}
+            target="_blank"
+            className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06] transition-all"
+          >
+            <span>Lihat Preview</span>
+            <ExternalLink className="w-3 h-3" />
+          </Link>
+        </div>
+      </header>
+
+      {/* ── Main Content ──────────────────────────────────────── */}
+      <div className="flex flex-1 overflow-hidden">
+
+        {/* ── Left Panel ────────────────────────────────────── */}
+        <div className="w-[460px] shrink-0 border-r border-white/[0.06] flex flex-col bg-[#111111]">
+          
+          {/* Tab Switcher */}
+          <div className="flex items-center gap-1 px-4 pt-4 pb-3 shrink-0">
+            <button
+              onClick={() => setActiveTab('info')}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === 'info'
+                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.05] border border-transparent'
+              }`}
+            >
+              <Info className="w-3.5 h-3.5" />
+              Info Tema
+            </button>
+            <button
+              onClick={() => setActiveTab('assets')}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === 'assets'
+                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.05] border border-transparent'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              Aset
+              {/* Progress chip */}
+              <span className={`text-[10px] ml-1 px-1.5 py-0.5 rounded-full leading-none ${
+                filledCount === totalCount
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : 'bg-white/[0.08] text-white/40'
               }`}>
-                {theme.is_active ? 'ACTIVE' : 'DRAFT'}
+                {filledCount}/{totalCount}
               </span>
-              
-              {/* Active Toggle */}
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={theme.is_active} onChange={handleToggleActive} />
-                <div className="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
-            </div>
+            </button>
+          </div>
+
+          {/* Tab Content — scrollable */}
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            
+            {/* ── Tab: Info Tema ─────────────────────────────── */}
+            {activeTab === 'info' && (
+              <ThemeInfoForm theme={theme} />
+            )}
+
+            {/* ── Tab: Aset ──────────────────────────────────── */}
+            {activeTab === 'assets' && (
+              <div className="space-y-5">
+                {groups.map(group => {
+                  const groupSlots = ASSET_SLOTS.filter(a => a.group === group);
+                  const groupFilled = groupSlots.filter(s => 
+                    assets.some(a => a.slot === s.slot && a.file_url)
+                  ).length;
+
+                  return (
+                    <div key={group}>
+                      {/* Group Header */}
+                      <div className="flex items-center justify-between mb-2.5 px-0.5">
+                        <h3 className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
+                          {group}
+                        </h3>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                          groupFilled === groupSlots.length
+                            ? 'bg-emerald-500/15 text-emerald-400'
+                            : 'text-white/25'
+                        }`}>
+                          {groupFilled}/{groupSlots.length}
+                        </span>
+                      </div>
+                      
+                      {/* Slot Cards */}
+                      <div className="space-y-1.5">
+                        {groupSlots.map(spec => (
+                          <ThemeAssetRow
+                            key={spec.slot}
+                            themeKey={theme.theme_key}
+                            slot={spec.slot}
+                            label={spec.label}
+                            description={spec.description}
+                            idealSize={spec.idealSize}
+                            needsTransparent={spec.needsTransparent}
+                            currentAsset={assets.find(a => a.slot === spec.slot) || null}
+                            onUploadSuccess={handleUploadSuccess}
+                            onDelete={handleDelete}
+                            onHover={handleHover}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
           </div>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
-           
-           {/* Section 1: Info Tema */}
-           <ThemeInfoForm theme={theme} />
-
-           {/* Section 2: Upload Assets */}
-           <div className="space-y-8">
-             {groups.map(group => (
-               <div key={group}>
-                 <h2 className="text-sm font-semibold text-white/80 mb-4 px-1">{group}</h2>
-                 <div className="space-y-3">
-                   {ASSET_SLOTS.filter(a => a.group === group).map(spec => (
-                     <ThemeAssetRow
-                       key={spec.slot}
-                       themeKey={theme.theme_key}
-                       slot={spec.slot}
-                       label={spec.label}
-                       description={spec.description}
-                       idealSize={spec.idealSize}
-                       needsTransparent={spec.needsTransparent}
-                       currentAsset={assets.find(a => a.slot === spec.slot) || null}
-                       onUploadSuccess={handleUploadSuccess}
-                       onDelete={handleDelete}
-                       onHover={handleHover}
-                     />
-                   ))}
-                 </div>
-               </div>
-             ))}
-           </div>
-
+        {/* ── Right Panel: Preview ──────────────────────────── */}
+        <div className="flex-1 flex flex-col bg-[#050505] relative overflow-hidden">
+          {/* Toggle Bar */}
+          <SectionToggleBar themeKey={theme.theme_key} initialConfig={theme.section_config} onConfigChange={handleConfigChange} />
+          
+          {/* Preview Panel Wrapper */}
+          <div className="flex-1 relative w-full h-full"> 
+            <ThemePreviewPanel initialTheme={theme} />
+          </div>
         </div>
-      </div>
 
-      {/* Panel Kanan: Preview */}
-      <div className="flex-1 flex flex-col bg-[#050505] relative overflow-hidden">
-        {/* Toggle Bar */}
-        <SectionToggleBar themeKey={theme.theme_key} initialConfig={theme.section_config} onConfigChange={handleConfigChange} />
-        
-        {/* Preview Panel Wrapper */}
-        <div className="flex-1 relative w-full h-full"> 
-          <ThemePreviewPanel initialTheme={theme} />
-        </div>
       </div>
-
     </div>
   )
 }

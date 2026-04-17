@@ -2,7 +2,7 @@
 
 import { useState, useRef, ChangeEvent, DragEvent } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { UploadCloud, FileAudio, Trash2, RefreshCw, Image as ImageIcon } from 'lucide-react'
+import { UploadCloud, FileAudio, Trash2, RefreshCw, Upload } from 'lucide-react'
 import { AssetKind, AdminThemeAsset } from '@/types/theme'
 import { saveUploadedAsset } from '@/app/dashboard/themes/actions'
 
@@ -37,6 +37,7 @@ export function ThemeAssetRow({
   const [warningMsg, setWarningMsg] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [tempPreviewUrl, setTempPreviewUrl] = useState<string | null>(null)
+  const [showSuccess, setShowSuccess] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   
@@ -145,6 +146,10 @@ export function ThemeAssetRow({
       setProgress(100)
       onUploadSuccess(slot, bustedUrl, result.data)
       
+      // Flash success border
+      setShowSuccess(true)
+      setTimeout(() => setShowSuccess(false), 1500)
+      
     } catch (err: any) {
       setErrorMsg(err.message || 'Upload failed')
       setTempPreviewUrl(null)
@@ -193,30 +198,17 @@ export function ThemeAssetRow({
   }
 
   const assetUrl = tempPreviewUrl || currentAsset?.file_url;
-  
-  // Minimal status display
-  let statusBadge = (
-    <span className="text-xs px-2 py-0.5 rounded-full bg-red-950 text-red-400 border border-red-800">EMPTY</span>
-  )
-  if (isUploading) {
-    statusBadge = (
-      <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-950 text-yellow-400 border border-yellow-800">UPLOADING</span>
-    )
-  } else if (errorMsg) {
-    statusBadge = (
-      <span className="text-xs px-2 py-0.5 rounded-full bg-red-950 text-red-500 border border-red-700">ERROR</span>
-    )
-  } else if (assetUrl) {
-    statusBadge = (
-      <span className="text-xs px-2 py-0.5 rounded-full bg-green-950 text-green-400 border border-green-800">UPLOADED</span>
-    )
-  }
+  const hasAsset = !!assetUrl;
 
   return (
     <div 
-      className={`border rounded-lg p-3 bg-surface border-white/5 transition-all
-        ${isDragging ? 'border-emerald-500 bg-emerald-500/10' : ''}
-        hover:border-white/20
+      className={`group relative flex items-center gap-3 p-2.5 rounded-xl transition-all
+        ${isDragging 
+          ? 'bg-emerald-500/10 border border-emerald-500/40' 
+          : showSuccess
+            ? 'bg-emerald-500/[0.06] border border-emerald-500/30'
+            : 'bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1]'
+        }
       `}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -224,87 +216,93 @@ export function ThemeAssetRow({
       onMouseEnter={() => onHover(slot)}
       onMouseLeave={() => onHover(null)}
     >
-      <div className="flex items-start gap-4">
-        {/* Thumbnail Preview Area */}
-        <div 
-          className="w-16 h-16 shrink-0 bg-surface-2 rounded-md border border-white/10 flex items-center justify-center overflow-hidden cursor-pointer relative group"
-          onClick={() => !isUploading && fileInputRef.current?.click()}
-        >
-          {assetUrl ? (
-            isAudio ? (
-              <FileAudio className="w-6 h-6 text-emerald-500" />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={assetUrl} alt={label} className="w-full h-full object-cover" />
-            )
+      {/* Thumbnail */}
+      <div 
+        className={`w-12 h-12 rounded-lg shrink-0 overflow-hidden flex items-center justify-center cursor-pointer relative
+          ${hasAsset 
+            ? 'border border-white/[0.1] bg-white/[0.05]' 
+            : 'border border-dashed border-white/[0.12] bg-white/[0.02]'
+          }
+        `}
+        onClick={() => !isUploading && fileInputRef.current?.click()}
+      >
+        {assetUrl ? (
+          isAudio ? (
+            <FileAudio className="w-5 h-5 text-emerald-500" />
           ) : (
-             <UploadCloud className="w-6 h-6 text-white/30 group-hover:text-emerald-500 transition-colors" />
-          )}
-          {assetUrl && !isUploading && (
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-               <RefreshCw className="w-4 h-4 text-white" />
-            </div>
-          )}
-        </div>
-
-        {/* Content Info */}
-        <div className="flex-1 min-w-0 py-1">
-          <div className="flex justify-between items-start mb-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-white/50">{slot}</span>
-              {statusBadge}
-            </div>
-            
-            {/* Actions for uploaded file */}
-            {assetUrl && !isUploading && (
-               <button 
-                onClick={handleDelete}
-                className="text-white/40 hover:text-red-400 transition-colors"
-                title="Delete Asset"
-               >
-                 <Trash2 className="w-4 h-4" />
-               </button>
-            )}
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={assetUrl} alt={label} className="w-full h-full object-cover" />
+          )
+        ) : (
+          <UploadCloud className="w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors" />
+        )}
+        {/* Replace overlay on hover for existing assets */}
+        {hasAsset && !isUploading && (
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
+            <RefreshCw className="w-3.5 h-3.5 text-white" />
           </div>
-          
-          <h4 className="text-sm font-medium text-white truncate">{label}</h4>
-          <p className="text-xs text-white/40 leading-relaxed truncate">{description}</p>
-          
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-[10px] text-white/30 bg-surface-2 px-1.5 py-0.5 rounded">
-              Size: {idealSize}
-            </span>
-            {needsTransparent && (
-              <span className="text-[10px] text-emerald-400/80 bg-emerald-950 px-1.5 py-0.5 rounded">
-                Transparent PNG
-              </span>
-            )}
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Progress Bar & Error Display */}
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-medium text-white truncate">{label}</span>
+          {needsTransparent && (
+            <span className="text-[10px] text-white/40 border border-white/[0.1] px-1.5 py-0.5 rounded-full leading-none shrink-0">
+              PNG
+            </span>
+          )}
+        </div>
+        <span className="text-[11px] text-white/30">{idealSize}</span>
+      </div>
+
+      {/* Status indicator (subtle dot) */}
+      <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+        isUploading 
+          ? 'bg-amber-400 animate-pulse' 
+          : hasAsset 
+            ? 'bg-emerald-500' 
+            : 'bg-white/[0.15]'
+      }`} />
+
+      {/* Actions — hover reveal */}
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        {hasAsset && !isUploading ? (
+          <button 
+            onClick={handleDelete}
+            className="p-1.5 rounded-lg hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-all"
+            title="Hapus aset"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        ) : !isUploading ? (
+          <label 
+            className="p-1.5 rounded-lg hover:bg-white/[0.1] text-white/40 hover:text-white cursor-pointer transition-all"
+            title="Upload aset"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <input 
+              type="file" 
+              className="sr-only" 
+              accept={isAudio ? "audio/mpeg,audio/mp3" : (needsTransparent ? "image/png,image/webp,image/svg+xml" : "image/*")}
+              onChange={handleFileChange}
+            />
+          </label>
+        ) : null}
+      </div>
+
+      {/* Upload Progress Bar — thin line at bottom */}
       {isUploading && (
-        <div className="mt-3 h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
+        <div className="absolute bottom-0 left-3 right-3 h-0.5 bg-white/[0.06] rounded-full overflow-hidden">
           <div 
-            className="h-full bg-emerald-500 transition-all duration-300"
+            className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
             style={{ width: `${progress}%` }}
           />
         </div>
       )}
-      
-      {errorMsg && (
-        <div className="mt-2 text-xs text-red-400 bg-red-950/50 p-2 rounded border border-red-900">
-          {errorMsg}
-        </div>
-      )}
-      {warningMsg && (
-        <div className="mt-2 text-xs text-amber-400 bg-amber-950/50 p-2 rounded border border-amber-900">
-          {warningMsg}
-        </div>
-      )}
 
-      {/* Hidden File Input */}
+      {/* Hidden File Input (main) */}
       <input 
         type="file"
         ref={fileInputRef}
@@ -312,6 +310,16 @@ export function ThemeAssetRow({
         accept={isAudio ? "audio/mpeg,audio/mp3" : (needsTransparent ? "image/png,image/webp,image/svg+xml" : "image/*")}
         onChange={handleFileChange}
       />
+
+      {/* Error message — appears below card via a sibling approach won't work here, 
+           so we overlay it as a tooltip-like element */}
+      {errorMsg && (
+        <div className="absolute -bottom-7 left-0 right-0 z-10">
+          <div className="text-[10px] text-red-400 bg-red-950/90 px-2.5 py-1 rounded-lg border border-red-900/50 truncate">
+            {errorMsg}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
