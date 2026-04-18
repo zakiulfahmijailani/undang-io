@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { CreateThemeModal } from './_components/create-theme-modal'
-import { Image as ImageIcon } from 'lucide-react'
+import { Image as ImageIcon, Eye } from 'lucide-react'
 
 export const metadata = {
   title: 'Kelola Tema — undang.io Dashboard',
@@ -24,6 +24,7 @@ export default async function DashboardThemesPage() {
   if (!profile || !['admin', 'owner'].includes(profile.role)) {
     redirect('/dashboard')
   }
+
   const { data: themes, error } = await supabase
     .from('themes')
     .select(`
@@ -58,6 +59,10 @@ export default async function DashboardThemesPage() {
 
             const coverAsset = theme.theme_assets?.find((a: any) => a.slot === 'cover_scene')
 
+            // Use correct DB fields: name & slug (not display_name / theme_key)
+            const themeName = theme.name || theme.display_name || '(Tanpa Nama)'
+            const themeSlug = theme.slug || theme.theme_key || theme.id
+
             return (
               <div key={theme.id} className="bg-[#1A1A1A] border border-white/5 rounded-xl overflow-hidden shadow-lg flex flex-col group hover:border-white/20 transition-colors">
 
@@ -67,7 +72,7 @@ export default async function DashboardThemesPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={coverAsset.file_url}
-                      alt={theme.display_name}
+                      alt={themeName}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
@@ -96,11 +101,11 @@ export default async function DashboardThemesPage() {
 
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">
-                  <h3 className="font-semibold text-white truncate text-lg" title={theme.display_name}>
-                    {theme.display_name}
+                  <h3 className="font-semibold text-white truncate text-lg" title={themeName}>
+                    {themeName}
                   </h3>
-                  <p className="text-xs text-white/50 font-mono mt-1 mb-4 truncate" title={theme.theme_key}>
-                    {theme.theme_key}
+                  <p className="text-xs text-white/50 font-mono mt-1 mb-4 truncate" title={themeSlug}>
+                    {themeSlug}
                   </p>
 
                   {/* Progress */}
@@ -122,10 +127,20 @@ export default async function DashboardThemesPage() {
                   {/* Actions */}
                   <div className="mt-5 pt-4 border-t border-white/5 flex gap-2">
                     <Link
-                      href={`/dashboard/themes/${theme.theme_key}/assets`}
+                      href={`/dashboard/themes/${themeSlug}/assets`}
                       className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm text-center py-2 rounded-lg font-medium transition-colors"
                     >
                       Kelola Aset
+                    </Link>
+                    <Link
+                      href={`/dashboard/themes/${themeSlug}/preview`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm px-3 py-2 rounded-lg font-medium transition-colors"
+                      title="Lihat Preview"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Preview</span>
                     </Link>
                   </div>
                 </div>
