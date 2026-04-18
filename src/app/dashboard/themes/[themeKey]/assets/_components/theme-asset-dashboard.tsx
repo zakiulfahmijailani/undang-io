@@ -170,7 +170,7 @@ export function ThemeAssetDashboard({ theme, assets }: Props) {
 
           {/* Preview Link */}
           <Link
-            href={`/preview/${theme.theme_key}`}
+            href={`/dashboard/themes/${theme.theme_key}/preview`}
             target="_blank"
             className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06] transition-all"
           >
