@@ -41,7 +41,6 @@ function normalizeThemeCategory(category?: string | null) {
     .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
-// ─── Primitives ──────────────────────────────────────────────────────────────
 function ToggleSection({ enabled, onToggle, label, children }: {
   enabled: boolean; onToggle: () => void; label: string; children: React.ReactNode
 }) {
@@ -110,7 +109,6 @@ function SectionDivider({ label }: { label: string }) {
   )
 }
 
-// ─── Main ────────────────────────────────────────────────────────────────
 export default function CreateInvitationWizard() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
@@ -119,7 +117,6 @@ export default function CreateInvitationWizard() {
   const [isLoadingThemes, setIsLoadingThemes] = useState(true)
   const [themesError, setThemesError] = useState<string | null>(null)
 
-  // ── Compulsory fields ──
   const [f, setF] = useState({
     groomFullName: "",
     groomNickname: "",
@@ -133,7 +130,6 @@ export default function CreateInvitationWizard() {
   })
   const upF = (p: Partial<typeof f>) => setF(prev => ({ ...prev, ...p }))
 
-  // ── Optional toggles ──
   const [opt, setOpt] = useState({
     groomParents: false, brideParents: false,
     groomPhoto: false, bridePhoto: false,
@@ -146,7 +142,6 @@ export default function CreateInvitationWizard() {
   })
   const toggleOpt = (k: keyof typeof opt) => setOpt(p => ({ ...p, [k]: !p[k] }))
 
-  // ── Optional field values ──
   const [x, setX] = useState({
     groomFather: "", groomMother: "",
     brideFather: "", brideMother: "",
@@ -502,7 +497,9 @@ export default function CreateInvitationWizard() {
                     <div key={i} className="rounded-xl border border-[#EDE6D6] bg-[#FDFCF9] p-4 flex flex-col gap-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-[#D4A91C]">Peristiwa {i + 1}</span>
-                        <button type="button" onClick={() => removeStory(i)}><Trash2 className="w-4 h-4 text-[#C2BEB8] hover:text-[#E05555]" /></button></n                        </button>
+                        <button type="button" onClick={() => removeStory(i)}>
+                          <Trash2 className="w-4 h-4 text-[#C2BEB8] hover:text-[#E05555]" />
+                        </button>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <TInput label="Tahun" value={ev.year} onChange={v => updateStory(i, { year: v })} placeholder="2023" />
