@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const QUOTE_PRESETS = [
   { text: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya.", source: "QS. Ar-Rum: 21" },
@@ -19,29 +20,14 @@ const QUOTE_PRESETS = [
   { text: "Love is patient, love is kind. It does not envy, it does not boast.", source: "1 Corinthians 13:4" },
 ];
 
-const activeThemes = [
-  {
-    id: "theme-jawa-klasik",
-    name: "Jawa Klasik",
-    description: "Tema undangan dengan nuansa Jawa klasik, ornamen batik, dan warna emas-cokelat.",
-    culturalCategory: "jawa",
-    thumbnailUrl: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=338&h=600&fit=crop"
-  },
-  {
-    id: "theme-bali-tropis",
-    name: "Bali Tropis",
-    description: "Nuansa tropis Bali dengan hijau daun, bunga frangipani, dan suasana pantai.",
-    culturalCategory: "bali",
-    thumbnailUrl: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=338&h=600&fit=crop"
-  },
-  {
-    id: "theme-modern-minimalis",
-    name: "Modern Minimalis",
-    description: "Desain bersih dan modern dengan tipografi elegan dan palet netral.",
-    culturalCategory: "minimalis",
-    thumbnailUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=338&h=600&fit=crop"
-  }
-];
+type ActiveTheme = {
+  id: string;
+  name: string;
+  description: string | null;
+  culturalCategory: string | null;
+  thumbnailUrl: string | null;
+  slug: string;
+};
 
 /** 25 menit dalam milliseconds */
 const PREVIEW_DURATION_MS = 25 * 60 * 1000;
@@ -52,7 +38,7 @@ function generateSlug(groomNick: string, brideNick: string) {
   return `${clean(groomNick)}-${clean(brideNick)}-${year}`;
 }
 
-function BuatUndanganContent() {
+function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -69,9 +55,9 @@ function BuatUndanganContent() {
   useEffect(() => {
     const themeFromUrl = searchParams.get("theme");
     if (themeFromUrl) {
-      const match = activeThemes.find((t) => t.id === themeFromUrl);
+      const match = themes.find((t) => t.id === themeFromUrl || t.slug === themeFromUrl);
       if (match) {
-        setSelectedThemeId(themeFromUrl);
+        setSelectedThemeId(match.id);
         setStep(2);
       }
     }
@@ -90,7 +76,7 @@ function BuatUndanganContent() {
         sessionStorage.removeItem("undang_draft");
       }
     } catch (_) {}
-  }, [searchParams]);
+  }, [searchParams, themes]);
 
   const update = (key: string, val: string) => setForm((prev) => ({ ...prev, [key]: val }));
 
@@ -125,6 +111,8 @@ function BuatUndanganContent() {
     }
   };
 
+  const selectedTheme = themes.find((t) => t.id === selectedThemeId);
+
   return (
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
@@ -156,30 +144,44 @@ function BuatUndanganContent() {
           <div>
             <h1 className="mb-2 text-2xl font-bold text-foreground">Pilih Tema Undangan</h1>
             <p className="mb-6 text-muted-foreground">Semua tema Rp 49.000 (hemat 51% dari Rp 99.000)</p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {activeThemes.map((theme) => (
-                <Card
-                  key={theme.id}
-                  className={`cursor-pointer overflow-hidden transition-all ${
-                    selectedThemeId === theme.id ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"
-                  }`}
-                  onClick={() => setSelectedThemeId(theme.id)}
-                >
-                  <div className="aspect-[9/16] max-h-52 overflow-hidden">
-                    <img src={theme.thumbnailUrl || "/placeholder.svg"} alt={theme.name} className="h-full w-full object-cover" loading="lazy" />
-                  </div>
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-foreground">{theme.name}</h3>
-                      {selectedThemeId === theme.id && (
-                        <Badge className="bg-accent text-accent-foreground">Dipilih</Badge>
-                      )}
+            {themes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
+                <p className="text-lg font-medium">Belum ada tema tersedia</p>
+                <p className="text-sm mt-1">Tema sedang disiapkan, silakan coba beberapa saat lagi.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {themes.map((theme) => (
+                  <Card
+                    key={theme.id}
+                    className={`cursor-pointer overflow-hidden transition-all ${
+                      selectedThemeId === theme.id ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"
+                    }`}
+                    onClick={() => setSelectedThemeId(theme.id)}
+                  >
+                    <div className="aspect-[9/16] max-h-52 overflow-hidden">
+                      <img
+                        src={theme.thumbnailUrl || "/placeholder.svg"}
+                        alt={theme.name}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
                     </div>
-                    <Badge variant="secondary" className="mt-1 capitalize">{theme.culturalCategory}</Badge>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-foreground">{theme.name}</h3>
+                        {selectedThemeId === theme.id && (
+                          <Badge className="bg-accent text-accent-foreground">Dipilih</Badge>
+                        )}
+                      </div>
+                      {theme.culturalCategory && (
+                        <Badge variant="secondary" className="mt-1 capitalize">{theme.culturalCategory}</Badge>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
             <div className="mt-8 flex justify-end">
               <Button size="lg" disabled={!selectedThemeId} onClick={() => setStep(2)}>
                 Lanjut Isi Data <ChevronRight className="ml-1 h-4 w-4" />
@@ -290,7 +292,7 @@ function BuatUndanganContent() {
               <strong>{form.brideNickname || form.brideFullName}</strong>
             </p>
             <p className="mb-8 text-sm text-muted-foreground">
-              Tema: <strong>{activeThemes.find((t) => t.id === selectedThemeId)?.name}</strong>
+              Tema: <strong>{selectedTheme?.name ?? "-"}</strong>
             </p>
             <Alert className="mb-6 border-accent/40 bg-accent/10 text-left">
               <AlertTriangle className="h-4 w-4 text-accent" />
@@ -313,10 +315,40 @@ function BuatUndanganContent() {
   );
 }
 
-export default function BuatUndangan() {
+async function fetchActiveThemes(): Promise<ActiveTheme[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from("themes")
+      .select("id, name, description, cultural_category, thumbnail_url, slug")
+      .eq("is_active", true)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Failed to fetch themes:", error);
+      return [];
+    }
+
+    return (data ?? []).map((row) => ({
+      id: row.id,
+      name: row.name ?? "",
+      description: row.description ?? null,
+      culturalCategory: row.cultural_category ?? null,
+      thumbnailUrl: row.thumbnail_url ?? null,
+      slug: row.slug ?? "",
+    }));
+  } catch (err) {
+    console.error("Unexpected error fetching themes:", err);
+    return [];
+  }
+}
+
+export default async function BuatUndangan() {
+  const themes = await fetchActiveThemes();
+
   return (
     <Suspense fallback={null}>
-      <BuatUndanganContent />
+      <BuatUndanganContent themes={themes} />
     </Suspense>
   );
 }
