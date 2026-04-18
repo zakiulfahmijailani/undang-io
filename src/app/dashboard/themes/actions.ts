@@ -37,6 +37,13 @@ export async function createTheme(formData: FormData): Promise<ActionResult> {
       return { success: false, error: 'theme_key and display_name are required' }
     }
 
+    if (typeof slug !== 'string' || !/^[a-z0-9_]+$/.test(slug)) {
+      return { success: false, error: 'Slug tidak valid. Gunakan huruf kecil, angka, dan underscore saja.' }
+    }
+    if (slug.length < 3 || slug.length > 60) {
+      return { success: false, error: 'Slug harus 3–60 karakter.' }
+    }
+
     const { data, error } = await supabase
       .from('themes')
       .insert({ slug, name })

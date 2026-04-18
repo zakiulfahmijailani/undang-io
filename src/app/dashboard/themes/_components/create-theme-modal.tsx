@@ -4,17 +4,36 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, X } from 'lucide-react'
 import { createTheme } from '@/app/dashboard/themes/actions'
+import { toast } from 'sonner'
 
 export function CreateThemeModal() {
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [slug, setSlug] = useState('')
   const router = useRouter()
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const autoSlug = value.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
+    setSlug(autoSlug)
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
+
+    if (!/^[a-z0-9_]+$/.test(slug)) { 
+      setError('Slug hanya boleh huruf kecil, angka, dan underscore')
+      setIsSubmitting(false)
+      return 
+    }
+    if (slug.length < 3) { 
+      setError('Slug minimal 3 karakter')
+      setIsSubmitting(false)
+      return 
+    }
 
     const formData = new FormData(e.currentTarget)
 
@@ -22,6 +41,7 @@ export function CreateThemeModal() {
       const res = await createTheme(formData)
       if (res.success && res.data) {
         setIsOpen(false)
+        toast.success(`Tema "${res.data.name}" berhasil dibuat!`, { description: 'Sekarang upload aset untuk tema ini.' })
         router.push(`/dashboard/themes/${res.data.slug}/assets`)
       } else {
         setError(res.error || 'Failed to create theme')
@@ -52,26 +72,29 @@ export function CreateThemeModal() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm text-white/70 mb-1">Theme Key</label>
-                <input
-                  type="text"
-                  name="theme_key"
-                  required
-                  placeholder="e.g. vintage_botanica"
-                  className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
-                />
-                <p className="text-xs text-white/30 mt-1">Gunakan lowercase dan underscore. Harus unik.</p>
-              </div>
-
-              <div>
                 <label className="block text-sm text-white/70 mb-1">Display Name</label>
                 <input
                   type="text"
                   name="display_name"
                   required
+                  onChange={handleNameChange}
                   placeholder="e.g. Vintage Botanica"
                   className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm text-white/70 mb-1">Theme Key (Slug)</label>
+                <input
+                  type="text"
+                  name="theme_key"
+                  required
+                  readOnly
+                  value={slug}
+                  placeholder="e.g. vintage_botanica"
+                  className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-2 text-sm text-white opacity-70 cursor-not-allowed focus:outline-none"
+                />
+                <p className="text-xs text-emerald-500/80 mt-1">Slug: {slug || '-'}</p>
               </div>
 
               {error && (

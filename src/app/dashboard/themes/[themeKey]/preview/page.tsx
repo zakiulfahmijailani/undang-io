@@ -98,9 +98,14 @@ export default async function ThemeLivePreviewPage({ params }: PreviewPageProps)
     };
 
     return (
-      <div className="min-h-screen bg-black">
-        <ParallaxThemeRenderer theme={parallaxTheme} />
-      </div>
+      <>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, background: '#1a1a1a', color: '#facc15', padding: '8px 16px', fontSize: '13px', textAlign: 'center', borderBottom: '1px solid #333' }}>
+          👁️ Mode Preview Admin — Menggunakan data dummy. Bukan tampilan undangan nyata.
+        </div>
+        <div className="min-h-screen bg-black pt-10">
+          <ParallaxThemeRenderer theme={parallaxTheme} />
+        </div>
+      </>
     );
   }
 
@@ -161,10 +166,17 @@ export default async function ThemeLivePreviewPage({ params }: PreviewPageProps)
   };
 
   return (
-    <ClassicThemeRenderer 
-      theme={classicTheme} 
-      data={mockInvitationData}
-      isPreview={true}
-    />
+    <>
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, background: '#1a1a1a', color: '#facc15', padding: '8px 16px', fontSize: '13px', textAlign: 'center', borderBottom: '1px solid #333' }}>
+        👁️ Mode Preview Admin — Menggunakan data dummy. Bukan tampilan undangan nyata.
+      </div>
+      <div className="pt-10">
+        <ClassicThemeRenderer 
+          theme={classicTheme} 
+          data={mockInvitationData}
+          isPreview={true}
+        />
+      </div>
+    </>
   );
 }
