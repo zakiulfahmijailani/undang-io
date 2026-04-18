@@ -5,7 +5,6 @@ import { ParallaxThemeRenderer } from "@/components/themes/parallax/ParallaxThem
 import { mockInvitationData } from "@/lib/mock";
 import type { 
   SupabaseThemeRow, 
-  SupabaseAssetSlotRow, 
   ClassicTheme, 
   ClassicThemeAssets, 
   ParallaxTheme,
@@ -14,7 +13,7 @@ import type {
 } from "@/types/theme";
 
 interface PreviewPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ themeKey: string }>;
 }
 
 /**
@@ -34,7 +33,7 @@ const KIND_TO_CLASSIC_SLOT: Partial<Record<AssetKind, (keyof ClassicThemeAssets)
 };
 
 export default async function ThemeLivePreviewPage({ params }: PreviewPageProps) {
-  const { slug } = await params;
+  const { themeKey } = await params;
   const supabase = await createServerSupabaseClient();
 
   if (!supabase) {
@@ -45,7 +44,7 @@ export default async function ThemeLivePreviewPage({ params }: PreviewPageProps)
   const { data: themeData, error: themeError } = await supabase
     .from("themes")
     .select("*")
-    .eq("slug", slug)
+    .eq("slug", themeKey)
     .single();
 
   if (themeError || !themeData) {
@@ -58,7 +57,7 @@ export default async function ThemeLivePreviewPage({ params }: PreviewPageProps)
   const { data: assetsData, error: assetsError } = await supabase
     .from("theme_assets")
     .select("*")
-    .eq("theme_key", slug);
+    .eq("theme_key", themeKey);
 
   const assets = (assetsData || []) as any[];
 
@@ -123,11 +122,11 @@ export default async function ThemeLivePreviewPage({ params }: PreviewPageProps)
     ornament_corner_br: null,
     particle_type: "petals",
     particle_color: null,
-    color_primary: themeRow.color_primary || "#8b6c42",
+    color_primary: (themeRow.colors as any)?.primary || "#8b6c42",
     color_secondary: "#f5ede0",
-    color_accent: themeRow.color_accent || "#c9a97a",
+    color_accent: (themeRow.colors as any)?.accent || "#c9a97a",
     color_bg_page: "#fdfaf6",
-    color_text_body: themeRow.color_text || "#3d2e1e",
+    color_text_body: (themeRow.colors as any)?.text || "#3d2e1e",
     color_overlay: null,
     font_display: (themeRow.typography as any)?.heading || "Playfair Display",
     font_body: (themeRow.typography as any)?.body || "Inter",
@@ -156,7 +155,7 @@ export default async function ThemeLivePreviewPage({ params }: PreviewPageProps)
     target_event: "wedding",
     assets: classicAssets,
     tags: themeRow.tags || [],
-    created_by: themeRow.created_by,
+    created_by: null,
     created_at: themeRow.created_at,
     updated_at: themeRow.updated_at,
   };
