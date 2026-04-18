@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   ChevronRight, ChevronLeft, Save, Sparkles,
   Image as ImageIcon, Plus, Trash2, ToggleLeft, ToggleRight
 } from "lucide-react"
+import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
 const STEPS = [
   "Data Mempelai",
@@ -15,6 +16,30 @@ const STEPS = [
   "Fitur Tambahan",
   "Preview & Publish",
 ]
+
+type ThemeOption = {
+  id: string
+  name: string
+  cat: string
+  thumbnailUrl: string | null
+}
+
+const FALLBACK_THEMES: ThemeOption[] = [
+  { id: "minimalist-white", name: "Modern Minimalis", cat: "Modern", thumbnailUrl: null },
+  { id: "garden-romance", name: "Garden Romance", cat: "Modern", thumbnailUrl: null },
+  { id: "jawa-klasik", name: "Jawa Klasik", cat: "Budaya", thumbnailUrl: null },
+  { id: "bali-tropis", name: "Bali Tropis", cat: "Budaya", thumbnailUrl: null },
+  { id: "islami", name: "Islami Elegan", cat: "Islami", thumbnailUrl: null },
+  { id: "modern-bold", name: "Modern Bold", cat: "Modern", thumbnailUrl: null },
+]
+
+function normalizeThemeCategory(category?: string | null) {
+  if (!category) return "Tema"
+  return category
+    .split("_")
+    .join(" ")
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+}
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 function ToggleSection({ enabled, onToggle, label, children }: {
@@ -90,6 +115,9 @@ export default function CreateInvitationWizard() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [themeOptions, setThemeOptions] = useState<ThemeOption[]>(FALLBACK_THEMES)
+  const [isLoadingThemes, setIsLoadingThemes] = useState(true)
+  const [themesError, setThemesError] = useState<string | null>(null)
 
   // ── Compulsory fields ──
   const [f, setF] = useState({
@@ -100,7 +128,7 @@ export default function CreateInvitationWizard() {
     eventType: "akad_resepsi" as "akad" | "resepsi" | "akad_resepsi",
     akadDate: "", akadTime: "", akadVenue: "", akadAddress: "",
     receptionDate: "", receptionTime: "", receptionVenue: "", receptionAddress: "",
-    themeId: "minimalist-white",
+    themeId: FALLBACK_THEMES[0]?.id ?? "",
     greetingText: "Assalamu'alaikum Wr. Wb.\n\nDengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada acara pernikahan kami.",
   })
   const upF = (p: Partial<typeof f>) => setF(prev => ({ ...prev, ...p }))
@@ -141,10 +169,81 @@ export default function CreateInvitationWizard() {
   const updateStory = (i: number, p: Partial<typeof x.loveStory[0]>) =>
     upX({ loveStory: x.loveStory.map((e, n) => n === i ? { ...e, ...p } : e) })
 
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadThemes() {
+      try {
+        setIsLoadingThemes(true)
+        setThemesError(null)
+
+        const supabase = createBrowserSupabaseClient()
+        const { data, error } = await supabase
+          .from("themes")
+          .select("slug, name, cultural_category, thumbnail_url, is_active, is_published")
+          .eq("is_active", true)
+          .order("name", { ascending: true })
+
+        if (error) throw error
+
+        const nextThemes = (data ?? [])
+          .filter((theme) => theme?.slug && theme?.name)
+          .map((theme) => ({
+            id: theme.slug,
+            name: theme.name,
+            cat: normalizeThemeCategory(theme.cultural_category),
+            thumbnailUrl: theme.thumbnail_url ?? null,
+          }))
+
+        if (!isMounted) return
+
+        if (nextThemes.length > 0) {
+          setThemeOptions(nextThemes)
+        } else {
+          setThemeOptions(FALLBACK_THEMES)
+          setThemesError("Belum ada tema aktif yang tersedia. Menampilkan daftar default sementara.")
+        }
+      } catch (error) {
+        console.error("Failed to load themes for invitation wizard:", error)
+        if (!isMounted) return
+
+        setThemeOptions(FALLBACK_THEMES)
+        setThemesError("Gagal memuat tema terbaru. Menampilkan daftar default sementara.")
+      } finally {
+        if (isMounted) {
+          setIsLoadingThemes(false)
+        }
+      }
+    }
+
+    loadThemes()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (themeOptions.length === 0) return
+
+    setF((prev) => {
+      const hasSelectedTheme = themeOptions.some((theme) => theme.id === prev.themeId)
+      if (hasSelectedTheme) return prev
+
+      return {
+        ...prev,
+        themeId: themeOptions[0].id,
+      }
+    })
+  }, [themeOptions])
+
+  const selectedThemeName = useMemo(() => {
+    return themeOptions.find((theme) => theme.id === f.themeId)?.name ?? f.themeId.replace(/-/g, " ")
+  }, [f.themeId, themeOptions])
+
   const handlePublish = async () => {
     setIsSubmitting(true)
     try {
-      // ── POST /api/invitations (schema: groom_name, bride_name, theme_id, details.*) ──
       const res = await fetch('/api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -177,7 +276,6 @@ export default function CreateInvitationWizard() {
       const result = await res.json()
       if (!res.ok) throw new Error(result.error?.message || 'Gagal menyimpan undangan')
 
-      // ── PATCH with remaining optional fields ──
       const { id } = result.data
       await fetch(`/api/invitations/${id}`, {
         method: 'PATCH',
@@ -209,7 +307,6 @@ export default function CreateInvitationWizard() {
         <p className="text-sm text-[#726C67] mt-1">Lengkapi data berikut untuk membuat undangan digital Anda.</p>
       </div>
 
-      {/* Progress */}
       <div className="flex gap-1.5 overflow-x-auto pb-1">
         {STEPS.map((step, idx) => (
           <button key={idx} type="button" onClick={() => setCurrentStep(idx)}
@@ -238,8 +335,6 @@ export default function CreateInvitationWizard() {
         </div>
 
         <div className="px-6 py-5 flex flex-col gap-5">
-
-          {/* STEP 1: Data Mempelai */}
           {currentStep === 0 && (
             <>
               <SectionDivider label="Pengantin Pria" />
@@ -280,7 +375,6 @@ export default function CreateInvitationWizard() {
             </>
           )}
 
-          {/* STEP 2: Jadwal & Lokasi */}
           {currentStep === 1 && (
             <>
               <div>
@@ -333,39 +427,50 @@ export default function CreateInvitationWizard() {
             </>
           )}
 
-          {/* STEP 3: Tema */}
           {currentStep === 2 && (
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { id: 'minimalist-white', name: 'Modern Minimalis', cat: 'Modern' },
-                { id: 'garden-romance',   name: 'Garden Romance',   cat: 'Modern' },
-                { id: 'jawa-klasik',      name: 'Jawa Klasik',      cat: 'Budaya' },
-                { id: 'bali-tropis',      name: 'Bali Tropis',      cat: 'Budaya' },
-                { id: 'islami',           name: 'Islami Elegan',    cat: 'Islami' },
-                { id: 'modern-bold',      name: 'Modern Bold',      cat: 'Modern' },
-              ].map(t => (
-                <button key={t.id} type="button" onClick={() => upF({ themeId: t.id })}
-                  className={`relative rounded-2xl overflow-hidden border-2 transition-all text-left ${
-                    f.themeId === t.id ? 'border-[#D4A91C] shadow-md' : 'border-[#EDE6D6] hover:border-[#D4A91C]/40'
-                  }`}>
-                  <div className="aspect-[3/4] bg-[#F5F0E8] flex items-center justify-center">
-                    <ImageIcon className="w-10 h-10 text-[#C2BEB8]" />
-                  </div>
-                  <div className="p-3 bg-white">
-                    <p className="text-xs font-semibold text-[#1E1B18]">{t.name}</p>
-                    <p className="text-[10px] text-[#9A9390]">{t.cat}</p>
-                  </div>
-                  {f.themeId === t.id && (
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#D4A91C] flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            <div className="flex flex-col gap-4">
+              {isLoadingThemes && (
+                <p className="text-xs text-[#9A9390]">Memuat daftar tema terbaru…</p>
+              )}
+
+              {themesError && (
+                <div className="rounded-xl border border-[#F2D6A2] bg-[#FFF9ED] px-4 py-3 text-xs text-[#7D5C0C]">
+                  {themesError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                {themeOptions.map((t) => (
+                  <button key={t.id} type="button" onClick={() => upF({ themeId: t.id })}
+                    className={`relative rounded-2xl overflow-hidden border-2 transition-all text-left ${
+                      f.themeId === t.id ? 'border-[#D4A91C] shadow-md' : 'border-[#EDE6D6] hover:border-[#D4A91C]/40'
+                    }`}>
+                    <div className="aspect-[3/4] bg-[#F5F0E8] overflow-hidden flex items-center justify-center">
+                      {t.thumbnailUrl ? (
+                        <img
+                          src={t.thumbnailUrl}
+                          alt={t.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon className="w-10 h-10 text-[#C2BEB8]" />
+                      )}
                     </div>
-                  )}
-                </button>
-              ))}
+                    <div className="p-3 bg-white">
+                      <p className="text-xs font-semibold text-[#1E1B18]">{t.name}</p>
+                      <p className="text-[10px] text-[#9A9390]">{t.cat}</p>
+                    </div>
+                    {f.themeId === t.id && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#D4A91C] flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* STEP 4: Konten & Media */}
           {currentStep === 3 && (
             <>
               <TTextarea label="Teks Sambutan" value={f.greetingText} onChange={v => upF({ greetingText: v })} rows={5} />
@@ -397,7 +502,7 @@ export default function CreateInvitationWizard() {
                     <div key={i} className="rounded-xl border border-[#EDE6D6] bg-[#FDFCF9] p-4 flex flex-col gap-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-[#D4A91C]">Peristiwa {i + 1}</span>
-                        <button type="button" onClick={() => removeStory(i)}><Trash2 className="w-4 h-4 text-[#C2BEB8] hover:text-[#E05555]" /></button>
+                        <button type="button" onClick={() => removeStory(i)}><Trash2 className="w-4 h-4 text-[#C2BEB8] hover:text-[#E05555]" /></button></n                        </button>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <TInput label="Tahun" value={ev.year} onChange={v => updateStory(i, { year: v })} placeholder="2023" />
@@ -415,7 +520,6 @@ export default function CreateInvitationWizard() {
             </>
           )}
 
-          {/* STEP 5: Fitur Tambahan */}
           {currentStep === 4 && (
             <>
               <SectionDivider label="RSVP & Buku Tamu" />
@@ -463,7 +567,6 @@ export default function CreateInvitationWizard() {
             </>
           )}
 
-          {/* STEP 6: Preview & Publish */}
           {currentStep === 5 && (
             <div className="rounded-2xl bg-[#FDFCF9] border border-[#EDE6D6] overflow-hidden">
               <div className="px-5 py-3 border-b border-[#EDE6D6]">
@@ -473,7 +576,7 @@ export default function CreateInvitationWizard() {
                 {[
                   ['Pengantin', `${f.groomNickname || '—'} & ${f.brideNickname || '—'}`],
                   ['Jenis Acara', f.eventType.replace('_', ' & ')],
-                  ['Tema', f.themeId.replace(/-/g, ' ')],
+                  ['Tema', selectedThemeName],
                   ['RSVP', opt.rsvp ? 'Aktif' : 'Nonaktif'],
                   ['Buku Tamu', opt.guestbook ? 'Aktif' : 'Nonaktif'],
                   ['Amplop Digital', [opt.giftBank && 'Bank', opt.qris && 'QRIS', opt.giftAddress && 'Alamat'].filter(Boolean).join(', ') || 'Nonaktif'],
@@ -489,10 +592,8 @@ export default function CreateInvitationWizard() {
               <p className="text-xs text-center text-[#9A9390] pb-4">Anda masih bisa mengubah semua data ini setelah diterbitkan.</p>
             </div>
           )}
-
         </div>
 
-        {/* Footer Nav */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-[#EDE6D6] bg-[#FDFCF9]">
           <button type="button" onClick={() => { if (currentStep > 0) setCurrentStep(s => s - 1) }}
             disabled={currentStep === 0 || isSubmitting}
