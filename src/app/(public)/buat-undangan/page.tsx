@@ -33,11 +33,15 @@ async function fetchActiveThemes(): Promise<ActiveTheme[]> {
 }
 
 export default async function BuatUndangan() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
   const themes = await fetchActiveThemes();
 
   return (
     <Suspense fallback={<div className="flex h-screen items-center justify-center text-muted-foreground">Memuat tema...</div>}>
-      <BuatUndanganContent themes={themes} />
+      <BuatUndanganContent themes={themes} isLoggedIn={isLoggedIn} />
     </Suspense>
   );
 }
