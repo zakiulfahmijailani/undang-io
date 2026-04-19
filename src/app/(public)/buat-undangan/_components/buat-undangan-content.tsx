@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
@@ -211,10 +210,10 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
                 <CardContent className="p-6">
                   <h2 className="mb-4 font-semibold text-foreground">👤 Mempelai Pria</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div><Label>Nama Lengkap *</Label><Input value={form.groomFullName} onChange={(e) => update("groomFullName", e.target.value)} placeholder="Budi Santoso, S.T." /></div>
-                    <div><Label>Nama Panggilan *</Label><Input value={form.groomNickname} onChange={(e) => update("groomNickname", e.target.value)} placeholder="Budi" /></div>
-                    <div><Label>Nama Ayah</Label><Input value={form.groomFather} onChange={(e) => update("groomFather", e.target.value)} placeholder="Bapak H. Ahmad Santoso" /></div>
-                    <div><Label>Nama Ibu</Label><Input value={form.groomMother} onChange={(e) => update("groomMother", e.target.value)} placeholder="Ibu Hj. Siti Aminah" /></div>
+                    <Input label="Nama Lengkap" required value={form.groomFullName} onChange={(e) => update("groomFullName", e.target.value)} placeholder="Budi Santoso, S.T." />
+                    <Input label="Nama Panggilan" required value={form.groomNickname} onChange={(e) => update("groomNickname", e.target.value)} placeholder="Budi" />
+                    <Input label="Nama Ayah" value={form.groomFather} onChange={(e) => update("groomFather", e.target.value)} placeholder="Bapak H. Ahmad Santoso" />
+                    <Input label="Nama Ibu" value={form.groomMother} onChange={(e) => update("groomMother", e.target.value)} placeholder="Ibu Hj. Siti Aminah" />
                   </div>
                 </CardContent>
               </Card>
@@ -223,10 +222,10 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
                 <CardContent className="p-6">
                   <h2 className="mb-4 font-semibold text-foreground">👤 Mempelai Wanita</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div><Label>Nama Lengkap *</Label><Input value={form.brideFullName} onChange={(e) => update("brideFullName", e.target.value)} placeholder="Ayu Pratiwi, S.Pd." /></div>
-                    <div><Label>Nama Panggilan *</Label><Input value={form.brideNickname} onChange={(e) => update("brideNickname", e.target.value)} placeholder="Ayu" /></div>
-                    <div><Label>Nama Ayah</Label><Input value={form.brideFather} onChange={(e) => update("brideFather", e.target.value)} placeholder="Bapak H. Surya Pratama" /></div>
-                    <div><Label>Nama Ibu</Label><Input value={form.brideMother} onChange={(e) => update("brideMother", e.target.value)} placeholder="Ibu Hj. Ratna Dewi" /></div>
+                    <Input label="Nama Lengkap" required value={form.brideFullName} onChange={(e) => update("brideFullName", e.target.value)} placeholder="Ayu Pratiwi, S.Pd." />
+                    <Input label="Nama Panggilan" required value={form.brideNickname} onChange={(e) => update("brideNickname", e.target.value)} placeholder="Ayu" />
+                    <Input label="Nama Ayah" value={form.brideFather} onChange={(e) => update("brideFather", e.target.value)} placeholder="Bapak H. Surya Pratama" />
+                    <Input label="Nama Ibu" value={form.brideMother} onChange={(e) => update("brideMother", e.target.value)} placeholder="Ibu Hj. Ratna Dewi" />
                   </div>
                 </CardContent>
               </Card>
@@ -235,18 +234,22 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
                 <CardContent className="p-6">
                   <h2 className="mb-4 font-semibold text-foreground">📅 Akad Nikah</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div><Label>Tanggal</Label><Input type="date" value={form.akadDate} onChange={(e) => update("akadDate", e.target.value)} /></div>
-                    <div><Label>Jam</Label><Input type="time" value={form.akadTime} onChange={(e) => update("akadTime", e.target.value)} /></div>
-                    <div><Label>Nama Gedung/Tempat</Label><Input value={form.akadVenue} onChange={(e) => update("akadVenue", e.target.value)} placeholder="Masjid Agung Al-Azhar" /></div>
-                    <div className="sm:col-span-2"><Label>Alamat</Label><Input value={form.akadAddress} onChange={(e) => update("akadAddress", e.target.value)} placeholder="Jl. Sisingamangaraja..." /></div>
+                    <Input label="Tanggal" type="date" value={form.akadDate} onChange={(e) => update("akadDate", e.target.value)} />
+                    <Input label="Jam" type="time" value={form.akadTime} onChange={(e) => update("akadTime", e.target.value)} />
+                    <Input label="Nama Gedung/Tempat" value={form.akadVenue} onChange={(e) => update("akadVenue", e.target.value)} placeholder="Masjid Agung Al-Azhar" />
+                    <div className="sm:col-span-2">
+                      <Input label="Alamat" value={form.akadAddress} onChange={(e) => update("akadAddress", e.target.value)} placeholder="Jl. Sisingamangaraja..." />
+                    </div>
                   </div>
 
                   <h2 className="mb-4 mt-8 font-semibold text-foreground">🎉 Resepsi</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div><Label>Tanggal</Label><Input type="date" value={form.receptionDate} onChange={(e) => update("receptionDate", e.target.value)} /></div>
-                    <div><Label>Jam</Label><Input type="time" value={form.receptionTime} onChange={(e) => update("receptionTime", e.target.value)} /></div>
-                    <div><Label>Nama Gedung/Tempat</Label><Input value={form.receptionVenue} onChange={(e) => update("receptionVenue", e.target.value)} placeholder="Balai Kartini" /></div>
-                    <div className="sm:col-span-2"><Label>Alamat</Label><Input value={form.receptionAddress} onChange={(e) => update("receptionAddress", e.target.value)} placeholder="Jl. Gatot Subroto..." /></div>
+                    <Input label="Tanggal" type="date" value={form.receptionDate} onChange={(e) => update("receptionDate", e.target.value)} />
+                    <Input label="Jam" type="time" value={form.receptionTime} onChange={(e) => update("receptionTime", e.target.value)} />
+                    <Input label="Nama Gedung/Tempat" value={form.receptionVenue} onChange={(e) => update("receptionVenue", e.target.value)} placeholder="Balai Kartini" />
+                    <div className="sm:col-span-2">
+                      <Input label="Alamat" value={form.receptionAddress} onChange={(e) => update("receptionAddress", e.target.value)} placeholder="Jl. Gatot Subroto..." />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -262,8 +265,10 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
                       </Badge>
                     ))}
                   </div>
-                  <Textarea value={form.quote} onChange={(e) => update("quote", e.target.value)} rows={3} />
-                  <Input className="mt-2" value={form.quoteSource} onChange={(e) => update("quoteSource", e.target.value)} placeholder="Sumber" />
+                  <Textarea label="Teks Ayat / Quote" value={form.quote} onChange={(e) => update("quote", e.target.value)} rows={3} />
+                  <div className="mt-2">
+                    <Input label="Sumber" value={form.quoteSource} onChange={(e) => update("quoteSource", e.target.value)} placeholder="Sumber" />
+                  </div>
                 </CardContent>
               </Card>
             </div>
