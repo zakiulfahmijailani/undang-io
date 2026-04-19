@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { demoData } from "@/data/demoInvitation";
+import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 
 export type ActiveTheme = {
   id: string;
@@ -111,8 +113,43 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
 
   const selectedTheme = themes.find((t) => t.id === selectedThemeId);
 
+  const liveData = {
+    ...demoData,
+    coupleShortName: `${form.groomNickname || "Pria"} & ${form.brideNickname || "Wanita"}`,
+    groom: {
+      ...demoData.groom,
+      fullName: form.groomFullName || "Mempelai Pria",
+      father: form.groomFather ? `Bapak ${form.groomFather}` : "",
+      mother: form.groomMother ? `Ibu ${form.groomMother}` : "",
+    },
+    bride: {
+      ...demoData.bride,
+      fullName: form.brideFullName || "Mempelai Wanita",
+      father: form.brideFather ? `Bapak ${form.brideFather}` : "",
+      mother: form.brideMother ? `Ibu ${form.brideMother}` : "",
+    },
+    akad: {
+      ...demoData.akad,
+      date: form.akadDate || demoData.akad.date,
+      time: form.akadTime || demoData.akad.time,
+      venue: form.akadVenue || demoData.akad.venue,
+      address: form.akadAddress || demoData.akad.address,
+    },
+    reception: {
+      ...demoData.reception,
+      date: form.receptionDate || demoData.reception.date,
+      time: form.receptionTime || demoData.reception.time,
+      venue: form.receptionVenue || demoData.reception.venue,
+      address: form.receptionAddress || demoData.reception.address,
+    },
+    quote: {
+      text: form.quote || demoData.quote.text,
+      source: form.quoteSource || demoData.quote.source,
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
@@ -137,7 +174,7 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
         </div>
       </nav>
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className={`flex-1 ${step === 2 ? "w-full max-w-full" : "mx-auto max-w-4xl px-4 py-8"}`}>
         {step === 1 && (
           <div>
             <h1 className="mb-2 text-2xl font-bold text-foreground">Pilih Tema Undangan</h1>
@@ -189,10 +226,13 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
         )}
 
         {step === 2 && (
-          <div>
-            <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mb-4 cursor-pointer">
-              <ChevronLeft className="mr-1 h-4 w-4" /> Kembali ke Pilih Tema
-            </Button>
+          <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] overflow-hidden">
+            {/* LEFT — Form */}
+            <div className="flex-1 overflow-y-auto w-full md:w-1/2 p-4 md:p-8">
+              <div className="mx-auto max-w-2xl">
+                <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mb-4 cursor-pointer">
+                  <ChevronLeft className="mr-1 h-4 w-4" /> Kembali ke Pilih Tema
+                </Button>
 
             <Alert className="mb-6 border-accent/40 bg-accent/10">
               <AlertTriangle className="h-4 w-4 text-accent" />
@@ -273,13 +313,42 @@ export function BuatUndanganContent({ themes }: { themes: ActiveTheme[] }) {
               </Card>
             </div>
 
-            <div className="mt-8 flex justify-between">
+            <div className="mt-8 flex justify-between pb-8">
               <Button variant="secondary" onClick={() => setStep(1)} className="cursor-pointer">
                 <ChevronLeft className="mr-1 h-4 w-4" /> Kembali
               </Button>
               <Button size="lg" disabled={!form.groomFullName || !form.brideFullName} onClick={() => setStep(3)} className="cursor-pointer">
                 Lanjut ke Publish <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
+            </div>
+              </div>
+            </div>
+
+            {/* RIGHT — Live Preview */}
+            <div className="hidden md:flex flex-col w-[380px] lg:w-[450px] border-l border-border bg-stone-100 flex-shrink-0">
+              <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-border flex-shrink-0">
+                <div className="flex gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-red-400" />
+                  <span className="w-3 h-3 rounded-full bg-amber-400" />
+                  <span className="w-3 h-3 rounded-full bg-green-400" />
+                </div>
+                <div className="flex-1 mx-3 text-center">
+                  <span className="text-xs text-stone-500 bg-stone-100 px-3 py-1 rounded-full font-mono">
+                    Live Preview ({selectedTheme?.name || "Tema"})
+                  </span>
+                </div>
+                <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  ● LIVE
+                </span>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div
+                  className="origin-top-left"
+                  style={{ transform: "scale(0.65)", width: "153.8%", transformOrigin: "top left" }}
+                >
+                  <InvitationClientWrapper data={liveData as any} />
+                </div>
+              </div>
             </div>
           </div>
         )}
