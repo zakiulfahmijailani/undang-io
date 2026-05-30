@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import EditorClient from "./EditorClient";
+import EditorClient, { type InvitationEditorInitialData } from "./EditorClient";
 
 export default async function EditInvitationPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
@@ -20,6 +20,7 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
             slug,
             status,
             created_at,
+            couple_photo_url,
             groom_full_name,
             groom_nickname,
             groom_father_name,
@@ -35,6 +36,12 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
             resepsi_location_name,
             resepsi_location_address,
             quote_text,
+            quote_source,
+            music_url,
+            love_story,
+            gallery_photos,
+            sections_order,
+            sections_visibility,
             gift_bank_name,
             gift_bank_account,
             gift_bank_account_name,
@@ -54,8 +61,6 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
     }
 
     return (
-        <div className="max-w-7xl mx-auto pb-10">
-            <EditorClient initialData={invitation} />
-        </div>
+        <EditorClient initialData={invitation as InvitationEditorInitialData} />
     );
 }

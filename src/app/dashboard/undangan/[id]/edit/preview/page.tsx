@@ -1,6 +1,44 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import EditorClient from "../EditorClient";
+import EditorClient, { type InvitationEditorInitialData } from "../EditorClient";
+
+function createDummyInvitation(id: string): InvitationEditorInitialData {
+    return {
+        id,
+        slug: 'demo',
+        status: 'draft',
+        created_at: new Date().toISOString(),
+        couple_photo_url: null,
+        groom_full_name: null,
+        groom_nickname: null,
+        groom_father_name: null,
+        groom_mother_name: null,
+        bride_full_name: null,
+        bride_nickname: null,
+        bride_father_name: null,
+        bride_mother_name: null,
+        akad_datetime: null,
+        akad_location_name: null,
+        akad_location_address: null,
+        resepsi_datetime: null,
+        resepsi_location_name: null,
+        resepsi_location_address: null,
+        quote_text: null,
+        quote_source: null,
+        music_url: null,
+        love_story: null,
+        gallery_photos: null,
+        sections_order: null,
+        sections_visibility: null,
+        gift_bank_name: null,
+        gift_bank_account: null,
+        gift_bank_account_name: null,
+        gift_shipping_address: null,
+        show_couple_photos: true,
+        show_prewed_gallery: true,
+        show_gift_section: true,
+    };
+}
 
 export default async function PreviewSplitViewPage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createServerSupabaseClient();
@@ -9,13 +47,7 @@ export default async function PreviewSplitViewPage({ params }: { params: Promise
 
     // LOCAL DEV / NO DB MODE
     if (!supabase) {
-        const dummyInvitation = {
-            id,
-            slug: 'demo',
-            status: 'draft',
-            created_at: new Date().toISOString(),
-            invitation_details: []
-        };
+        const dummyInvitation = createDummyInvitation(id);
         
         return (
             <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-stone-100">
@@ -60,7 +92,35 @@ export default async function PreviewSplitViewPage({ params }: { params: Promise
         .from('invitations')
         .select(`
             id, slug, status, created_at,
-            invitation_details (*)
+            couple_photo_url,
+            groom_full_name,
+            groom_nickname,
+            groom_father_name,
+            groom_mother_name,
+            bride_full_name,
+            bride_nickname,
+            bride_father_name,
+            bride_mother_name,
+            akad_datetime,
+            akad_location_name,
+            akad_location_address,
+            resepsi_datetime,
+            resepsi_location_name,
+            resepsi_location_address,
+            quote_text,
+            quote_source,
+            music_url,
+            love_story,
+            gallery_photos,
+            sections_order,
+            sections_visibility,
+            gift_bank_name,
+            gift_bank_account,
+            gift_bank_account_name,
+            gift_shipping_address,
+            show_couple_photos,
+            show_prewed_gallery,
+            show_gift_section
         `)
         .eq('id', id)
         .eq('user_id', user.id)
@@ -75,7 +135,7 @@ export default async function PreviewSplitViewPage({ params }: { params: Promise
             {/* Left Panel: Editor Sidebar (Hidden on small mobile) */}
             <div className="hidden lg:flex w-[480px] flex-col border-r border-stone-200 bg-white overflow-y-auto">
                 <div className="h-full">
-                    <EditorClient initialData={invitation} />
+                    <EditorClient initialData={invitation as InvitationEditorInitialData} />
                 </div>
             </div>
 

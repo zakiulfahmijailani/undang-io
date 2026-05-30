@@ -41,7 +41,9 @@ async function fetchActiveThemes(): Promise<ActiveTheme[]> {
 
 export default async function BuatUndangan() {
   const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = supabase
+    ? await supabase.auth.getUser()
+    : { data: { user: null } };
   const isLoggedIn = !!user;
 
   const themes = await fetchActiveThemes();

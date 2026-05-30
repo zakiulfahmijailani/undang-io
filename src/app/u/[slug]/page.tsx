@@ -1,188 +1,372 @@
+/* Public invitation view for /u/[slug] based on docs/design/u[slug] — Halaman Undangan Publik.png and docs/design/undangio-freemium-invitation-flow.png. */
+
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Lock } from "lucide-react";
-import { ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { AlertTriangle, CheckCircle2, Clock3, Copy, Crown, ExternalLink, Lock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { demoData } from "@/data/demoInvitation";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
-import GuestCountdownBanner from "@/components/invitation/GuestCountdownBanner";
+import { demoData } from "@/data/demoInvitation";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+
+type InvitationData = typeof demoData & {
+  theme?: string;
+  musicUrl?: string | null;
+};
+
+type GuestInvitationData = {
+  groomNickname?: string;
+  brideNickname?: string;
+  groomFullName?: string;
+  brideFullName?: string;
+  groomFather?: string;
+  groomMother?: string;
+  brideFather?: string;
+  brideMother?: string;
+  akadDate?: string;
+  akadTime?: string;
+  akadVenue?: string;
+  akadAddress?: string;
+  receptionDate?: string;
+  receptionTime?: string;
+  receptionVenue?: string;
+  receptionAddress?: string;
+  quote?: string;
+  quoteSource?: string;
+};
+
+type GuestSession = {
+  id: string;
+  slug: string;
+  session_token: string;
+  expires_at: string;
+  status: "active" | "claimed" | "converted" | "expired" | string;
+  theme_id: string | null;
+  invitation_data: GuestInvitationData;
+};
+
+type ApiResponse<T> = {
+  data: T | null;
+  error: { code: string; message: string } | null;
+};
+
+type ViewerMode = "guest" | "logged-in" | "premium" | "expired";
+
+function joinDateTime(date?: string, time?: string) {
+  if (!date) return undefined;
+  return time ? `${date}T${time}` : date;
+}
+
+function mapGuestSessionToInvitation(session: GuestSession): InvitationData {
+  const invitation = session.invitation_data;
+  const groomNickname = invitation.groomNickname || "Mempelai Pria";
+  const brideNickname = invitation.brideNickname || "Mempelai Wanita";
+
+  return {
+    ...demoData,
+    coupleShortName: `${groomNickname} & ${brideNickname}`,
+    theme: session.theme_id || undefined,
+    groom: {
+      ...demoData.groom,
+      fullName: invitation.groomFullName || groomNickname,
+      father: invitation.groomFather ? `Bapak ${invitation.groomFather}` : demoData.groom.father,
+      mother: invitation.groomMother ? `Ibu ${invitation.groomMother}` : demoData.groom.mother,
+    },
+    bride: {
+      ...demoData.bride,
+      fullName: invitation.brideFullName || brideNickname,
+      father: invitation.brideFather ? `Bapak ${invitation.brideFather}` : demoData.bride.father,
+      mother: invitation.brideMother ? `Ibu ${invitation.brideMother}` : demoData.bride.mother,
+    },
+    akad: {
+      ...demoData.akad,
+      date: joinDateTime(invitation.akadDate, invitation.akadTime) || demoData.akad.date,
+      venue: invitation.akadVenue || demoData.akad.venue,
+      address: invitation.akadAddress || demoData.akad.address,
+    },
+    reception: {
+      ...demoData.reception,
+      date: joinDateTime(invitation.receptionDate, invitation.receptionTime) || demoData.reception.date,
+      venue: invitation.receptionVenue || demoData.reception.venue,
+      address: invitation.receptionAddress || demoData.reception.address,
+    },
+    quote: {
+      text: invitation.quote || demoData.quote.text,
+      source: invitation.quoteSource || demoData.quote.source,
+    },
+  };
+}
+
+function useCountdown(expiresAt: string | null) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!expiresAt) return undefined;
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [expiresAt]);
+
+  if (!expiresAt) {
+    return { display: "Permanen", isExpired: false };
+  }
+
+  const remaining = Math.max(0, new Date(expiresAt).getTime() - now);
+  const totalSeconds = Math.floor(remaining / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return {
+    display: `${minutes}:${seconds.toString().padStart(2, "0")}`,
+    isExpired: remaining <= 0,
+  };
+}
+
+function statusContent(mode: ViewerMode) {
+  const map: Record<ViewerMode, { label: string; title: string; body: string; icon: typeof Clock3; className: string }> = {
+    guest: {
+      label: "Preview Tamu 15 Menit",
+      title: "Undangan sementara aktif",
+      body: "Bagikan untuk pratinjau cepat. Masuk dan aktifkan agar waktunya lebih panjang.",
+      icon: Clock3,
+      className: "border-landing-gold/40 bg-landing-gold text-white",
+    },
+    "logged-in": {
+      label: "Preview Login 25 Menit",
+      title: "Waktu preview diperpanjang",
+      body: "Akun sudah terhubung. Publikasikan permanen sebelum waktu preview habis.",
+      icon: CheckCircle2,
+      className: "border-emerald-300 bg-emerald-600 text-white",
+    },
+    premium: {
+      label: "Premium Permanen",
+      title: "Undangan sudah aktif permanen",
+      body: "Tautan ini siap dibagikan tanpa batas waktu preview.",
+      icon: Crown,
+      className: "border-landing-gold bg-landing-maroon text-white",
+    },
+    expired: {
+      label: "Preview Berakhir",
+      title: "Masa berlaku habis",
+      body: "Undangan belum dipublikasikan permanen. Pemilik bisa login untuk mengaktifkan kembali.",
+      icon: AlertTriangle,
+      className: "border-red-300 bg-red-600 text-white",
+    },
+  };
+
+  return map[mode];
+}
+
+function StatusBar({
+  mode,
+  expiresAt,
+  sessionToken,
+  slug,
+  isCreator,
+}: {
+  mode: ViewerMode;
+  expiresAt: string | null;
+  sessionToken: string;
+  slug: string;
+  isCreator: boolean;
+}) {
+  const { display } = useCountdown(expiresAt);
+  const content = statusContent(mode);
+  const Icon = content.icon;
+
+  function copyLink() {
+    void navigator.clipboard.writeText(window.location.href);
+    toast.success("Tautan undangan disalin.");
+  }
+
+  function shareWhatsApp() {
+    const text = `Kamu diundang! Buka undangan pernikahan kami: ${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  }
+
+  return (
+    <div className="fixed inset-x-0 top-0 z-50 border-b border-white/20 bg-landing-paper/95 px-3 py-3 shadow-landing-card backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border", content.className)}>
+            <Icon className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-landing-cream px-3 py-1 font-ui text-xs font-bold text-landing-maroon">
+                {content.label}
+              </span>
+              <span className="font-ui text-xs font-semibold text-landing-muted">{display}</span>
+            </div>
+            <p className="mt-1 font-ui text-sm font-semibold text-landing-ink">{content.title}</p>
+            <p className="hidden font-ui text-xs text-landing-muted sm:block">{content.body}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 sm:justify-end">
+          <button
+            type="button"
+            onClick={shareWhatsApp}
+            className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md bg-landing-maroon px-3 font-ui text-xs font-semibold text-white transition hover:bg-landing-maroon/90 sm:flex-none"
+          >
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
+            WhatsApp
+          </button>
+          <button
+            type="button"
+            onClick={copyLink}
+            className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md border border-landing-border bg-white px-3 font-ui text-xs font-semibold text-landing-ink transition hover:border-landing-gold sm:flex-none"
+          >
+            <Copy className="h-4 w-4" aria-hidden="true" />
+            Salin
+          </button>
+          {isCreator && mode !== "premium" ? (
+            <Link
+              href={`/login?guest_token=${sessionToken}&next=/u/${slug}`}
+              className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md bg-landing-gold px-3 font-ui text-xs font-semibold text-white transition hover:bg-landing-gold/90 sm:flex-none"
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              Aktifkan
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-landing-cream p-4">
+      <div className="w-full max-w-md rounded-3xl border border-landing-border bg-white p-8 text-center shadow-landing-card">
+        <Lock className="mx-auto h-12 w-12 text-landing-gold" aria-hidden="true" />
+        <h1 className="mt-5 font-landing-serif text-3xl font-semibold text-landing-ink">Undangan Tidak Ditemukan</h1>
+        <p className="mt-3 font-ui text-sm leading-6 text-landing-muted">
+          Tautan undangan tidak tersedia atau sudah dipindahkan ke halaman permanen.
+        </p>
+        <Link
+          href="/"
+          className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-landing-maroon px-5 font-ui text-sm font-semibold text-white"
+        >
+          Kembali ke Beranda
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export default function GuestInvitationView(props: { params: Promise<{ slug: string }> }) {
-    const params = use(props.params);
-    const { slug } = params;
-    const router = useRouter();
+  const { slug } = use(props.params);
+  const router = useRouter();
+  const [sessionData, setSessionData] = useState<GuestSession | null>(null);
+  const [isCreator, setIsCreator] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-    const [sessionData, setSessionData] = useState<any>(null);
-    const [isExpired, setIsExpired] = useState(false);
-    const [isCreator, setIsCreator] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    let isMounted = true;
 
-    useEffect(() => {
-        const fetchInvitation = async () => {
-            try {
-                // Use API route (admin client) — bypasses RLS safely
-                const res = await fetch(`/api/guest-sessions/${slug}?by=slug`);
-                const json = await res.json();
-
-                if (!res.ok || !json.data) {
-                    // Check if it's a permanent invitation instead
-                    router.push(`/invite/${slug}`);
-                    return;
-                }
-
-                const guestInv = json.data;
-                const expiresTime = new Date(guestInv.expires_at).getTime();
-
-                if (expiresTime <= Date.now() && guestInv.status !== 'converted') {
-                    setIsExpired(true);
-                }
-
-                setSessionData(guestInv);
-
-                // Check if current user is the creator
-                const rawLocal = localStorage.getItem("guest_session");
-                if (rawLocal) {
-                    try {
-                        const parsed = JSON.parse(rawLocal);
-                        if (parsed.sessionToken === guestInv.session_token) {
-                            setIsCreator(true);
-                        }
-                    } catch (e) { }
-                }
-            } catch (e) {
-                console.error("Failed to fetch guest session:", e);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchInvitation();
-    }, [slug, router]);
-
-    const handleShare = () => {
-        const url = window.location.href;
-        const text = `Kamu diundang! Buka undangan pernikahan kami: ${url}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-    };
-
-    if (isLoading) {
-        return <div className="min-h-screen bg-stone-50" />;
-    }
-
-    if (!sessionData) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-stone-50">
-                <Card className="max-w-md p-6 text-center shadow-lg">
-                    <h2 className="text-xl font-bold text-stone-800">Undangan Tidak Ditemukan</h2>
-                    <p className="mt-2 text-stone-600">Undangan yang Anda cari tidak ada atau masa berlakunya sudah habis.</p>
-                    <Button className="mt-6" asChild>
-                        <Link href="/">Kembali ke Beranda</Link>
-                    </Button>
-                </Card>
-            </div>
-        );
-    }
-
-    const invData = sessionData.invitation_data;
-    const dataDisplay = {
-        ...demoData,
-        coupleShortName: `${invData.groomNickname} & ${invData.brideNickname}`,
-        theme: sessionData.theme_id,
-        groom: {
-            ...demoData.groom,
-            fullName: invData.groomFullName || "Mempelai Pria",
-            nickname: invData.groomNickname || "Pria",
-            father: invData.groomFather ? `Bapak ${invData.groomFather}` : "",
-            mother: invData.groomMother ? `Ibu ${invData.groomMother}` : "",
-        },
-        bride: {
-            ...demoData.bride,
-            fullName: invData.brideFullName || "Mempelai Wanita",
-            nickname: invData.brideNickname || "Wanita",
-            father: invData.brideFather ? `Bapak ${invData.brideFather}` : "",
-            mother: invData.brideMother ? `Ibu ${invData.brideMother}` : "",
-        },
-        akad: {
-            date: invData.akadDate,
-            time: invData.akadTime,
-            venue: invData.akadVenue,
-            address: invData.akadAddress,
-            mapsUrl: "",
-        },
-        reception: {
-            date: invData.receptionDate,
-            time: invData.receptionTime,
-            venue: invData.receptionVenue,
-            address: invData.receptionAddress,
-            mapsUrl: "",
-        },
-        quote: {
-            text: invData.quote,
-            source: invData.quoteSource,
+    async function fetchInvitation() {
+      try {
+        try {
+          const supabase = createBrowserSupabaseClient();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (isMounted) setIsLoggedIn(Boolean(user));
+        } catch (error) {
+          console.warn("[u/[slug]] auth state unavailable:", error);
         }
-    };
 
-    if (isExpired && sessionData.status !== 'converted') {
-        return (
-            <div className="relative min-h-screen">
-                <div className="pointer-events-none select-none blur-md opacity-60">
-                    <InvitationClientWrapper data={dataDisplay} />
-                </div>
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-sm">
-                    <Card className="mx-4 max-w-md shadow-2xl">
-                        <CardContent className="p-8 text-center pt-8">
-                            <Lock className="mx-auto mb-4 h-12 w-12 text-stone-400" />
-                            <h2 className="mb-2 font-serif text-2xl font-bold text-stone-800">
-                                💍 Masa Berlaku Habis
-                            </h2>
-                            <p className="mb-6 text-stone-500">Undangan ini belum dipublikasikan permanen.</p>
-                            {isCreator && (
-                                <Card className="border-amber-200 bg-amber-50 shadow-none">
-                                    <CardContent className="p-4 text-left pt-4">
-                                        <p className="mb-2 text-sm font-semibold text-stone-800">Mau langsung live selamanya?</p>
-                                        <Button className="w-full gap-1 cursor-pointer" asChild>
-                                            <Link href={`/login?guest_token=${sessionData.session_token}`}>
-                                                Login untuk Mengaktifkan
-                                            </Link>
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        );
+        const response = await fetch(`/api/guest-sessions/${slug}?by=slug`);
+        const json = (await response.json()) as ApiResponse<GuestSession>;
+
+        if (!response.ok || !json.data) {
+          router.push(`/invite/${slug}`);
+          return;
+        }
+
+        if (!isMounted) return;
+        setSessionData(json.data);
+
+        const rawLocal = window.localStorage.getItem("guest_session");
+        if (rawLocal) {
+          try {
+            const parsed = JSON.parse(rawLocal) as { sessionToken?: string };
+            setIsCreator(parsed.sessionToken === json.data.session_token);
+          } catch (error) {
+            console.warn("[u/[slug]] failed to parse guest session:", error);
+          }
+        }
+      } catch (error) {
+        console.error("[u/[slug]] failed to fetch guest invitation:", error);
+        if (isMounted) setNotFound(true);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     }
 
+    void fetchInvitation();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router, slug]);
+
+  const invitationData = useMemo(() => (sessionData ? mapGuestSessionToInvitation(sessionData) : null), [sessionData]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-landing-cream" />;
+  }
+
+  if (notFound || !sessionData || !invitationData) {
+    return <EmptyState />;
+  }
+
+  const isExpired = new Date(sessionData.expires_at).getTime() <= Date.now() && sessionData.status !== "converted";
+  const mode: ViewerMode = sessionData.status === "converted" ? "premium" : isExpired ? "expired" : isLoggedIn ? "logged-in" : "guest";
+
+  if (mode === "expired") {
     return (
-        <div className="relative pt-[56px] min-h-screen">
-            {sessionData.status !== 'converted' && (
-                <GuestCountdownBanner
-                    expiresAt={sessionData.expires_at}
-                    sessionToken={sessionData.session_token}
-                    slug={sessionData.slug}
-                    status={sessionData.status}
-                />
-            )}
-
-            {isCreator && !isExpired && (
-                <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-stone-200 bg-white/95 px-4 py-2 shadow-xl backdrop-blur-md">
-                    <Button size="sm" variant="secondary" className="h-9 gap-1 text-xs rounded-full font-semibold cursor-pointer" onClick={handleShare}>
-                        <ExternalLink className="h-4 w-4" /> WhatsApp
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-9 gap-1 text-xs rounded-full cursor-pointer hover:bg-stone-100" onClick={() => { navigator.clipboard.writeText(window.location.href); toast("Link disalin!"); }}>
-                        Salin Link
-                    </Button>
-                </div>
-            )}
-
-            <InvitationClientWrapper data={dataDisplay} />
+      <div className="relative min-h-screen bg-landing-cream pt-[132px] sm:pt-[92px]">
+        <StatusBar mode={mode} expiresAt={sessionData.expires_at} sessionToken={sessionData.session_token} slug={sessionData.slug} isCreator={isCreator} />
+        <div className="pointer-events-none select-none opacity-45 blur-sm">
+          <InvitationClientWrapper data={invitationData} />
         </div>
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-landing-ink/55 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-white/20 bg-white p-8 text-center shadow-2xl">
+            <Lock className="mx-auto h-12 w-12 text-landing-gold" aria-hidden="true" />
+            <h2 className="mt-5 font-landing-serif text-3xl font-semibold text-landing-ink">Masa Berlaku Habis</h2>
+            <p className="mt-3 font-ui text-sm leading-6 text-landing-muted">
+              Undangan ini masih preview dan belum dipublikasikan permanen.
+            </p>
+            {isCreator ? (
+              <Link
+                href={`/login?guest_token=${sessionData.session_token}&next=/u/${sessionData.slug}`}
+                className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-landing-maroon px-5 font-ui text-sm font-semibold text-white"
+              >
+                Login untuk Mengaktifkan
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="relative min-h-screen bg-landing-cream pt-[132px] sm:pt-[92px]">
+      <StatusBar
+        mode={mode}
+        expiresAt={mode === "premium" ? null : sessionData.expires_at}
+        sessionToken={sessionData.session_token}
+        slug={sessionData.slug}
+        isCreator={isCreator}
+      />
+      <InvitationClientWrapper data={invitationData} />
+    </div>
+  );
 }
