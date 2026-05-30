@@ -86,6 +86,18 @@
   --color-wedding-cream:      #FAF7F4;
   --color-wedding-pink:       #CFADB1;
 
+  /* Landing mockup tokens - additive only */
+  --font-landing-serif:  'Playfair Display', Georgia, serif;
+  --color-landing-maroon:      #8B1A2B;
+  --color-landing-maroon-dark: #68111F;
+  --color-landing-gold:        #C9A84C;
+  --color-landing-cream:       #FCF4ED;
+  --color-landing-paper:       #FFFDF9;
+  --color-landing-ink:         #2C171B;
+  --color-landing-muted:       #806B69;
+  --color-landing-border:      #EAD8CF;
+  --color-landing-success:     #14865D;
+
   /* ── Spacing ───────────────────────────────────────────── */
   --space-xs:   4px;
   --space-sm:   8px;
@@ -102,6 +114,10 @@
   --shadow-xl:  0 20px 25px rgba(181,115,122,0.12);
   --shadow-gold: 0 4px 12px rgba(155,107,74,0.18);
   --shadow-glow: 0 0 40px rgba(181,115,122,0.06);
+  --shadow-landing-card: 0 16px 36px rgba(139,26,43,0.12);
+  --shadow-landing-panel: 0 22px 56px rgba(139,26,43,0.13);
+  --shadow-landing-button: 0 12px 24px rgba(139,26,43,0.24);
+  --shadow-landing-phone: 0 24px 55px rgba(44,23,27,0.24);
 
   /* ── Radii ──────────────────────────────────────────────── */
   --radius:      0.5rem;
