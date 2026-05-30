@@ -1,111 +1,118 @@
+/* Login page based on docs/design/authlogin & authregister — Authentication Pages.png. */
+
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { Heart, Mail, Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useSearchParams, useRouter } from "next/navigation";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { FaGoogle } from "react-icons/fa";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { AuthInput } from "@/components/auth/AuthInput";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { AuthTabs } from "@/components/auth/AuthTabs";
+import { SocialButtons } from "@/components/auth/SocialButtons";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 function getGuestTokenFromStorage(searchParams: URLSearchParams): string | null {
   try {
-    const raw = localStorage.getItem('guest_session');
+    const raw = localStorage.getItem("guest_session");
     if (raw) {
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(raw) as { sessionToken?: string; expiresAt?: string };
       if (parsed?.sessionToken) {
         if (parsed.expiresAt && new Date(parsed.expiresAt) < new Date()) {
-          localStorage.removeItem('guest_session');
+          localStorage.removeItem("guest_session");
         } else {
           return parsed.sessionToken;
         }
       }
     }
-  } catch (e) {}
+  } catch (error) {
+    console.error("[login] Failed to read guest session:", error);
+  }
 
-  const pending = localStorage.getItem('pending_claim_token');
+  const pending = localStorage.getItem("pending_claim_token");
   if (pending) return pending;
 
-  return searchParams.get('guest_token');
+  return searchParams.get("guest_token");
 }
 
 function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
 
   useEffect(() => {
-    const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
-    setGuestSessionToken(token);
+    setGuestSessionToken(getGuestTokenFromStorage(new URLSearchParams(window.location.search)));
   }, []);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function claimGuestSession(accessToken: string) {
+    if (!guestSessionToken) return true;
+
+    try {
+      const claimRes = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const json = (await claimRes.json()) as { data?: unknown; error?: { message?: string } };
+
+      if (!claimRes.ok || !json.data) {
+        toast.error("Gagal menyimpan undangan sementara.", {
+          description: json?.error?.message || `Status: ${claimRes.status}`,
+        });
+        return false;
+      }
+
+      localStorage.removeItem("guest_session");
+      localStorage.removeItem("guest_return_slug");
+      localStorage.removeItem("pending_claim_token");
+      toast.success("Undangan tersimpan! Timer diperpanjang 10 menit.");
+      return true;
+    } catch (error) {
+      console.error("[LOGIN] Claim fetch exception:", error);
+      toast.error("Sistem sedang sibuk. Gagal mengklaim undangan.");
+      return false;
+    }
+  }
+
+  async function handleEmailLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setLoading(true);
 
     const supabase = createBrowserSupabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
+    if (error || !data.session) {
       toast.error("Login gagal", { description: "Email atau kata sandi salah." });
       setLoading(false);
       return;
     }
 
-    const token = guestSessionToken;
-    if (token && data.session) {
-      try {
-        const claimRes = await fetch(`/api/guest-sessions/${token}/claim`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${data.session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        const json = await claimRes.json();
-
-        if (!claimRes.ok || !json.data) {
-          toast.error('Gagal menyimpan undangan sementara.', {
-            description: json?.error?.message || `Status: ${claimRes.status}`,
-          });
-          setLoading(false);
-          return;
-        }
-
-        localStorage.removeItem('guest_session');
-        localStorage.removeItem('guest_return_slug');
-        localStorage.removeItem('pending_claim_token');
-        toast.success('Undangan tersimpan! Timer diperpanjang 10 menit.');
-      } catch (e: any) {
-        console.error('[LOGIN] Claim fetch exception:', e);
-        toast.error('Sistem sedang sibuk. Gagal mengklaim undangan.');
-        setLoading(false);
-        return;
-      }
+    const claimed = await claimGuestSession(data.session.access_token);
+    if (!claimed) {
+      setLoading(false);
+      return;
     }
 
-    router.push('/dashboard');
+    router.push("/dashboard");
     setLoading(false);
-  };
+  }
 
-  const handleGoogleLogin = async () => {
+  async function handleGoogleLogin() {
     try {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
       const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
-
-      let redirectTo = `${window.location.origin}/api/auth/callback`;
-      if (token) {
-        redirectTo += `?guest_session_token=${token}`;
-      }
+      const redirectTo = token
+        ? `${window.location.origin}/api/auth/callback?guest_session_token=${token}`
+        : `${window.location.origin}/api/auth/callback`;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -113,112 +120,93 @@ function LoginForm() {
       });
 
       if (error) {
-        console.error("Google login error:", error);
+        toast.error("Login Google gagal", { description: "Silakan coba lagi." });
         setLoading(false);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error("[login] Google login error:", error);
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <Card className="w-full max-w-sm shadow-lg border-border/50">
-      <CardContent className="p-8">
-        <Link href="/" className="mb-6 flex items-center justify-center gap-2">
-          <Heart className="h-6 w-6 text-accent" fill="currentColor" />
-          <span className="text-xl font-bold text-foreground">
-            undang<span className="text-accent">.io</span>
-          </span>
-        </Link>
-        <h1 className="mb-6 text-center text-xl font-bold text-foreground">Masuk ke Akun</h1>
+    <AuthShell>
+      <div className="w-full max-w-[470px]">
+        <AuthTabs active="login" />
 
-        {message && (
-          <p className="mb-4 text-center text-sm font-medium text-destructive bg-destructive/10 p-2 rounded-md">
-            {message}
-          </p>
-        )}
-
-        {guestSessionToken && (
-          <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-            ⏳ Login untuk menyimpan undanganmu dan perpanjang timer 10 menit.
-          </div>
-        )}
-
-        <Button
-          variant="secondary"
-          className="w-full flex items-center justify-center gap-2 mb-4 cursor-pointer"
-          onClick={handleGoogleLogin}
-          disabled={loading}
-          type="button"
-        >
-          <FaGoogle className="w-4 h-4 text-red-500" />
-          Masuk dengan Google
-        </Button>
-
-        <div className="relative mb-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border/50" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Atau dengan email</span>
-          </div>
+        <div className="mt-9">
+          <h1 className="font-ui text-2xl font-bold text-landing-ink">Selamat datang kembali 👋</h1>
+          <p className="mt-2 font-ui text-base text-landing-muted">Masuk ke akunmu untuk melanjutkan</p>
         </div>
 
-        <form onSubmit={handleEmailLogin} className="space-y-4">
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                className="pl-9"
-                placeholder="nama@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+        {message ? <p className="mt-5 rounded-lg bg-red-50 p-3 font-ui text-sm font-semibold text-landing-maroon">{message}</p> : null}
+        {guestSessionToken ? (
+          <p className="mt-5 rounded-lg border border-landing-gold/40 bg-landing-gold/10 p-3 font-ui text-sm text-landing-ink">
+            Login untuk menyimpan undanganmu dan memperpanjang timer.
+          </p>
+        ) : null}
+
+        <form onSubmit={handleEmailLogin} className="mt-8 space-y-5">
+          <AuthInput
+            id="email"
+            label="Alamat Email"
+            icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+            type="email"
+            placeholder="kamu@email.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+          <AuthInput
+            id="password"
+            label="Kata Sandi"
+            icon={<Lock className="h-5 w-5" aria-hidden="true" />}
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            right={
+              <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label="Tampilkan kata sandi">
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            }
+          />
+
+          <div className="flex justify-end">
+            <Link href="/reset-password" className="font-ui text-sm font-semibold text-landing-maroon hover:underline">
+              Lupa kata sandi?
+            </Link>
           </div>
-          <div>
-            <Label htmlFor="password">Kata Sandi</Label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type="password"
-                className="pl-9"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <Button type="submit" className="w-full mt-6 cursor-pointer" disabled={loading}>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="h-14 w-full rounded-lg bg-landing-gold font-ui text-lg font-bold text-white shadow-landing-button transition hover:bg-landing-maroon disabled:cursor-not-allowed disabled:opacity-60"
+          >
             {loading ? "Memproses..." : "Masuk"}
-          </Button>
+          </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-muted-foreground">
+        <div className="mt-8">
+          <SocialButtons mode="login" disabled={loading} onGoogle={handleGoogleLogin} />
+        </div>
+
+        <p className="mt-8 text-center font-ui text-sm text-landing-muted">
           Belum punya akun?{" "}
-          <Link href="/register" className="font-semibold text-accent hover:underline">
-            Daftar Gratis
+          <Link href="/register" className="font-bold text-landing-maroon underline">
+            Daftar sekarang
           </Link>
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </AuthShell>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Suspense fallback={
-        <div className="w-full max-w-sm h-96 rounded-2xl bg-stone-100 animate-pulse" />
-      }>
-        <LoginForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="min-h-screen bg-landing-paper" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

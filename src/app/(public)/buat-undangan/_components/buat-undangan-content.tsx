@@ -1,18 +1,30 @@
+/* Invitation wizard for /buat-undangan based on docs/design/buat-undangan — Invitation Wizard.png. */
+
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Heart, ChevronLeft, ChevronRight, AlertTriangle, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Calendar,
+  Check,
+  CheckCircle2,
+  Clock3,
+  Copy,
+  Instagram,
+  Leaf,
+  Link2,
+  MessageCircle,
+  Sprout,
+} from "lucide-react";
 import { toast } from "sonner";
-import { demoData } from "@/data/demoInvitation";
-import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
+import { fallbackThemes } from "@/components/landing/data";
+import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
+import type { LandingTheme } from "@/components/landing/types";
+import { cn } from "@/lib/utils";
 
 export type ActiveTheme = {
   id: string;
@@ -23,417 +35,607 @@ export type ActiveTheme = {
   slug: string;
 };
 
-const QUOTE_PRESETS = [
-  { text: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya.", source: "QS. Ar-Rum: 21" },
-  { text: "Maha Suci Allah yang telah menciptakan pasangan-pasangan semuanya.", source: "QS. Yasin: 36" },
-  { text: "Love is patient, love is kind. It does not envy, it does not boast.", source: "1 Corinthians 13:4" },
-];
+type WizardStep = 1 | 2 | 3;
 
-/** 25 menit dalam milliseconds */
+type InvitationForm = {
+  groomFullName: string;
+  groomNickname: string;
+  groomFather: string;
+  groomMother: string;
+  brideFullName: string;
+  brideNickname: string;
+  brideFather: string;
+  brideMother: string;
+  akadDate: string;
+  akadTime: string;
+  receptionDate: string;
+  receptionTime: string;
+  venue: string;
+  address: string;
+  mapsUrl: string;
+  quote: string;
+  guestMessage: string;
+};
+
 const PREVIEW_DURATION_MS = 25 * 60 * 1000;
 
+const defaultForm: InvitationForm = {
+  groomFullName: "Rizky Pratama",
+  groomNickname: "Rizky",
+  groomFather: "Bapak Ahmad",
+  groomMother: "Ibu Siti Aisyah",
+  brideFullName: "Amara Putri",
+  brideNickname: "Amara",
+  brideFather: "Bapak Budi Santoso",
+  brideMother: "",
+  akadDate: "2025-12-12",
+  akadTime: "09:00",
+  receptionDate: "2025-12-12",
+  receptionTime: "19:00",
+  venue: "Gedung Serbaguna Graha Indah",
+  address: "Jl. Melati No. 10, Kebayoran Baru, Jakarta Selatan, DKI Jakarta",
+  mapsUrl: "https://maps.app.goo.gl/example",
+  quote:
+    "Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri.",
+  guestMessage:
+    "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.",
+};
+
+const stepLabels = ["Pilih Tema", "Isi Data", "Pratinjau"] as const;
+
 function generateSlug(groomNick: string, brideNick: string) {
-  const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  const year = new Date().getFullYear();
-  return `${clean(groomNick)}-${clean(brideNick)}-${year}`;
+  const clean = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+  return `${clean(groomNick || "mempelai")}-${clean(brideNick || "pasangan")}`;
+}
+
+function toLandingTheme(theme: ActiveTheme): LandingTheme {
+  return {
+    id: theme.id,
+    name: theme.name,
+    slug: theme.slug,
+    thumbnailUrl: theme.thumbnailUrl,
+    culturalCategory: theme.culturalCategory,
+  };
+}
+
+function fallbackActiveThemes(): ActiveTheme[] {
+  return fallbackThemes.map((theme) => ({
+    id: theme.id,
+    name: theme.name,
+    slug: theme.slug,
+    thumbnailUrl: theme.thumbnailUrl,
+    culturalCategory: theme.culturalCategory,
+    description: null,
+  }));
+}
+
+function normalizeCategory(category: string | null) {
+  if (!category) return "Modern";
+  return category
+    .split("_")
+    .join(" ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function WizardHeader({ step, isLoggedIn }: { step: WizardStep; isLoggedIn: boolean }) {
+  return (
+    <header className="sticky top-0 z-50 border-b border-landing-border bg-landing-paper/95 backdrop-blur-xl">
+      <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6 lg:px-10">
+        <Link href="/" className="flex items-center gap-2 text-landing-maroon">
+          <span className="font-landing-serif text-3xl font-semibold leading-none">undang.io</span>
+          <Sprout className="h-5 w-5 text-landing-gold" aria-hidden="true" />
+        </Link>
+
+        <div className="hidden items-center justify-center gap-5 md:flex">
+          {stepLabels.map((label, index) => {
+            const stepNumber = (index + 1) as WizardStep;
+            const isDone = stepNumber < step;
+            const isCurrent = stepNumber === step;
+
+            return (
+              <div key={label} className="flex items-center gap-5">
+                <div className="flex items-center gap-3 font-ui text-sm font-semibold">
+                  <span
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full border",
+                      isDone && "border-landing-gold bg-white text-landing-gold",
+                      isCurrent && "border-landing-maroon bg-landing-maroon text-white",
+                      !isDone && !isCurrent && "border-landing-border bg-white text-landing-ink",
+                    )}
+                  >
+                    {isDone ? <Check className="h-5 w-5" aria-hidden="true" /> : stepNumber}
+                  </span>
+                  <span className={cn(isCurrent ? "text-landing-maroon" : "text-landing-ink")}>{label}</span>
+                </div>
+                {index < stepLabels.length - 1 ? <span className="h-px w-20 bg-landing-border" /> : null}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-3 font-ui text-sm font-semibold">
+          <Link href="/login" className="hidden text-landing-ink hover:text-landing-maroon sm:inline-flex">
+            Masuk
+          </Link>
+          <Link
+            href={isLoggedIn ? "/dashboard" : "/login"}
+            className="rounded-md border border-landing-gold px-4 py-2 text-landing-ink transition hover:bg-landing-gold hover:text-white"
+          >
+            Dashboard
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  required = false,
+  type = "text",
+  icon,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  type?: string;
+  icon?: React.ReactNode;
+  placeholder?: string;
+}) {
+  return (
+    <label className="block font-ui text-xs font-semibold text-landing-ink">
+      {label} {required ? <span className="text-landing-maroon">*</span> : null}
+      <span className="relative mt-1.5 block">
+        {icon ? <span className="absolute right-3 top-1/2 -translate-y-1/2 text-landing-muted">{icon}</span> : null}
+        <input
+          type={type}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          className={cn(
+            "h-10 w-full rounded-md border border-landing-border bg-white px-3 font-ui text-sm text-landing-ink outline-none transition placeholder:text-landing-muted/60 focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/20",
+            icon && "pr-10",
+          )}
+        />
+      </span>
+    </label>
+  );
+}
+
+function TextArea({
+  label,
+  value,
+  onChange,
+  maxLength,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  maxLength: number;
+}) {
+  return (
+    <label className="block font-ui text-xs font-semibold text-landing-ink">
+      {label} <span className="text-landing-muted">(maks. {maxLength} karakter)</span>
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value.slice(0, maxLength))}
+        rows={4}
+        className="mt-1.5 w-full resize-none rounded-md border border-landing-border bg-white px-3 py-2 font-ui text-sm text-landing-ink outline-none transition focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/20"
+      />
+      <span className="mt-1 block text-right font-ui text-xs text-landing-muted">
+        {value.length} / {maxLength}
+      </span>
+    </label>
+  );
+}
+
+function InvitationPreview({ form, large = false }: { form: InvitationForm; large?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "relative mx-auto overflow-hidden rounded-2xl border border-landing-border bg-landing-cream shadow-landing-card",
+        large ? "aspect-[1.52/1] w-full max-w-[650px] p-10" : "aspect-[3/4] w-full max-w-[300px] p-8",
+      )}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,26,43,0.10),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(201,168,76,0.12),transparent_35%)]" />
+      <Leaf className="absolute left-5 top-5 h-20 w-20 text-landing-maroon/30" aria-hidden="true" />
+      <Leaf className="absolute bottom-5 right-5 h-20 w-20 rotate-180 text-landing-maroon/30" aria-hidden="true" />
+      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
+        <p className="font-ui text-[10px] font-bold uppercase text-landing-muted">The Wedding Of</p>
+        <h2 className={cn("mt-5 font-landing-serif leading-tight text-landing-ink", large ? "text-5xl" : "text-4xl")}>
+          {form.groomNickname || "Rizky"}
+          <span className="block font-display text-4xl text-landing-maroon">&amp;</span>
+          {form.brideNickname || "Amara"}
+        </h2>
+        <p className="mt-4 font-ui text-xs font-semibold text-landing-muted">{form.akadDate || "12 . 12 . 2025"}</p>
+        <div className="mt-8 grid w-full max-w-sm grid-cols-2 divide-x divide-landing-border font-ui text-xs text-landing-ink">
+          <div>
+            <p className="font-landing-serif text-lg">Akad Nikah</p>
+            <p>{form.akadTime || "09:00"} WIB</p>
+          </div>
+          <div>
+            <p className="font-landing-serif text-lg">Resepsi</p>
+            <p>{form.receptionTime || "19:00"} WIB</p>
+          </div>
+        </div>
+        <p className="mt-8 max-w-sm font-ui text-xs leading-5 text-landing-ink">
+          {form.venue}
+          <br />
+          {form.address}
+        </p>
+        <p className="mt-8 max-w-md font-ui text-xs leading-5 text-landing-ink">{form.guestMessage}</p>
+      </div>
+    </div>
+  );
 }
 
 export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: ActiveTheme[]; isLoggedIn?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
-
-  const [form, setForm] = useState({
-    groomFullName: "", groomNickname: "", groomFather: "", groomMother: "",
-    brideFullName: "", brideNickname: "", brideFather: "", brideMother: "",
-    akadDate: "", akadTime: "", akadVenue: "", akadAddress: "",
-    receptionDate: "", receptionTime: "", receptionVenue: "", receptionAddress: "",
-    quote: QUOTE_PRESETS[0].text, quoteSource: QUOTE_PRESETS[0].source,
-  });
+  const themeOptions = themes.length > 0 ? themes : fallbackActiveThemes();
+  const [step, setStep] = useState<WizardStep>(1);
+  const [selectedThemeId, setSelectedThemeId] = useState(themeOptions[0]?.id ?? "");
+  const [form, setForm] = useState<InvitationForm>(defaultForm);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const themeFromUrl = searchParams.get("theme");
-    if (themeFromUrl) {
-      const match = themes.find((t) => t.id === themeFromUrl || t.slug === themeFromUrl);
-      if (match) {
-        setSelectedThemeId(match.id);
-        setStep(2);
-      }
+    const match = themeOptions.find((theme) => theme.id === themeFromUrl || theme.slug === themeFromUrl);
+    if (match) {
+      setSelectedThemeId(match.id);
+      setStep(2);
     }
 
     try {
       const raw = sessionStorage.getItem("undang_draft");
       if (raw) {
-        const draft = JSON.parse(raw);
-        setForm((prev) => ({
-          ...prev,
-          groomFullName: draft.groom_name || draft.groom_full_name || prev.groomFullName,
-          groomNickname: draft.groom_name || prev.groomNickname,
-          brideFullName: draft.bride_name || draft.bride_full_name || prev.brideFullName,
-          brideNickname: draft.bride_name || prev.brideNickname,
+        const draft = JSON.parse(raw) as {
+          groom_name?: string;
+          groom_full_name?: string;
+          bride_name?: string;
+          bride_full_name?: string;
+          themeId?: string;
+        };
+        setForm((previous) => ({
+          ...previous,
+          groomFullName: draft.groom_name || draft.groom_full_name || previous.groomFullName,
+          groomNickname: draft.groom_name || previous.groomNickname,
+          brideFullName: draft.bride_name || draft.bride_full_name || previous.brideFullName,
+          brideNickname: draft.bride_name || previous.brideNickname,
         }));
+        if (draft.themeId) {
+          const draftTheme = themeOptions.find((theme) => theme.id === draft.themeId || theme.slug === draft.themeId);
+          if (draftTheme) setSelectedThemeId(draftTheme.id);
+        }
         sessionStorage.removeItem("undang_draft");
       }
-    } catch (_) {}
-  }, [searchParams, themes]);
-
-  const update = (key: string, val: string) => setForm((prev) => ({ ...prev, [key]: val }));
-
-  const handlePublish = async () => {
-    const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
-
-    if (isLoggedIn) {
-      // User sudah login → simpan langsung ke dashboard via API
-      try {
-        const response = await fetch("/api/invitations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slug, themeId: selectedThemeId, invitationData: form }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || "Gagal menyimpan undangan.");
-        }
-
-        toast.success("✅ Undangan berhasil disimpan!", {
-          description: "Kamu bisa mengedit dan mempublikasikan dari dashboard.",
-        });
-
-        router.push("/dashboard");
-      } catch (error: any) {
-        console.error("Save Error:", error);
-        // Fallback ke guest session jika API belum siap
-        await handleGuestPublish(slug);
-      }
-    } else {
-      await handleGuestPublish(slug);
+    } catch (error) {
+      console.error("[buat-undangan] Failed to read draft:", error);
     }
-  };
+  }, [searchParams, themeOptions]);
 
-  const handleGuestPublish = async (slug: string) => {
+  const selectedTheme = useMemo(
+    () => themeOptions.find((theme) => theme.id === selectedThemeId) ?? themeOptions[0],
+    [selectedThemeId, themeOptions],
+  );
+
+  function update(key: keyof InvitationForm, value: string) {
+    setForm((previous) => ({ ...previous, [key]: value }));
+  }
+
+  async function handleGuestPublish(slug: string) {
     const sessionToken = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + PREVIEW_DURATION_MS).toISOString();
 
-    try {
-      const response = await fetch("/api/guest-sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionToken, slug, themeId: selectedThemeId, expiresAt, invitationData: form }),
-      });
+    const response = await fetch("/api/guest-sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionToken, slug, themeId: selectedTheme?.id ?? null, expiresAt, invitationData: form }),
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Gagal mempublikasikan undangan.");
+    const json = (await response.json()) as { error?: { message?: string } };
+    if (!response.ok) throw new Error(json.error?.message || "Gagal mempublikasikan undangan.");
+
+    localStorage.setItem("guest_session", JSON.stringify({ sessionToken, slug, expiresAt }));
+    localStorage.setItem("guest_return_slug", slug);
+    toast.success("Undangan berhasil dipublikasikan!", {
+      description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya.",
+    });
+    router.push(`/u/${slug}`);
+  }
+
+  async function handlePublish() {
+    setIsSubmitting(true);
+    const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
+
+    try {
+      if (isLoggedIn) {
+        const response = await fetch("/api/invitations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug, themeId: selectedTheme?.id ?? null, invitationData: form }),
+        });
+
+        if (response.ok) {
+          toast.success("Undangan berhasil disimpan!", {
+            description: "Kamu bisa mengedit dan mempublikasikan dari dashboard.",
+          });
+          router.push("/dashboard");
+          return;
+        }
       }
 
-      localStorage.setItem("guest_session", JSON.stringify({ sessionToken, slug, expiresAt }));
-      localStorage.setItem("guest_return_slug", slug);
-
-      toast.success("🚀 Undangan berhasil dipublikasikan!", {
-        description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya!",
+      await handleGuestPublish(slug);
+    } catch (error) {
+      console.error("[buat-undangan] Publish error:", error);
+      toast.error("Gagal publikasi", {
+        description: error instanceof Error ? error.message : "Terjadi kesalahan sistem.",
       });
-
-      router.push(`/u/${slug}`);
-    } catch (error: any) {
-      console.error("Publish Error:", error);
-      toast.error("Gagal publikasi", { description: error.message || "Terjadi kesalahan sistem." });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const selectedTheme = themes.find((t) => t.id === selectedThemeId);
-
-  const liveData = {
-    ...demoData,
-    coupleShortName: `${form.groomNickname || "Pria"} & ${form.brideNickname || "Wanita"}`,
-    groom: {
-      ...demoData.groom,
-      fullName: form.groomFullName || "Mempelai Pria",
-      father: form.groomFather ? `Bapak ${form.groomFather}` : "",
-      mother: form.groomMother ? `Ibu ${form.groomMother}` : "",
-    },
-    bride: {
-      ...demoData.bride,
-      fullName: form.brideFullName || "Mempelai Wanita",
-      father: form.brideFather ? `Bapak ${form.brideFather}` : "",
-      mother: form.brideMother ? `Ibu ${form.brideMother}` : "",
-    },
-    akad: {
-      ...demoData.akad,
-      date: form.akadDate || demoData.akad.date,
-      time: form.akadTime || demoData.akad.time,
-      venue: form.akadVenue || demoData.akad.venue,
-      address: form.akadAddress || demoData.akad.address,
-    },
-    reception: {
-      ...demoData.reception,
-      date: form.receptionDate || demoData.reception.date,
-      time: form.receptionTime || demoData.reception.time,
-      venue: form.receptionVenue || demoData.reception.venue,
-      address: form.receptionAddress || demoData.reception.address,
-    },
-    quote: {
-      text: form.quote || demoData.quote.text,
-      source: form.quoteSource || demoData.quote.source,
-    }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-accent" fill="currentColor" />
-            <span className="font-bold text-foreground">undang<span className="text-accent">.io</span></span>
-          </Link>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className={`flex items-center gap-1 ${s === step ? "font-semibold text-foreground" : ""}`}>
-                <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-                    s < step ? "bg-accent text-accent-foreground" : s === step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {s < step ? <Check className="h-3 w-3" /> : s}
-                </span>
-                <span className="hidden sm:inline">{s === 1 ? "Tema" : s === 2 ? "Data" : "Publish"}</span>
-                {s < 3 && <ChevronRight className="h-3 w-3" />}
-              </div>
+    <div className="min-h-screen bg-landing-paper text-landing-ink">
+      <WizardHeader step={step} isLoggedIn={isLoggedIn} />
+
+      {step === 1 ? (
+        <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-10">
+          <h1 className="font-landing-serif text-4xl font-semibold text-landing-maroon">Pilih Tema Undanganmu</h1>
+          <p className="mt-1 font-ui text-sm text-landing-muted">Temukan tema yang mencerminkan kisah cintamu</p>
+          <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {themeOptions.map((theme, index) => (
+              <button
+                type="button"
+                key={theme.id}
+                onClick={() => setSelectedThemeId(theme.id)}
+                className={cn(
+                  "relative rounded-lg border bg-white p-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-landing-card",
+                  selectedThemeId === theme.id ? "border-landing-gold ring-2 ring-landing-gold/20" : "border-landing-border",
+                )}
+              >
+                <ThemePreviewCard theme={toLandingTheme(theme)} index={index} />
+                {selectedThemeId === theme.id ? (
+                  <span className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-landing-gold text-white">
+                    <Check className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                ) : null}
+                <div className="px-2 py-3">
+                  <h2 className="font-ui text-base font-bold text-landing-ink">{theme.name}</h2>
+                  <p className="mt-1 font-ui text-sm text-landing-muted">
+                    {normalizeCategory(theme.culturalCategory)} <span aria-hidden="true">-</span>{" "}
+                    {theme.description || "Romantis"}
+                  </p>
+                </div>
+              </button>
             ))}
           </div>
-        </div>
-      </nav>
+          <div className="mt-7 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              className="inline-flex h-12 items-center gap-2 rounded-md bg-landing-maroon px-7 font-ui text-sm font-bold text-white shadow-landing-button transition hover:bg-landing-maroon-dark"
+            >
+              Lanjut ke Isi Data
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </main>
+      ) : null}
 
-      <div className={`flex-1 ${step === 2 ? "w-full max-w-full" : "mx-auto max-w-4xl px-4 py-8"}`}>
-        {step === 1 && (
-          <div>
-            <h1 className="mb-2 text-2xl font-bold text-foreground">Pilih Tema Undangan</h1>
-            <p className="mb-6 text-muted-foreground">Semua tema Rp 49.000 (hemat 51% dari Rp 99.000)</p>
-            {themes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
-                <p className="text-lg font-medium">Belum ada tema tersedia</p>
-                <p className="text-sm mt-1">Tema sedang disiapkan, silakan coba beberapa saat lagi.</p>
-              </div>
-            ) : (
+      {step === 2 ? (
+        <main className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_520px]">
+          <section className="border-r border-landing-border px-4 py-6 sm:px-6 lg:px-10">
+            <div className="mx-auto max-w-3xl">
+              <SectionTitle number="1" title="Identitas Pasangan" />
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {themes.map((theme) => (
-                  <Card
-                    key={theme.id}
-                    className={`cursor-pointer overflow-hidden transition-all ${
-                      selectedThemeId === theme.id ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"
-                    }`}
-                    onClick={() => setSelectedThemeId(theme.id)}
+                <Field label="Nama Mempelai Pria" required value={form.groomFullName} onChange={(value) => update("groomFullName", value)} />
+                <Field label="Nama Mempelai Wanita" required value={form.brideFullName} onChange={(value) => update("brideFullName", value)} />
+                <Field label="Nama Ayah Pria" required value={form.groomFather} onChange={(value) => update("groomFather", value)} />
+                <Field label="Nama Ibu Pria" required value={form.groomMother} onChange={(value) => update("groomMother", value)} />
+                <Field label="Nama Ayah Wanita" required value={form.brideFather} onChange={(value) => update("brideFather", value)} />
+              </div>
+
+              <SectionTitle number="2" title="Detail Acara" className="mt-6" />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Field
+                  label="Tanggal Akad"
+                  required
+                  type="date"
+                  value={form.akadDate}
+                  onChange={(value) => update("akadDate", value)}
+                  icon={<Calendar className="h-4 w-4" />}
+                />
+                <Field
+                  label="Waktu Akad"
+                  required
+                  type="time"
+                  value={form.akadTime}
+                  onChange={(value) => update("akadTime", value)}
+                  icon={<Clock3 className="h-4 w-4" />}
+                />
+                <Field
+                  label="Tanggal Resepsi"
+                  required
+                  type="date"
+                  value={form.receptionDate}
+                  onChange={(value) => update("receptionDate", value)}
+                  icon={<Calendar className="h-4 w-4" />}
+                />
+                <Field
+                  label="Waktu Resepsi"
+                  required
+                  type="time"
+                  value={form.receptionTime}
+                  onChange={(value) => update("receptionTime", value)}
+                  icon={<Clock3 className="h-4 w-4" />}
+                />
+                <div className="sm:col-span-2">
+                  <Field label="Nama Venue" required value={form.venue} onChange={(value) => update("venue", value)} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block font-ui text-xs font-semibold text-landing-ink">
+                    Alamat Lengkap <span className="text-landing-maroon">*</span>
+                    <textarea
+                      value={form.address}
+                      onChange={(event) => update("address", event.target.value)}
+                      rows={4}
+                      className="mt-1.5 w-full resize-none rounded-md border border-landing-border bg-white px-3 py-2 font-ui text-sm text-landing-ink outline-none transition focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/20"
+                    />
+                  </label>
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label="Link Google Maps (opsional)" value={form.mapsUrl} onChange={(value) => update("mapsUrl", value)} />
+                </div>
+              </div>
+
+              <SectionTitle number="3" title="Pesan & Kutipan" className="mt-6" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <TextArea label="Kutipan / Ayat" maxLength={200} value={form.quote} onChange={(value) => update("quote", value)} />
+                <TextArea label="Pesan untuk Tamu" maxLength={300} value={form.guestMessage} onChange={(value) => update("guestMessage", value)} />
+              </div>
+
+              <button
+                type="button"
+                className="mt-6 flex w-full items-center justify-between border-t border-landing-border py-4 font-landing-serif text-xl text-landing-ink"
+              >
+                Bagian 4 - Informasi Tambahan <span className="font-ui text-xs text-landing-muted">(opsional)</span>
+              </button>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="inline-flex h-12 items-center gap-2 rounded-md bg-landing-maroon px-7 font-ui text-sm font-bold text-white shadow-landing-button transition hover:bg-landing-maroon-dark"
+                >
+                  Lihat Pratinjau
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <aside className="hidden bg-landing-cream px-6 py-8 lg:block">
+            <div className="mb-4 flex items-center gap-2 font-ui text-xs font-bold text-landing-success">
+              <span className="h-2 w-2 rounded-full bg-landing-success" />
+              LIVE
+            </div>
+            <InvitationPreview form={form} />
+            <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? "Sakura"}</p>
+            <p className="mt-10 border-t border-landing-border pt-4 text-center font-ui text-xs text-landing-muted">Langkah 2 dari 3</p>
+          </aside>
+        </main>
+      ) : null}
+
+      {step === 3 ? (
+        <main className="grid min-h-[calc(100vh-4rem)] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_0.95fr] lg:px-10">
+          <section className="flex items-center">
+            <InvitationPreview form={form} large />
+          </section>
+
+          <section className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">
+            <div className="rounded-xl border border-landing-border bg-white p-6 shadow-sm">
+              <h1 className="font-landing-serif text-2xl font-semibold text-landing-ink">Status Penyimpanan</h1>
+              <label className="mt-5 flex items-center gap-2 font-ui text-sm text-landing-muted">
+                <input type="checkbox" readOnly checked={isLoggedIn} className="h-4 w-4 rounded border-landing-border" />
+                Saya sudah masuk
+              </label>
+              <div className="mt-4 rounded-lg border border-orange-300 bg-orange-50 p-4 font-ui text-sm text-orange-800">
+                <div className="flex gap-3">
+                  <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                  <p>
+                    Undangan ini bersifat sementara <strong>(25 menit)</strong>. Daftar atau masuk untuk menyimpan permanen.
+                  </p>
+                </div>
+              </div>
+              <p className="mt-5 font-ui text-sm text-landing-muted">Sisa waktu:</p>
+              <div className="mt-1 font-ui text-5xl font-bold text-orange-600">25:00</div>
+
+              <button
+                type="button"
+                onClick={handlePublish}
+                disabled={isSubmitting}
+                className="mt-5 h-12 w-full rounded-md bg-landing-maroon font-ui text-sm font-bold text-white shadow-landing-button transition hover:bg-landing-maroon-dark disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Memproses..." : "🚀 Publikasikan Sekarang"}
+              </button>
+              {!isLoggedIn ? (
+                <Link
+                  href="/register"
+                  className="mt-3 flex h-12 items-center justify-center rounded-md border border-landing-gold font-ui text-sm font-bold text-landing-ink transition hover:bg-landing-gold hover:text-white"
+                >
+                  Daftar untuk Menyimpan Permanen
+                </Link>
+              ) : null}
+              <div className="mt-3 rounded-lg border border-landing-gold/40 bg-landing-gold/10 p-4 font-ui text-sm text-landing-ink">
+                ⭐ Upgrade ke Premium Rp 49.000 untuk undangan permanen + semua fitur
+              </div>
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="mt-5 inline-flex h-10 items-center gap-2 rounded-md border border-landing-border px-4 font-ui text-sm font-semibold text-landing-ink"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Edit Data
+              </button>
+            </div>
+
+            <div className="rounded-xl border border-landing-border bg-white p-6 shadow-sm">
+              <h2 className="font-ui text-sm font-bold text-landing-ink">Link undangan kamu:</h2>
+              <div className="mt-3 flex gap-2">
+                <input
+                  readOnly
+                  value={`https://undang.io/u/${generateSlug(form.groomNickname, form.brideNickname)}`}
+                  className="h-10 min-w-0 flex-1 rounded-md border border-landing-border px-3 font-ui text-sm text-landing-ink"
+                />
+                <button type="button" className="rounded-md border border-landing-gold px-3 font-ui text-sm font-semibold text-landing-gold">
+                  Salin
+                </button>
+              </div>
+              <h2 className="mt-8 font-ui text-sm font-bold text-landing-ink">Bagikan undanganmu</h2>
+              <div className="mt-3 grid gap-3">
+                {[
+                  { label: "WhatsApp", icon: MessageCircle },
+                  { label: "Instagram", icon: Instagram },
+                  { label: "Copy Link", icon: Copy },
+                  { label: "Link", icon: Link2 },
+                ].map((item) => (
+                  <button
+                    type="button"
+                    key={item.label}
+                    className="flex h-12 items-center gap-4 rounded-lg border border-landing-border px-4 font-ui text-sm font-semibold text-landing-ink transition hover:border-landing-gold"
                   >
-                    <div className="aspect-[9/16] max-h-52 overflow-hidden">
-                      <img
-                        src={theme.thumbnailUrl || "/placeholder.svg"}
-                        alt={theme.name}
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                    <CardContent className="p-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-foreground">{theme.name}</h3>
-                        {selectedThemeId === theme.id && (
-                          <Badge className="bg-accent text-accent-foreground">Dipilih</Badge>
-                        )}
-                      </div>
-                      {theme.culturalCategory && (
-                        <Badge variant="secondary" className="mt-1 capitalize">{theme.culturalCategory}</Badge>
-                      )}
-                    </CardContent>
-                  </Card>
+                    <item.icon className="h-5 w-5 text-landing-gold" aria-hidden="true" />
+                    {item.label}
+                  </button>
                 ))}
               </div>
-            )}
-            <div className="mt-8 flex justify-end">
-              <Button size="lg" disabled={!selectedThemeId} onClick={() => setStep(2)}>
-                Lanjut Isi Data <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
             </div>
-          </div>
-        )}
+          </section>
+        </main>
+      ) : null}
+    </div>
+  );
+}
 
-        {step === 2 && (
-          <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] overflow-hidden">
-            {/* LEFT — Form */}
-            <div className="flex-1 overflow-y-auto w-full md:w-1/2 p-4 md:p-8">
-              <div className="mx-auto max-w-2xl">
-                <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mb-4 cursor-pointer">
-                  <ChevronLeft className="mr-1 h-4 w-4" /> Kembali ke Pilih Tema
-                </Button>
-
-                {/* Hanya tampilkan alert jika belum login */}
-                {!isLoggedIn && (
-                  <Alert className="mb-6 border-accent/40 bg-accent/10">
-                    <AlertTriangle className="h-4 w-4 text-accent" />
-                    <AlertDescription className="text-sm cursor-pointer">
-                      <strong>Perhatian:</strong> Data yang kamu isi di sini <strong>tidak akan tersimpan</strong> jika kamu tidak mendaftar. Jika ingin menyimpan undangan dan mengaksesnya kapan saja, silakan{" "}
-                      <Link href="/register" className="font-semibold text-accent underline">Daftar Gratis</Link>{" "}
-                      terlebih dahulu.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <h1 className="mb-6 text-2xl font-bold text-foreground">Isi Data Undangan</h1>
-
-                <div className="space-y-8">
-                  <Card>
-                    <CardContent className="p-6">
-                      <h2 className="mb-4 font-semibold text-foreground">👤 Mempelai Pria</h2>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <Input label="Nama Lengkap" required value={form.groomFullName} onChange={(e) => update("groomFullName", e.target.value)} placeholder="Budi Santoso, S.T." />
-                        <Input label="Nama Panggilan" required value={form.groomNickname} onChange={(e) => update("groomNickname", e.target.value)} placeholder="Budi" />
-                        <Input label="Nama Ayah" value={form.groomFather} onChange={(e) => update("groomFather", e.target.value)} placeholder="Bapak H. Ahmad Santoso" />
-                        <Input label="Nama Ibu" value={form.groomMother} onChange={(e) => update("groomMother", e.target.value)} placeholder="Ibu Hj. Siti Aminah" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <h2 className="mb-4 font-semibold text-foreground">👤 Mempelai Wanita</h2>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <Input label="Nama Lengkap" required value={form.brideFullName} onChange={(e) => update("brideFullName", e.target.value)} placeholder="Ayu Pratiwi, S.Pd." />
-                        <Input label="Nama Panggilan" required value={form.brideNickname} onChange={(e) => update("brideNickname", e.target.value)} placeholder="Ayu" />
-                        <Input label="Nama Ayah" value={form.brideFather} onChange={(e) => update("brideFather", e.target.value)} placeholder="Bapak H. Surya Pratama" />
-                        <Input label="Nama Ibu" value={form.brideMother} onChange={(e) => update("brideMother", e.target.value)} placeholder="Ibu Hj. Ratna Dewi" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <h2 className="mb-4 font-semibold text-foreground">📅 Akad Nikah</h2>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <Input label="Tanggal" type="date" value={form.akadDate} onChange={(e) => update("akadDate", e.target.value)} />
-                        <Input label="Jam" type="time" value={form.akadTime} onChange={(e) => update("akadTime", e.target.value)} />
-                        <Input label="Nama Gedung/Tempat" value={form.akadVenue} onChange={(e) => update("akadVenue", e.target.value)} placeholder="Masjid Agung Al-Azhar" />
-                        <div className="sm:col-span-2">
-                          <Input label="Alamat" value={form.akadAddress} onChange={(e) => update("akadAddress", e.target.value)} placeholder="Jl. Sisingamangaraja..." />
-                        </div>
-                      </div>
-
-                      <h2 className="mb-4 mt-8 font-semibold text-foreground">🎉 Resepsi</h2>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <Input label="Tanggal" type="date" value={form.receptionDate} onChange={(e) => update("receptionDate", e.target.value)} />
-                        <Input label="Jam" type="time" value={form.receptionTime} onChange={(e) => update("receptionTime", e.target.value)} />
-                        <Input label="Nama Gedung/Tempat" value={form.receptionVenue} onChange={(e) => update("receptionVenue", e.target.value)} placeholder="Balai Kartini" />
-                        <div className="sm:col-span-2">
-                          <Input label="Alamat" value={form.receptionAddress} onChange={(e) => update("receptionAddress", e.target.value)} placeholder="Jl. Gatot Subroto..." />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <h2 className="mb-4 font-semibold text-foreground">✨ Ayat / Quote</h2>
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {QUOTE_PRESETS.map((q, i) => (
-                          <Badge key={i} variant={form.quote === q.text ? "default" : "secondary"} className="cursor-pointer"
-                            onClick={() => { update("quote", q.text); update("quoteSource", q.source); }}>
-                            {q.source}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Textarea label="Teks Ayat / Quote" value={form.quote} onChange={(e) => update("quote", e.target.value)} rows={3} />
-                      <div className="mt-2">
-                        <Input label="Sumber" value={form.quoteSource} onChange={(e) => update("quoteSource", e.target.value)} placeholder="Sumber" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="mt-8 flex justify-between pb-8">
-                  <Button variant="secondary" onClick={() => setStep(1)} className="cursor-pointer">
-                    <ChevronLeft className="mr-1 h-4 w-4" /> Kembali
-                  </Button>
-                  <Button size="lg" disabled={!form.groomFullName || !form.brideFullName} onClick={() => setStep(3)} className="cursor-pointer">
-                    Lanjut ke Publish <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT — Live Preview */}
-            <div className="hidden md:flex flex-col w-[380px] lg:w-[450px] border-l border-border bg-stone-100 flex-shrink-0">
-              <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-border flex-shrink-0">
-                <div className="flex gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-red-400" />
-                  <span className="w-3 h-3 rounded-full bg-amber-400" />
-                  <span className="w-3 h-3 rounded-full bg-green-400" />
-                </div>
-                <div className="flex-1 mx-3 text-center">
-                  <span className="text-xs text-stone-500 bg-stone-100 px-3 py-1 rounded-full font-mono">
-                    Live Preview ({selectedTheme?.name || "Tema"})
-                  </span>
-                </div>
-                <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  ● LIVE
-                </span>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <div
-                  className="origin-top-left"
-                  style={{ transform: "scale(0.65)", width: "153.8%", transformOrigin: "top left" }}
-                >
-                  <InvitationClientWrapper data={liveData as any} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="mx-auto max-w-lg text-center">
-            <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="mb-4 cursor-pointer">
-              <ChevronLeft className="mr-1 h-4 w-4" /> Kembali ke Data
-            </Button>
-            <Heart className="mx-auto mb-4 h-16 w-16 text-accent" />
-            <h1 className="mb-2 text-2xl font-bold text-foreground">Undangan Siap Dipublikasikan!</h1>
-            <p className="mb-2 text-muted-foreground">
-              Undangan <strong>{form.groomNickname || form.groomFullName}</strong> &{" "}
-              <strong>{form.brideNickname || form.brideFullName}</strong>
-            </p>
-            <p className="mb-8 text-sm text-muted-foreground">
-              Tema: <strong>{selectedTheme?.name ?? "-"}</strong>
-            </p>
-
-            {/* Alert berbeda tergantung status login */}
-            {isLoggedIn ? (
-              <Alert className="mb-6 border-green-200 bg-green-50 text-left">
-                <Check className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-sm text-green-800">
-                  Undangan akan <strong>langsung tersimpan</strong> ke dashboard kamu dan bisa diedit kapan saja.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <Alert className="mb-6 border-accent/40 bg-accent/10 text-left">
-                <AlertTriangle className="h-4 w-4 text-accent" />
-                <AlertDescription className="text-sm">
-                  Undangan akan <strong>live selama 25 menit</strong>. Jika tidak dibayar, undangan akan <strong>otomatis terhapus</strong> setelah waktu habis. Bayar Rp 49.000 untuk menyimpan selamanya.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <Button size="lg" className="w-full gap-2 text-base cursor-pointer" onClick={handlePublish}>
-              {isLoggedIn ? "✅ Simpan ke Dashboard" : "🚀 Publikasikan Undangan Sekarang"}
-            </Button>
-
-            {/* Hanya tampilkan link daftar jika belum login */}
-            {!isLoggedIn && (
-              <p className="mt-4 text-xs text-muted-foreground">
-                Belum punya akun?{" "}
-                <Link href="/register" className="text-accent underline">Daftar gratis</Link>{" "}
-                untuk menyimpan undangan.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+function SectionTitle({ number, title, className }: { number: string; title: string; className?: string }) {
+  return (
+    <div className={cn("mb-3 flex items-center gap-4", className)}>
+      <h2 className="font-landing-serif text-xl font-semibold text-landing-ink">
+        Bagian {number} - {title}
+      </h2>
+      <span className="h-px flex-1 bg-landing-border" />
     </div>
   );
 }

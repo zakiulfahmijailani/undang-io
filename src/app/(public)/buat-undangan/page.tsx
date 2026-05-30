@@ -18,7 +18,14 @@ async function fetchActiveThemes(): Promise<ActiveTheme[]> {
       return [];
     }
 
-    return (data ?? []).map((row) => ({
+    return (data ?? []).map((row: {
+      id: string;
+      name: string | null;
+      description: string | null;
+      cultural_category: string | null;
+      thumbnail_url: string | null;
+      slug: string | null;
+    }) => ({
       id: row.id,
       name: row.name ?? "",
       description: row.description ?? null,
