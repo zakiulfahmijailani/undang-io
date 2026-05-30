@@ -1,161 +1,218 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server'
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
-import { CreateThemeModal } from './_components/create-theme-modal'
-import { Image as ImageIcon, Eye } from 'lucide-react'
+/* Admin theme list for /dashboard/themes based on docs/design/dashboardthemes — Theme List Management Page.png. */
+
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { CheckCircle2, Eye, Image as ImageIcon, Layers3, Plus, Search, Sparkles } from "lucide-react";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 
 export const metadata = {
-  title: 'Kelola Tema — undang.io Dashboard',
+  title: "Kelola Tema — undang.io Dashboard",
+};
+
+type ThemeAsset = {
+  slot: string | null;
+  file_url: string | null;
+};
+
+type ThemeRow = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  description: string | null;
+  is_active: boolean | null;
+  is_premium: boolean | null;
+  cultural_category: string | null;
+  created_at: string | null;
+  theme_assets?: ThemeAsset[] | null;
+};
+
+const totalSlots = 16;
+
+async function requireAdmin() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) redirect("/login");
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || !["admin", "owner"].includes(profile.role)) redirect("/dashboard");
+
+  return supabase;
+}
+
+function normalizeCategory(category: string | null) {
+  if (!category) return "Universal";
+  return category
+    .split("_")
+    .join(" ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export default async function DashboardThemesPage() {
-  const supabase = await createServerSupabaseClient()
+  const supabase = await requireAdmin();
 
-  // Auth Guard — real Supabase auth
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['admin', 'owner'].includes(profile.role)) {
-    redirect('/dashboard')
-  }
-
-  const { data: themes, error } = await supabase
-    .from('themes')
-    .select(`
-      *,
-      theme_assets (slot, file_url)
-    `)
-    .order('created_at', { ascending: false })
+  const { data, error } = await supabase
+    .from("themes")
+    .select("id, name, slug, description, is_active, is_premium, cultural_category, created_at, theme_assets (slot, file_url)")
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('[dashboard/themes] Error fetching themes:', error)
+    console.error("[dashboard/themes] Error fetching themes:", error);
   }
 
-  const TOTAL_SLOTS = 16
+  const themes = (data ?? []) as ThemeRow[];
+  const activeThemes = themes.filter((theme) => theme.is_active).length;
+  const premiumThemes = themes.filter((theme) => theme.is_premium).length;
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] text-[#E5E5E5] -m-5 md:-m-8 p-8 font-sans">
-      <div className="max-w-6xl mx-auto">
-
-        <div className="flex items-center justify-between mb-8">
+    <div className="mx-auto flex max-w-7xl flex-col gap-7 pb-10">
+      <section className="rounded-3xl border border-landing-border bg-landing-paper p-6 shadow-landing-card lg:p-8">
+        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
           <div>
-            <h1 className="text-2xl font-semibold text-white">Kelola Tema</h1>
-            <p className="text-white/50 text-sm mt-1">Upload aset dan kustomisasi tema undangan</p>
+            <span className="inline-flex items-center gap-2 rounded-full border border-landing-gold/30 bg-landing-gold/10 px-3 py-1 font-ui text-xs font-semibold text-landing-ink">
+              <Sparkles className="h-3.5 w-3.5 text-landing-gold" aria-hidden="true" />
+              Studio Tema
+            </span>
+            <h1 className="mt-4 font-landing-serif text-4xl font-semibold text-landing-ink">Kelola Tema Undangan</h1>
+            <p className="mt-2 max-w-2xl font-ui text-sm leading-6 text-landing-muted">
+              Atur katalog tema, status publikasi, aset visual, dan varian premium dari satu dashboard admin.
+            </p>
           </div>
-          <CreateThemeModal />
+          <Link
+            href="/dashboard/themes/create"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-landing-maroon px-5 font-ui text-sm font-semibold text-white shadow-sm transition hover:bg-landing-maroon/90"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Buat Tema Baru
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {themes?.map((theme: any) => {
-            const assetCount = theme.theme_assets?.length || 0
-            const progressPct = Math.round((assetCount / TOTAL_SLOTS) * 100)
-            const isComplete = assetCount === TOTAL_SLOTS
-
-            const coverAsset = theme.theme_assets?.find((a: any) => a.slot === 'cover_scene')
-
-            // Use correct DB fields: name & slug (not display_name / theme_key)
-            const themeName = theme.name || theme.display_name || '(Tanpa Nama)'
-            const themeSlug = theme.slug || theme.theme_key || theme.id
-
-            return (
-              <div key={theme.id} className="bg-[#1A1A1A] border border-white/5 rounded-xl overflow-hidden shadow-lg flex flex-col group hover:border-white/20 transition-colors">
-
-                {/* Thumbnail */}
-                <div className="w-full h-48 bg-[#111] relative overflow-hidden flex items-center justify-center">
-                  {coverAsset?.file_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={coverAsset.file_url}
-                      alt={themeName}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-2 text-white/20">
-                      <ImageIcon className="w-8 h-8" />
-                      <span className="text-xs">No Cover</span>
-                    </div>
-                  )}
-
-                  {/* Badges */}
-                  <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full border shadow-sm backdrop-blur-sm ${
-                      theme.is_active
-                        ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800/50'
-                        : 'bg-zinc-900/80 text-zinc-400 border-zinc-700/50'
-                    }`}>
-                      {theme.is_active ? 'ACTIVE' : 'DRAFT'}
-                    </span>
-                    {theme.is_premium && (
-                      <span className="bg-amber-500/80 text-amber-100 text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-amber-500/50 backdrop-blur-sm">
-                        Premium
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4 flex-1 flex flex-col">
-                  <h3 className="font-semibold text-white truncate text-lg" title={themeName}>
-                    {themeName}
-                  </h3>
-                  <p className="text-xs text-white/50 font-mono mt-1 mb-4 truncate" title={themeSlug}>
-                    {themeSlug}
-                  </p>
-
-                  {/* Progress */}
-                  <div className="mt-auto pt-2">
-                    <div className="flex justify-between text-xs mb-1.5">
-                      <span className="text-white/60">Aset Terkumpul</span>
-                      <span className={isComplete ? 'text-emerald-400 font-medium' : 'text-white/40'}>
-                        {assetCount} / {TOTAL_SLOTS}
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 bg-[#111] rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-500 ${isComplete ? 'bg-emerald-500' : 'bg-white/30'}`}
-                        style={{ width: `${progressPct}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="mt-5 pt-4 border-t border-white/5 flex gap-2">
-                    <Link
-                      href={`/dashboard/themes/${themeSlug}/assets`}
-                      className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm text-center py-2 rounded-lg font-medium transition-colors"
-                    >
-                      Kelola Aset
-                    </Link>
-                    <Link
-                      href={`/dashboard/themes/${themeSlug}/preview`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm px-3 py-2 rounded-lg font-medium transition-colors"
-                      title="Lihat Preview"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>Preview</span>
-                    </Link>
-                  </div>
-                </div>
+        <div className="mt-7 grid gap-4 md:grid-cols-3">
+          {[
+            { label: "Total Tema", value: themes.length, icon: Layers3 },
+            { label: "Tema Aktif", value: activeThemes, icon: CheckCircle2 },
+            { label: "Tema Premium", value: premiumThemes, icon: Sparkles },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-2xl border border-landing-border bg-white p-4">
+              <div className="flex items-center justify-between">
+                <p className="font-ui text-sm font-medium text-landing-muted">{stat.label}</p>
+                <stat.icon className="h-5 w-5 text-landing-gold" aria-hidden="true" />
               </div>
-            )
-          })}
-
-          {(themes?.length === 0 || !themes) && (
-            <div className="col-span-full py-20 text-center text-white/40 border-2 border-dashed border-white/10 rounded-xl">
-              <p>Belum ada tema. Klik &quot;Buat Tema Baru&quot; untuk memulai.</p>
+              <p className="mt-2 font-ui text-3xl font-bold text-landing-ink">{stat.value}</p>
             </div>
-          )}
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-landing-border bg-white p-5 shadow-landing-card">
+        <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="font-landing-serif text-2xl font-semibold text-landing-ink">Daftar Tema</h2>
+            <p className="font-ui text-sm text-landing-muted">Pilih tema untuk mengedit metadata atau mengelola aset.</p>
+          </div>
+          <div className="flex h-10 items-center gap-2 rounded-md border border-landing-border bg-landing-cream px-3 font-ui text-sm text-landing-muted md:w-72">
+            <Search className="h-4 w-4" aria-hidden="true" />
+            <span>Cari tema...</span>
+          </div>
         </div>
 
-      </div>
+        {themes.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-landing-gold/50 bg-landing-cream p-10 text-center">
+            <ImageIcon className="mx-auto h-10 w-10 text-landing-gold" aria-hidden="true" />
+            <p className="mt-4 font-ui text-sm font-semibold text-landing-ink">Belum ada tema.</p>
+            <p className="mt-1 font-ui text-sm text-landing-muted">Buat tema pertama untuk mulai mengisi katalog.</p>
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {themes.map((theme) => {
+              const assets = theme.theme_assets ?? [];
+              const assetCount = assets.length;
+              const progressPct = Math.round((assetCount / totalSlots) * 100);
+              const coverAsset = assets.find((asset) => asset.slot === "cover_scene");
+              const themeName = theme.name || "Tema tanpa nama";
+              const themeSlug = theme.slug || theme.id;
+
+              return (
+                <article key={theme.id} className="overflow-hidden rounded-2xl border border-landing-border bg-white shadow-sm">
+                  <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden bg-landing-cream">
+                    {coverAsset?.file_url ? (
+                      <img src={coverAsset.file_url} alt={themeName} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-landing-muted">
+                        <ImageIcon className="h-8 w-8" aria-hidden="true" />
+                        <span className="font-ui text-xs">Belum ada cover</span>
+                      </div>
+                    )}
+                    <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                      <span
+                        className={cn(
+                          "rounded-full border px-2.5 py-1 font-ui text-[11px] font-bold",
+                          theme.is_active
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            : "border-landing-border bg-white text-landing-muted",
+                        )}
+                      >
+                        {theme.is_active ? "Aktif" : "Draft"}
+                      </span>
+                      {theme.is_premium ? (
+                        <span className="rounded-full border border-landing-gold/40 bg-landing-gold px-2.5 py-1 font-ui text-[11px] font-bold text-white">
+                          Premium
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="p-5">
+                    <p className="font-ui text-xs font-semibold uppercase tracking-[0.2em] text-landing-gold">
+                      {normalizeCategory(theme.cultural_category)}
+                    </p>
+                    <h3 className="mt-2 truncate font-landing-serif text-2xl font-semibold text-landing-ink" title={themeName}>
+                      {themeName}
+                    </h3>
+                    <p className="mt-1 truncate font-ui text-xs text-landing-muted">{themeSlug}</p>
+                    <p className="mt-3 line-clamp-2 min-h-10 font-ui text-sm leading-5 text-landing-muted">
+                      {theme.description || "Deskripsi tema belum diisi."}
+                    </p>
+
+                    <div className="mt-5">
+                      <div className="mb-2 flex justify-between font-ui text-xs">
+                        <span className="text-landing-muted">Kelengkapan Aset</span>
+                        <span className="font-semibold text-landing-ink">
+                          {assetCount}/{totalSlots}
+                        </span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-landing-cream">
+                        <div className="h-full rounded-full bg-landing-gold" style={{ width: `${progressPct}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-[1fr_auto] gap-2">
+                      <Link
+                        href={`/dashboard/themes/${themeSlug}`}
+                        className="inline-flex h-10 items-center justify-center rounded-md bg-landing-maroon px-4 font-ui text-sm font-semibold text-white transition hover:bg-landing-maroon/90"
+                      >
+                        Edit Tema
+                      </Link>
+                      <Link
+                        href={`/dashboard/themes/${themeSlug}/preview`}
+                        target="_blank"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-landing-border text-landing-ink transition hover:border-landing-gold hover:text-landing-maroon"
+                        title="Lihat pratinjau"
+                      >
+                        <Eye className="h-4 w-4" aria-hidden="true" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
-  )
+  );
 }

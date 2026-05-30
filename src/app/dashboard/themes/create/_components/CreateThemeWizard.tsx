@@ -1,0 +1,170 @@
+/* Client wizard for /dashboard/themes/create based on docs/design/dashboardthemescreate — Create New Theme Page.png. */
+
+"use client";
+
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Check, ImagePlus, Layers3, Loader2, Palette, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { createTheme } from "@/app/dashboard/themes/actions";
+import { cn } from "@/lib/utils";
+
+const categories = ["modern", "jawa", "sunda", "minang", "internasional"];
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+}
+
+export function CreateThemeWizard() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [category, setCategory] = useState(categories[0]);
+  const [isPremium, setIsPremium] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const generatedSlug = useMemo(() => slug || slugify(name), [name, slug]);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData();
+    formData.set("display_name", name);
+    formData.set("theme_key", generatedSlug);
+
+    try {
+      const result = await createTheme(formData);
+      if (!result.success || !result.data) {
+        toast.error(result.error || "Tema gagal dibuat.");
+        return;
+      }
+
+      toast.success("Tema berhasil dibuat.", {
+        description: "Lanjutkan dengan mengunggah aset dan mengatur detail tema.",
+      });
+      router.push(`/dashboard/themes/${result.data.slug || generatedSlug}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1fr_380px]">
+      <section className="rounded-3xl border border-landing-border bg-white p-6 shadow-landing-card lg:p-8">
+        <div className="grid gap-5 md:grid-cols-3">
+          {["Identitas", "Gaya Visual", "Aset Awal"].map((label, index) => (
+            <div
+              key={label}
+              className={cn(
+                "rounded-2xl border p-4",
+                index === 0 ? "border-landing-maroon bg-landing-maroon text-white" : "border-landing-border bg-landing-cream text-landing-ink",
+              )}
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 font-ui text-sm font-bold">
+                {index === 0 ? <Check className="h-4 w-4" aria-hidden="true" /> : index + 1}
+              </span>
+              <p className="mt-4 font-ui text-sm font-bold">{label}</p>
+              <p className={cn("mt-1 font-ui text-xs", index === 0 ? "text-white/75" : "text-landing-muted")}>
+                {index === 0 ? "Nama dan slug tema." : "Dilanjutkan setelah tema tersimpan."}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <label className="block font-ui text-sm font-semibold text-landing-ink">
+            Nama Tema
+            <input
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Contoh: Javanese Gold"
+              className="mt-2 h-11 w-full rounded-md border border-landing-border bg-white px-3 font-ui text-sm outline-none transition focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/20"
+            />
+          </label>
+          <label className="block font-ui text-sm font-semibold text-landing-ink">
+            Slug Tema
+            <input
+              required
+              value={generatedSlug}
+              onChange={(event) => setSlug(slugify(event.target.value))}
+              placeholder="javanese_gold"
+              className="mt-2 h-11 w-full rounded-md border border-landing-border bg-white px-3 font-ui text-sm outline-none transition focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/20"
+            />
+          </label>
+        </div>
+
+        <div className="mt-6">
+          <p className="font-ui text-sm font-semibold text-landing-ink">Kategori Budaya</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {categories.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setCategory(item)}
+                className={cn(
+                  "rounded-full border px-4 py-2 font-ui text-sm font-semibold capitalize transition",
+                  category === item
+                    ? "border-landing-maroon bg-landing-maroon text-white"
+                    : "border-landing-border bg-white text-landing-ink hover:border-landing-gold",
+                )}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <label className="mt-6 flex items-center justify-between rounded-2xl border border-landing-border bg-landing-cream p-4">
+          <span>
+            <span className="block font-ui text-sm font-bold text-landing-ink">Tandai sebagai tema premium</span>
+            <span className="mt-1 block font-ui text-xs text-landing-muted">Metadata ini bisa disempurnakan di halaman detail.</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsPremium((value) => !value)}
+            className={cn("h-6 w-11 rounded-full p-1 transition", isPremium ? "bg-landing-gold" : "bg-landing-border")}
+            aria-pressed={isPremium}
+          >
+            <span className={cn("block h-4 w-4 rounded-full bg-white transition", isPremium && "translate-x-5")} />
+          </button>
+        </label>
+
+        <button
+          type="submit"
+          disabled={isSubmitting || generatedSlug.length < 3}
+          className="mt-8 inline-flex h-11 items-center justify-center gap-2 rounded-md bg-landing-maroon px-5 font-ui text-sm font-semibold text-white shadow-sm transition hover:bg-landing-maroon/90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+          Simpan dan Lanjutkan
+        </button>
+      </section>
+
+      <aside className="rounded-3xl border border-landing-border bg-landing-paper p-6 shadow-landing-card">
+        <div className="aspect-[9/13] rounded-2xl border border-landing-border bg-landing-cream p-5 text-center">
+          <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-landing-gold/50">
+            <Palette className="h-10 w-10 text-landing-gold" aria-hidden="true" />
+            <p className="mt-4 font-landing-serif text-3xl font-semibold text-landing-ink">{name || "Nama Tema"}</p>
+            <p className="mt-2 font-ui text-xs font-semibold uppercase tracking-[0.2em] text-landing-muted">{category}</p>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-3">
+          {[
+            { icon: Layers3, text: "Buat struktur tema lebih dulu." },
+            { icon: ImagePlus, text: "Upload cover dan ornamen setelah tersimpan." },
+            { icon: Sparkles, text: "Aktifkan tema setelah seluruh aset siap." },
+          ].map((item) => (
+            <div key={item.text} className="flex items-center gap-3 rounded-xl bg-white p-3 font-ui text-sm text-landing-muted">
+              <item.icon className="h-4 w-4 text-landing-gold" aria-hidden="true" />
+              {item.text}
+            </div>
+          ))}
+        </div>
+      </aside>
+    </form>
+  );
+}
