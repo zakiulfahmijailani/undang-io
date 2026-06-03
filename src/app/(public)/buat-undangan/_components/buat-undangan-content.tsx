@@ -12,13 +12,18 @@ import {
   Calendar,
   Check,
   CheckCircle2,
+  ChevronRight,
   Clock3,
   Copy,
+  Eye,
   Instagram,
   Leaf,
   Link2,
   MessageCircle,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { toast } from "sonner";
 import { fallbackThemes } from "@/components/landing/data";
@@ -285,6 +290,8 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const themeOptions = themes.length > 0 ? themes : fallbackActiveThemes();
   const [step, setStep] = useState<WizardStep>(1);
   const [selectedThemeId, setSelectedThemeId] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [selectedPrice, setSelectedPrice] = useState("Semua");
   const [form, setForm] = useState<InvitationForm>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -392,68 +399,140 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
 
       {step === 1 ? (
         <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-10">
-          <h1 className="font-landing-serif text-4xl font-semibold text-landing-maroon">Pilih Tema Undanganmu</h1>
-          <p className="mt-1 font-ui text-sm text-landing-muted">Temukan tema yang mencerminkan kisah cintamu</p>
-          <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            <button
-              type="button"
-              onClick={() => setSelectedThemeId("")}
-              className={cn(
-                "relative rounded-lg border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-landing-card",
-                selectedThemeId === "" ? "border-landing-gold ring-2 ring-landing-gold/20" : "border-landing-border",
-              )}
-            >
-              <div className="flex aspect-[3/4] items-center justify-center rounded-lg bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,#eff7fb,#dcecf5_55%,#c9ddeb)]">
-                <div className="rounded-full border border-landing-gold/40 bg-white/70 px-6 py-4 text-center shadow-landing-card">
-                  <p className="font-display text-4xl text-landing-gold">SS</p>
-                  <p className="mt-1 font-ui text-xs font-bold uppercase text-landing-muted">Sakinah</p>
-                </div>
-              </div>
-              {selectedThemeId === "" ? (
-                <span className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-landing-gold text-white">
-                  <Check className="h-5 w-5" aria-hidden="true" />
-                </span>
-              ) : null}
-              <div className="px-2 py-3">
-                <h2 className="font-ui text-base font-bold text-landing-ink">{DEFAULT_INVITATION_THEME_NAME}</h2>
-                <p className="mt-1 font-ui text-sm text-landing-muted">Elegan <span aria-hidden="true">-</span> Biru lembut dan emas</p>
-              </div>
-            </button>
-            {themeOptions.map((theme, index) => (
-              <button
-                type="button"
-                key={theme.id}
-                onClick={() => setSelectedThemeId(theme.id)}
-                className={cn(
-                  "relative rounded-lg border bg-white p-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-landing-card",
-                  selectedThemeId === theme.id ? "border-landing-gold ring-2 ring-landing-gold/20" : "border-landing-border",
-                )}
-              >
-                <ThemePreviewCard theme={toLandingTheme(theme)} index={index} />
-                {selectedThemeId === theme.id ? (
-                  <span className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-landing-gold text-white">
-                    <Check className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                ) : null}
-                <div className="px-2 py-3">
-                  <h2 className="font-ui text-base font-bold text-landing-ink">{theme.name}</h2>
-                  <p className="mt-1 font-ui text-sm text-landing-muted">
-                    {normalizeCategory(theme.culturalCategory)} <span aria-hidden="true">-</span>{" "}
-                    {theme.description || "Romantis"}
-                  </p>
-                </div>
-              </button>
-            ))}
+          <div className="mb-8">
+            <h1 className="font-landing-serif text-4xl font-semibold text-[#14213D]">Pilih Tema Undanganmu</h1>
+            <p className="mt-1 font-ui text-lg text-gray-500">Sesuaikan tampilan undangan sesuai dengan konsep perayaan Anda.</p>
           </div>
-          <div className="mt-7 flex justify-end">
-            <button
-              type="button"
-              onClick={() => setStep(2)}
-              className="inline-flex h-12 items-center gap-2 rounded-md bg-landing-maroon px-7 font-ui text-sm font-bold text-white shadow-landing-button transition hover:bg-landing-maroon-dark"
-            >
-              Lanjut ke Isi Data
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </button>
+
+          <div className="mb-8 flex flex-col justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:flex-row">
+            <div className="flex flex-col gap-2">
+              <span className="font-ui text-xs font-bold uppercase tracking-wider text-gray-500">Kategori Tema</span>
+              <div className="flex flex-wrap gap-2">
+                {["Semua", "Elegan", "Minimalis", "Jawa", "Sunda", "Modern", "Romantis"].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={cn(
+                      "rounded-full px-4 py-1.5 font-ui text-sm font-medium transition-colors",
+                      selectedCategory === cat ? "bg-[#14213D] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200",
+                    )}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 border-t border-gray-200 pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+              <span className="font-ui text-xs font-bold uppercase tracking-wider text-gray-500">Harga</span>
+              <div className="flex gap-2">
+                {["Semua", "Gratis", "Premium"].map((price) => (
+                  <button
+                    key={price}
+                    onClick={() => setSelectedPrice(price)}
+                    className={cn(
+                      "rounded-full px-4 py-1.5 font-ui text-sm font-medium transition-colors",
+                      selectedPrice === price ? "bg-[#FCA311] text-[#14213D]" : "bg-gray-100 text-gray-600 hover:bg-gray-200",
+                    )}
+                  >
+                    {price}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {themeOptions
+              .filter((theme) => {
+                const themeCategory = theme.name === DEFAULT_INVITATION_THEME_NAME ? "Elegan" : normalizeCategory(theme.culturalCategory);
+                const matchCategory = selectedCategory === "Semua" || themeCategory === selectedCategory;
+                const matchPrice = selectedPrice === "Semua" || selectedPrice === "Gratis";
+                return matchCategory && matchPrice;
+              })
+              .map((theme) => (
+                <Card
+                  key={theme.id}
+                  className="group flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-xl"
+                >
+                  <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden bg-gray-100">
+                    {theme.thumbnailUrl ? (
+                      <img src={theme.thumbnailUrl} alt={theme.name} className="h-full w-full object-cover" loading="lazy" />
+                    ) : theme.name === DEFAULT_INVITATION_THEME_NAME ? (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.86),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(195,163,107,0.28),transparent_38%)]" />
+                        <div className="absolute left-6 top-8 h-24 w-24 rounded-full border border-[#C3A36B]/35 bg-white/25 blur-sm" />
+                        <div className="absolute bottom-8 right-8 h-28 w-28 rounded-full border border-white/50 bg-white/20 blur-sm" />
+                        <div className="relative flex h-52 w-40 flex-col items-center justify-center rounded-[32px] border border-[#C3A36B]/45 bg-white/45 px-5 text-center shadow-[0_18px_50px_rgba(66,94,112,0.16)] backdrop-blur-sm">
+                          <span className="font-serif text-5xl font-semibold text-[#8A6F42]">SS</span>
+                          <span className="mt-3 h-px w-12 bg-[#C3A36B]/70" />
+                          <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#536979]">Sakinah</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-300" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent opacity-10" />
+                        <div className="z-10 flex h-32 w-24 -rotate-12 transform items-center justify-center rounded-sm border-2 border-white/20">
+                          <span className="-rotate-12 transform font-serif text-lg font-bold italic tracking-widest text-white/40">
+                            umuman
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    <div className="absolute right-3 top-3 flex gap-2">
+                      <Badge className="border border-gray-200 bg-white text-gray-700 shadow-md hover:bg-gray-100">Gratis</Badge>
+                    </div>
+                  </div>
+
+                  <CardContent className="flex flex-1 flex-col p-5">
+                    <span className="mb-1 block font-ui text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      {theme.name === DEFAULT_INVITATION_THEME_NAME ? "Elegan" : normalizeCategory(theme.culturalCategory)}
+                    </span>
+                    <h3 className="mb-4 font-landing-serif text-xl font-bold text-[#14213D]">{theme.name}</h3>
+
+                    <div className="mt-auto flex flex-col gap-2">
+                      <Link href={`/invite/demo?preview=true&theme=${theme.slug || theme.id}`} className="w-full" target="_blank">
+                        <Button variant="secondary" className="w-full gap-2 border border-gray-300 bg-white text-gray-600 hover:bg-gray-50">
+                          <Eye className="h-4 w-4" /> Live Preview
+                        </Button>
+                      </Link>
+                      <Button
+                        onClick={() => {
+                          setSelectedThemeId(theme.id);
+                          setStep(2);
+                        }}
+                        className="group w-full gap-2 bg-[#14213D] text-white transition-all hover:bg-[#1a2b50] hover:text-[#14213D] group-hover:bg-[#FCA311]"
+                      >
+                        Pilih Tema Ini <ChevronRight className="ml-auto h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+            {themeOptions.filter((theme) => {
+              const themeCategory = theme.name === DEFAULT_INVITATION_THEME_NAME ? "Elegan" : normalizeCategory(theme.culturalCategory);
+              const matchCategory = selectedCategory === "Semua" || themeCategory === selectedCategory;
+              const matchPrice = selectedPrice === "Semua" || selectedPrice === "Gratis";
+              return matchCategory && matchPrice;
+            }).length === 0 && (
+              <div className="col-span-full rounded-xl border border-dashed border-gray-300 bg-gray-50 py-20 text-center">
+                <h3 className="font-landing-serif text-xl font-bold text-gray-800">Tema Tidak Ditemukan</h3>
+                <p className="mt-2 font-ui text-gray-500">Coba ubah filter kategori atau harga yang Anda pilih.</p>
+                <Button
+                  variant="secondary"
+                  className="mt-4 border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                  onClick={() => {
+                    setSelectedCategory("Semua");
+                    setSelectedPrice("Semua");
+                  }}
+                >
+                  Reset Filter
+                </Button>
+              </div>
+            )}
           </div>
         </main>
       ) : null}
