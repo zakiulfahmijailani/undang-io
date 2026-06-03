@@ -66,10 +66,10 @@ export default function FormContent() {
             }
 
             toast.success("Undangan berhasil disimpan!", {
-                description: "Anda akan diarahkan ke dasbor.",
+                description: "Anda akan diarahkan ke editor undangan.",
             });
 
-            router.push("/dashboard");
+            router.push(`/dashboard/undangan/${result.data.id}/edit`);
 
         } catch (error: any) {
             console.error("Save Invitation Error:", error);

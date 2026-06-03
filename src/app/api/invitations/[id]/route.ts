@@ -24,16 +24,24 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 groom_nickname,
                 groom_father_name,
                 groom_mother_name,
+                groom_photo_url,
                 bride_full_name,
                 bride_nickname,
                 bride_father_name,
                 bride_mother_name,
+                bride_photo_url,
+                couple_photo_url,
+                background_photo_url,
                 akad_datetime,
                 akad_location_name,
                 akad_location_address,
+                akad_maps_url,
                 resepsi_datetime,
                 resepsi_location_name,
                 resepsi_location_address,
+                resepsi_maps_url,
+                dresscode_colors,
+                dresscode_note,
                 quote_text,
                 quote_source,
                 music_url,
@@ -43,9 +51,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 gift_bank_account,
                 gift_bank_account_name,
                 gift_shipping_address,
+                qris_account,
                 show_couple_photos,
                 show_prewed_gallery,
-                show_gift_section
+                show_gift_section,
+                rsvp_enabled,
+                sections_order,
+                sections_visibility
             `)
             .eq('id', id)
             .eq('user_id', user.id)
@@ -137,6 +149,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         // Love story
         if (body.love_story !== undefined) updates.love_story = body.love_story;
 
+        // Cover and background photos
+        if (body.couple_photo_url !== undefined) updates.couple_photo_url = body.couple_photo_url;
+        if (body.background_photo_url !== undefined) updates.background_photo_url = body.background_photo_url;
+        if (body.groom_photo_url !== undefined) updates.groom_photo_url = body.groom_photo_url;
+        if (body.bride_photo_url !== undefined) updates.bride_photo_url = body.bride_photo_url;
+
+        // Maps URL
+        if (body.akad_maps_url !== undefined) updates.akad_maps_url = body.akad_maps_url;
+        if (body.reception_maps_url !== undefined) updates.resepsi_maps_url = body.reception_maps_url;
+
+        // Dresscode
+        if (body.dresscode_colors !== undefined) updates.dresscode_colors = body.dresscode_colors;
+        if (body.dresscode_note !== undefined) updates.dresscode_note = body.dresscode_note;
+
         // Sections order & visibility
         if (body.sections_order !== undefined) updates.sections_order = body.sections_order;
         if (body.sections_visibility !== undefined) updates.sections_visibility = body.sections_visibility;
@@ -148,11 +174,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         }
         if (body.gift_bank_account_name !== undefined) updates.gift_bank_account_name = body.gift_bank_account_name;
         if (body.gift_shipping_address !== undefined) updates.gift_shipping_address = body.gift_shipping_address;
+        if (body.qris_account !== undefined) updates.qris_account = body.qris_account;
 
-        // Visibility toggles
+        // Visibility toggles & settings
         if (body.show_couple_photos !== undefined) updates.show_couple_photos = body.show_couple_photos;
         if (body.show_prewed_gallery !== undefined) updates.show_prewed_gallery = body.show_prewed_gallery;
         if (body.show_gift_section !== undefined) updates.show_gift_section = body.show_gift_section;
+        if (body.rsvp_enabled !== undefined) updates.rsvp_enabled = body.rsvp_enabled;
 
         if (Object.keys(updates).length === 0) {
             return NextResponse.json({ data: { success: true }, error: null });
