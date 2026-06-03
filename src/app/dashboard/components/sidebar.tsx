@@ -1,11 +1,11 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { Home, Mail, FileText, LayoutTemplate, User, LogOut, Layers } from "lucide-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { FileText, Home, Layers, LayoutTemplate, LogOut, Mail, User } from "lucide-react"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
+import { cn } from "@/lib/utils"
 
 export function Sidebar({ isOpen }: { isOpen: boolean }) {
     const pathname = usePathname()
@@ -33,69 +33,88 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
 
     return (
         <>
-            {/* Desktop Sidebar */}
             <aside
-                className={`relative hidden md:flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out bg-card text-card-foreground border-r border-border overflow-hidden ${isOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 border-none'}`}
+                className={cn(
+                    "relative hidden md:flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden border-r border-landing-border bg-landing-paper text-landing-ink",
+                    isOpen ? "w-64 opacity-100" : "w-0 opacity-0 border-none",
+                )}
             >
-                {/* Logo Area */}
-                <div className="flex flex-col items-center justify-center p-6 min-h-[100px] w-64 border-b border-border">
-                    <Link href="/dashboard" className="flex flex-col items-center gap-4 group">
-                        <Image src="/logo.png" alt="undang.io logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-105" />
-                        <span className="font-serif text-2xl font-bold text-foreground tracking-tight">
-                            undang<span className="text-accent">.io</span>
+                <div className="flex w-64 flex-col items-center justify-center border-b border-landing-border px-6 py-8">
+                    <Link href="/dashboard" className="group flex flex-col items-center gap-3">
+                        <span className="flex h-20 w-20 items-center justify-center rounded-3xl border border-landing-gold/30 bg-landing-cream shadow-sm">
+                            <Image
+                                src="/logo.png"
+                                alt="undang.io logo"
+                                width={88}
+                                height={88}
+                                className="h-14 w-14 object-contain transition-transform group-hover:scale-105"
+                            />
+                        </span>
+                        <span className="font-landing-serif text-3xl font-semibold tracking-tight text-landing-ink">
+                            undang<span className="text-landing-gold">.io</span>
                         </span>
                     </Link>
                 </div>
 
-                {/* Navigation Items */}
-                <nav className="flex-1 px-3 py-6 flex flex-col gap-1 w-64">
+                <nav className="flex w-64 flex-1 flex-col gap-1 px-4 py-6">
                     {navItems.map((item) => {
-                        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                        const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
                         const Icon = item.icon
+
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                                className={cn(
+                                    "group flex items-center gap-3 rounded-2xl px-4 py-3 font-ui text-sm transition-all",
                                     isActive
-                                        ? 'bg-accent/10 text-accent font-semibold'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                                }`}
+                                        ? "bg-landing-maroon text-white shadow-landing-button"
+                                        : "text-landing-muted hover:bg-landing-cream hover:text-landing-maroon",
+                                )}
                             >
-                                <Icon className="w-4 h-4 shrink-0" />
-                                <span className="text-sm">{item.name}</span>
+                                <span
+                                    className={cn(
+                                        "flex h-8 w-8 items-center justify-center rounded-xl transition",
+                                        isActive ? "bg-white/15 text-landing-gold" : "bg-white text-landing-muted group-hover:text-landing-maroon",
+                                    )}
+                                >
+                                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                </span>
+                                <span className="font-semibold">{item.name}</span>
                             </Link>
                         )
                     })}
                 </nav>
 
-                {/* Bottom Actions */}
-                <div className="p-4 mt-auto border-t border-border w-64">
+                <div className="w-64 border-t border-landing-border p-4">
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-muted-foreground hover:text-destructive hover:bg-destructive/10 w-full cursor-pointer"
+                        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 font-ui text-sm font-semibold text-landing-muted transition-all hover:bg-red-50 hover:text-red-700 cursor-pointer"
                     >
-                        <LogOut className="w-4 h-4 shrink-0" />
-                        <span className="text-sm font-medium">Keluar</span>
+                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white">
+                            <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        </span>
+                        Keluar
                     </button>
                 </div>
             </aside>
 
-            {/* Mobile Sidebar (Bottom Nav) */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border px-2 py-2 flex justify-around items-center z-50 shadow-lg">
+            <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-landing-border bg-landing-paper/95 px-2 py-2 shadow-lg backdrop-blur-xl md:hidden">
                 {navItems.slice(0, 5).map((item) => {
-                    const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                    const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
                     const Icon = item.icon
+
                     return (
                         <Link
                             key={item.name}
                             href={item.href}
-                            className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
-                                isActive ? 'text-accent' : 'text-muted-foreground'
-                            }`}
+                            className={cn(
+                                "flex min-w-0 flex-col items-center gap-1 rounded-xl p-2 transition-colors",
+                                isActive ? "text-landing-maroon" : "text-landing-muted",
+                            )}
                         >
-                            <Icon className="w-5 h-5" />
-                            <span className="text-[10px] font-medium text-center leading-tight max-w-[60px] truncate">{item.name}</span>
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                            <span className="max-w-[64px] truncate text-center font-ui text-[10px] font-semibold leading-tight">{item.name}</span>
                         </Link>
                     )
                 })}

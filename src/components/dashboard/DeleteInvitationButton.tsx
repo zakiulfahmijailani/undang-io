@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -36,8 +35,9 @@ export default function DeleteInvitationButton({ invitationId, invitationTitle }
                 setOpen(false);
                 router.refresh();
             }
-        } catch (e: any) {
-            toast.error("Terjadi kesalahan", { description: e.message });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Silakan coba lagi.";
+            toast.error("Terjadi kesalahan", { description: message });
         } finally {
             setLoading(false);
         }
@@ -45,14 +45,14 @@ export default function DeleteInvitationButton({ invitationId, invitationTitle }
 
     return (
         <>
-            <Button
-                variant="secondary"
-                className="shrink-0 h-9 w-9 p-0 text-destructive border border-destructive/20 hover:bg-destructive/10 cursor-pointer"
+            <button
+                type="button"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-red-200 bg-white text-red-600 transition hover:bg-red-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setOpen(true)}
                 disabled={loading}
             >
-                <Trash2 className="w-4 h-4" />
-            </Button>
+                <Trash2 className="w-4 h-4" aria-hidden="true" />
+            </button>
 
             <Modal
                 isOpen={open}
@@ -61,21 +61,22 @@ export default function DeleteInvitationButton({ invitationId, invitationTitle }
                 description={`Undangan "${invitationTitle}" akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
             >
                 <div className="flex justify-end gap-3 pt-2">
-                    <Button
-                        variant="secondary"
+                    <button
+                        type="button"
                         onClick={() => setOpen(false)}
                         disabled={loading}
-                        className="cursor-pointer"
+                        className="inline-flex h-10 items-center justify-center rounded-md border border-landing-border bg-white px-4 font-ui text-sm font-semibold text-landing-ink transition hover:border-landing-gold disabled:opacity-50"
                     >
                         Batal
-                    </Button>
-                    <Button
+                    </button>
+                    <button
+                        type="button"
                         onClick={handleDelete}
                         disabled={loading}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+                        className="inline-flex h-10 items-center justify-center rounded-md bg-red-600 px-4 font-ui text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
                     >
                         {loading ? "Menghapus..." : "Ya, Hapus"}
-                    </Button>
+                    </button>
                 </div>
             </Modal>
         </>

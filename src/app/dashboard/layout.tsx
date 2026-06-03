@@ -3,8 +3,8 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { Bell, Menu, Search, Sparkles } from "lucide-react"
 import { Sidebar } from "./components/sidebar"
-import { Menu, Bell, Search } from "lucide-react"
 
 export default function DashboardLayout({
     children,
@@ -25,53 +25,47 @@ export default function DashboardLayout({
     }
 
     return (
-        <div className="flex h-screen w-full overflow-hidden bg-background">
+        <div className="flex h-screen w-full overflow-hidden bg-landing-cream">
             <Sidebar isOpen={isSidebarOpen} />
 
-            {/* Main */}
             <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-
-                {/* Top Header */}
-                <header className="h-16 shrink-0 flex items-center justify-between px-6 md:px-8 bg-card border-b border-border sticky top-0 z-20">
+                <header className="h-16 shrink-0 flex items-center justify-between px-6 md:px-8 bg-landing-paper/95 border-b border-landing-border sticky top-0 z-20 backdrop-blur-xl">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+                            className="w-9 h-9 rounded-md flex items-center justify-center text-landing-muted hover:text-landing-maroon hover:bg-landing-cream transition-colors cursor-pointer"
+                            aria-label="Toggle sidebar"
                         >
                             <Menu className="w-4 h-4" />
                         </button>
-                        <div className="hidden md:flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">undang.io</span>
-                            <span className="text-border">/</span>
-                            <span className="font-medium text-foreground">{getPageTitle()}</span>
+                        <div className="hidden md:flex items-center gap-2 font-ui text-sm">
+                            <span className="text-landing-muted">undang.io</span>
+                            <span className="text-landing-border">/</span>
+                            <span className="font-semibold text-landing-ink">{getPageTitle()}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {/* Search pill */}
-                        <div className="hidden md:flex items-center gap-2 bg-secondary rounded-full px-4 py-2 text-sm text-muted-foreground cursor-text w-48">
+                        <div className="hidden md:flex h-9 items-center gap-2 rounded-full border border-landing-border bg-white px-4 font-ui text-sm text-landing-muted cursor-text w-56">
                             <Search className="w-3.5 h-3.5" />
-                            <span>Cari undangan…</span>
+                            <span>Cari undangan...</span>
                         </div>
 
-                        {/* Bell */}
-                        <button className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors relative">
+                        <button className="w-9 h-9 rounded-full flex items-center justify-center text-landing-muted hover:bg-landing-cream hover:text-landing-maroon transition-colors relative">
                             <Bell className="w-4 h-4" />
-                            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-accent" />
+                            <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-landing-gold" />
                         </button>
 
-                        {/* Avatar */}
                         <Link
                             href="/dashboard/akun"
-                            className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center text-xs font-bold text-accent cursor-pointer ml-1"
+                            className="w-9 h-9 rounded-full bg-landing-maroon flex items-center justify-center text-xs font-bold text-white cursor-pointer ml-1 ring-2 ring-landing-gold/30"
                             title="Akun"
                         >
-                            ZF
+                            <Sparkles className="h-4 w-4 text-landing-gold" aria-hidden="true" />
                         </Link>
                     </div>
                 </header>
 
-                {/* Page content */}
                 <div className="flex-1 p-5 md:p-8">
                     {children}
                 </div>
