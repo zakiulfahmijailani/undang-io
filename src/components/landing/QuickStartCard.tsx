@@ -125,9 +125,28 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
         Tanpa login <span aria-hidden="true">-</span> live dalam 5 menit <span aria-hidden="true">-</span> gratis 25 menit
       </p>
 
-      <div className="absolute -left-20 top-7 hidden max-w-[140px] -rotate-6 text-center font-display text-xl leading-tight text-landing-maroon xl:block">
-        <Zap className="mx-auto mb-1 h-5 w-5 text-landing-gold" aria-hidden="true" />
-        Mulai sekarang, gratis 25 menit!
+      {/* Elegant Hand-drawn Annotation */}
+      <div className="absolute -left-4 -top-16 hidden -rotate-6 flex-col items-end md:flex lg:-left-12 lg:-top-20">
+        <div className="flex items-center gap-1.5">
+          <Zap className="h-5 w-5 fill-landing-gold text-landing-gold" aria-hidden="true" />
+          <span className="font-display text-2xl tracking-wide text-landing-maroon">
+            Mulai sekarang, gratis 25 menit!
+          </span>
+        </div>
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 100 100"
+          className="mr-12 mt-1 text-landing-maroon opacity-70"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M20,10 Q40,60 80,80" />
+          <path d="M60,85 L80,80 L70,60" />
+        </svg>
       </div>
     </section>
   );
