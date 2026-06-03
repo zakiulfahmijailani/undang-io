@@ -1,7 +1,8 @@
 /* Landing navigation for the Landing Page undang-io mockup. */
 
 import Link from "next/link";
-import { ArrowRight, Sprout } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 const navItems = [
   { label: "Fitur", href: "#fitur" },
@@ -14,9 +15,8 @@ export function LandingNav() {
   return (
     <header className="sticky top-0 z-50 border-b border-landing-border/80 bg-landing-paper/95 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
-        <Link href="/" className="flex items-center gap-2 text-landing-maroon" aria-label="Beranda undang.io">
-          <span className="font-landing-serif text-2xl font-semibold leading-none sm:text-3xl">undang.io</span>
-          <Sprout className="h-5 w-5 text-landing-gold" aria-hidden="true" />
+        <Link href="/" className="flex items-center text-landing-maroon" aria-label="Beranda undang.io">
+          <BrandLogo size="nav" priority />
         </Link>
 
         <nav className="hidden items-center gap-9 font-ui text-sm font-medium text-landing-ink md:flex">

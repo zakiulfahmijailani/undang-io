@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Flower2, Leaf, Star } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 type AuthShellProps = {
   children: React.ReactNode;
@@ -12,7 +13,12 @@ export function AuthShell({ children, compact = false }: AuthShellProps) {
   if (compact) {
     return (
       <main className="min-h-screen bg-landing-paper px-4 py-8 text-landing-ink sm:px-6">
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-xl items-center justify-center">{children}</div>
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-xl flex-col items-center justify-center">
+          <Link href="/" className="mb-8 inline-flex rounded-2xl bg-white px-5 py-3 shadow-landing-card" aria-label="Beranda undang.io">
+            <BrandLogo size="nav" priority />
+          </Link>
+          {children}
+        </div>
       </main>
     );
   }
@@ -27,8 +33,12 @@ export function AuthShell({ children, compact = false }: AuthShellProps) {
         <Leaf className="absolute bottom-32 left-8 h-28 w-28 text-white/12" aria-hidden="true" />
 
         <div className="relative z-10 mx-auto max-w-md px-10 text-center">
-          <Link href="/" className="font-landing-serif text-6xl font-semibold leading-none">
-            undang.io
+          <Link
+            href="/"
+            className="inline-flex rounded-[28px] bg-white px-8 py-5 shadow-2xl shadow-black/15"
+            aria-label="Beranda undang.io"
+          >
+            <BrandLogo size="authHero" priority />
           </Link>
           <p className="mt-5 font-landing-serif text-2xl italic leading-snug text-white/92">
             Undangan pernikahan digital

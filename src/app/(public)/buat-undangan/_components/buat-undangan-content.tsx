@@ -18,8 +18,8 @@ import {
   Leaf,
   Link2,
   MessageCircle,
-  Sprout,
 } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { toast } from "sonner";
 import { fallbackThemes } from "@/components/landing/data";
 import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
@@ -127,9 +127,8 @@ function WizardHeader({ step, isLoggedIn }: { step: WizardStep; isLoggedIn: bool
   return (
     <header className="sticky top-0 z-50 border-b border-landing-border bg-landing-paper/95 backdrop-blur-xl">
       <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6 lg:px-10">
-        <Link href="/" className="flex items-center gap-2 text-landing-maroon">
-          <span className="font-landing-serif text-3xl font-semibold leading-none">undang.io</span>
-          <Sprout className="h-5 w-5 text-landing-gold" aria-hidden="true" />
+        <Link href="/" className="flex items-center text-landing-maroon" aria-label="Beranda undang.io">
+          <BrandLogo size="wizard" priority />
         </Link>
 
         <div className="hidden items-center justify-center gap-5 md:flex">

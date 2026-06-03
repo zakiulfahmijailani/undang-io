@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import Image from "next/image"
 import { LayoutDashboard, Users, CreditCard, Settings, LogOut } from "lucide-react"
+import { BrandLogo } from "@/components/shared/BrandLogo"
 
 export function OwnerSidebar({ isOpen }: { isOpen: boolean }) {
     const pathname = usePathname()
@@ -22,11 +22,10 @@ export function OwnerSidebar({ isOpen }: { isOpen: boolean }) {
                 className={`relative hidden md:flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out bg-[#0B0F19] text-white border-r border-white/10 overflow-hidden ${isOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 border-none'}`}
             >
                 {/* Logo Area */}
-                <div className="flex flex-col items-center justify-center p-6 min-h-[100px] w-64 border-b border-white/10">
-                    <Link href="/owner/dashboard" className="flex flex-col items-center gap-4 group">
-                        <Image src="/logo.png" alt="umuman logo" width={120} height={120} className="w-30 h-30 object-contain transition-transform group-hover:scale-105" />
-                        <span className="font-serif text-3xl font-bold text-white tracking-widest uppercase">
-                            umuman
+                <div className="flex flex-col items-center justify-center p-6 min-h-[116px] w-64 border-b border-white/10">
+                    <Link href="/owner/dashboard" className="flex flex-col items-center group">
+                        <span className="flex h-20 w-52 items-center justify-center rounded-2xl bg-white px-4 py-3 shadow-md shadow-black/20">
+                            <BrandLogo size="ownerSidebar" priority imageClassName="transition-transform group-hover:scale-105" />
                         </span>
                     </Link>
                     <span className="text-[10px] uppercase tracking-widest text-[#10B981] mt-1 font-bold">Owner Dashboard</span>

@@ -1,9 +1,9 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { FileText, Home, Layers, LayoutTemplate, LogOut, Mail, User } from "lucide-react"
+import { BrandLogo } from "@/components/shared/BrandLogo"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
@@ -40,19 +40,9 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
                 )}
             >
                 <div className="flex w-64 flex-col items-center justify-center border-b border-landing-border px-6 py-7">
-                    <Link href="/dashboard" className="group flex flex-col items-center gap-3">
-                        <span className="flex h-24 w-40 items-center justify-center rounded-2xl border border-landing-gold/25 bg-white px-4 py-3 shadow-sm">
-                            <Image
-                                src="/logo.png"
-                                alt="undang.io logo"
-                                width={160}
-                                height={96}
-                                priority
-                                className="h-20 w-32 object-contain transition-transform group-hover:scale-105"
-                            />
-                        </span>
-                        <span className="font-ui text-3xl font-extrabold tracking-tight text-landing-ink">
-                            undang<span className="text-landing-gold">.io</span>
+                    <Link href="/dashboard" className="group flex flex-col items-center">
+                        <span className="flex h-24 w-52 items-center justify-center rounded-2xl border border-landing-gold/25 bg-white px-4 py-3 shadow-sm">
+                            <BrandLogo size="sidebar" priority imageClassName="transition-transform group-hover:scale-105" />
                         </span>
                     </Link>
                 </div>
