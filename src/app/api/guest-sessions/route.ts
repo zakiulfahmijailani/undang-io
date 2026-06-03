@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { normalizeThemeSelection } from '@/lib/default-theme'
 
 const createGuestSessionSchema = z.object({
   sessionToken: z.string().uuid(),
   slug: z.string().min(3, { message: 'Slug minimal 3 karakter.' }),
-  themeId: z.string().min(1, { message: 'Theme ID wajib diisi.' }),
+  themeId: z.string().trim().nullable().optional(),
   expiresAt: z.string(),
-  invitationData: z.record(z.string(), z.any()),
+  invitationData: z.record(z.string(), z.unknown()),
 })
 
 export async function POST(request: Request) {
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     }
 
     const { sessionToken, slug, themeId, expiresAt, invitationData } = parsed.data
+    const normalizedThemeId = normalizeThemeSelection(themeId)
 
     const supabaseAdmin = getAdminClient()
     if (!supabaseAdmin) {
@@ -88,7 +90,7 @@ export async function POST(request: Request) {
       .insert({
         session_token: sessionToken,
         slug,
-        theme_id: themeId,
+        theme_id: normalizedThemeId,
         expires_at: expiresAt,
         invitation_data: invitationData,
         status: 'preview',

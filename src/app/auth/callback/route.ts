@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { mapGuestInvitationDataToInvitationColumns } from '@/lib/guest-invitation-columns'
+import { resolveInvitationThemeSelection } from '@/lib/theme-selection'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -36,13 +38,16 @@ export async function GET(request: Request) {
             
             // 2. Create a new invitation from guest data
             const { invitation_data, theme_id, slug } = guestSession
+            const mappedInvitation = mapGuestInvitationDataToInvitationColumns(invitation_data)
+            const themeSelection = await resolveInvitationThemeSelection(supabaseAdmin, theme_id)
             const { data: newInvitation, error: invitationError } = await supabaseAdmin
               .from('invitations')
               .insert({
                 user_id: user.id,
                 slug,
-                theme_id,
-                ...invitation_data, // Spread the JSONB data
+                theme_id: themeSelection.themeId,
+                theme_key: themeSelection.themeKey,
+                ...mappedInvitation.columns,
                 status: 'draft',
                 is_trial: true,
                 expires_at: guestSession.expires_at,

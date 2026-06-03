@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { mapGuestInvitationDataToInvitationColumns } from '@/lib/guest-invitation-columns';
+import { resolveInvitationThemeSelection } from '@/lib/theme-selection';
 
 export async function POST(
     request: Request,
@@ -39,22 +41,8 @@ export async function POST(
         }
 
         const invData = session.invitation_data;
-
-        // 2. Map Theme ID
-        // The demo themes use string IDs like 'theme-jawa-klasik', but DB uses UUID.
-        // We try to find a theme with that slug or just use null if not found.
-        let themeUuid: string | null = null;
-        if (session.theme_id) {
-            const { data: themeData } = await supabase
-                .from('themes')
-                .select('id')
-                .eq('slug', session.theme_id)
-                .single();
-            
-            if (themeData) {
-                themeUuid = themeData.id;
-            }
-        }
+        const mappedInvitation = mapGuestInvitationDataToInvitationColumns(invData);
+        const themeSelection = await resolveInvitationThemeSelection(supabase, session.theme_id);
 
         // 3. Create Invitation
         const { data: invitation, error: invError } = await supabase
@@ -62,8 +50,10 @@ export async function POST(
             .insert({
                 user_id: user.id,
                 slug: session.slug,
-                theme_id: themeUuid,
-                status: 'draft'
+                theme_id: themeSelection.themeId,
+                theme_key: themeSelection.themeKey,
+                status: 'draft',
+                ...mappedInvitation.columns,
             })
             .select()
             .single();

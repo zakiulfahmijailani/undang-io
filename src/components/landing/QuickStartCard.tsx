@@ -17,11 +17,11 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
   const router = useRouter();
   const [groomName, setGroomName] = useState("");
   const [brideName, setBrideName] = useState("");
-  const [selectedThemeKey, setSelectedThemeKey] = useState(() => themes[0]?.slug || themes[0]?.id || "");
+  const [selectedThemeKey, setSelectedThemeKey] = useState("");
 
   const quickThemes = useMemo(() => themes.slice(0, 4), [themes]);
 
-  const selectedTheme = themes.find((theme) => theme.slug === selectedThemeKey || theme.id === selectedThemeKey) ?? themes[0];
+  const selectedTheme = themes.find((theme) => theme.slug === selectedThemeKey || theme.id === selectedThemeKey);
 
   function handleSubmit() {
     if (typeof window !== "undefined") {
@@ -32,12 +32,12 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
           groom_name: groomName,
           bride_full_name: "",
           bride_name: brideName,
-          themeId: selectedTheme?.id ?? selectedThemeKey,
+          themeId: selectedTheme?.id ?? "",
         }),
       );
     }
 
-    const themeParam = selectedTheme?.slug || selectedTheme?.id || selectedThemeKey;
+    const themeParam = selectedTheme?.slug || selectedTheme?.id || "";
     router.push(themeParam ? `/buat-undangan?theme=${encodeURIComponent(themeParam)}` : "/buat-undangan");
   }
 
@@ -73,8 +73,19 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
       </div>
 
       <div className="mt-5">
-        <div className="mb-3 font-ui text-xs font-bold uppercase text-landing-muted">Pilih tema favorit</div>
+        <div className="mb-3 font-ui text-xs font-bold uppercase text-landing-muted">Pilih tema favorit (opsional)</div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          <button
+            type="button"
+            onClick={() => setSelectedThemeKey("")}
+            className={cn(
+              "flex h-20 flex-col items-center justify-center rounded-xl border bg-landing-cream px-3 text-center font-ui text-xs font-semibold text-landing-ink transition hover:border-landing-gold hover:text-landing-maroon",
+              selectedThemeKey === "" ? "border-landing-gold ring-2 ring-landing-gold/20" : "border-landing-border",
+            )}
+          >
+            Fateha Default
+            <span className="mt-1 text-[10px] font-medium text-landing-muted">Elegan biru-gold</span>
+          </button>
           {quickThemes.map((theme, index) => (
             <div key={theme.id} className="grid gap-1.5">
               <ThemePreviewCard

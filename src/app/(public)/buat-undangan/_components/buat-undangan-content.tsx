@@ -283,7 +283,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const searchParams = useSearchParams();
   const themeOptions = themes.length > 0 ? themes : fallbackActiveThemes();
   const [step, setStep] = useState<WizardStep>(1);
-  const [selectedThemeId, setSelectedThemeId] = useState(themeOptions[0]?.id ?? "");
+  const [selectedThemeId, setSelectedThemeId] = useState("");
   const [form, setForm] = useState<InvitationForm>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -324,7 +324,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   }, [searchParams, themeOptions]);
 
   const selectedTheme = useMemo(
-    () => themeOptions.find((theme) => theme.id === selectedThemeId) ?? themeOptions[0],
+    () => themeOptions.find((theme) => theme.id === selectedThemeId),
     [selectedThemeId, themeOptions],
   );
 
@@ -394,6 +394,30 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
           <h1 className="font-landing-serif text-4xl font-semibold text-landing-maroon">Pilih Tema Undanganmu</h1>
           <p className="mt-1 font-ui text-sm text-landing-muted">Temukan tema yang mencerminkan kisah cintamu</p>
           <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <button
+              type="button"
+              onClick={() => setSelectedThemeId("")}
+              className={cn(
+                "relative rounded-lg border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-landing-card",
+                selectedThemeId === "" ? "border-landing-gold ring-2 ring-landing-gold/20" : "border-landing-border",
+              )}
+            >
+              <div className="flex aspect-[3/4] items-center justify-center rounded-lg bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,#eff7fb,#dcecf5_55%,#c9ddeb)]">
+                <div className="rounded-full border border-landing-gold/40 bg-white/70 px-6 py-4 text-center shadow-landing-card">
+                  <p className="font-display text-4xl text-landing-gold">FH</p>
+                  <p className="mt-1 font-ui text-xs font-bold uppercase text-landing-muted">Fateha Default</p>
+                </div>
+              </div>
+              {selectedThemeId === "" ? (
+                <span className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-landing-gold text-white">
+                  <Check className="h-5 w-5" aria-hidden="true" />
+                </span>
+              ) : null}
+              <div className="px-2 py-3">
+                <h2 className="font-ui text-base font-bold text-landing-ink">Fateha Default</h2>
+                <p className="mt-1 font-ui text-sm text-landing-muted">Elegan <span aria-hidden="true">-</span> Biru lembut dan emas</p>
+              </div>
+            </button>
             {themeOptions.map((theme, index) => (
               <button
                 type="button"
@@ -531,7 +555,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               LIVE
             </div>
             <InvitationPreview form={form} />
-            <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? "Sakura"}</p>
+            <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? "Fateha Default"}</p>
             <p className="mt-10 border-t border-landing-border pt-4 text-center font-ui text-xs text-landing-muted">Langkah 2 dari 3</p>
           </aside>
         </main>

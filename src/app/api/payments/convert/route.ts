@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { mapGuestInvitationDataToInvitationColumns } from '@/lib/guest-invitation-columns'
+import { resolveInvitationThemeSelection } from '@/lib/theme-selection'
 
 export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient()
@@ -63,37 +65,17 @@ export async function POST(request: Request) {
   }
 
   const inv = guestSession.invitation_data || {}
-
-  // 3. Insert ke tabel invitations
-  const groomNick = inv.groomNickname || inv.groomFullName || 'Mempelai Pria'
-  const brideNick = inv.brideNickname || inv.brideFullName || 'Mempelai Wanita'
+  const mappedInvitation = mapGuestInvitationDataToInvitationColumns(inv)
+  const themeSelection = await resolveInvitationThemeSelection(adminClient, guestSession.theme_id)
 
   const { data: newInvitation, error: insertError } = await adminClient
     .from('invitations')
     .insert({
       user_id: user.id,
-      theme_id: guestSession.theme_id || null,
+      theme_id: themeSelection.themeId,
+      theme_key: themeSelection.themeKey,
       slug: guestSession.slug,
-      title: `Pernikahan ${groomNick} & ${brideNick}`,
-      groom_full_name: inv.groomFullName || null,
-      groom_nickname: inv.groomNickname || null,
-      groom_father_name: inv.groomFatherName || null,
-      groom_mother_name: inv.groomMotherName || null,
-      bride_full_name: inv.brideFullName || null,
-      bride_nickname: inv.brideNickname || null,
-      bride_father_name: inv.brideFatherName || null,
-      bride_mother_name: inv.brideMotherName || null,
-      akad_datetime: inv.akadDatetime || inv.akadDate || null,
-      akad_location_name: inv.akadLocationName || null,
-      akad_location_address: inv.akadLocationAddress || null,
-      resepsi_datetime: inv.resepsiDatetime || inv.resepsiDate || null,
-      resepsi_location_name: inv.resepsiLocationName || null,
-      resepsi_location_address: inv.resepsiLocationAddress || null,
-      quote_text: inv.quoteText || null,
-      gift_bank_name: inv.giftBankName || null,
-      gift_bank_account: inv.giftBankAccount || null,
-      gift_bank_account_name: inv.giftBankAccountName || null,
-      gift_shipping_address: inv.giftShippingAddress || null,
+      ...mappedInvitation.columns,
       status: 'active',
       is_paid: true,
       paid_at: new Date().toISOString(),

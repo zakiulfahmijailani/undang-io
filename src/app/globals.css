@@ -440,3 +440,163 @@ body {
   }
 
 }
+
+/* Fateha default invitation theme - scoped to public invitation renderer only. */
+.fateha-theme {
+  --fateha-blue-ice: #eff7fb;
+  --fateha-blue-mist: #dcecf5;
+  --fateha-blue-powder: #c9ddeb;
+  --fateha-pearl: #fbfaf6;
+  --fateha-ivory: #f4efe6;
+  --fateha-vellum: #fffdf8;
+  --fateha-champagne: #c3a36b;
+  --fateha-champagne-soft: #e3d0a3;
+  --fateha-champagne-deep: #8a6f42;
+  --fateha-charcoal: #24313a;
+  --fateha-slate: #536979;
+  --fateha-line: rgba(195, 163, 107, 0.34);
+  --fateha-line-blue: rgba(111, 143, 166, 0.22);
+  --fateha-shadow-paper: 0 18px 50px rgba(66, 94, 112, 0.12);
+  --fateha-shadow-fine: 0 8px 28px rgba(66, 94, 112, 0.1);
+  --fateha-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 100dvh;
+  color: var(--fateha-charcoal);
+  font-family: var(--font-fateha-body), system-ui, sans-serif;
+  line-height: 1.7;
+  background: radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.72), transparent 30rem), linear-gradient(180deg, var(--fateha-blue-ice), var(--fateha-blue-mist) 46%, #eaf4f8);
+}
+.fateha-theme * { box-sizing: border-box; }
+.fateha-theme a { color: inherit; text-decoration: none; }
+.fateha-theme button, .fateha-theme input, .fateha-theme textarea, .fateha-theme select { font: inherit; }
+.fateha-theme button { cursor: pointer; border: 0; }
+.fateha-petals-canvas { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.fateha-site { position: relative; overflow: hidden; animation: fatehaFadeUp 0.8s ease both; background: linear-gradient(180deg, rgba(255,255,255,0.1), transparent 16rem), var(--fateha-blue-ice); }
+.fateha-intro { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: clamp(0.75rem, 3vw, 1.5rem); background: radial-gradient(circle at 50% 18%, rgba(255,255,255,0.92), transparent 28rem), linear-gradient(180deg, #eff7fb 0%, #dcecf5 54%, #c9ddeb 100%); transition: opacity 650ms var(--fateha-ease), transform 650ms var(--fateha-ease), filter 650ms var(--fateha-ease); }
+.fateha-intro.is-opening { opacity: 0; transform: scale(1.015); filter: blur(8px); }
+.fateha-intro::before { content: ""; position: absolute; inset: 2.5vw; border: 1px solid rgba(195,163,107,0.28); outline: 1px solid rgba(255,255,255,0.58); outline-offset: -9px; pointer-events: none; }
+.fateha-intro-card { position: relative; width: min(calc(100vw - 1.5rem), 390px); max-height: calc(100dvh - 2.5rem); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: clamp(1rem, 3.5vw, 2rem) clamp(1rem, 4vw, 1.75rem); border: 1px solid rgba(195,163,107,0.44); border-radius: 8px; background: linear-gradient(145deg, rgba(255,253,248,0.94), rgba(244,249,250,0.8)), var(--fateha-vellum); box-shadow: 0 28px 80px rgba(66,94,112,0.18), inset 0 1px 0 rgba(255,255,255,0.95); overflow: hidden; animation: fatehaIntroCardIn 900ms var(--fateha-ease) 90ms forwards; opacity: 0; transform: translateY(16px); }
+.fateha-intro-card::before, .fateha-card::before, .fateha-panel::before { content: ""; position: absolute; inset: 8px; border: 1px solid rgba(195, 163, 107, 0.2); border-radius: 4px; pointer-events: none; }
+.fateha-seal { width: clamp(74px, 16vw, 104px); aspect-ratio: 1; margin-inline: auto; filter: drop-shadow(0 8px 18px rgba(138, 111, 66, 0.18)); }
+.fateha-seal text { font-family: var(--font-fateha-serif), Georgia, serif; }
+.fateha-intro-title, .fateha-and, .fateha-hero-copy, .fateha-section-header div, .fateha-quote p, .fateha-wall p { font-family: var(--font-fateha-serif), Georgia, serif; }
+.fateha-intro-title { margin-top: 0.5rem; color: var(--fateha-charcoal); font-size: clamp(1.1rem, 4vw, 1.6rem); font-weight: 500; line-height: 1.1; }
+.fateha-script-name, .fateha-hero-names, .fateha-script-small, .fateha-wall h3, .fateha-rsvp-success h3 { color: var(--fateha-champagne-deep); font-family: var(--font-fateha-script), cursive; font-weight: 400; line-height: 0.92; }
+.fateha-script-name, .fateha-hero-names { font-size: clamp(3.8rem, 13vw, 7rem); }
+.fateha-script-name span, .fateha-hero-names span { display: block; }
+.fateha-and { margin: 0.25rem 0; color: var(--fateha-charcoal); font-size: clamp(0.8rem, 2vw, 1.1rem); font-style: normal; letter-spacing: 0.22em; text-transform: uppercase; }
+.fateha-script-small { font-size: clamp(2.6rem, 8vw, 4.2rem); }
+.fateha-intro-date, .fateha-kicker, .fateha-section-header > span, .fateha-form-label, .fateha-form-grid label span { color: var(--fateha-champagne-deep); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+.fateha-intro-date { margin-top: 0.65rem; color: var(--fateha-slate); }
+.fateha-envelope { width: min(100%, 260px); height: clamp(120px, 22vw, 160px); margin-top: 0.6rem; filter: drop-shadow(0 14px 22px rgba(66,94,112,0.14)); }
+.fateha-envelope svg { width: 100%; height: 100%; }
+.fateha-button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 0.55rem; padding: 0.76rem 1.25rem; border: 1px solid rgba(138, 111, 66, 0.36); border-radius: 999px; color: #fffdf8; background: linear-gradient(135deg, #b89558, #d3bb85 48%, #967540); box-shadow: 0 10px 26px rgba(138, 111, 66, 0.22); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; transition: transform 220ms var(--fateha-ease), box-shadow 220ms var(--fateha-ease), filter 220ms var(--fateha-ease); }
+.fateha-button:hover { transform: translateY(-1px); filter: saturate(1.03); box-shadow: 0 14px 32px rgba(138, 111, 66, 0.28); }
+.fateha-button:disabled { cursor: not-allowed; opacity: 0.48; transform: none; box-shadow: none; }
+.fateha-button.is-secondary { color: var(--fateha-champagne-deep); background: rgba(255, 253, 248, 0.64); box-shadow: none; }
+.fateha-floral { pointer-events: none; position: absolute; z-index: 0; width: clamp(150px, 26vw, 260px); color: var(--fateha-champagne); opacity: 0.72; }
+.fateha-floral.is-top-left { top: -34px; left: -36px; }
+.fateha-floral.is-top-right { top: -34px; right: -36px; transform: scaleX(-1); }
+.fateha-floral.is-bottom-left { bottom: -42px; left: -38px; transform: scaleY(-1); }
+.fateha-floral.is-bottom-right { right: -38px; bottom: -42px; transform: scale(-1); }
+.fateha-intro .intro-flower { width: clamp(130px, 26vw, 280px); opacity: 0.72; }
+.fateha-hero { position: relative; isolation: isolate; min-height: 100svh; display: grid; place-items: center; overflow: hidden; padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2rem) clamp(3.5rem, 7vw, 5rem); text-align: center; background: radial-gradient(circle at 50% 25%, rgba(255,255,255,0.94), transparent 25rem), linear-gradient(180deg, #eef7fb 0%, #dcecf5 56%, #c9ddeb 100%); }
+.fateha-hero::before { content: ""; position: absolute; inset: clamp(0.7rem, 2vw, 1.4rem); z-index: -1; border: 1px solid rgba(195,163,107,0.32); outline: 1px solid rgba(255,255,255,0.55); outline-offset: -10px; }
+.fateha-arch-frame { position: relative; width: min(100%, 560px); margin-inline: auto; }
+.fateha-arch-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; filter: drop-shadow(0 10px 22px rgba(138, 111, 66, 0.12)); }
+.fateha-arch-content { position: relative; z-index: 1; }
+.fateha-hero-arch { min-height: min(790px, calc(100svh - 4rem)); display: grid; place-items: center; padding: clamp(4.2rem, 10vh, 6.4rem) clamp(1.1rem, 6vw, 3.8rem) clamp(2.4rem, 7vh, 4rem); }
+.fateha-hero-card { position: relative; z-index: 2; width: min(100%, 410px); margin: 0 auto; animation: fatehaFadeUp 900ms var(--fateha-ease) 120ms both; }
+.fateha-arabic { margin-top: 1.2rem; color: var(--fateha-champagne-deep); direction: rtl; font-family: var(--font-fateha-arabic), serif; font-size: clamp(1.25rem, 4vw, 1.75rem); line-height: 1.75; }
+.fateha-kicker { margin-top: clamp(0.8rem, 2.8vw, 1.2rem); color: var(--fateha-slate); }
+.fateha-hero-copy { max-width: 30rem; margin: 0 auto; color: var(--fateha-slate); font-size: clamp(1rem, 2.7vw, 1.18rem); line-height: 1.65; }
+.fateha-date-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: clamp(0.65rem, 2.2vw, 1.25rem); max-width: 380px; margin: clamp(1.1rem, 3vw, 1.5rem) auto 0; font-family: var(--font-fateha-serif), Georgia, serif; }
+.fateha-date-grid span { color: var(--fateha-slate); text-transform: uppercase; }
+.fateha-date-grid strong { min-width: clamp(74px, 18vw, 96px); display: block; padding-inline: clamp(0.65rem, 2vw, 1rem); border-inline: 1px solid rgba(195,163,107,0.55); color: var(--fateha-champagne-deep); font-size: clamp(3.2rem, 10vw, 4.7rem); line-height: 0.9; font-weight: 500; }
+.fateha-date-grid small { display: block; margin-top: 0.25rem; color: var(--fateha-slate); font-family: var(--font-fateha-body), system-ui, sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.26em; }
+.fateha-venue { margin-top: clamp(1rem, 3vw, 1.35rem); font-family: var(--font-fateha-serif), Georgia, serif; font-size: clamp(1.4rem, 4.8vw, 2rem); font-weight: 500; line-height: 1.08; }
+.fateha-address { max-width: 26rem; margin: 0.55rem auto 0; color: var(--fateha-slate); font-size: clamp(0.76rem, 1.8vw, 0.86rem); line-height: 1.65; }
+.fateha-scroll { position: absolute; left: 50%; bottom: 1.2rem; z-index: 3; transform: translateX(-50%); color: var(--fateha-champagne-deep); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.76; }
+.fateha-scroll::before { content: ""; display: block; width: 1px; height: 34px; margin: 0 auto 0.42rem; background: linear-gradient(to bottom, var(--fateha-champagne), transparent); }
+.fateha-section { position: relative; isolation: isolate; overflow: hidden; padding: clamp(4.5rem, 9vw, 7rem) clamp(1.15rem, 5vw, 3rem); }
+.fateha-section::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; background-image: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.62), transparent 32rem), linear-gradient(120deg, rgba(255,255,255,0.28), transparent 42%, rgba(195,163,107,0.08)); }
+.fateha-section.is-blue { background: linear-gradient(180deg, rgba(239,247,251,0.96), rgba(220,236,245,0.98)), var(--fateha-blue-mist); }
+.fateha-section.is-pearl { background: linear-gradient(180deg, rgba(255,253,248,0.95), rgba(244,239,230,0.94)), var(--fateha-pearl); }
+.fateha-section.is-deep { background: linear-gradient(180deg, #dfeef6 0%, #c9ddea 54%, #eef6fa 100%); }
+.fateha-inner { width: min(100%, 960px); margin: 0 auto; position: relative; z-index: 1; }
+.fateha-inner.is-narrow { width: min(100%, 720px); }
+.fateha-grain { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.08; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); background-size: 220px 220px; mix-blend-mode: multiply; }
+.fateha-section-header { text-align: center; margin: 0 auto clamp(2rem, 5vw, 3.4rem); }
+.fateha-section-header h2 { color: var(--fateha-charcoal); font-family: var(--font-fateha-serif), Georgia, serif; font-size: clamp(2.25rem, 7vw, 4rem); font-weight: 500; line-height: 0.98; }
+.fateha-section-header div { max-width: 44rem; margin: 0.9rem auto 0; color: var(--fateha-slate); font-size: clamp(1rem, 2.5vw, 1.18rem); font-style: italic; line-height: 1.7; }
+.fateha-divider { display: flex; align-items: center; justify-content: center; gap: 0.72rem; width: min(100%, 340px); margin: clamp(1.2rem, 3vw, 1.8rem) auto; color: var(--fateha-champagne); }
+.fateha-divider::before, .fateha-divider::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, transparent, currentColor, transparent); opacity: 0.7; }
+.fateha-divider span { width: 9px; height: 9px; border: 1px solid currentColor; transform: rotate(45deg); background: rgba(255, 253, 248, 0.9); box-shadow: 0 0 0 4px rgba(227, 208, 163, 0.12); }
+.fateha-panel, .fateha-card { position: relative; border: 1px solid var(--fateha-line); border-radius: 8px; background: linear-gradient(145deg, rgba(255,255,255,0.86), rgba(247,250,249,0.7)), var(--fateha-vellum); box-shadow: var(--fateha-shadow-paper), inset 0 1px 0 rgba(255,255,255,0.84); }
+.fateha-card { padding: clamp(1.1rem, 3vw, 1.6rem); box-shadow: var(--fateha-shadow-fine), inset 0 1px 0 rgba(255,255,255,0.84); }
+.fateha-panel { padding: clamp(1.5rem, 5vw, 2.6rem); }
+.fateha-reveal { opacity: 0; transform: translateY(22px); transition: opacity 800ms var(--fateha-ease), transform 800ms var(--fateha-ease), filter 800ms var(--fateha-ease); filter: blur(2px); }
+.fateha-reveal.visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+.fateha-quote, .fateha-event-card, .fateha-contact, .fateha-location, .fateha-closing { text-align: center; }
+.fateha-quote p { color: var(--fateha-slate); font-size: clamp(1.06rem, 3vw, 1.24rem); font-style: italic; }
+.fateha-quote span { display: block; margin-top: 1rem; color: var(--fateha-champagne-deep); font-weight: 700; }
+.fateha-couple-grid, .fateha-event-grid, .fateha-contact-grid, .fateha-countdown { display: grid; gap: clamp(1rem, 3vw, 1.6rem); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.fateha-countdown { grid-template-columns: repeat(4, minmax(0, 1fr)); text-align: center; }
+.fateha-countdown strong { display: block; color: var(--fateha-champagne-deep); font-family: var(--font-fateha-serif), Georgia, serif; font-size: clamp(2.3rem, 7vw, 4rem); line-height: 1; }
+.fateha-countdown span { color: var(--fateha-slate); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+.fateha-person { text-align: center; }
+.fateha-photo { position: relative; width: min(100%, 320px); aspect-ratio: 4 / 5; margin: 0 auto 1.2rem; overflow: hidden; border: 1px solid rgba(195,163,107,0.34); border-radius: 999px 999px 8px 8px; background: var(--fateha-blue-mist); }
+.fateha-person h3, .fateha-event-card h3, .fateha-contact h3, .fateha-location h3, .fateha-gift h3 { color: var(--fateha-charcoal); font-family: var(--font-fateha-serif), Georgia, serif; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 500; line-height: 1.08; }
+.fateha-muted, .fateha-event-card span, .fateha-event-card p, .fateha-contact p, .fateha-location p, .fateha-empty { color: var(--fateha-slate); }
+.fateha-event-card svg, .fateha-contact svg, .fateha-location svg, .fateha-closing > svg, .fateha-gift > svg { width: 36px; height: 36px; margin: 0 auto 1rem; color: var(--fateha-champagne-deep); }
+.fateha-event-card strong { display: block; color: var(--fateha-charcoal); }
+.fateha-story-list, .fateha-rsvp form, .fateha-form-grid, .fateha-wall, .fateha-gift { display: grid; gap: 1rem; }
+.fateha-story span { color: var(--fateha-champagne-deep); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.fateha-story h3 { margin-top: 0.35rem; font-family: var(--font-fateha-serif), Georgia, serif; font-size: 1.45rem; }
+.fateha-story p { color: var(--fateha-slate); }
+.fateha-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
+.fateha-gallery-item { position: relative; min-height: 240px; overflow: hidden; border: 1px solid rgba(195,163,107,0.34); border-radius: 8px; background: var(--fateha-blue-mist); box-shadow: var(--fateha-shadow-fine); }
+.fateha-location .fateha-button { margin-top: 1.4rem; }
+.fateha-step-row { display: flex; align-items: center; justify-content: center; gap: 0.45rem; margin-bottom: 1rem; }
+.fateha-step { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(195,163,107,0.34); border-radius: 50%; color: var(--fateha-champagne-deep); background: rgba(255,253,248,0.72); font-size: 0.76rem; font-weight: 600; }
+.fateha-step.is-active, .fateha-step.is-done { color: #fffdf8; background: linear-gradient(135deg, #b89558, #d3bb85); }
+.fateha-step-line { width: 42px; height: 1px; background: rgba(195,163,107,0.34); }
+.fateha-form-grid input, .fateha-form-grid select, .fateha-form-grid textarea { width: 100%; margin-top: 0.48rem; border: 1px solid rgba(111, 143, 166, 0.28); border-radius: 8px; outline: none; color: var(--fateha-charcoal); background: rgba(255, 253, 248, 0.78); padding: 0.85rem 0.95rem; }
+.fateha-form-grid textarea { min-height: 118px; resize: vertical; }
+.fateha-choice-row, .fateha-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.fateha-choice-row button { min-height: 46px; border: 1px solid rgba(111,143,166,0.26); border-radius: 8px; color: var(--fateha-slate); background: rgba(255,253,248,0.62); font-weight: 600; }
+.fateha-choice-row button.is-selected { color: var(--fateha-champagne-deep); border-color: rgba(195,163,107,0.62); background: rgba(227,208,163,0.18); }
+.fateha-error { color: #8d4b42; background: rgba(141,75,66,0.08); border: 1px solid rgba(141,75,66,0.18); border-radius: 8px; padding: 0.8rem 0.95rem; }
+.fateha-rsvp-success { text-align: center; }
+.fateha-rsvp-success span { width: 62px; height: 62px; display: grid; place-items: center; margin: 0 auto 1rem; border-radius: 50%; color: #fffdf8; background: linear-gradient(135deg, #b89558, #d3bb85); }
+.fateha-rsvp-success h3, .fateha-wall h3 { font-size: clamp(2.6rem, 7vw, 4rem); text-align: center; }
+.fateha-wall { margin-top: clamp(2.3rem, 6vw, 3.6rem); }
+.fateha-wall .fateha-card strong { color: var(--fateha-charcoal); }
+.fateha-wall .fateha-card span { float: right; color: var(--fateha-champagne-deep); border: 1px solid rgba(195,163,107,0.28); border-radius: 999px; padding: 0.12rem 0.55rem; font-size: 0.64rem; font-weight: 600; text-transform: uppercase; }
+.fateha-contact-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fateha-contact a { display: inline-flex; margin-top: 0.5rem; color: var(--fateha-champagne-deep); font-weight: 700; }
+.fateha-closing { font-family: var(--font-fateha-serif), Georgia, serif; font-size: 1.1rem; }
+.fateha-closing .fateha-script-name { margin-top: 1.4rem; }
+.fateha-gift { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(195,163,107,0.24); font-family: var(--font-fateha-body), system-ui, sans-serif; }
+.fateha-gift-row { display: grid; gap: 0.2rem; padding: 0.9rem; border: 1px solid rgba(195,163,107,0.2); border-radius: 8px; background: rgba(255,253,248,0.62); }
+.fateha-gift-row button { justify-self: center; display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.25rem; color: var(--fateha-champagne-deep); font-weight: 700; }
+.fateha-bottom-space { height: 5rem; }
+.fateha-bottom-nav { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); z-index: 40; display: flex; gap: 0.15rem; width: min(calc(100% - 1.5rem), 460px); min-height: 58px; padding: 0.35rem; transform: translateX(-50%); border: 1px solid rgba(195, 163, 107, 0.28); border-radius: 999px; background: rgba(255, 253, 248, 0.82); box-shadow: 0 16px 38px rgba(66, 94, 112, 0.18); backdrop-filter: blur(18px); }
+.fateha-bottom-nav a { flex: 1; min-width: 0; border-radius: 999px; color: var(--fateha-slate); display: inline-flex; align-items: center; justify-content: center; gap: 0.32rem; padding: 0.4rem 0.35rem; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.fateha-bottom-nav a svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.fateha-bottom-nav a.is-active { color: var(--fateha-champagne-deep); background: rgba(227, 208, 163, 0.22); }
+.fateha-music-button { position: fixed; right: 18px; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 72px); z-index: 42; width: 48px; height: 48px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--fateha-champagne-deep); border: 1px solid rgba(195, 163, 107, 0.36); background: rgba(255, 253, 248, 0.88); box-shadow: 0 12px 28px rgba(66, 94, 112, 0.16); backdrop-filter: blur(14px); }
+.fateha-music-button.is-playing { color: #fffdf8; background: linear-gradient(135deg, #b89558, #d3bb85); }
+@keyframes fatehaIntroCardIn { to { opacity: 1; transform: translateY(0); } }
+@keyframes fatehaFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 760px) {
+  .fateha-couple-grid, .fateha-event-grid, .fateha-contact-grid, .fateha-countdown, .fateha-gallery { grid-template-columns: 1fr; }
+  .fateha-countdown { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fateha-gallery-item { min-height: 280px; }
+  .fateha-bottom-nav { width: min(calc(100% - 0.75rem), 440px); min-height: 54px; }
+  .fateha-bottom-nav a { flex-direction: column; gap: 0.1rem; font-size: 0.5rem; letter-spacing: 0.05em; }
+  .fateha-music-button { width: 44px; height: 44px; right: 12px; }
+  .fateha-hero .fateha-floral.is-bottom-left, .fateha-hero .fateha-floral.is-bottom-right { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fateha-theme *, .fateha-theme *::before, .fateha-theme *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.001ms !important; }
+}

@@ -8,7 +8,10 @@ import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, Clock3, Copy, Crown, ExternalLink, Lock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
+import { FatehaInvitationRenderer } from "@/components/themes/fateha";
 import { demoData } from "@/data/demoInvitation";
+import { DEFAULT_INVITATION_THEME_KEY } from "@/lib/default-theme";
+import { mapGuestSessionToFatehaData } from "@/lib/fateha-theme-mapper";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -317,6 +320,8 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
   }, [router, slug]);
 
   const invitationData = useMemo(() => (sessionData ? mapGuestSessionToInvitation(sessionData) : null), [sessionData]);
+  const isFatehaTheme = !sessionData?.theme_id || sessionData.theme_id === DEFAULT_INVITATION_THEME_KEY;
+  const fatehaData = useMemo(() => (sessionData && isFatehaTheme ? mapGuestSessionToFatehaData(sessionData) : null), [isFatehaTheme, sessionData]);
 
   if (isLoading) {
     return <div className="min-h-screen bg-landing-cream" />;
@@ -328,13 +333,18 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
 
   const isExpired = new Date(sessionData.expires_at).getTime() <= Date.now() && sessionData.status !== "converted";
   const mode: ViewerMode = sessionData.status === "converted" ? "premium" : isExpired ? "expired" : isLoggedIn ? "logged-in" : "guest";
+  const renderedInvitation = isFatehaTheme && fatehaData ? (
+    <FatehaInvitationRenderer data={fatehaData} />
+  ) : (
+    <InvitationClientWrapper data={invitationData} />
+  );
 
   if (mode === "expired") {
     return (
       <div className="relative min-h-screen bg-landing-cream pt-[132px] sm:pt-[92px]">
         <StatusBar mode={mode} expiresAt={sessionData.expires_at} sessionToken={sessionData.session_token} slug={sessionData.slug} isCreator={isCreator} />
         <div className="pointer-events-none select-none opacity-45 blur-sm">
-          <InvitationClientWrapper data={invitationData} />
+          {renderedInvitation}
         </div>
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-landing-ink/55 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl border border-white/20 bg-white p-8 text-center shadow-2xl">
@@ -366,7 +376,7 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
         slug={sessionData.slug}
         isCreator={isCreator}
       />
-      <InvitationClientWrapper data={invitationData} />
+      {renderedInvitation}
     </div>
   );
 }

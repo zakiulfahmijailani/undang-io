@@ -7,6 +7,9 @@ import ViewTracker from './ViewTracker';
 import ParallaxWrapper from './ParallaxWrapper';
 import { fetchClassicTheme, mapInvitationToClassicData } from '@/lib/classic-theme-loader';
 import ClassicThemeRendererWrapper from './ClassicThemeRendererWrapper';
+import FatehaThemeRendererWrapper from './FatehaThemeRendererWrapper';
+import { DEFAULT_INVITATION_THEME_KEY } from '@/lib/default-theme';
+import { mapInvitationToFatehaData } from '@/lib/fateha-theme-mapper';
 
 export const revalidate = 0;
 
@@ -83,7 +86,10 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
             resepsi_location_name,
             resepsi_location_address,
             quote_text,
+            quote_source,
             music_url,
+            love_story,
+            gallery_photos,
             gift_bank_name,
             gift_bank_account,
             gift_bank_account_name,
@@ -115,6 +121,16 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
 
     // ── Classic Theme Route ─────────────────────────────────────────────
     const themeKey = (invitation as any).theme_key as string | null;
+
+    if (themeKey === DEFAULT_INVITATION_THEME_KEY) {
+        const fatehaData = mapInvitationToFatehaData(invitation, { guestName, isPreview });
+        return (
+            <>
+                <FatehaThemeRendererWrapper data={fatehaData} />
+                <ViewTracker slug={slug} isPreview={isPreview} />
+            </>
+        );
+    }
 
     if (themeKey && themeKey.startsWith('classic')) {
         const classicTheme = await fetchClassicTheme(themeKey);

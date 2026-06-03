@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export default function FormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const temaId = searchParams.get("tema") || "th-01";
+    const temaId = searchParams.get("tema") || "";
 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -34,7 +34,7 @@ export default function FormContent() {
         setLoading(true);
 
         const payload = {
-            theme_id: temaId,
+            theme_id: temaId || null,
             slug: formData.slug,
             groom_name: formData.groom_nickname,
             bride_name: formData.bride_nickname,
@@ -88,7 +88,7 @@ export default function FormContent() {
                     </Button>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-[#14213D]">Buat Undangan Baru</h1>
-                        <p className="text-sm text-muted-foreground mt-1">Tema Terpilih: {temaId}</p>
+                        <p className="text-sm text-muted-foreground mt-1">Tema Terpilih: {temaId || "Fateha Default"}</p>
                     </div>
                 </div>
             </div>

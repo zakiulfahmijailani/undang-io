@@ -24,6 +24,13 @@ type ThemeOption = {
   thumbnailUrl: string | null
 }
 
+type ThemeRow = {
+  slug: string | null
+  name: string | null
+  cultural_category: string | null
+  thumbnail_url: string | null
+}
+
 const FALLBACK_THEMES: ThemeOption[] = [
   { id: "minimalist-white", name: "Modern Minimalis", cat: "Modern", thumbnailUrl: null },
   { id: "garden-romance", name: "Garden Romance", cat: "Modern", thumbnailUrl: null },
@@ -125,7 +132,7 @@ export default function CreateInvitationWizard() {
     eventType: "akad_resepsi" as "akad" | "resepsi" | "akad_resepsi",
     akadDate: "", akadTime: "", akadVenue: "", akadAddress: "",
     receptionDate: "", receptionTime: "", receptionVenue: "", receptionAddress: "",
-    themeId: FALLBACK_THEMES[0]?.id ?? "",
+    themeId: "",
     greetingText: "Assalamu'alaikum Wr. Wb.\n\nDengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada acara pernikahan kami.",
   })
   const upF = (p: Partial<typeof f>) => setF(prev => ({ ...prev, ...p }))
@@ -181,8 +188,8 @@ export default function CreateInvitationWizard() {
 
         if (error) throw error
 
-        const nextThemes = (data ?? [])
-          .filter((theme) => theme?.slug && theme?.name)
+        const nextThemes = ((data ?? []) as ThemeRow[])
+          .filter((theme): theme is ThemeRow & { slug: string; name: string } => Boolean(theme?.slug && theme?.name))
           .map((theme) => ({
             id: theme.slug,
             name: theme.name,
@@ -218,22 +225,8 @@ export default function CreateInvitationWizard() {
     }
   }, [])
 
-  useEffect(() => {
-    if (themeOptions.length === 0) return
-
-    setF((prev) => {
-      const hasSelectedTheme = themeOptions.some((theme) => theme.id === prev.themeId)
-      if (hasSelectedTheme) return prev
-
-      return {
-        ...prev,
-        themeId: themeOptions[0].id,
-      }
-    })
-  }, [themeOptions])
-
   const selectedThemeName = useMemo(() => {
-    return themeOptions.find((theme) => theme.id === f.themeId)?.name ?? f.themeId.replace(/-/g, " ")
+    return themeOptions.find((theme) => theme.id === f.themeId)?.name ?? "Fateha Default"
   }, [f.themeId, themeOptions])
 
   const handlePublish = async () => {
@@ -245,7 +238,7 @@ export default function CreateInvitationWizard() {
         body: JSON.stringify({
           groom_name: f.groomNickname || f.groomFullName,
           bride_name: f.brideNickname || f.brideFullName,
-          theme_id: f.themeId,
+          theme_id: f.themeId || null,
           details: {
             groom_full_name: f.groomFullName,
             groom_nickname:  f.groomNickname,
@@ -435,6 +428,26 @@ export default function CreateInvitationWizard() {
               )}
 
               <div className="grid grid-cols-2 gap-4">
+                <button type="button" onClick={() => upF({ themeId: "" })}
+                  className={`relative rounded-2xl overflow-hidden border-2 transition-all text-left ${
+                    f.themeId === "" ? 'border-[#D4A91C] shadow-md' : 'border-[#EDE6D6] hover:border-[#D4A91C]/40'
+                  }`}>
+                  <div className="aspect-[3/4] bg-gradient-to-b from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB] overflow-hidden flex items-center justify-center">
+                    <div className="rounded-full border border-[#D4A91C]/40 bg-white/70 px-5 py-4 text-center shadow-sm">
+                      <p className="font-display text-3xl text-[#D4A91C]">FH</p>
+                      <p className="mt-1 text-[10px] font-semibold uppercase text-[#726C67]">Default</p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white">
+                    <p className="text-xs font-semibold text-[#1E1B18]">Fateha Default</p>
+                    <p className="text-[10px] text-[#9A9390]">Elegan</p>
+                  </div>
+                  {f.themeId === "" && (
+                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#D4A91C] flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                  )}
+                </button>
                 {themeOptions.map((t) => (
                   <button key={t.id} type="button" onClick={() => upF({ themeId: t.id })}
                     className={`relative rounded-2xl overflow-hidden border-2 transition-all text-left ${
