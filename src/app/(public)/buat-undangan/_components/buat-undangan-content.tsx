@@ -66,25 +66,23 @@ type InvitationForm = {
 const PREVIEW_DURATION_MS = 25 * 60 * 1000;
 
 const defaultForm: InvitationForm = {
-  groomFullName: "Rizky Pratama",
-  groomNickname: "Rizky",
-  groomFather: "Bapak Ahmad",
-  groomMother: "Ibu Siti Aisyah",
-  brideFullName: "Amara Putri",
-  brideNickname: "Amara",
-  brideFather: "Bapak Budi Santoso",
+  groomFullName: "",
+  groomNickname: "",
+  groomFather: "",
+  groomMother: "",
+  brideFullName: "",
+  brideNickname: "",
+  brideFather: "",
   brideMother: "",
-  akadDate: "2025-12-12",
-  akadTime: "09:00",
-  receptionDate: "2025-12-12",
-  receptionTime: "19:00",
-  venue: "Gedung Serbaguna Graha Indah",
-  address: "Jl. Melati No. 10, Kebayoran Baru, Jakarta Selatan, DKI Jakarta",
-  mapsUrl: "https://maps.app.goo.gl/example",
-  quote:
-    "Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri.",
-  guestMessage:
-    "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.",
+  akadDate: "",
+  akadTime: "",
+  receptionDate: "",
+  receptionTime: "",
+  venue: "",
+  address: "",
+  mapsUrl: "",
+  quote: "",
+  guestMessage: "",
 };
 
 const stepLabels = ["Pilih Tema", "Isi Data", "Pratinjau"] as const;
@@ -244,42 +242,30 @@ function TextArea({
   );
 }
 
-function InvitationPreview({ form, large = false }: { form: InvitationForm; large?: boolean }) {
+import { useRef } from "react";
+
+function InvitationPreview({ form, themeSlug, large = false }: { form: InvitationForm; themeSlug?: string; large?: boolean }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: "UPDATE_PREVIEW", data: form }, "*");
+    }
+  }, [form]);
+
   return (
     <div
       className={cn(
-        "relative mx-auto overflow-hidden rounded-2xl border border-landing-border bg-landing-cream shadow-landing-card",
-        large ? "aspect-[1.52/1] w-full max-w-[650px] p-10" : "aspect-[3/4] w-full max-w-[300px] p-8",
+        "relative mx-auto overflow-hidden rounded-2xl border border-landing-border shadow-landing-card bg-landing-cream",
+        large ? "aspect-[1.52/1] w-full max-w-[650px]" : "aspect-[3/4] w-full max-w-[300px]",
       )}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,26,43,0.10),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(201,168,76,0.12),transparent_35%)]" />
-      <Leaf className="absolute left-5 top-5 h-20 w-20 text-landing-maroon/30" aria-hidden="true" />
-      <Leaf className="absolute bottom-5 right-5 h-20 w-20 rotate-180 text-landing-maroon/30" aria-hidden="true" />
-      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
-        <p className="font-ui text-[10px] font-bold uppercase text-landing-muted">The Wedding Of</p>
-        <h2 className={cn("mt-5 font-landing-serif leading-tight text-landing-ink", large ? "text-5xl" : "text-4xl")}>
-          {form.groomNickname || "Rizky"}
-          <span className="block font-display text-4xl text-landing-maroon">&amp;</span>
-          {form.brideNickname || "Amara"}
-        </h2>
-        <p className="mt-4 font-ui text-xs font-semibold text-landing-muted">{form.akadDate || "12 . 12 . 2025"}</p>
-        <div className="mt-8 grid w-full max-w-sm grid-cols-2 divide-x divide-landing-border font-ui text-xs text-landing-ink">
-          <div>
-            <p className="font-landing-serif text-lg">Akad Nikah</p>
-            <p>{form.akadTime || "09:00"} WIB</p>
-          </div>
-          <div>
-            <p className="font-landing-serif text-lg">Resepsi</p>
-            <p>{form.receptionTime || "19:00"} WIB</p>
-          </div>
-        </div>
-        <p className="mt-8 max-w-sm font-ui text-xs leading-5 text-landing-ink">
-          {form.venue}
-          <br />
-          {form.address}
-        </p>
-        <p className="mt-8 max-w-md font-ui text-xs leading-5 text-landing-ink">{form.guestMessage}</p>
-      </div>
+      <iframe
+        ref={iframeRef}
+        src={`/invite/demo?preview=true&theme=${themeSlug || "sakinah-serenity"}`}
+        className="h-full w-full border-0"
+        sandbox="allow-scripts allow-same-origin"
+      />
     </div>
   );
 }
@@ -542,12 +528,15 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
           <section className="border-r border-landing-border px-4 py-6 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-3xl">
               <SectionTitle number="1" title="Identitas Pasangan" />
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <Field label="Nama Mempelai Pria" required value={form.groomFullName} onChange={(value) => update("groomFullName", value)} />
-                <Field label="Nama Mempelai Wanita" required value={form.brideFullName} onChange={(value) => update("brideFullName", value)} />
-                <Field label="Nama Ayah Pria" required value={form.groomFather} onChange={(value) => update("groomFather", value)} />
-                <Field label="Nama Ibu Pria" required value={form.groomMother} onChange={(value) => update("groomMother", value)} />
-                <Field label="Nama Ayah Wanita" required value={form.brideFather} onChange={(value) => update("brideFather", value)} />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <Field label="Nama Lengkap Pria" required value={form.groomFullName} onChange={(value) => update("groomFullName", value)} />
+                <Field label="Nama Lengkap Wanita" required value={form.brideFullName} onChange={(value) => update("brideFullName", value)} />
+                <Field label="Panggilan Pria" required value={form.groomNickname} onChange={(value) => update("groomNickname", value)} />
+                <Field label="Panggilan Wanita" required value={form.brideNickname} onChange={(value) => update("brideNickname", value)} />
+                <Field label="Nama Ayah Pria" value={form.groomFather} onChange={(value) => update("groomFather", value)} />
+                <Field label="Nama Ibu Pria" value={form.groomMother} onChange={(value) => update("groomMother", value)} />
+                <Field label="Nama Ayah Wanita" value={form.brideFather} onChange={(value) => update("brideFather", value)} />
+                <Field label="Nama Ibu Wanita" value={form.brideMother} onChange={(value) => update("brideMother", value)} />
               </div>
 
               <SectionTitle number="2" title="Detail Acara" className="mt-6" />
@@ -634,7 +623,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               <span className="h-2 w-2 rounded-full bg-landing-success" />
               LIVE
             </div>
-            <InvitationPreview form={form} />
+            <InvitationPreview form={form} themeSlug={selectedTheme?.slug} />
             <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? DEFAULT_INVITATION_THEME_NAME}</p>
             <p className="mt-10 border-t border-landing-border pt-4 text-center font-ui text-xs text-landing-muted">Langkah 2 dari 3</p>
           </aside>
@@ -644,7 +633,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
       {step === 3 ? (
         <main className="grid min-h-[calc(100vh-4rem)] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_0.95fr] lg:px-10">
           <section className="flex items-center">
-            <InvitationPreview form={form} large />
+            <InvitationPreview form={form} themeSlug={selectedTheme?.slug} large />
           </section>
 
           <section className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">

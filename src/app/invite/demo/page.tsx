@@ -1,7 +1,6 @@
 import { demoData } from "@/data/demoInvitation";
-import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
-import FatehaThemeRendererWrapper from "@/app/invite/[slug]/FatehaThemeRendererWrapper";
 import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
+import { LiveDemoWrapper } from "./LiveDemoWrapper";
 
 type InviteDemoPageProps = {
   searchParams: Promise<{ theme?: string }>;
@@ -48,10 +47,11 @@ function createSakinahDemoData() {
 
 export default async function InviteDemoPage({ searchParams }: InviteDemoPageProps) {
   const resolvedSearch = await searchParams;
+  const theme = resolvedSearch.theme || "sakinah-serenity";
 
-  if (resolvedSearch.theme === "legacy") {
-    return <InvitationClientWrapper data={demoData} />;
+  if (theme === "legacy") {
+    return <LiveDemoWrapper initialData={demoData} theme={theme} />;
   }
 
-  return <FatehaThemeRendererWrapper data={createSakinahDemoData()} />;
+  return <LiveDemoWrapper initialData={createSakinahDemoData()} theme={theme} />;
 }
