@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronRight, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme";
 import type { LandingTheme } from "./types";
 import { ThemePreviewCard } from "./ThemePreviewCard";
 
@@ -22,7 +21,8 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
 
   const quickThemes = useMemo(() => themes.slice(0, 4), [themes]);
 
-  const selectedTheme = themes.find((theme) => theme.slug === selectedThemeKey || theme.id === selectedThemeKey);
+  const activeThemeKey = selectedThemeKey || themes[0]?.slug || themes[0]?.id || "";
+  const selectedTheme = themes.find((theme) => theme.slug === activeThemeKey || theme.id === activeThemeKey);
 
   function handleSubmit() {
     if (typeof window !== "undefined") {
@@ -100,24 +100,13 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
       <div className="mt-5">
         <div className="mb-3 font-ui text-[11px] font-bold uppercase tracking-widest text-landing-muted">Pilih tema favorit (opsional)</div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <button
-            type="button"
-            onClick={() => setSelectedThemeKey("")}
-            className={cn(
-              "flex h-20 flex-col items-center justify-center rounded-xl border bg-landing-cream px-3 text-center font-ui text-xs font-semibold text-landing-ink transition hover:border-landing-gold hover:text-landing-maroon",
-              selectedThemeKey === "" ? "border-landing-gold ring-2 ring-landing-gold/20" : "border-landing-border",
-            )}
-          >
-            {DEFAULT_INVITATION_THEME_NAME}
-            <span className="mt-1 text-[10px] font-medium text-landing-muted">Elegan biru-gold</span>
-          </button>
           {quickThemes.map((theme, index) => (
             <div key={theme.id} className="grid gap-1.5">
                <ThemePreviewCard
                  theme={theme}
                  index={index}
                  compact
-                 selected={selectedThemeKey === theme.slug || selectedThemeKey === theme.id}
+                 selected={activeThemeKey === theme.slug || activeThemeKey === theme.id}
                  onSelect={(nextTheme) => setSelectedThemeKey(nextTheme.slug || nextTheme.id)}
                />
                <span className="truncate text-center font-ui text-[11px] font-semibold text-landing-ink">{theme.name}</span>
