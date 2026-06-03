@@ -15,50 +15,16 @@ import {
   WalletCards,
 } from "lucide-react";
 import type { LandingTheme } from "./types";
+import { DEFAULT_INVITATION_THEME_KEY, DEFAULT_INVITATION_THEME_NAME, DEFAULT_INVITATION_THEME_CATEGORY } from "@/lib/default-theme";
 
 export const fallbackThemes: LandingTheme[] = [
   {
-    id: "sakura",
-    name: "Sakura",
-    slug: "sakura",
+    id: DEFAULT_INVITATION_THEME_KEY,
+    name: DEFAULT_INVITATION_THEME_NAME,
+    slug: "sakinah",
     thumbnailUrl: null,
-    culturalCategory: "romantis",
-  },
-  {
-    id: "klasik-modern",
-    name: "Klasik Modern",
-    slug: "klasik-modern",
-    thumbnailUrl: null,
-    culturalCategory: "modern",
-  },
-  {
-    id: "javanese-gold",
-    name: "Javanese Gold",
-    slug: "javanese-gold",
-    thumbnailUrl: null,
-    culturalCategory: "jawa",
-  },
-  {
-    id: "rustic-garden",
-    name: "Rustic Garden",
-    slug: "rustic-garden",
-    thumbnailUrl: null,
-    culturalCategory: "botanical",
-  },
-  {
-    id: "midnight-luxe",
-    name: "Midnight Luxe",
-    slug: "midnight-luxe",
-    thumbnailUrl: null,
-    culturalCategory: "premium",
-  },
-  {
-    id: "minimalis",
-    name: "Minimalis",
-    slug: "minimalis",
-    thumbnailUrl: null,
-    culturalCategory: "minimalis",
-  },
+    culturalCategory: DEFAULT_INVITATION_THEME_CATEGORY,
+  }
 ];
 
 export type LandingFeature = {
