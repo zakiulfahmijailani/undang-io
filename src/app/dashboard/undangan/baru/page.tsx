@@ -26,12 +26,6 @@ export default function SelectThemePage() {
 
     const dummyThemes: DashboardTheme[] = [
         { id: DEFAULT_INVITATION_THEME_KEY, name: DEFAULT_INVITATION_THEME_NAME, category: DEFAULT_INVITATION_THEME_CATEGORY, price: "Gratis", gradient: "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]", preview: "sakinah" },
-        { id: "th-01", name: "Elegant Minimalist", category: "Minimalis", price: "Gratis", gradient: "from-gray-100 to-gray-300", preview: "placeholder" },
-        { id: "th-02", name: "Classic Javanese", category: "Jawa", price: "Premium", gradient: "from-amber-700 to-amber-900", preview: "placeholder" },
-        { id: "th-03", name: "Modern Sundanese", category: "Sunda", price: "Premium", gradient: "from-teal-600 to-teal-800", preview: "placeholder" },
-        { id: "th-04", name: "Romantic Rose", category: "Romantis", price: "Gratis", gradient: "from-rose-100 to-rose-300", preview: "placeholder" },
-        { id: "th-05", name: "Dark Modern", category: "Modern", price: "Premium", gradient: "from-slate-800 to-slate-950", preview: "placeholder" },
-        { id: "th-06", name: "Pure White", category: "Minimalis", price: "Gratis", gradient: "from-stone-50 to-stone-200", preview: "placeholder" },
     ];
 
     const filteredThemes = dummyThemes.filter(theme => {
