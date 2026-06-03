@@ -18,10 +18,12 @@ type ThemePreviewCardProps = {
   index: number;
   selected?: boolean;
   compact?: boolean;
+  groomName?: string;
+  brideName?: string;
   onSelect?: (theme: LandingTheme) => void;
 };
 
-export function ThemePreviewCard({ theme, index, selected = false, compact = false, onSelect }: ThemePreviewCardProps) {
+export function ThemePreviewCard({ theme, index, selected = false, compact = false, groomName, brideName, onSelect }: ThemePreviewCardProps) {
   const content = (
     <>
       {theme.thumbnailUrl ? (
@@ -39,11 +41,11 @@ export function ThemePreviewCard({ theme, index, selected = false, compact = fal
             The Wedding Of
           </div>
           <div className="mt-2 text-center font-landing-serif text-xl leading-tight sm:text-2xl">
-            Rizky
+            {groomName || "Mempelai Pria"}
             <br />
             <span className="font-display text-2xl sm:text-3xl">&amp;</span>
             <br />
-            Amara
+            {brideName || "Mempelai Wanita"}
           </div>
           <div className="mt-1 font-ui text-[10px] font-semibold opacity-70">12.12.2025</div>
         </div>

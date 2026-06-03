@@ -9,7 +9,7 @@ async function fetchActiveThemes(): Promise<ActiveTheme[]> {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
       .from("classic_themes")
-      .select("id, name, description, cultural_category, slug")
+      .select("id, name, description, cultural_category, slug, thumbnail_url")
       .eq("status", "active")
       .eq("is_published", true)
       .order("created_at", { ascending: true });
@@ -25,12 +25,13 @@ async function fetchActiveThemes(): Promise<ActiveTheme[]> {
       description: string | null;
       cultural_category: string | null;
       slug: string | null;
+      thumbnail_url: string | null;
     }) => ({
       id: row.id,
       name: row.name ?? "",
       description: row.description ?? null,
       culturalCategory: row.cultural_category ?? null,
-      thumbnailUrl: null, // classic_themes uses JSONB assets, fallback to null for now
+      thumbnailUrl: row.thumbnail_url || null,
       slug: row.slug ?? "",
     }));
   } catch (err) {

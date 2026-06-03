@@ -108,6 +108,8 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
                  compact
                  selected={activeThemeKey === theme.slug || activeThemeKey === theme.id}
                  onSelect={(nextTheme) => setSelectedThemeKey(nextTheme.slug || nextTheme.id)}
+                 groomName={groomName}
+                 brideName={brideName}
                />
                <span className="truncate text-center font-ui text-[11px] font-semibold text-landing-ink">{theme.name}</span>
             </div>
