@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { fallbackThemes } from "@/components/landing/data";
 import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
 import type { LandingTheme } from "@/components/landing/types";
+import { DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme";
 import { cn } from "@/lib/utils";
 
 export type ActiveTheme = {
@@ -404,8 +405,8 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
             >
               <div className="flex aspect-[3/4] items-center justify-center rounded-lg bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,#eff7fb,#dcecf5_55%,#c9ddeb)]">
                 <div className="rounded-full border border-landing-gold/40 bg-white/70 px-6 py-4 text-center shadow-landing-card">
-                  <p className="font-display text-4xl text-landing-gold">FH</p>
-                  <p className="mt-1 font-ui text-xs font-bold uppercase text-landing-muted">Fateha Default</p>
+                  <p className="font-display text-4xl text-landing-gold">SS</p>
+                  <p className="mt-1 font-ui text-xs font-bold uppercase text-landing-muted">Sakinah</p>
                 </div>
               </div>
               {selectedThemeId === "" ? (
@@ -414,7 +415,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
                 </span>
               ) : null}
               <div className="px-2 py-3">
-                <h2 className="font-ui text-base font-bold text-landing-ink">Fateha Default</h2>
+                <h2 className="font-ui text-base font-bold text-landing-ink">{DEFAULT_INVITATION_THEME_NAME}</h2>
                 <p className="mt-1 font-ui text-sm text-landing-muted">Elegan <span aria-hidden="true">-</span> Biru lembut dan emas</p>
               </div>
             </button>
@@ -555,7 +556,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               LIVE
             </div>
             <InvitationPreview form={form} />
-            <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? "Fateha Default"}</p>
+            <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? DEFAULT_INVITATION_THEME_NAME}</p>
             <p className="mt-10 border-t border-landing-border pt-4 text-center font-ui text-xs text-landing-muted">Langkah 2 dari 3</p>
           </aside>
         </main>

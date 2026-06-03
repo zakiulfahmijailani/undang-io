@@ -1,4 +1,6 @@
 export const DEFAULT_INVITATION_THEME_KEY = "fateha-default";
+export const DEFAULT_INVITATION_THEME_NAME = "Sakinah Serenity";
+export const DEFAULT_INVITATION_THEME_CATEGORY = "Islami";
 
 export function normalizeThemeSelection(themeId?: string | null) {
   const value = typeof themeId === "string" ? themeId.trim() : "";

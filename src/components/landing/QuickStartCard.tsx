@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronRight, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme";
 import type { LandingTheme } from "./types";
 import { ThemePreviewCard } from "./ThemePreviewCard";
 
@@ -83,7 +84,7 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
               selectedThemeKey === "" ? "border-landing-gold ring-2 ring-landing-gold/20" : "border-landing-border",
             )}
           >
-            Fateha Default
+            {DEFAULT_INVITATION_THEME_NAME}
             <span className="mt-1 text-[10px] font-medium text-landing-muted">Elegan biru-gold</span>
           </button>
           {quickThemes.map((theme, index) => (

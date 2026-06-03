@@ -7,6 +7,7 @@ import {
   Image as ImageIcon, Plus, Trash2, ToggleLeft, ToggleRight
 } from "lucide-react"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
+import { DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme"
 
 const STEPS = [
   "Data Mempelai",
@@ -226,7 +227,7 @@ export default function CreateInvitationWizard() {
   }, [])
 
   const selectedThemeName = useMemo(() => {
-    return themeOptions.find((theme) => theme.id === f.themeId)?.name ?? "Fateha Default"
+    return themeOptions.find((theme) => theme.id === f.themeId)?.name ?? DEFAULT_INVITATION_THEME_NAME
   }, [f.themeId, themeOptions])
 
   const handlePublish = async () => {
@@ -439,7 +440,7 @@ export default function CreateInvitationWizard() {
                     </div>
                   </div>
                   <div className="p-3 bg-white">
-                    <p className="text-xs font-semibold text-[#1E1B18]">Fateha Default</p>
+                    <p className="text-xs font-semibold text-[#1E1B18]">{DEFAULT_INVITATION_THEME_NAME}</p>
                     <p className="text-[10px] text-[#9A9390]">Elegan</p>
                   </div>
                   {f.themeId === "" && (

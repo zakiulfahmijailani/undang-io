@@ -6,21 +6,32 @@ import { Badge } from "@/components/ui/badge"
 import { Eye, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { DEFAULT_INVITATION_THEME_CATEGORY, DEFAULT_INVITATION_THEME_KEY, DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme"
+
+type DashboardTheme = {
+    id: string
+    name: string
+    category: string
+    price: "Gratis" | "Premium"
+    gradient: string
+    preview: "sakinah" | "placeholder"
+}
 
 export default function SelectThemePage() {
     const [selectedCategory, setSelectedCategory] = useState("Semua")
     const [selectedPrice, setSelectedPrice] = useState("Semua")
 
-    const categories = ["Semua", "Minimalis", "Jawa", "Sunda", "Modern", "Romantis"]
+    const categories = ["Semua", DEFAULT_INVITATION_THEME_CATEGORY, "Minimalis", "Jawa", "Sunda", "Modern", "Romantis"]
     const prices = ["Semua", "Gratis", "Premium"]
 
-    const dummyThemes = [
-        { id: "th-01", name: "Elegant Minimalist", category: "Minimalis", price: "Gratis", gradient: "from-gray-100 to-gray-300" },
-        { id: "th-02", name: "Classic Javanese", category: "Jawa", price: "Premium", gradient: "from-amber-700 to-amber-900" },
-        { id: "th-03", name: "Modern Sundanese", category: "Sunda", price: "Premium", gradient: "from-teal-600 to-teal-800" },
-        { id: "th-04", name: "Romantic Rose", category: "Romantis", price: "Gratis", gradient: "from-rose-100 to-rose-300" },
-        { id: "th-05", name: "Dark Modern", category: "Modern", price: "Premium", gradient: "from-slate-800 to-slate-950" },
-        { id: "th-06", name: "Pure White", category: "Minimalis", price: "Gratis", gradient: "from-stone-50 to-stone-200" },
+    const dummyThemes: DashboardTheme[] = [
+        { id: DEFAULT_INVITATION_THEME_KEY, name: DEFAULT_INVITATION_THEME_NAME, category: DEFAULT_INVITATION_THEME_CATEGORY, price: "Gratis", gradient: "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]", preview: "sakinah" },
+        { id: "th-01", name: "Elegant Minimalist", category: "Minimalis", price: "Gratis", gradient: "from-gray-100 to-gray-300", preview: "placeholder" },
+        { id: "th-02", name: "Classic Javanese", category: "Jawa", price: "Premium", gradient: "from-amber-700 to-amber-900", preview: "placeholder" },
+        { id: "th-03", name: "Modern Sundanese", category: "Sunda", price: "Premium", gradient: "from-teal-600 to-teal-800", preview: "placeholder" },
+        { id: "th-04", name: "Romantic Rose", category: "Romantis", price: "Gratis", gradient: "from-rose-100 to-rose-300", preview: "placeholder" },
+        { id: "th-05", name: "Dark Modern", category: "Modern", price: "Premium", gradient: "from-slate-800 to-slate-950", preview: "placeholder" },
+        { id: "th-06", name: "Pure White", category: "Minimalis", price: "Gratis", gradient: "from-stone-50 to-stone-200", preview: "placeholder" },
     ];
 
     const filteredThemes = dummyThemes.filter(theme => {
@@ -76,10 +87,25 @@ export default function SelectThemePage() {
                         {/* Image Placeholder with elegant gradient */}
                         <div className={`aspect-[3/4] bg-gradient-to-br ${theme.gradient} relative overflow-hidden flex items-center justify-center`}>
                             {/* Decorative elements for the placeholder */}
-                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
-                            <div className="w-24 h-32 border-2 border-white/20 rotate-12 flex items-center justify-center rounded-sm">
-                                <span className="text-white/40 font-serif font-bold italic tracking-widest text-lg transform -rotate-12">umuman</span>
-                            </div>
+                            {theme.preview === "sakinah" ? (
+                                <>
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.86),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(195,163,107,0.28),transparent_38%)]" />
+                                    <div className="absolute left-6 top-8 h-24 w-24 rounded-full border border-[#C3A36B]/35 bg-white/25 blur-sm" />
+                                    <div className="absolute bottom-8 right-8 h-28 w-28 rounded-full border border-white/50 bg-white/20 blur-sm" />
+                                    <div className="relative flex h-52 w-40 flex-col items-center justify-center rounded-[32px] border border-[#C3A36B]/45 bg-white/45 px-5 text-center shadow-[0_18px_50px_rgba(66,94,112,0.16)] backdrop-blur-sm">
+                                        <span className="font-serif text-5xl font-semibold text-[#8A6F42]">SS</span>
+                                        <span className="mt-3 h-px w-12 bg-[#C3A36B]/70" />
+                                        <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#536979]">Sakinah</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
+                                    <div className="w-24 h-32 border-2 border-white/20 rotate-12 flex items-center justify-center rounded-sm">
+                                        <span className="text-white/40 font-serif font-bold italic tracking-widest text-lg transform -rotate-12">umuman</span>
+                                    </div>
+                                </>
+                            )}
 
                             <div className="absolute top-3 right-3 flex gap-2">
                                 <Badge className={`shadow-md ${theme.price === 'Premium' ? 'bg-[#FCA311] text-[#14213D] hover:bg-[#FCA311]/90' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}`}>
