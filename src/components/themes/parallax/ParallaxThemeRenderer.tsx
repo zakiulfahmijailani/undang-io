@@ -232,7 +232,7 @@ export function ParallaxThemeRenderer({
                     minHeight: '100dvh',
                     overflow: 'hidden',
                     isolation: 'isolate',
-                    fontFamily: `var(--parallax-font-body, 'Inter', sans-serif)`,
+                    fontFamily: "var(--font-body)",
                     ...cssVars,
                 }}
             >

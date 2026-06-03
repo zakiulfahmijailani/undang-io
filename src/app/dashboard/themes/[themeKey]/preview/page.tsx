@@ -133,8 +133,8 @@ export default async function ThemeLivePreviewPage({ params }: PreviewPageProps)
     color_bg_page: "#fdfaf6",
     color_text_body: (themeRow.colors as any)?.text || "#3d2e1e",
     color_overlay: null,
-    font_display: (themeRow.typography as any)?.heading || "Playfair Display",
-    font_body: (themeRow.typography as any)?.body || "Inter",
+    font_display: (themeRow.typography as any)?.heading || "Plus Jakarta Sans",
+    font_body: (themeRow.typography as any)?.body || "Plus Jakarta Sans",
     bg_music: null,
     loader_asset: null,
   };

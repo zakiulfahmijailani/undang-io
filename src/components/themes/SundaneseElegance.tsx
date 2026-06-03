@@ -14,9 +14,7 @@ export default function SundaneseElegance({ content, invitationId }: ThemeProps)
     return (
         <div className="bg-[#FFFDF9] min-h-screen text-[#4A2C2A] font-serif selection:bg-[#7D2731] selection:text-[#FFFDF9]">
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap');
-                h1, .script-font { font-family: 'Pinyon Script', cursive; }
-                h2, h3, h4, h5, h6, p, span, div { font-family: 'PT Serif', serif; }
+                h1, .script-font, h2, h3, h4, h5, h6, p, span, div { font-family: var(--font-body); }
             `}</style>
 
             {/* Hero Section */}

@@ -14,9 +14,8 @@ export default function ModernBold({ content, invitationId }: ThemeProps) {
     return (
         <div className="bg-[#121212] min-h-screen text-white font-sans selection:bg-[#E53935] selection:text-white pb-20">
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@300;400;600;900&display=swap');
-                h1, h2, h3, h4, h5, h6 { font-family: 'Inter', sans-serif; font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
-                p, span, div { font-family: 'Inter', sans-serif; font-weight: 400; }
+                h1, h2, h3, h4, h5, h6 { font-family: var(--font-body); font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
+                p, span, div { font-family: var(--font-body); font-weight: 400; }
                 .accent { color: #E53935; }
                 .accent-bg { background-color: #E53935; }
             `}</style>

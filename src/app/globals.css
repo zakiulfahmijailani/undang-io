@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Great+Vibes&display=swap');
 
 /* ============================================================
    UNDANG.IO — BLUSH IVORY PASTEL DESIGN SYSTEM
@@ -8,10 +7,12 @@
 
 @theme inline {
   /* ── Fonts ─────────────────────────────────────────────── */
-  --font-display:    'Great Vibes', cursive;
-  --font-body:       'Cormorant Infant', Georgia, serif;
-  --font-ui:         'Inter', system-ui, sans-serif;
-  --font-mono:       'Fira Code', monospace;
+  --font-sans:       var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-serif:      var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-display:    var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-body:       var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-ui:         var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-mono:       var(--font-plus-jakarta), system-ui, sans-serif;
 
   /* ── Core Palette (Blush Ivory) ─────────────────────────── */
   --color-primary:           #B5737A;   /* Dusty rose */
@@ -87,7 +88,7 @@
   --color-wedding-pink:       #CFADB1;
 
   /* Landing mockup tokens - additive only */
-  --font-landing-serif:  'Playfair Display', Georgia, serif;
+  --font-landing-serif:  var(--font-plus-jakarta), system-ui, sans-serif;
   --color-landing-maroon:      #8B1A2B;
   --color-landing-maroon-dark: #68111F;
   --color-landing-gold:        #C9A84C;
@@ -183,7 +184,7 @@ html {
 body {
   background-color: var(--color-background);
   color: var(--color-text);
-  font-family: var(--font-ui);
+  font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
 }
@@ -201,18 +202,25 @@ body {
 @layer utilities {
 
   /* Typography */
-  .font-display  { font-family: 'Great Vibes', cursive; }
-  .font-body     { font-family: 'Cormorant Infant', Georgia, serif; }
-  .font-ui       { font-family: 'Inter', system-ui, sans-serif; }
+  .font-display,
+  .font-body,
+  .font-ui,
+  .font-serif,
+  .font-sans,
+  .font-mono,
+  .font-landing-serif,
+  .font-serif-wedding {
+    font-family: var(--font-body);
+  }
 
   .text-display {
-    font-family: 'Great Vibes', cursive;
+    font-family: var(--font-body);
     font-size: clamp(3rem, 8vw, 6rem);
     line-height: 1.1;
     color: var(--color-primary);
   }
   .text-overline {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     line-height: 1;
     letter-spacing: 0.16em;
@@ -220,7 +228,7 @@ body {
     text-transform: uppercase;
   }
   .text-label-lg {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     line-height: 1;
     letter-spacing: 0.08em;
@@ -228,7 +236,7 @@ body {
     text-transform: uppercase;
   }
   .text-label-sm {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     line-height: 1;
     letter-spacing: 0.10em;
@@ -236,7 +244,7 @@ body {
     text-transform: uppercase;
   }
   .text-caption {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     line-height: 1.4;
     letter-spacing: 0.01em;
@@ -263,7 +271,7 @@ body {
     padding: 12px 24px;
     border-radius: var(--radius-full);
     font-weight: 600;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     transition: all 200ms ease;
     cursor: pointer;
     box-shadow: var(--shadow-gold);
@@ -279,7 +287,7 @@ body {
     padding: 12px 24px;
     border-radius: var(--radius-full);
     font-weight: 600;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     transition: all 200ms ease;
     cursor: pointer;
   }
@@ -324,7 +332,7 @@ body {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: 16px;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     transition: border-color 200ms ease;
     background: #FFFFFF;
     color: var(--color-text);
@@ -431,10 +439,4 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
   }
 
-  /* Material symbols (kept) */
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    display: inline-block;
-    line-height: 1;
-  }
 }

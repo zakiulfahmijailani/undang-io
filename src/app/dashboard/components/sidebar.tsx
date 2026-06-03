@@ -39,18 +39,19 @@ export function Sidebar({ isOpen }: { isOpen: boolean }) {
                     isOpen ? "w-64 opacity-100" : "w-0 opacity-0 border-none",
                 )}
             >
-                <div className="flex w-64 flex-col items-center justify-center border-b border-landing-border px-6 py-8">
+                <div className="flex w-64 flex-col items-center justify-center border-b border-landing-border px-6 py-7">
                     <Link href="/dashboard" className="group flex flex-col items-center gap-3">
-                        <span className="flex h-20 w-20 items-center justify-center rounded-3xl border border-landing-gold/30 bg-landing-cream shadow-sm">
+                        <span className="flex h-24 w-40 items-center justify-center rounded-2xl border border-landing-gold/25 bg-white px-4 py-3 shadow-sm">
                             <Image
                                 src="/logo.png"
                                 alt="undang.io logo"
-                                width={88}
-                                height={88}
-                                className="h-14 w-14 object-contain transition-transform group-hover:scale-105"
+                                width={160}
+                                height={96}
+                                priority
+                                className="h-20 w-32 object-contain transition-transform group-hover:scale-105"
                             />
                         </span>
-                        <span className="font-landing-serif text-3xl font-semibold tracking-tight text-landing-ink">
+                        <span className="font-ui text-3xl font-extrabold tracking-tight text-landing-ink">
                             undang<span className="text-landing-gold">.io</span>
                         </span>
                     </Link>

@@ -14,9 +14,7 @@ export default function RusticBoho({ content, invitationId }: ThemeProps) {
     return (
         <div className="bg-[#FAF6F0] min-h-screen text-[#5D534A] font-sans selection:bg-[#C27E6A] selection:text-white pb-20">
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap');
-                h1, h2, h3, h4, h5, h6 { font-family: 'Cormorant Garamond', serif; }
-                p, span, div, a, button, input { font-family: 'Montserrat', sans-serif; }
+                h1, h2, h3, h4, h5, h6, p, span, div, a, button, input { font-family: var(--font-body); }
             `}</style>
 
             {/* Hero Section */}

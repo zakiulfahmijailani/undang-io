@@ -13,9 +13,7 @@ export default function ClassicJavanese({ content, invitationId }: ThemeProps) {
     return (
         <div className="bg-[#FAF3E0] min-h-screen text-[#4A3B32] font-serif selection:bg-[#BE8C3A] selection:text-white">
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
-                h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
-                p, span, div { font-family: 'Lora', serif; }
+                h1, h2, h3, h4, h5, h6, p, span, div { font-family: var(--font-body); }
             `}</style>
 
             {/* Hero Section */}

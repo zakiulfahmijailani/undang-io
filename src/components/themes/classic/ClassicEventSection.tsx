@@ -105,7 +105,7 @@ function EventCard({
       <h3
         className="text-xl font-semibold tracking-wide"
         style={{
-          fontFamily: assets.font_heading ?? "'Oswald', sans-serif",
+          fontFamily: assets.font_heading ?? "var(--font-body)",
           color: assets.color_primary ?? "#8b6c42",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
