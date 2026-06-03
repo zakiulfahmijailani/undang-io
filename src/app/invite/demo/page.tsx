@@ -1,108 +1,57 @@
-"use client";
-
-import { useState, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { demoData } from "@/data/demoInvitation";
-import CoverSection from "@/components/invitation/CoverSection";
-import HeroSection from "@/components/invitation/HeroSection";
-import CoupleSection from "@/components/invitation/CoupleSection";
-import QuoteSection from "@/components/invitation/QuoteSection";
-import LoveStorySection from "@/components/invitation/LoveStorySection";
-import CountdownSection from "@/components/invitation/CountdownSection";
-import EventSection from "@/components/invitation/EventSection";
-import GallerySection from "@/components/invitation/GallerySection";
-import LoveGiftSection from "@/components/invitation/LoveGiftSection";
-import RsvpSection from "@/components/invitation/RsvpSection";
-import BottomNavbar from "@/components/invitation/BottomNavbar";
-import MusicButton from "@/components/invitation/MusicButton";
+import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
+import FatehaThemeRendererWrapper from "@/app/invite/[slug]/FatehaThemeRendererWrapper";
+import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
 
-export default function InviteDemoPage() {
-    const [isOpened, setIsOpened] = useState(false);
-    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-    const audioRef = useRef<HTMLAudioElement>(null);
+type InviteDemoPageProps = {
+  searchParams: Promise<{ theme?: string }>;
+};
 
-    const handleOpen = () => {
-        setIsOpened(true);
-        if (audioRef.current) {
-            audioRef.current.play().then(() => {
-                setIsMusicPlaying(true);
-            }).catch(() => {});
-        }
-    };
+function createSakinahDemoData() {
+  return mapInvitationToFatehaData(
+    {
+      id: "demo",
+      slug: "demo",
+      groom_full_name: demoData.groom.fullName,
+      groom_nickname: "Budi",
+      groom_father_name: demoData.groom.father,
+      groom_mother_name: demoData.groom.mother,
+      bride_full_name: demoData.bride.fullName,
+      bride_nickname: "Ayu",
+      bride_father_name: demoData.bride.father,
+      bride_mother_name: demoData.bride.mother,
+      akad_datetime: demoData.akad.date,
+      akad_location_name: demoData.akad.venue,
+      akad_location_address: demoData.akad.address,
+      akad_maps_url: demoData.akad.mapsUrl,
+      resepsi_datetime: demoData.reception.date,
+      resepsi_location_name: demoData.reception.venue,
+      resepsi_location_address: demoData.reception.address,
+      resepsi_maps_url: demoData.reception.mapsUrl,
+      quote_text: demoData.quote.text,
+      quote_source: demoData.quote.source,
+      love_story: demoData.loveStory,
+      gallery_photos: demoData.gallery,
+      rekening: demoData.bankAccounts,
+      gift_shipping_address: demoData.giftAddress,
+      rsvp_messages: demoData.rsvpMessages.map((message) => ({
+        id: message.id,
+        guest_name: message.guestName,
+        attendance: message.attendance,
+        message: message.message,
+        created_at: message.createdAt,
+      })),
+    },
+    { isPreview: true },
+  );
+}
 
-    const toggleMusic = () => {
-        if (!audioRef.current) return;
-        if (isMusicPlaying) {
-            audioRef.current.pause();
-        } else {
-            audioRef.current.play();
-        }
-        setIsMusicPlaying(!isMusicPlaying);
-    };
+export default async function InviteDemoPage({ searchParams }: InviteDemoPageProps) {
+  const resolvedSearch = await searchParams;
 
-    return (
-        <div className="min-h-screen bg-background text-foreground">
-            <audio
-                ref={audioRef}
-                loop
-                preload="auto"
-                src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-            />
+  if (resolvedSearch.theme === "legacy") {
+    return <InvitationClientWrapper data={demoData} />;
+  }
 
-            {!isOpened && (
-                <CoverSection
-                    coupleShortName={demoData.coupleShortName}
-                    coverPhoto={demoData.coverPhoto}
-                    onOpen={handleOpen}
-                />
-            )}
-
-            <AnimatePresence>
-                {isOpened && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <HeroSection
-                            coupleShortName={demoData.coupleShortName}
-                            groomName={demoData.groom.fullName}
-                            brideName={demoData.bride.fullName}
-                            heroPhoto={demoData.heroPhoto}
-                            weddingDate={demoData.akad.date}
-                            calendarUrl={demoData.calendarUrl}
-                        />
-
-                        <CoupleSection groom={demoData.groom} bride={demoData.bride} />
-
-                        <QuoteSection quote={demoData.quote} />
-
-                        <LoveStorySection stories={demoData.loveStory} />
-
-                        <CountdownSection targetDate={demoData.akad.date} />
-
-                        <EventSection
-                            akad={demoData.akad}
-                            reception={demoData.reception}
-                            dressCode={demoData.dressCode}
-                        />
-
-                        <GallerySection photos={demoData.gallery} />
-
-                        <LoveGiftSection
-                            bankAccounts={demoData.bankAccounts}
-                            giftAddress={demoData.giftAddress}
-                        />
-
-                        <RsvpSection existingMessages={demoData.rsvpMessages} />
-
-                        <div className="h-20" />
-
-                        <BottomNavbar />
-                        <MusicButton isPlaying={isMusicPlaying} onToggle={toggleMusic} />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
+  return <FatehaThemeRendererWrapper data={createSakinahDemoData()} />;
 }

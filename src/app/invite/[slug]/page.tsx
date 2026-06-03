@@ -52,7 +52,10 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     if (slug === '404') notFound();
 
     if (slug === 'demo') {
-        if (resolvedSearch.theme === DEFAULT_INVITATION_THEME_KEY) {
+        const shouldRenderSakinahDemo =
+            !resolvedSearch.theme || resolvedSearch.theme === DEFAULT_INVITATION_THEME_KEY;
+
+        if (shouldRenderSakinahDemo) {
             const fatehaDemoData = mapInvitationToFatehaData({
                 id: 'demo',
                 slug: 'demo',

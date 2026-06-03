@@ -43,7 +43,7 @@ export default function SelectThemePage() {
     const previewHref = (theme: DashboardTheme) =>
         theme.id === DEFAULT_INVITATION_THEME_KEY
             ? `/invite/demo?preview=true&theme=${DEFAULT_INVITATION_THEME_KEY}`
-            : "/invite/demo?preview=true";
+            : "/invite/demo?preview=true&theme=legacy";
 
     return (
         <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
