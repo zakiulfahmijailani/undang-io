@@ -3,6 +3,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -37,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select } from "@/components/ui/select";
 
 type LoveStoryItem = {
   year: string;
@@ -167,54 +168,56 @@ const defaultLoveStory: LoveStoryItem[] = [
 
 const defaultSections = ["hero", "couple", "quote", "lovestory", "countdown", "event", "gallery", "gift", "rsvp", "music"];
 
-function initialForm(data: InvitationEditorInitialData): EditorForm {
+function initialForm(data?: Partial<InvitationEditorInitialData>): EditorForm {
   return {
-    status: data.status || "draft",
-    slug: data.slug || "",
-    groom_name: data.groom_nickname || "",
-    bride_name: data.bride_nickname || "",
-    groom_full_name: data.groom_full_name || "",
-    bride_full_name: data.bride_full_name || "",
-    groom_father: data.groom_father_name || "",
-    groom_mother: data.groom_mother_name || "",
-    bride_father: data.bride_father_name || "",
-    bride_mother: data.bride_mother_name || "",
-    groom_photo_url: data.groom_photo_url || "",
-    bride_photo_url: data.bride_photo_url || "",
-    couple_photo_url: data.couple_photo_url || "",
-    background_photo_url: data.background_photo_url || "",
-    akad_date: data.akad_datetime || "",
-    akad_venue: data.akad_location_name || "",
-    akad_address: data.akad_location_address || "",
-    akad_maps_url: data.akad_maps_url || "",
-    reception_date: data.resepsi_datetime || "",
-    reception_venue: data.resepsi_location_name || "",
-    reception_address: data.resepsi_location_address || "",
-    reception_maps_url: data.resepsi_maps_url || "",
-    dresscode_colors: data.dresscode_colors || "",
-    dresscode_note: data.dresscode_note || "",
-    greeting_text: data.quote_text || "",
-    quote_source: data.quote_source || "Mempelai",
-    music_url: data.music_url || "",
-    love_story: data.love_story?.length ? data.love_story : defaultLoveStory,
-    gallery_photos: data.gallery_photos || [],
-    gift_bank_name: data.gift_bank_name || "",
-    gift_bank_account: data.gift_bank_account || "",
-    gift_bank_account_name: data.gift_bank_account_name || "",
-    gift_shipping_address: data.gift_shipping_address || "",
-    qris_account: data.qris_account || "",
-    sections_order: data.sections_order || defaultSections,
-    sections_visibility: data.sections_visibility || {},
-    show_couple_photos: data.show_couple_photos ?? true,
-    show_prewed_gallery: data.show_prewed_gallery ?? true,
-    show_gift_section: data.show_gift_section ?? true,
-    rsvp_enabled: data.rsvp_enabled ?? true,
-  };
+    status: data?.status || "draft",
+    slug: data?.slug || "",
+    groom_name: data?.groom_nickname || "",
+    bride_name: data?.bride_nickname || "",
+    groom_full_name: data?.groom_full_name || "",
+    bride_full_name: data?.bride_full_name || "",
+    groom_father: data?.groom_father_name || "",
+    groom_mother: data?.groom_mother_name || "",
+    bride_father: data?.bride_father_name || "",
+    bride_mother: data?.bride_mother_name || "",
+    groom_photo_url: data?.groom_photo_url || "",
+    bride_photo_url: data?.bride_photo_url || "",
+    couple_photo_url: data?.couple_photo_url || "",
+    background_photo_url: data?.background_photo_url || "",
+    akad_date: data?.akad_datetime || "",
+    akad_venue: data?.akad_location_name || "",
+    akad_address: data?.akad_location_address || "",
+    akad_maps_url: data?.akad_maps_url || "",
+    reception_date: data?.resepsi_datetime || "",
+    reception_venue: data?.resepsi_location_name || "",
+    reception_address: data?.resepsi_location_address || "",
+    reception_maps_url: data?.resepsi_maps_url || "",
+    dresscode_colors: data?.dresscode_colors || "",
+    dresscode_note: data?.dresscode_note || "",
+    greeting_text: data?.quote_text || "",
+    quote_source: data?.quote_source || "Mempelai",
+    music_url: data?.music_url || "",
+    love_story: data?.love_story?.length ? data?.love_story : defaultLoveStory,
+    gallery_photos: data?.gallery_photos || [],
+    gift_bank_name: data?.gift_bank_name || "",
+    gift_bank_account: data?.gift_bank_account || "",
+    gift_bank_account_name: data?.gift_bank_account_name || "",
+    gift_shipping_address: data?.gift_shipping_address || "",
+    qris_account: data?.qris_account || "",
+    sections_order: data?.sections_order || defaultSections,
+    sections_visibility: data?.sections_visibility || {},
+    show_couple_photos: data?.show_couple_photos ?? true,
+    show_prewed_gallery: data?.show_prewed_gallery ?? true,
+    show_gift_section: data?.show_gift_section ?? true,
+    rsvp_enabled: data?.rsvp_enabled ?? true,
+
+      };
 }
 
 // Custom components removed in favor of Shadcn UI components.
 
-export default function EditorClient({ initialData }: { initialData: InvitationEditorInitialData }) {
+export default function InvitationEditorForm({ initialData, isCreateMode, themeId }: { initialData?: Partial<InvitationEditorInitialData>, isCreateMode?: boolean, themeId?: string }) {
+  const router = useRouter();
   const [formData, setFormData] = useState<EditorForm>(() => initialForm(initialData));
   const [activeTab, setActiveTab] = useState<TabId>("info-dasar");
   const [isSaving, setIsSaving] = useState(false);
@@ -287,7 +290,25 @@ export default function EditorClient({ initialData }: { initialData: InvitationE
     const payload = nextStatus ? { ...formData, status: nextStatus } : formData;
 
     try {
-      const response = await fetch(`/api/invitations/${initialData.id}`, {
+      if (isCreateMode) {
+        const response = await fetch(`/api/invitations`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, theme_id: themeId, details: { ...payload } }),
+        });
+        const result = (await response.json()) as ApiResponse<{ id: string }>;
+        if (!response.ok || result.error) { toast.error(result.error?.message || "Gagal menyimpan undangan."); return; }
+        if (result.data?.id) {
+          await fetch(`/api/invitations/${result.data.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          toast.success("Undangan berhasil dibuat!");
+          router.push(`/dashboard/undangan/${result.data.id}/edit`);
+        }
+      } else {
+        const response = await fetch(`/api/invitations/${initialData?.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -303,6 +324,7 @@ export default function EditorClient({ initialData }: { initialData: InvitationE
         updateField("status", nextStatus);
       }
       toast.success(nextStatus === "active" ? "Undangan dipublikasikan." : "Perubahan tersimpan.");
+      }
     } catch (error) {
       console.error("[editor] save failed:", error);
       toast.error("Terjadi kesalahan saat menyimpan.");
@@ -313,11 +335,12 @@ export default function EditorClient({ initialData }: { initialData: InvitationE
 
   async function handleUpload(file: File | null) {
     if (!file) return;
+    if (isCreateMode) { toast.error("Simpan undangan terlebih dahulu untuk mengunggah foto."); return; }
     setIsUploading(true);
 
     const body = new FormData();
     body.set("file", file);
-    body.set("invitation_id", initialData.id);
+    body.set("invitation_id", initialData?.id || "");
     body.set("type", "cover");
 
     try {
@@ -370,14 +393,9 @@ export default function EditorClient({ initialData }: { initialData: InvitationE
               <div className="grid gap-4">
                 <div className="space-y-2">
                   <Label>Status Undangan</Label>
-                  <Select value={formData.status} onValueChange={(value) => updateField("status", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="active">Aktif</SelectItem>
-                    </SelectContent>
+                  <Select value={formData.status} onChange={(e) => updateField("status", e.target.value)}>
+                    <option value="draft">Draft</option>
+                    <option value="active">Aktif</option>
                   </Select>
                 </div>
                 <div className="space-y-2">
@@ -763,7 +781,7 @@ export default function EditorClient({ initialData }: { initialData: InvitationE
               <Music className="h-5 w-5 text-white/50" aria-hidden="true" />
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto rounded-[1.5rem] bg-white">
-              <InvitationClientWrapper data={liveData} invitationId={initialData.id} />
+              {initialData?.id ? <InvitationClientWrapper data={liveData} invitationId={initialData.id} /> : <div className="flex h-full items-center justify-center p-6 text-center text-muted-foreground">Simpan undangan terlebih dahulu untuk melihat preview lengkap.</div>}
             </div>
           </div>
         </aside>
