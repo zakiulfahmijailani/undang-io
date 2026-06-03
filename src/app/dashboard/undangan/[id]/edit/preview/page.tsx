@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import EditorClient, { type InvitationEditorInitialData } from "../EditorClient";
+import InvitationEditorForm, { type InvitationEditorInitialData } from "@/components/dashboard/InvitationEditorForm";
 
 function createDummyInvitation(id: string): InvitationEditorInitialData {
     return {
@@ -53,7 +53,7 @@ export default async function PreviewSplitViewPage({ params }: { params: Promise
             <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-stone-100">
                 <div className="hidden lg:flex w-[480px] flex-col border-r border-stone-200 bg-white overflow-y-auto">
                     <div className="h-full">
-                        <EditorClient initialData={dummyInvitation} />
+                        <InvitationEditorForm initialData={dummyInvitation} />
                     </div>
                 </div>
                 <div className="flex-1 flex flex-col bg-stone-200 relative overflow-hidden">
@@ -135,7 +135,7 @@ export default async function PreviewSplitViewPage({ params }: { params: Promise
             {/* Left Panel: Editor Sidebar (Hidden on small mobile) */}
             <div className="hidden lg:flex w-[480px] flex-col border-r border-stone-200 bg-white overflow-y-auto">
                 <div className="h-full">
-                    <EditorClient initialData={invitation as InvitationEditorInitialData} />
+                    <InvitationEditorForm initialData={invitation as InvitationEditorInitialData} />
                 </div>
             </div>
 

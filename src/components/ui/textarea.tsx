@@ -19,8 +19,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <label
             htmlFor={textareaId}
             className={cn(
-              "text-sm font-semibold",
-              error ? "text-[var(--color-error-base)]" : "text-[var(--color-neutral-700)]"
+              "text-[11px] font-bold tracking-widest uppercase mb-1",
+              error ? "text-[var(--color-error-base)]" : "text-[var(--color-landing-muted)]"
             )}
           >
             {label}
@@ -32,9 +32,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             id={textareaId}
             disabled={disabled}
             className={cn(
-              "flex min-h-[100px] w-full rounded-md border text-sm bg-[var(--color-surface-card)] px-3 py-2.5 transition-all duration-150 resize-y",
-              "border-[var(--color-neutral-300)] text-[var(--color-neutral-900)] placeholder:text-[var(--color-neutral-400)]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-300)] focus-visible:border-[var(--color-primary-500)]",
+              "flex min-h-[100px] w-full rounded-2xl border text-sm bg-[var(--color-landing-paper)] px-4 py-3 transition-all duration-150 resize-y",
+              "border-[var(--color-landing-border)] text-[var(--color-neutral-900)] placeholder:text-[var(--color-neutral-400)] shadow-sm",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-landing-gold)] focus-visible:border-[var(--color-landing-gold)]",
               "disabled:cursor-not-allowed disabled:bg-[var(--color-neutral-100)] disabled:border-[var(--color-neutral-200)] disabled:text-[var(--color-neutral-400)] disabled:resize-none",
               error && "border-[var(--color-error-base)] focus-visible:ring-[var(--color-error-border)] focus-visible:border-[var(--color-error-base)]",
               className

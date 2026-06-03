@@ -11,9 +11,9 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 primary:
-                    "bg-[var(--color-primary-500)] text-[var(--color-neutral-0)] shadow-[var(--shadow-gold)] hover:bg-[var(--color-primary-600)] active:bg-[var(--color-primary-700)] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-[var(--color-primary-300)] focus-visible:ring-offset-2 disabled:bg-[var(--color-neutral-200)] disabled:text-[var(--color-neutral-400)] disabled:shadow-none hover:scale-[1.02] disabled:scale-100",
+                    "bg-[var(--color-landing-maroon)] text-[var(--color-neutral-0)] shadow-[var(--shadow-landing-button)] hover:bg-[var(--color-landing-maroon-dark)] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-[var(--color-landing-maroon)] focus-visible:ring-offset-2 disabled:bg-[var(--color-neutral-200)] disabled:text-[var(--color-neutral-400)] disabled:shadow-none hover:scale-[1.02] disabled:scale-100 rounded-full",
                 secondary:
-                    "bg-transparent border-[1.5px] border-[var(--color-neutral-300)] text-[var(--color-neutral-800)] hover:bg-[var(--color-neutral-50)] hover:border-[var(--color-neutral-400)] active:bg-[var(--color-neutral-100)] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-[var(--color-neutral-300)] focus-visible:ring-offset-2 disabled:border-[var(--color-neutral-200)] disabled:text-[var(--color-neutral-300)]",
+                    "bg-transparent border-[1.5px] border-[var(--color-landing-border)] text-[var(--color-landing-maroon)] hover:bg-[var(--color-landing-cream)] hover:border-[var(--color-landing-maroon)] active:bg-[var(--color-landing-paper)] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-[var(--color-landing-border)] focus-visible:ring-offset-2 disabled:border-[var(--color-neutral-200)] disabled:text-[var(--color-neutral-300)] rounded-full",
                 ghost:
                     "bg-transparent text-[var(--color-neutral-600)] hover:bg-[var(--color-neutral-100)] active:bg-[var(--color-neutral-200)] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-[var(--color-neutral-300)] disabled:text-[var(--color-neutral-400)]",
                 destructive:
