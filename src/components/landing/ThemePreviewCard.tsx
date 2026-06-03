@@ -28,6 +28,17 @@ export function ThemePreviewCard({ theme, index, selected = false, compact = fal
     <>
       {theme.thumbnailUrl ? (
         <img src={theme.thumbnailUrl} alt={theme.name} className="h-full w-full object-cover" loading="lazy" />
+      ) : theme.slug === "sakinah-serenity" || theme.id === "sakinah-serenity" ? (
+        <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#14213D] via-[#1e305a] to-[#14213D]">
+           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%)]" />
+           <div className="absolute -left-4 -top-4 h-16 w-16 rounded-full border border-[#C3A36B]/20 bg-[#C3A36B]/5 blur-sm" />
+           <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full border border-white/10 bg-white/5 blur-sm" />
+           <div className="relative flex flex-col items-center justify-center text-center p-2 rounded-xl border border-[#C3A36B]/20 bg-white/5 backdrop-blur-sm shadow-xl">
+             <span className={cn("font-serif font-semibold text-[#C3A36B] leading-none mb-1", compact ? "text-xl" : "text-3xl")}>SS</span>
+             <span className={cn("h-px bg-[#C3A36B]/50 mb-1.5", compact ? "w-5" : "w-8")} />
+             <span className={cn("font-semibold uppercase text-[#9bb0c7]", compact ? "text-[6px] tracking-[0.15em]" : "text-[8px] tracking-[0.25em]")}>Sakinah</span>
+           </div>
+        </div>
       ) : (
         <div
           className={cn(
