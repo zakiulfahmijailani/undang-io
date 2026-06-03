@@ -53,28 +53,28 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="grid gap-2 font-ui text-xs font-bold uppercase text-landing-muted">
+        <label className="grid gap-2 font-ui text-[11px] font-bold uppercase tracking-widest text-landing-muted">
           Nama Pria
           <input
             value={groomName}
             onChange={(event) => setGroomName(event.target.value)}
             placeholder="Nama mempelai pria"
-            className="h-11 rounded-xl border border-landing-border bg-landing-cream px-4 font-ui text-sm font-medium normal-case text-landing-ink outline-none transition placeholder:text-landing-muted/60 focus:border-landing-maroon focus:ring-2 focus:ring-landing-maroon/10"
+            className="h-11 rounded-full border border-landing-border bg-landing-paper px-4 font-ui text-sm font-medium normal-case text-landing-ink shadow-sm outline-none transition placeholder:text-landing-muted/60 focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/50"
           />
         </label>
-        <label className="grid gap-2 font-ui text-xs font-bold uppercase text-landing-muted">
+        <label className="grid gap-2 font-ui text-[11px] font-bold uppercase tracking-widest text-landing-muted">
           Nama Wanita
           <input
             value={brideName}
             onChange={(event) => setBrideName(event.target.value)}
             placeholder="Nama mempelai wanita"
-            className="h-11 rounded-xl border border-landing-border bg-landing-cream px-4 font-ui text-sm font-medium normal-case text-landing-ink outline-none transition placeholder:text-landing-muted/60 focus:border-landing-maroon focus:ring-2 focus:ring-landing-maroon/10"
+            className="h-11 rounded-full border border-landing-border bg-landing-paper px-4 font-ui text-sm font-medium normal-case text-landing-ink shadow-sm outline-none transition placeholder:text-landing-muted/60 focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/50"
           />
         </label>
       </div>
 
       <div className="mt-5">
-        <div className="mb-3 font-ui text-xs font-bold uppercase text-landing-muted">Pilih tema favorit (opsional)</div>
+        <div className="mb-3 font-ui text-[11px] font-bold uppercase tracking-widest text-landing-muted">Pilih tema favorit (opsional)</div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <button
             type="button"
@@ -125,7 +125,7 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
         Tanpa login <span aria-hidden="true">-</span> live dalam 5 menit <span aria-hidden="true">-</span> gratis 25 menit
       </p>
 
-      <div className="absolute -left-14 top-7 hidden max-w-[78px] text-center font-display text-xl leading-tight text-landing-maroon md:block">
+      <div className="absolute -left-20 top-7 hidden max-w-[140px] -rotate-6 text-center font-display text-xl leading-tight text-landing-maroon xl:block">
         <Zap className="mx-auto mb-1 h-5 w-5 text-landing-gold" aria-hidden="true" />
         Mulai sekarang, gratis 25 menit!
       </div>
