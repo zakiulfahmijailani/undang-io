@@ -159,7 +159,7 @@ export function useTheme(options: UseThemeOptions): UseThemeResult {
             try {
                 // 1. Fetch theme row
                 const themeQuery = supabase
-                    .from('themes')
+                    .from('classic_themes')
                     .select('*')
                     .eq('is_published', true);
 
@@ -251,7 +251,7 @@ export function useInvitationTheme(
 
             try {
                 const { data: themeData, error: themeError } = await supabase
-                    .from('themes')
+                    .from('classic_themes')
                     .select('*')
                     .eq('id', activeThemeId)
                     .single();

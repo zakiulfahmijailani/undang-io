@@ -1,4 +1,4 @@
-export const DEFAULT_INVITATION_THEME_KEY = "fateha-default";
+export const DEFAULT_INVITATION_THEME_KEY = "sakinah-serenity";
 export const DEFAULT_INVITATION_THEME_NAME = "Sakinah Serenity";
 export const DEFAULT_INVITATION_THEME_CATEGORY = "Islami";
 

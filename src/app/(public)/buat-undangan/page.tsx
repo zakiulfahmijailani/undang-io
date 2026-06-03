@@ -8,9 +8,10 @@ async function fetchActiveThemes(): Promise<ActiveTheme[]> {
   try {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
-      .from("themes")
-      .select("id, name, description, cultural_category, thumbnail_url, slug")
-      .eq("is_active", true)
+      .from("classic_themes")
+      .select("id, name, description, cultural_category, slug")
+      .eq("status", "active")
+      .eq("is_published", true)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -23,14 +24,13 @@ async function fetchActiveThemes(): Promise<ActiveTheme[]> {
       name: string | null;
       description: string | null;
       cultural_category: string | null;
-      thumbnail_url: string | null;
       slug: string | null;
     }) => ({
       id: row.id,
       name: row.name ?? "",
       description: row.description ?? null,
       culturalCategory: row.cultural_category ?? null,
-      thumbnailUrl: row.thumbnail_url ?? null,
+      thumbnailUrl: null, // classic_themes uses JSONB assets, fallback to null for now
       slug: row.slug ?? "",
     }));
   } catch (err) {

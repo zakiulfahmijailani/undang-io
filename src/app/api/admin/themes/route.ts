@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         );
 
         const { data: themes, error } = await supabase
-            .from("themes")
+            .from("classic_themes")
             .select("*")
             .order("created_at", { ascending: false });
 
@@ -72,16 +72,19 @@ export async function POST(request: NextRequest) {
         // TODO: Verify if the user is an admin here
 
         const { data, error } = await supabase
-            .from("themes")
+            .from("classic_themes")
             .insert([{
                 name: body.name,
+                slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-'),
                 description: body.description,
-                thumbnail_url: body.thumbnail_url,
-                background_type: body.background_type,
-                background_value: body.background_value,
-                music_url: body.music_url,
-                is_premium: body.is_premium,
-                price: body.price
+                cultural_category: body.cultural_category || 'general',
+                status: 'draft',
+                is_published: false,
+                config: {},
+                assets: {},
+                colors: {},
+                typography: {},
+                animation_settings: {}
             }])
             .select()
             .single();

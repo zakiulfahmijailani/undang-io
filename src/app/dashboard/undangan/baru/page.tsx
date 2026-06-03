@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Eye, ChevronRight } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DEFAULT_INVITATION_THEME_CATEGORY, DEFAULT_INVITATION_THEME_KEY, DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme"
+import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
 type DashboardTheme = {
     id: string
@@ -15,28 +16,60 @@ type DashboardTheme = {
     price: "Gratis" | "Premium"
     gradient: string
     preview: "sakinah" | "placeholder"
+    slug: string
 }
 
 export default function SelectThemePage() {
     const [selectedCategory, setSelectedCategory] = useState("Semua")
     const [selectedPrice, setSelectedPrice] = useState("Semua")
+    const [themes, setThemes] = useState<DashboardTheme[]>([])
+    const [isLoading, setIsLoading] = useState(true)
 
     const categories = ["Semua", DEFAULT_INVITATION_THEME_CATEGORY, "Minimalis", "Jawa", "Sunda", "Modern", "Romantis"]
     const prices = ["Semua", "Gratis", "Premium"]
 
-    const dummyThemes: DashboardTheme[] = [
-        { id: DEFAULT_INVITATION_THEME_KEY, name: DEFAULT_INVITATION_THEME_NAME, category: DEFAULT_INVITATION_THEME_CATEGORY, price: "Gratis", gradient: "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]", preview: "sakinah" },
-    ];
+    useEffect(() => {
+        async function fetchThemes() {
+            try {
+                const supabase = createBrowserSupabaseClient()
+                const { data, error } = await supabase
+                    .from("classic_themes")
+                    .select("id, name, cultural_category, slug")
+                    .eq("status", "active")
+                    .eq("is_published", true)
+                    .order("created_at", { ascending: true })
 
-    const filteredThemes = dummyThemes.filter(theme => {
+                if (error) throw error
+
+                const mapped: DashboardTheme[] = (data || []).map(row => ({
+                    id: row.id,
+                    name: row.name || "Tanpa Nama",
+                    category: row.cultural_category || "Lainnya",
+                    price: "Gratis", // Freemium model default
+                    gradient: "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
+                    preview: row.slug === "sakinah-serenity" ? "sakinah" : "placeholder",
+                    slug: row.slug || row.id
+                }))
+                
+                setThemes(mapped)
+            } catch (err) {
+                console.error("Failed to fetch themes", err)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchThemes()
+    }, [])
+
+    const filteredThemes = themes.filter(theme => {
         const matchCategory = selectedCategory === "Semua" || theme.category === selectedCategory;
         const matchPrice = selectedPrice === "Semua" || theme.price === selectedPrice;
         return matchCategory && matchPrice;
     });
 
     const previewHref = (theme: DashboardTheme) =>
-        theme.id === DEFAULT_INVITATION_THEME_KEY
-            ? `/invite/demo?preview=true&theme=${DEFAULT_INVITATION_THEME_KEY}`
+        theme.slug === "sakinah-serenity"
+            ? `/invite/demo?preview=true&theme=${theme.slug}`
             : "/invite/demo?preview=true&theme=legacy";
 
     return (
@@ -123,7 +156,7 @@ export default function SelectThemePage() {
                                         <Eye className="w-4 h-4" /> Live Preview
                                     </Button>
                                 </Link>
-                                <Link href={`/dashboard/undangan/baru/form?tema=${theme.id}`} className="w-full">
+                                <Link href={`/dashboard/undangan/baru/form?tema=${theme.slug}`} className="w-full">
                                     <Button className="w-full bg-[#14213D] hover:bg-[#1a2b50] text-white gap-2 transition-all group-hover:bg-[#FCA311] group-hover:text-[#14213D]">
                                         Pilih Tema Ini <ChevronRight className="w-4 h-4 ml-auto" />
                                     </Button>

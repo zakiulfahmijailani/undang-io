@@ -12,7 +12,6 @@ type ThemeRow = {
   id: string | null;
   name: string | null;
   slug: string | null;
-  thumbnail_url: string | null;
   cultural_category: string | null;
 };
 
@@ -27,7 +26,7 @@ function normalizeTheme(row: ThemeRow): LandingTheme | null {
     id,
     name,
     slug,
-    thumbnailUrl: row.thumbnail_url,
+    thumbnailUrl: null, // From JSONB in classic_themes, keep null for fallback rendering
     culturalCategory: row.cultural_category,
   };
 }
@@ -38,9 +37,9 @@ async function fetchLandingThemes(): Promise<LandingTheme[]> {
     if (!supabase) return fallbackThemes;
 
     const { data, error } = await supabase
-      .from("themes")
-      .select("id, name, slug, thumbnail_url, cultural_category")
-      .eq("is_active", true)
+      .from("classic_themes")
+      .select("id, name, slug, cultural_category")
+      .eq("status", "active")
       .eq("is_published", true)
       .order("created_at", { ascending: true })
       .limit(6);

@@ -1,23 +1,59 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Eye, Plus, Star, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { dummyThemes, dummyUserPreferences } from '@/data/dummyThemes';
+import { dummyUserPreferences } from '@/data/dummyThemes';
 import { Theme, InvitationThemePreference, CULTURAL_LABELS } from '@/types/theme';
+import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 
 export default function UserThemeSelectionPage() {
     const router = useRouter();
 
-    // Available themes (active only)
-    const availableThemes = dummyThemes.filter((t) => t.status === 'active');
+    const [availableThemes, setAvailableThemes] = useState<Theme[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     // User's selected themes
     const [preferences, setPreferences] = useState<InvitationThemePreference[]>(dummyUserPreferences);
 
     const selectedThemeIds = new Set(preferences.map((p) => p.themeId));
+
+    useEffect(() => {
+        async function fetchThemes() {
+            try {
+                const supabase = createBrowserSupabaseClient();
+                const { data, error } = await supabase
+                    .from("classic_themes")
+                    .select("id, name, slug, description, cultural_category, created_at, updated_at")
+                    .eq("status", "active")
+                    .eq("is_published", true);
+
+                if (error) throw error;
+                
+                const themes: Theme[] = (data || []).map(row => ({
+                    id: row.id,
+                    name: row.name || "",
+                    slug: row.slug || "",
+                    description: row.description || "",
+                    thumbnailUrl: null, // from JSONB
+                    status: "active",
+                    isPublished: true,
+                    culturalCategory: row.cultural_category as any,
+                    createdAt: row.created_at,
+                    updatedAt: row.updated_at
+                }));
+                
+                setAvailableThemes(themes);
+            } catch (err) {
+                console.error("Failed to fetch available themes", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchThemes();
+    }, []);
 
     const addTheme = (theme: Theme) => {
         if (selectedThemeIds.has(theme.id)) return;
