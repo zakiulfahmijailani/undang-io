@@ -40,6 +40,11 @@ export default function SelectThemePage() {
         return matchCategory && matchPrice;
     });
 
+    const previewHref = (theme: DashboardTheme) =>
+        theme.id === DEFAULT_INVITATION_THEME_KEY
+            ? `/invite/demo?preview=true&theme=${DEFAULT_INVITATION_THEME_KEY}`
+            : "/invite/demo?preview=true";
+
     return (
         <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-10">
             <div>
@@ -119,7 +124,7 @@ export default function SelectThemePage() {
                             <h3 className="font-serif text-xl font-bold text-[#14213D] mb-4">{theme.name}</h3>
 
                             <div className="mt-auto flex flex-col gap-2">
-                                <Link href="/u/demo" className="w-full">
+                                <Link href={previewHref(theme)} className="w-full">
                                     <Button variant="secondary" className="w-full gap-2 border border-gray-300 text-gray-600 bg-white hover:bg-gray-50">
                                         <Eye className="w-4 h-4" /> Live Preview
                                     </Button>

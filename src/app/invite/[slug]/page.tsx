@@ -15,7 +15,7 @@ export const revalidate = 0;
 
 interface InvitePageProps {
     params: Promise<{ slug: string }>;
-    searchParams: Promise<{ preview?: string; to?: string }>;
+    searchParams: Promise<{ preview?: string; theme?: string; to?: string }>;
 }
 
 export async function generateMetadata({ params }: InvitePageProps): Promise<Metadata> {
@@ -52,6 +52,49 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     if (slug === '404') notFound();
 
     if (slug === 'demo') {
+        if (resolvedSearch.theme === DEFAULT_INVITATION_THEME_KEY) {
+            const fatehaDemoData = mapInvitationToFatehaData({
+                id: 'demo',
+                slug: 'demo',
+                groom_full_name: demoData.groom.fullName,
+                groom_nickname: 'Budi',
+                groom_father_name: demoData.groom.father,
+                groom_mother_name: demoData.groom.mother,
+                bride_full_name: demoData.bride.fullName,
+                bride_nickname: 'Ayu',
+                bride_father_name: demoData.bride.father,
+                bride_mother_name: demoData.bride.mother,
+                akad_datetime: demoData.akad.date,
+                akad_location_name: demoData.akad.venue,
+                akad_location_address: demoData.akad.address,
+                akad_maps_url: demoData.akad.mapsUrl,
+                resepsi_datetime: demoData.reception.date,
+                resepsi_location_name: demoData.reception.venue,
+                resepsi_location_address: demoData.reception.address,
+                resepsi_maps_url: demoData.reception.mapsUrl,
+                quote_text: demoData.quote.text,
+                quote_source: demoData.quote.source,
+                love_story: demoData.loveStory,
+                gallery_photos: demoData.gallery,
+                rekening: demoData.bankAccounts,
+                gift_shipping_address: demoData.giftAddress,
+                rsvp_messages: demoData.rsvpMessages.map((message) => ({
+                    id: message.id,
+                    guest_name: message.guestName,
+                    attendance: message.attendance,
+                    message: message.message,
+                    created_at: message.createdAt,
+                })),
+            }, { isPreview: true });
+
+            return (
+                <>
+                    <FatehaThemeRendererWrapper data={fatehaDemoData} />
+                    <ViewTracker slug={slug} isPreview={isPreview} />
+                </>
+            );
+        }
+
         return (
             <>
                 <InvitationClientWrapper data={demoData} />
