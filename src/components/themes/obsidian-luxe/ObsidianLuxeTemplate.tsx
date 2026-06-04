@@ -75,18 +75,38 @@ const navItems = [
 ] as const;
 
 const dustParticles = [
-  "left-[9%] top-[76%] h-1 w-1 [animation-delay:-1s] [animation-duration:9s]",
-  "left-[18%] top-[58%] h-1.5 w-1.5 [animation-delay:-5s] [animation-duration:12s]",
-  "left-[26%] top-[84%] h-1 w-1 [animation-delay:-8s] [animation-duration:10s]",
-  "left-[37%] top-[70%] h-1.5 w-1.5 [animation-delay:-3s] [animation-duration:13s]",
-  "left-[48%] top-[88%] h-1 w-1 [animation-delay:-11s] [animation-duration:11s]",
-  "left-[58%] top-[62%] h-1.5 w-1.5 [animation-delay:-6s] [animation-duration:12s]",
-  "left-[69%] top-[79%] h-1 w-1 [animation-delay:-9s] [animation-duration:10s]",
-  "left-[78%] top-[54%] h-1.5 w-1.5 [animation-delay:-2s] [animation-duration:14s]",
-  "left-[88%] top-[82%] h-1 w-1 [animation-delay:-12s] [animation-duration:11s]",
-  "left-[94%] top-[67%] h-1.5 w-1.5 [animation-delay:-4s] [animation-duration:13s]",
-  "left-[14%] top-[35%] h-1 w-1 [animation-delay:-7s] [animation-duration:12s]",
-  "left-[83%] top-[31%] h-1 w-1 [animation-delay:-10s] [animation-duration:12s]",
+  "left-[6%] top-[76%] h-1 w-1 [animation-delay:-1s] [animation-duration:9s]",
+  "left-[10%] top-[18%] h-0.5 w-0.5 [animation-delay:-9s] [animation-duration:12s]",
+  "left-[13%] top-[42%] h-1.5 w-1.5 [animation-delay:-4s] [animation-duration:13s]",
+  "left-[17%] top-[64%] h-1 w-1 [animation-delay:-7s] [animation-duration:10s]",
+  "left-[22%] top-[82%] h-0.5 w-0.5 [animation-delay:-2s] [animation-duration:11s]",
+  "left-[25%] top-[27%] h-1.5 w-1.5 [animation-delay:-12s] [animation-duration:15s]",
+  "left-[29%] top-[55%] h-1 w-1 [animation-delay:-5s] [animation-duration:12s]",
+  "left-[33%] top-[72%] h-0.5 w-0.5 [animation-delay:-8s] [animation-duration:10s]",
+  "left-[37%] top-[13%] h-1 w-1 [animation-delay:-11s] [animation-duration:14s]",
+  "left-[41%] top-[88%] h-1.5 w-1.5 [animation-delay:-3s] [animation-duration:12s]",
+  "left-[46%] top-[34%] h-0.5 w-0.5 [animation-delay:-10s] [animation-duration:13s]",
+  "left-[49%] top-[69%] h-1 w-1 [animation-delay:-6s] [animation-duration:11s]",
+  "left-[54%] top-[18%] h-1.5 w-1.5 [animation-delay:-14s] [animation-duration:16s]",
+  "left-[58%] top-[51%] h-0.5 w-0.5 [animation-delay:-1s] [animation-duration:12s]",
+  "left-[61%] top-[86%] h-1 w-1 [animation-delay:-5s] [animation-duration:10s]",
+  "left-[65%] top-[38%] h-1.5 w-1.5 [animation-delay:-8s] [animation-duration:15s]",
+  "left-[69%] top-[75%] h-0.5 w-0.5 [animation-delay:-13s] [animation-duration:11s]",
+  "left-[73%] top-[22%] h-1 w-1 [animation-delay:-2s] [animation-duration:14s]",
+  "left-[77%] top-[58%] h-1.5 w-1.5 [animation-delay:-9s] [animation-duration:13s]",
+  "left-[81%] top-[84%] h-0.5 w-0.5 [animation-delay:-6s] [animation-duration:10s]",
+  "left-[86%] top-[32%] h-1 w-1 [animation-delay:-12s] [animation-duration:12s]",
+  "left-[90%] top-[67%] h-1.5 w-1.5 [animation-delay:-4s] [animation-duration:15s]",
+  "left-[94%] top-[49%] h-0.5 w-0.5 [animation-delay:-10s] [animation-duration:11s]",
+  "left-[96%] top-[80%] h-1 w-1 [animation-delay:-15s] [animation-duration:14s]",
+] as const;
+
+const sparkleStars = [
+  "left-[12%] top-[21%] h-8 w-8 [animation-delay:-1s] [animation-duration:5.5s]",
+  "left-[78%] top-[19%] h-6 w-6 [animation-delay:-3s] [animation-duration:6.2s]",
+  "left-[88%] top-[42%] h-4 w-4 [animation-delay:-4s] [animation-duration:5.8s]",
+  "left-[20%] top-[68%] h-5 w-5 [animation-delay:-2s] [animation-duration:6.5s]",
+  "left-[64%] top-[83%] h-7 w-7 [animation-delay:-5s] [animation-duration:7s]",
 ] as const;
 
 function normalizeSection(section: string): ObsidianSectionId | null {
@@ -139,7 +159,7 @@ function formatTime(event: FatehaEvent) {
 }
 
 function cleanArabic(value: string | null | undefined) {
-  if (!value || value.includes("Ø") || value.includes("Ù")) return FALLBACK_ARABIC_QUOTE;
+  if (!value || value.includes("Ã˜") || value.includes("Ã™")) return FALLBACK_ARABIC_QUOTE;
   return value;
 }
 
@@ -159,8 +179,14 @@ export function ObsidianLuxeTemplate({ data }: { data: FatehaInvitationData }) {
   const sectionOrder = useMemo(() => getVisibleSections(data), [data]);
 
   return (
-    <div className={cn("relative min-h-screen overflow-x-hidden bg-[#0A0A0A] text-[#F5F0E8] [font-family:var(--font-obsidian-body)]", obsidianLuxeFontClassName)}>
-      <main>
+    <div
+      className={cn(
+        "obsidian-luxe-theme relative min-h-screen overflow-x-hidden bg-[#020202] text-[#F6EBD1] [font-family:var(--font-obsidian-body)]",
+        obsidianLuxeFontClassName,
+      )}
+    >
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_15%,rgba(201,168,76,0.15),transparent_28rem),linear-gradient(120deg,#020202,#101010_45%,#030303)]" />
+      <main className="relative mx-auto min-h-screen w-full max-w-[780px] overflow-hidden bg-[#060606] shadow-[0_0_120px_rgba(201,168,76,0.18)]">
         {sectionOrder.map((section) => {
           if (section === "cover") return <CoverSection key={section} data={data} />;
           if (section === "quote") return <OpeningQuoteSection key={section} data={data} />;
@@ -182,25 +208,27 @@ export function ObsidianLuxeTemplate({ data }: { data: FatehaInvitationData }) {
 
 function CoverSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="cover" className="relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-[#0A0A0A] px-6 py-16 text-center">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_10%,rgba(201,168,76,0.18),transparent_25rem),radial-gradient(circle_at_15%_85%,rgba(232,213,163,0.08),transparent_18rem),linear-gradient(180deg,#0A0A0A_0%,#141414_62%,#0A0A0A_100%)]" />
-      <div className="absolute inset-0 -z-10 opacity-[0.035] bg-[radial-gradient(circle_at_center,#C9A84C_1px,transparent_1px)] [background-size:22px_22px]" />
-      <GoldDust />
+    <section id="cover" className="relative isolate flex min-h-svh items-center justify-center overflow-hidden px-6 pb-32 pt-14 text-center sm:py-16">
+      <LuxuryBackdrop />
       <ArtDecoCorners />
+      <GoldFloralCorner className="left-0 top-20 w-44 -translate-x-16 opacity-70 sm:w-56" />
+      <GoldFloralCorner className="right-0 top-28 w-44 translate-x-16 scale-x-[-1] opacity-70 sm:w-56" />
+      <GoldFloralCorner className="bottom-0 left-0 w-52 -translate-x-16 translate-y-6 -rotate-12 opacity-80 sm:w-64" />
+      <GoldFloralCorner className="bottom-0 right-0 w-52 translate-x-16 translate-y-6 rotate-12 scale-x-[-1] opacity-80 sm:w-64" />
 
-      <div className="relative z-10 mx-auto w-full max-w-3xl">
-        <p className="text-xs font-light tracking-[0.46em] text-[#C9A84C]/80 [font-family:var(--font-obsidian-heading)]">{shortInitials(data)}</p>
-        <div className="mx-auto mt-8 h-px w-44 bg-[#C9A84C]/60" />
-        <h1 className="mx-auto mt-12 bg-[linear-gradient(110deg,#A67C2D,#C9A84C_35%,#F4E5B8_58%,#C9A84C)] bg-clip-text text-transparent [font-family:var(--font-obsidian-script)] text-[clamp(2.2rem,8vw,4.8rem)] font-bold italic leading-[0.95] tracking-wide">
-          {data.bride.nickname} &amp; {data.groom.nickname}
+      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center">
+        <ArtDecoCrown className="h-32 w-64 text-[#D9B457] sm:h-40 sm:w-80" />
+        <p className="mt-2 text-[0.72rem] font-medium tracking-[0.48em] text-[#D9B457]/90 [font-family:var(--font-obsidian-heading)]">{shortInitials(data)}</p>
+        <DiamondRule className="mt-6 w-56" />
+        <p className="mt-10 text-[0.62rem] font-semibold uppercase tracking-[0.42em] text-[#CDB06A]/85">Undangan Pernikahan</p>
+        <h1 className="mt-8 w-full bg-[linear-gradient(115deg,#8F6425,#D9B457_28%,#FFF1BB_45%,#C4973D_62%,#FFE5A1_82%)] bg-[length:240%_100%] bg-clip-text text-transparent [animation:obsidianShimmer_9s_ease-in-out_infinite] [font-family:var(--font-obsidian-script)] [text-shadow:0_0_34px_rgba(217,180,87,0.2)]">
+          <span className="block text-[clamp(4.8rem,18vw,11.5rem)] font-bold italic leading-[0.72]">{data.bride.nickname}</span>
+          <span className="block py-5 text-[clamp(2.1rem,8vw,4.2rem)] leading-none text-[#F7E1A1]">&amp;</span>
+          <span className="block text-[clamp(4.6rem,17vw,10.8rem)] font-bold italic leading-[0.72]">{data.groom.nickname}</span>
         </h1>
-        <div className="mx-auto mt-10 flex max-w-xs items-center justify-center gap-4 text-[#C9A84C]">
-          <span className="h-px flex-1 bg-current/45" />
-          <span className="text-sm">✦</span>
-          <span className="h-px flex-1 bg-current/45" />
-        </div>
-        <p className="mt-8 text-[0.65rem] font-medium uppercase tracking-[0.32em] text-[#E8D5A3]">Mengundang Anda</p>
-        <p className="mt-5 [font-family:var(--font-obsidian-heading)] text-lg font-light text-[#E8D5A3]">{formatDate(data.wedding.date)}</p>
+        <DiamondRule className="mt-10 w-80 max-w-full" />
+        <p className="mt-8 text-[0.68rem] font-semibold uppercase tracking-[0.48em] text-[#D9B457]">Mengundang Anda</p>
+        <p className="mt-5 [font-family:var(--font-obsidian-heading)] text-xl font-light text-[#F6EBD1] sm:text-2xl">{formatDate(data.wedding.date)}</p>
       </div>
     </section>
   );
@@ -212,17 +240,24 @@ function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
   if (!quoteText && !data.quote.source) return null;
 
   return (
-    <section id="quote" className="bg-[#141414] px-6 py-24 text-center">
-      <div className="mx-auto max-w-3xl border-y border-[#C9A84C]/35 py-14">
-        <p className="mx-auto max-w-2xl text-3xl leading-[2.1] text-[#C9A84C] [font-family:var(--font-obsidian-arabic)] sm:text-4xl">
+    <section id="quote" className="relative isolate overflow-hidden bg-[#111111] px-5 py-20 text-center">
+      <LuxuryBackdrop muted />
+      <GoldFloralCorner className="left-0 top-0 w-48 -translate-x-20 -translate-y-8 rotate-12 opacity-50" />
+      <GoldFloralCorner className="right-0 bottom-0 w-48 translate-x-20 translate-y-8 rotate-180 opacity-50" />
+      <div className="relative mx-auto max-w-3xl overflow-hidden border border-[#D9B457]/40 bg-[linear-gradient(135deg,rgba(8,8,8,0.92),rgba(28,28,25,0.86),rgba(8,8,8,0.96))] px-5 py-12 shadow-[0_28px_90px_rgba(0,0,0,0.45)] sm:px-10">
+        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#F3D889]/70 to-transparent" />
+        <div className="absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-[#F3D889]/60 to-transparent" />
+        <GoldFloralSpray className="mx-auto mb-8 h-14 w-64 text-[#D9B457]" />
+        <p className="mx-auto max-w-2xl text-3xl leading-[2.1] text-[#D9B457] [font-family:var(--font-obsidian-arabic)] sm:text-4xl">
           {cleanArabic(data.quote.arabic)}
         </p>
         {quoteText ? (
-          <p className="mx-auto mt-8 max-w-2xl [font-family:var(--font-obsidian-heading)] text-xl italic leading-9 text-[#F5F0E8]">
+          <p className="mx-auto mt-8 max-w-2xl [font-family:var(--font-obsidian-heading)] text-lg italic leading-8 text-[#F6EBD1] sm:text-xl sm:leading-9">
             &ldquo;{quoteText}&rdquo;
           </p>
         ) : null}
-        {data.quote.source ? <p className="mt-5 text-xs uppercase tracking-[0.28em] text-[#8A8070]">{data.quote.source}</p> : null}
+        {data.quote.source ? <p className="mt-6 text-xs uppercase tracking-[0.32em] text-[#D7BD76]/75">{data.quote.source}</p> : null}
+        <DiamondRule className="mx-auto mt-8 w-64" />
       </div>
     </section>
   );
@@ -230,10 +265,18 @@ function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
 
 function CoupleSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="couple" className="relative overflow-hidden bg-[#0A0A0A] px-6 py-24">
+    <section id="couple" className="relative isolate overflow-hidden bg-[#070707] px-5 py-24">
+      <LuxuryBackdrop muted />
       <SectionHeading eyebrow="Mempelai" title="Dua Hati, Satu Janji" />
-      <div className="mx-auto mt-14 grid max-w-5xl gap-10 md:grid-cols-2">
+      <div className="relative mx-auto mt-14 grid max-w-4xl gap-10 md:grid-cols-[1fr_auto_1fr] md:items-start">
         <PersonCard person={data.bride} kind="Putri" showPhoto={data.show_couple_photos !== false} />
+        <div className="hidden h-full min-h-72 items-center justify-center md:flex">
+          <div className="flex h-full flex-col items-center gap-4 text-[#D9B457]/70">
+            <span className="h-24 w-px bg-current/45" />
+            <span className="h-3 w-3 rotate-45 border border-current bg-[#060606]" />
+            <span className="h-24 w-px bg-current/45" />
+          </div>
+        </div>
         <PersonCard person={data.groom} kind="Putra" showPhoto={data.show_couple_photos !== false} />
       </div>
     </section>
@@ -242,34 +285,44 @@ function CoupleSection({ data }: { data: FatehaInvitationData }) {
 
 function PersonCard({ person, kind, showPhoto }: { person: FatehaPerson; kind: "Putra" | "Putri"; showPhoto: boolean }) {
   return (
-    <article className="text-center">
+    <article className="relative overflow-hidden border border-[#D9B457]/35 bg-[linear-gradient(180deg,rgba(17,17,17,0.88),rgba(5,5,5,0.96))] px-5 py-8 text-center shadow-[0_26px_90px_rgba(0,0,0,0.34)]">
+      <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#F3D889]/70 to-transparent" />
+      <GoldFloralSpray className="absolute -top-6 left-1/2 h-16 w-56 -translate-x-1/2 text-[#D9B457]/40" />
       {showPhoto ? (
-        <div className="relative mx-auto h-48 w-48">
-          <div className="absolute inset-4 rounded-full bg-[#C9A84C]/15 blur-3xl" />
-          <div className="relative h-full w-full overflow-hidden rounded-full border-2 border-[#C9A84C] bg-[#141414] p-1 shadow-[0_0_40px_rgba(201,168,76,0.15)]">
-            <img src={person.photo} alt={person.fullName} className="h-full w-full rounded-full object-cover grayscale-[0.18]" loading="lazy" />
+        <div className="relative mx-auto h-52 w-52">
+          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,#D9B457_0%,transparent_62%)] opacity-20 blur-2xl" />
+          <div className="absolute inset-4 rounded-full border border-[#D9B457]/35" />
+          <div className="relative h-full w-full overflow-hidden rounded-full border-2 border-[#D9B457] bg-[#141414] p-1 shadow-[0_0_52px_rgba(217,180,87,0.2)]">
+            <img src={person.photo} alt={person.fullName} className="h-full w-full rounded-full object-cover grayscale-[0.35] sepia-[0.12]" loading="lazy" />
+            <div className="absolute inset-1 rounded-full bg-[radial-gradient(circle_at_50%_35%,transparent_36%,rgba(0,0,0,0.5)_100%)]" />
           </div>
         </div>
       ) : null}
-      <h3 className="mt-7 [font-family:var(--font-obsidian-heading)] text-3xl font-semibold text-[#C9A84C]">{person.fullName}</h3>
-      <p className="mt-4 text-xs uppercase tracking-[0.24em] text-[#8A8070]">{kind} dari:</p>
-      <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-[#F5F0E8]/88">{parentLine(kind, person.father, person.mother)}</p>
+      <h3 className="mt-7 [font-family:var(--font-obsidian-heading)] text-4xl font-semibold text-[#D9B457]">{person.fullName}</h3>
+      <DiamondRule className="mx-auto mt-5 w-44" />
+      <p className="mt-5 text-xs uppercase tracking-[0.28em] text-[#D7BD76]/75">{kind} dari</p>
+      <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-[#F6EBD1]/84">{parentLine(kind, person.father, person.mother)}</p>
     </article>
   );
 }
 
 function LoveStorySection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="story" className="bg-[#141414] px-6 py-24">
+    <section id="story" className="relative isolate overflow-hidden bg-[#101010] px-5 py-24">
+      <LuxuryBackdrop muted />
       <SectionHeading eyebrow="Kisah" title="Perjalanan Kami" />
       <div className="mx-auto mt-14 max-w-3xl">
-        <div className="relative border-l border-dashed border-[#C9A84C]/55 pl-8">
+        <div className="relative border-l border-dashed border-[#D9B457]/55 pl-8">
           {data.loveStory.map((story, index) => (
-            <article key={`${story.year}-${story.title}`} className={cn("relative mb-6 p-6", index % 2 === 0 ? "bg-[#0A0A0A]" : "bg-[#141414]")}>
-              <span className="absolute -left-[42px] top-7 text-lg text-[#C9A84C]">✦</span>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#E8D5A3]">{story.year}</p>
-              <h3 className="mt-3 [font-family:var(--font-obsidian-heading)] text-2xl font-semibold text-[#C9A84C]">{story.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-[#F5F0E8]/82">{story.description}</p>
+            <article
+              key={`${story.year}-${story.title}`}
+              className="relative mb-6 border border-[#D9B457]/30 bg-[linear-gradient(135deg,rgba(7,7,7,0.9),rgba(20,20,20,0.82))] p-6 shadow-[0_18px_60px_rgba(0,0,0,0.25)]"
+            >
+              <span className="absolute -left-[42px] top-7 h-4 w-4 rotate-45 border border-[#D9B457] bg-[#080808]" />
+              <p className="text-xs uppercase tracking-[0.28em] text-[#D7BD76]">{story.year}</p>
+              <h3 className="mt-3 [font-family:var(--font-obsidian-heading)] text-3xl font-semibold text-[#D9B457]">{story.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-[#F6EBD1]/82">{story.description}</p>
+              {index % 2 === 0 ? <GoldFloralSpray className="absolute bottom-2 right-3 h-12 w-40 text-[#D9B457]/20" /> : null}
             </article>
           ))}
         </div>
@@ -280,48 +333,73 @@ function LoveStorySection({ data }: { data: FatehaInvitationData }) {
 
 function EventSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="event" className="bg-[#0A0A0A] px-6 py-24">
+    <section id="event" className="relative isolate overflow-hidden bg-[#060606] px-5 py-24">
+      <LuxuryBackdrop muted />
       <SectionHeading eyebrow="Rangkaian Acara" title="Hari Bahagia" />
-      <div className="mx-auto mt-14 grid max-w-5xl gap-5 md:grid-cols-2">
-        <EventCard event={data.wedding.akad} />
-        <EventCard event={data.wedding.reception} />
+      <div className="mx-auto mt-14 grid max-w-3xl gap-5">
+        <EventCard event={data.wedding.akad} variant="akad" />
+        <EventCard event={data.wedding.reception} variant="resepsi" />
       </div>
     </section>
   );
 }
 
-function EventCard({ event }: { event: FatehaEvent }) {
+function EventCard({ event, variant }: { event: FatehaEvent; variant: "akad" | "resepsi" }) {
   return (
-    <article className="border border-[#C9A84C]/40 bg-[#0F0F1A] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]">
-      <p className="text-[0.7rem] font-medium uppercase tracking-[0.25em] text-[#C9A84C]">{event.label}</p>
-      <h3 className="mt-6 [font-family:var(--font-obsidian-heading)] text-2xl font-semibold text-[#C9A84C]">{formatDate(event.date)}</h3>
-      <p className="mt-3 text-sm text-[#F5F0E8]">{formatTime(event)}</p>
-      <p className="mt-6 font-medium text-[#F5F0E8]">{event.venue}</p>
-      <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#8A8070]">{event.address}</p>
-      {event.mapsUrl ? (
-        <a
-          href={event.mapsUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-6 inline-flex items-center gap-2 border border-[#C9A84C] px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#C9A84C] transition hover:bg-[#C9A84C] hover:text-[#0A0A0A]"
-        >
-          <Navigation className="h-4 w-4" aria-hidden="true" />
-          Buka Maps
-        </a>
-      ) : null}
+    <article className="relative overflow-hidden border border-[#D9B457]/55 bg-[linear-gradient(135deg,rgba(13,15,28,0.92),rgba(5,5,5,0.96))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.38)] sm:p-6">
+      <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#F3D889]/70 to-transparent" />
+      <div className="grid gap-5 sm:grid-cols-[112px_1fr_auto] sm:items-center">
+        <div className="mx-auto grid h-24 w-24 place-items-center border border-[#D9B457]/50 bg-[#080808]/70 text-[#D9B457]">
+          <EventOrnament variant={variant} />
+        </div>
+        <div className="text-center sm:text-left">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.42em] text-[#D9B457]">{event.label}</p>
+          <div className="mt-4 grid gap-2 text-sm leading-6 text-[#F6EBD1]/86">
+            <p className="flex items-center justify-center gap-2 sm:justify-start">
+              <CalendarDays className="h-4 w-4 text-[#D9B457]" aria-hidden="true" />
+              {formatDate(event.date)}
+            </p>
+            <p>{formatTime(event)}</p>
+            <p className="font-medium text-[#F6EBD1]">{event.venue}</p>
+            <p className="flex items-start justify-center gap-2 text-[#BFAE86] sm:justify-start">
+              <MapPin className="mt-1 h-4 w-4 shrink-0 text-[#D9B457]" aria-hidden="true" />
+              <span>{event.address}</span>
+            </p>
+          </div>
+        </div>
+        {event.mapsUrl ? (
+          <a
+            href={event.mapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center gap-2 border border-[#D9B457] px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#D9B457] transition hover:bg-[#D9B457] hover:text-[#050505]"
+          >
+            <Navigation className="h-4 w-4" aria-hidden="true" />
+            Buka Maps
+          </a>
+        ) : null}
+      </div>
     </article>
   );
 }
 
 function GallerySection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="gallery" className="bg-[#141414] px-6 py-24">
+    <section id="gallery" className="relative isolate overflow-hidden bg-[#101010] px-5 py-24">
+      <LuxuryBackdrop muted />
       <SectionHeading eyebrow="Galeri" title="Momen Terpilih" />
-      <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-2">
-        {data.gallery.map((item) => (
-          <figure key={`${item.src}-${item.alt}`} className="group relative aspect-[4/5] overflow-hidden bg-[#0F0F1A]">
+      <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-2 sm:grid-cols-3">
+        {data.gallery.map((item, index) => (
+          <figure
+            key={`${item.src}-${item.alt}`}
+            className={cn(
+              "group relative overflow-hidden border border-[#D9B457]/25 bg-[#0F0F1A]",
+              index === 0 || index === 3 ? "aspect-[4/5] sm:row-span-2 sm:aspect-auto" : "aspect-square",
+            )}
+          >
             <img src={item.src} alt={item.alt} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" />
-            <div className="absolute inset-0 bg-[#C9A84C]/0 transition group-hover:bg-[#C9A84C]/15" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.45))]" />
+            <div className="absolute inset-2 border border-[#D9B457]/20 opacity-0 transition group-hover:opacity-100" />
           </figure>
         ))}
       </div>
@@ -428,29 +506,33 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
   }
 
   return (
-    <section id="rsvp" className="border-y border-[#C9A84C]/35 bg-[#0F0F1A] px-6 py-24">
-      <div className="mx-auto max-w-2xl">
-        <h2 className="text-center [font-family:var(--font-obsidian-heading)] text-4xl font-semibold text-[#C9A84C]">Konfirmasi Kehadiran</h2>
-        <div className="mx-auto mt-4 h-px w-24 bg-[#C9A84C]/55" />
-        <div className="mt-10 border border-[#C9A84C]/35 bg-[#0A0A0A]/65 p-6 sm:p-8">
+    <section id="rsvp" className="relative isolate overflow-hidden border-y border-[#D9B457]/35 bg-[#0A1020] px-5 py-24">
+      <LuxuryBackdrop muted />
+      <div className="mx-auto max-w-3xl">
+        <SectionHeading eyebrow="RSVP" title="Konfirmasi Kehadiran" />
+        <div className="mt-10 border border-[#D9B457]/40 bg-[linear-gradient(135deg,rgba(8,12,25,0.94),rgba(8,8,8,0.98))] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.4)] sm:p-8">
           {submitted ? (
             <div className="py-8 text-center">
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#C9A84C] text-[#0A0A0A]">
+              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[linear-gradient(135deg,#A87324,#F3D889,#B9872D)] text-[#050505] shadow-[0_0_42px_rgba(217,180,87,0.35)]">
                 <Check className="h-8 w-8" aria-hidden="true" />
               </span>
-              <h3 className="mt-6 [font-family:var(--font-obsidian-heading)] text-3xl font-semibold text-[#C9A84C]">Terima Kasih</h3>
-              <p className="mt-3 text-sm leading-6 text-[#8A8070]">
+              <h3 className="mt-6 [font-family:var(--font-obsidian-heading)] text-4xl font-semibold text-[#D9B457]">Terima Kasih</h3>
+              <p className="mt-3 text-sm leading-6 text-[#BFAE86]">
                 {canSubmit ? "Konfirmasi dan doa Anda telah kami terima." : "Ini adalah pratinjau. Form aktif setelah undangan dipublikasikan permanen."}
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="grid gap-6">
+            <form onSubmit={handleSubmit} className="grid gap-6 sm:grid-cols-2">
               <ObsidianField label="Nama">
                 <input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Masukkan nama Anda" autoComplete="name" />
               </ObsidianField>
               <ObsidianField label="Jumlah Tamu">
                 <select value={form.guests} onChange={(event) => update("guests", event.target.value)}>
-                  {[1, 2, 3, 4, 5].map((count) => <option key={count} value={count}>{count} orang</option>)}
+                  {[1, 2, 3, 4, 5].map((count) => (
+                    <option key={count} value={count}>
+                      {count} orang
+                    </option>
+                  ))}
                 </select>
               </ObsidianField>
               <ObsidianField label="Kehadiran">
@@ -461,11 +543,15 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
                   <option value="masih_ragu">Mungkin</option>
                 </select>
               </ObsidianField>
-              <ObsidianField label="Pesan / Ucapan">
+              <ObsidianField label="Pesan / Ucapan" className="sm:col-span-2">
                 <textarea value={form.message} onChange={(event) => update("message", event.target.value)} placeholder="Tulis doa atau ucapan untuk kami..." rows={4} />
               </ObsidianField>
-              {error ? <p className="border border-[#C9A84C]/35 bg-[#C9A84C]/10 px-4 py-3 text-sm text-[#E8D5A3]">{error}</p> : null}
-              <button type="submit" className="inline-flex items-center justify-center gap-3 bg-[#C9A84C] px-7 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-[#0A0A0A] transition hover:bg-[#E8D5A3]" disabled={loading}>
+              {error ? <p className="border border-[#D9B457]/35 bg-[#D9B457]/10 px-4 py-3 text-sm text-[#F3D889] sm:col-span-2">{error}</p> : null}
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-3 bg-[linear-gradient(135deg,#A87324,#F3D889,#B9872D)] px-7 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#050505] shadow-[0_14px_42px_rgba(217,180,87,0.22)] transition hover:brightness-110 sm:col-span-2"
+                disabled={loading}
+              >
                 <Send className="h-4 w-4" aria-hidden="true" />
                 {loading ? "Mengirim" : "Kirim Konfirmasi"}
               </button>
@@ -475,12 +561,12 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
         {messages.length > 0 ? (
           <div className="mt-10 grid gap-3">
             {messages.slice(0, 4).map((message) => (
-              <article key={message.id} className="border border-[#C9A84C]/25 bg-[#141414] p-4">
+              <article key={message.id} className="border border-[#D9B457]/25 bg-[#090909]/88 p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <strong className="text-sm text-[#E8D5A3]">{message.name}</strong>
-                  {message.attendance ? <span className="text-xs uppercase tracking-[0.18em] text-[#8A8070]">{message.attendance}</span> : null}
+                  <strong className="text-sm text-[#F3D889]">{message.name}</strong>
+                  {message.attendance ? <span className="text-xs uppercase tracking-[0.18em] text-[#BFAE86]">{message.attendance}</span> : null}
                 </div>
-                <p className="mt-2 text-sm leading-6 text-[#F5F0E8]/82">&ldquo;{message.message}&rdquo;</p>
+                <p className="mt-2 text-sm leading-6 text-[#F6EBD1]/82">&ldquo;{message.message}&rdquo;</p>
               </article>
             ))}
           </div>
@@ -492,15 +578,18 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
 
 function GiftSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="gift" className="bg-[#141414] px-6 py-24">
+    <section id="gift" className="relative isolate overflow-hidden bg-[#0B0B0B] px-5 py-24">
+      <LuxuryBackdrop muted />
       <SectionHeading eyebrow="Hadiah" title="Hadiah & Doa" />
       <div className="mx-auto mt-12 grid max-w-2xl gap-4">
-        {data.giftAccounts.map((account) => <GiftAccountCard key={`${account.bank}-${account.number}`} account={account} />)}
+        {data.giftAccounts.map((account) => (
+          <GiftAccountCard key={`${account.bank}-${account.number}`} account={account} />
+        ))}
         {data.giftAddress ? (
-          <div className="border border-[#C9A84C]/35 bg-[#0F0F1A] p-6 text-center">
-            <MapPin className="mx-auto h-6 w-6 text-[#C9A84C]" aria-hidden="true" />
-            <h3 className="mt-4 [font-family:var(--font-obsidian-heading)] text-2xl font-semibold text-[#C9A84C]">Alamat Pengiriman</h3>
-            <p className="mt-3 text-sm leading-7 text-[#F5F0E8]/82">{data.giftAddress}</p>
+          <div className="border border-[#D9B457]/35 bg-[linear-gradient(135deg,rgba(8,8,8,0.92),rgba(22,20,16,0.9))] p-6 text-center">
+            <MapPin className="mx-auto h-6 w-6 text-[#D9B457]" aria-hidden="true" />
+            <h3 className="mt-4 [font-family:var(--font-obsidian-heading)] text-3xl font-semibold text-[#D9B457]">Alamat Pengiriman</h3>
+            <p className="mt-3 text-sm leading-7 text-[#F6EBD1]/82">{data.giftAddress}</p>
           </div>
         ) : null}
       </div>
@@ -510,14 +599,14 @@ function GiftSection({ data }: { data: FatehaInvitationData }) {
 
 function GiftAccountCard({ account }: { account: FatehaGiftAccount }) {
   return (
-    <article className="border border-[#C9A84C]/40 bg-[#0F0F1A] p-6 text-center">
-      <Gift className="mx-auto h-7 w-7 text-[#C9A84C]" aria-hidden="true" />
-      <p className="mt-4 text-xs uppercase tracking-[0.26em] text-[#C9A84C]">{account.bank}</p>
-      <strong className="mt-3 block [font-family:var(--font-obsidian-heading)] text-3xl font-semibold text-[#F5F0E8]">{account.number}</strong>
-      <p className="mt-2 text-sm text-[#8A8070]">{account.name}</p>
+    <article className="border border-[#D9B457]/40 bg-[linear-gradient(135deg,rgba(8,8,8,0.95),rgba(18,18,28,0.92))] p-6 text-center shadow-[0_18px_70px_rgba(0,0,0,0.28)]">
+      <Gift className="mx-auto h-7 w-7 text-[#D9B457]" aria-hidden="true" />
+      <p className="mt-4 text-xs uppercase tracking-[0.3em] text-[#D9B457]">{account.bank}</p>
+      <strong className="mt-3 block [font-family:var(--font-obsidian-heading)] text-3xl font-semibold text-[#F6EBD1]">{account.number}</strong>
+      <p className="mt-2 text-sm text-[#BFAE86]">{account.name}</p>
       <button
         type="button"
-        className="mt-5 inline-flex items-center gap-2 border border-[#C9A84C] px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#C9A84C] transition hover:bg-[#C9A84C] hover:text-[#0A0A0A]"
+        className="mt-5 inline-flex items-center gap-2 border border-[#D9B457] px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#D9B457] transition hover:bg-[#D9B457] hover:text-[#050505]"
         onClick={() => {
           void navigator.clipboard.writeText(account.number);
           toast.success("Nomor rekening disalin.");
@@ -532,19 +621,24 @@ function GiftAccountCard({ account }: { account: FatehaGiftAccount }) {
 
 function ClosingSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="closing" className="relative overflow-hidden bg-[#0A0A0A] px-6 py-28 pb-36 text-center">
-      <GoldDust />
-      <div className="mx-auto max-w-3xl">
-        <ArtDecoOrnament />
-        <p className="mt-10 [font-family:var(--font-obsidian-heading)] text-2xl italic leading-9 text-[#E8D5A3]">
-          Terima kasih atas doa dan kehadiran Anda
+    <section id="closing" className="relative isolate overflow-hidden bg-[#050505] px-5 py-28 pb-36 text-center">
+      <LuxuryBackdrop />
+      <ArtDecoCorners />
+      <GoldFloralCorner className="bottom-0 left-0 w-64 -translate-x-20 translate-y-10 opacity-75" />
+      <GoldFloralCorner className="bottom-0 right-0 w-64 translate-x-20 translate-y-10 scale-x-[-1] opacity-75" />
+      <div className="relative mx-auto max-w-3xl">
+        <ArtDecoCrown className="mx-auto h-32 w-64 text-[#D9B457]" />
+        <p className="mt-8 [font-family:var(--font-obsidian-heading)] text-2xl italic leading-9 text-[#F3D889]">
+          Terima kasih atas doa, restu, dan kehadiran Bapak/Ibu/Saudara/i.
         </p>
-        <div className="mx-auto mt-8 h-px w-44 bg-[#C9A84C]/55" />
-        <h2 className="mt-10 bg-[linear-gradient(110deg,#C9A84C,#F4E5B8,#C9A84C)] bg-clip-text [font-family:var(--font-obsidian-script)] text-5xl font-bold italic leading-tight text-transparent sm:text-6xl">
-          {data.bride.fullName}
-          <span className="block text-3xl text-[#E8D5A3]">&amp;</span>
-          {data.groom.fullName}
+        <DiamondRule className="mx-auto mt-8 w-72 max-w-full" />
+        <h2 className="mt-10 bg-[linear-gradient(110deg,#9C6A24,#F3D889,#D9B457,#FFF1BB)] bg-[length:220%_100%] bg-clip-text [animation:obsidianShimmer_9s_ease-in-out_infinite] [font-family:var(--font-obsidian-script)] text-6xl font-bold italic leading-[0.95] text-transparent sm:text-7xl">
+          {data.bride.nickname}
+          <span className="block py-3 text-3xl text-[#F3D889]">&amp;</span>
+          {data.groom.nickname}
         </h2>
+        <GoldFloralSpray className="mx-auto mt-8 h-20 w-80 max-w-full text-[#D9B457]" />
+        <p className="mt-8 text-xs uppercase tracking-[0.34em] text-[#D7BD76]/80">Bagikan kebahagiaan ini</p>
       </div>
     </section>
   );
@@ -552,21 +646,23 @@ function ClosingSection({ data }: { data: FatehaInvitationData }) {
 
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
-    <header className="mx-auto max-w-2xl text-center">
-      <p className="text-xs font-medium uppercase tracking-[0.32em] text-[#8A8070]">{eyebrow}</p>
-      <h2 className="mt-4 [font-family:var(--font-obsidian-heading)] text-4xl font-semibold text-[#C9A84C] sm:text-5xl">{title}</h2>
-      <div className="mx-auto mt-5 flex w-44 items-center justify-center gap-3 text-[#C9A84C]">
-        <span className="h-px flex-1 bg-current/45" />
-        <span className="text-xs">✦</span>
-        <span className="h-px flex-1 bg-current/45" />
-      </div>
+    <header className="relative mx-auto max-w-2xl text-center">
+      <GoldFloralSpray className="mx-auto mb-3 h-16 w-72 max-w-full text-[#D9B457]/75" />
+      <p className="text-xs font-semibold uppercase tracking-[0.36em] text-[#BFAE86]">{eyebrow}</p>
+      <h2 className="mt-4 [font-family:var(--font-obsidian-heading)] text-4xl font-semibold text-[#D9B457] sm:text-5xl">{title}</h2>
+      <DiamondRule className="mx-auto mt-5 w-56" />
     </header>
   );
 }
 
-function ObsidianField({ label, children }: { label: string; children: ReactNode }) {
+function ObsidianField({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <label className="grid gap-2 text-xs font-medium uppercase tracking-[0.18em] text-[#C9A84C] [&_input]:border-0 [&_input]:border-b [&_input]:border-[#C9A84C]/45 [&_input]:bg-transparent [&_input]:px-0 [&_input]:py-3 [&_input]:text-base [&_input]:normal-case [&_input]:tracking-normal [&_input]:text-[#F5F0E8] [&_input]:outline-none [&_input]:placeholder:text-[#8A8070] [&_select]:border-0 [&_select]:border-b [&_select]:border-[#C9A84C]/45 [&_select]:bg-[#0A0A0A] [&_select]:px-0 [&_select]:py-3 [&_select]:text-base [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-[#F5F0E8] [&_select]:outline-none [&_textarea]:border-0 [&_textarea]:border-b [&_textarea]:border-[#C9A84C]/45 [&_textarea]:bg-transparent [&_textarea]:px-0 [&_textarea]:py-3 [&_textarea]:text-base [&_textarea]:normal-case [&_textarea]:tracking-normal [&_textarea]:text-[#F5F0E8] [&_textarea]:outline-none [&_textarea]:placeholder:text-[#8A8070]">
+    <label
+      className={cn(
+        "grid gap-2 text-xs font-medium uppercase tracking-[0.18em] text-[#D9B457] [&_input]:border-0 [&_input]:border-b [&_input]:border-[#D9B457]/55 [&_input]:bg-transparent [&_input]:px-0 [&_input]:py-3 [&_input]:text-base [&_input]:normal-case [&_input]:tracking-normal [&_input]:text-[#F6EBD1] [&_input]:outline-none [&_input]:placeholder:text-[#9E906F] [&_select]:border-0 [&_select]:border-b [&_select]:border-[#D9B457]/55 [&_select]:bg-[#0A1020] [&_select]:px-0 [&_select]:py-3 [&_select]:text-base [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-[#F6EBD1] [&_select]:outline-none [&_textarea]:border-0 [&_textarea]:border-b [&_textarea]:border-[#D9B457]/55 [&_textarea]:bg-transparent [&_textarea]:px-0 [&_textarea]:py-3 [&_textarea]:text-base [&_textarea]:normal-case [&_textarea]:tracking-normal [&_textarea]:text-[#F6EBD1] [&_textarea]:outline-none [&_textarea]:placeholder:text-[#9E906F]",
+        className,
+      )}
+    >
       {label}
       {children}
     </label>
@@ -575,9 +671,13 @@ function ObsidianField({ label, children }: { label: string; children: ReactNode
 
 function ObsidianNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-3 z-40 mx-auto flex w-[min(calc(100%_-_1rem),430px)] items-center justify-center border border-[#C9A84C]/35 bg-[#0A0A0A]/82 p-1 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+    <nav className="fixed inset-x-0 bottom-3 z-40 mx-auto flex w-[min(calc(100%_-_1rem),430px)] items-center justify-center border border-[#D9B457]/40 bg-[#060606]/88 p-1 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
       {navItems.map((item) => (
-        <a key={item.href} href={item.href} className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-[#8A8070] transition hover:bg-[#C9A84C]/12 hover:text-[#C9A84C]">
+        <a
+          key={item.href}
+          href={item.href}
+          className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-[#BFAE86] transition hover:bg-[#D9B457]/14 hover:text-[#F3D889]"
+        >
           <item.icon className="h-4 w-4" aria-hidden="true" />
           <span className="truncate">{item.label}</span>
         </a>
@@ -609,12 +709,29 @@ function MusicToggle({ musicUrl }: { musicUrl: string }) {
         aria-label={playing ? "Matikan musik" : "Nyalakan musik"}
         onClick={() => setPlaying((current) => !current)}
         className={cn(
-          "fixed bottom-24 right-4 z-40 grid h-12 w-12 place-items-center border border-[#C9A84C]/45 bg-[#0A0A0A]/86 text-[#C9A84C] shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl transition hover:bg-[#141414]",
-          playing && "bg-[#C9A84C] text-[#0A0A0A]",
+          "fixed bottom-24 right-4 z-40 grid h-12 w-12 place-items-center border border-[#D9B457]/55 bg-[#060606]/88 text-[#D9B457] shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl transition hover:bg-[#151515]",
+          playing && "bg-[#D9B457] text-[#050505]",
         )}
       >
         {playing ? <Volume2 className="h-5 w-5" aria-hidden="true" /> : <VolumeX className="h-5 w-5" aria-hidden="true" />}
       </button>
+    </>
+  );
+}
+
+function LuxuryBackdrop({ muted = false }: { muted?: boolean }) {
+  return (
+    <>
+      <div
+        className={cn(
+          "absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_7%,rgba(217,180,87,0.22),transparent_22rem),radial-gradient(circle_at_12%_58%,rgba(217,180,87,0.1),transparent_16rem),radial-gradient(circle_at_82%_72%,rgba(217,180,87,0.13),transparent_18rem),linear-gradient(180deg,#050505_0%,#101010_48%,#050505_100%)]",
+          muted && "opacity-55",
+        )}
+      />
+      <div className={cn("absolute inset-0 -z-10 opacity-[0.11] bg-[radial-gradient(circle_at_center,#D9B457_0.9px,transparent_1px)] [background-size:17px_17px]", muted && "opacity-[0.055]")} />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(115deg,transparent_0%,rgba(255,241,187,0.035)_45%,transparent_58%)]" />
+      <GoldDust />
+      <SparkleField />
     </>
   );
 }
@@ -626,7 +743,7 @@ function GoldDust() {
         <span
           key={`dust-${index}`}
           className={cn(
-            "absolute rounded-full bg-[#C9A84C] opacity-0 shadow-[0_0_14px_rgba(201,168,76,0.75)] [animation:obsidianGoldDust_ease-in-out_infinite]",
+            "absolute rounded-full bg-[#D9B457] opacity-0 shadow-[0_0_16px_rgba(217,180,87,0.78)] [animation:obsidianGoldDust_ease-in-out_infinite]",
             classes,
           )}
         />
@@ -635,25 +752,129 @@ function GoldDust() {
   );
 }
 
-function ArtDecoCorners() {
-  const base = "absolute h-24 w-24 border-[#C9A84C]/45";
-
+function SparkleField() {
   return (
-    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      <span className={cn(base, "left-5 top-5 border-l border-t")} />
-      <span className={cn(base, "right-5 top-5 border-r border-t")} />
-      <span className={cn(base, "bottom-5 left-5 border-b border-l")} />
-      <span className={cn(base, "bottom-5 right-5 border-b border-r")} />
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {sparkleStars.map((classes, index) => (
+        <span key={`sparkle-${index}`} className={cn("absolute text-[#F8E7A8] opacity-70 [animation:obsidianTwinkle_ease-in-out_infinite]", classes)}>
+          <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-current to-transparent" />
+          <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gradient-to-r from-transparent via-current to-transparent" />
+          <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current shadow-[0_0_22px_rgba(248,231,168,0.9)]" />
+        </span>
+      ))}
     </div>
   );
 }
 
-function ArtDecoOrnament() {
+function ArtDecoCorners() {
+  const base = "absolute h-24 w-24 border-[#D9B457]/55 sm:h-32 sm:w-32";
+  const inner = "absolute h-16 w-16 border-[#D9B457]/35 sm:h-20 sm:w-20";
+
   return (
-    <div className="mx-auto flex w-64 items-center justify-center gap-4 text-[#C9A84C]" aria-hidden="true">
-      <span className="h-px flex-1 bg-current/45" />
-      <span className="border border-current px-3 py-2 text-xs tracking-[0.32em]">✦</span>
-      <span className="h-px flex-1 bg-current/45" />
+    <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true">
+      <span className={cn(base, "left-5 top-5 border-l border-t")} />
+      <span className={cn(inner, "left-10 top-10 border-l border-t")} />
+      <span className={cn(base, "right-5 top-5 border-r border-t")} />
+      <span className={cn(inner, "right-10 top-10 border-r border-t")} />
+      <span className={cn(base, "bottom-5 left-5 border-b border-l")} />
+      <span className={cn(inner, "bottom-10 left-10 border-b border-l")} />
+      <span className={cn(base, "bottom-5 right-5 border-b border-r")} />
+      <span className={cn(inner, "bottom-10 right-10 border-b border-r")} />
+      <span className="absolute left-8 top-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
+      <span className="absolute right-8 top-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
+      <span className="absolute bottom-8 left-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
+      <span className="absolute bottom-8 right-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
     </div>
+  );
+}
+
+function ArtDecoCrown({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 360 190" className={className} fill="none" aria-hidden="true">
+      <path d="M38 152H322" stroke="currentColor" strokeWidth="2" opacity="0.78" />
+      <path d="M78 152C93 97 119 67 151 55" stroke="currentColor" strokeWidth="2" opacity="0.82" />
+      <path d="M282 152C267 97 241 67 209 55" stroke="currentColor" strokeWidth="2" opacity="0.82" />
+      <path d="M118 152V80L152 111V42L180 14L208 42V111L242 80V152" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M145 152V94L165 112V53L180 34L195 53V112L215 94V152" stroke="currentColor" strokeWidth="1.8" opacity="0.7" />
+      <path d="M92 152V119L120 131V152" stroke="currentColor" strokeWidth="2" opacity="0.72" />
+      <path d="M268 152V119L240 131V152" stroke="currentColor" strokeWidth="2" opacity="0.72" />
+      <path d="M114 152C126 114 147 90 180 76C213 90 234 114 246 152" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+      <path d="M180 14V170" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+      <path d="M180 174L186 168L180 162L174 168L180 174Z" stroke="currentColor" strokeWidth="2" />
+      <path d="M38 152H78M282 152H322" stroke="currentColor" strokeWidth="4" opacity="0.3" />
+    </svg>
+  );
+}
+
+function GoldFloralCorner({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 210 170" className={cn("pointer-events-none absolute z-0 text-[#D9B457]", className)} fill="none" aria-hidden="true">
+      <path d="M20 146C63 109 100 73 160 34" stroke="currentColor" strokeWidth="1.6" opacity="0.72" />
+      <path d="M56 116C48 93 59 76 80 72C84 94 73 111 56 116Z" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+      <path d="M87 90C80 68 92 52 115 48C118 72 106 86 87 90Z" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+      <path d="M121 65C115 45 128 30 151 26C153 48 140 62 121 65Z" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+      <path d="M64 104C80 97 97 99 111 115C94 126 75 122 64 104Z" stroke="currentColor" strokeWidth="1.4" opacity="0.55" />
+      <path d="M96 76C113 69 132 72 146 88C126 99 108 94 96 76Z" stroke="currentColor" strokeWidth="1.4" opacity="0.55" />
+      <circle cx="155" cy="36" r="10" stroke="currentColor" strokeWidth="1.5" opacity="0.9" />
+      <circle cx="155" cy="36" r="4" fill="currentColor" opacity="0.35" />
+      <path d="M155 19C161 25 165 31 165 36C165 43 161 49 155 54C149 49 145 43 145 36C145 31 149 25 155 19Z" stroke="currentColor" strokeWidth="1.3" opacity="0.72" />
+      <path d="M138 36C145 31 151 29 155 29C161 29 167 31 173 36C167 42 161 44 155 44C151 44 145 42 138 36Z" stroke="currentColor" strokeWidth="1.3" opacity="0.72" />
+      <circle cx="36" cy="136" r="3" fill="currentColor" opacity="0.55" />
+      <circle cx="71" cy="103" r="2.5" fill="currentColor" opacity="0.45" />
+      <circle cx="108" cy="70" r="2.5" fill="currentColor" opacity="0.45" />
+    </svg>
+  );
+}
+
+function GoldFloralSpray({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 320 82" className={className} fill="none" aria-hidden="true">
+      <path d="M32 42H128M192 42H288" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+      <path d="M160 53L170 42L160 31L150 42L160 53Z" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M100 42C119 25 139 20 160 42C181 20 201 25 220 42" stroke="currentColor" strokeWidth="1.2" opacity="0.52" />
+      <path d="M128 42C122 28 127 18 141 16C146 31 141 39 128 42Z" stroke="currentColor" strokeWidth="1.2" opacity="0.72" />
+      <path d="M192 42C198 28 193 18 179 16C174 31 179 39 192 42Z" stroke="currentColor" strokeWidth="1.2" opacity="0.72" />
+      <path d="M121 48C107 49 98 58 96 72C111 72 121 63 121 48Z" stroke="currentColor" strokeWidth="1.2" opacity="0.55" />
+      <path d="M199 48C213 49 222 58 224 72C209 72 199 63 199 48Z" stroke="currentColor" strokeWidth="1.2" opacity="0.55" />
+      <circle cx="160" cy="42" r="3" fill="currentColor" opacity="0.6" />
+      <circle cx="84" cy="42" r="2" fill="currentColor" opacity="0.55" />
+      <circle cx="236" cy="42" r="2" fill="currentColor" opacity="0.55" />
+    </svg>
+  );
+}
+
+function DiamondRule({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center justify-center gap-3 text-[#D9B457]", className)} aria-hidden="true">
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent via-current to-current/60" />
+      <span className="h-3 w-3 rotate-45 border border-current bg-[#060606] shadow-[0_0_16px_rgba(217,180,87,0.35)]" />
+      <span className="h-px flex-1 bg-gradient-to-l from-transparent via-current to-current/60" />
+    </div>
+  );
+}
+
+function EventOrnament({ variant }: { variant: "akad" | "resepsi" }) {
+  if (variant === "akad") {
+    return (
+      <svg viewBox="0 0 80 80" className="h-16 w-16" fill="none" aria-hidden="true">
+        <path d="M18 64V39C18 27 28 17 40 17C52 17 62 27 62 39V64" stroke="currentColor" strokeWidth="2" />
+        <path d="M27 64V41C27 34 33 28 40 28C47 28 53 34 53 41V64" stroke="currentColor" strokeWidth="1.6" opacity="0.72" />
+        <path d="M12 64H68" stroke="currentColor" strokeWidth="2" />
+        <path d="M40 17V10M34 12H46" stroke="currentColor" strokeWidth="1.6" opacity="0.85" />
+        <path d="M20 54C29 47 35 47 40 54C45 47 51 47 60 54" stroke="currentColor" strokeWidth="1.4" opacity="0.65" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 80 80" className="h-16 w-16" fill="none" aria-hidden="true">
+      <path d="M18 64V39C18 26 28 16 40 16C52 16 62 26 62 39V64" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 64H68" stroke="currentColor" strokeWidth="2" />
+      <path d="M20 39C30 30 50 30 60 39" stroke="currentColor" strokeWidth="1.5" opacity="0.72" />
+      <path d="M28 64V46M52 64V46" stroke="currentColor" strokeWidth="1.5" opacity="0.7" />
+      <circle cx="29" cy="41" r="5" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="51" cy="41" r="5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M34 41H46" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
   );
 }
