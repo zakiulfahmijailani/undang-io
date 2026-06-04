@@ -64,13 +64,7 @@ const navItems = [
   { href: "#closing", icon: Heart, label: "Penutup" },
 ] as const;
 
-const petalClasses = [
-  "petal-soft-float-one left-[12%] top-[18%]",
-  "petal-soft-float-two right-[18%] top-[32%]",
-  "petal-soft-float-three left-[22%] top-[62%]",
-  "petal-soft-float-four right-[12%] top-[70%]",
-  "petal-soft-float-five left-[50%] top-[26%]",
-] as const;
+const petalItems = Array.from({ length: 18 }, (_, index) => `petal-${index + 1}`);
 
 function formatDate(value: string | null) {
   if (!value) return "Tanggal akan diumumkan";
@@ -141,6 +135,7 @@ function CoverSection({ data }: { data: FatehaInvitationData }) {
       <FloralCorner position="top-right" />
       <FloralCorner position="bottom-left" />
       <FloralCorner position="bottom-right" />
+      <BottomBouquet />
 
       <div className="relative z-10 mx-auto w-full max-w-[430px]">
         <p className="petal-soft-kicker">Undangan Pernikahan</p>
@@ -528,6 +523,7 @@ function ClosingSection({ data }: { data: FatehaInvitationData }) {
     <section id="closing" className="petal-soft-section relative overflow-hidden bg-petal-paper pb-28 text-center">
       <FloralCorner position="bottom-left" />
       <FloralCorner position="bottom-right" />
+      <BottomBouquet />
       <div className="mx-auto max-w-2xl">
         <h2 className="petal-soft-serif text-5xl font-semibold text-petal-rose">Terima Kasih</h2>
         <div className="petal-soft-divider mx-auto my-4 w-56" aria-hidden="true">
@@ -647,27 +643,18 @@ function MusicToggle({ musicUrl }: { musicUrl: string | null }) {
 
 function FloatingPetals() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-30 overflow-hidden" aria-hidden="true">
-      {petalClasses.map((className) => (
-        <span key={className} className={cn("petal-soft-floating-petal", className)} />
+    <div className="petal-soft-petal-field" aria-hidden="true">
+      {petalItems.map((item) => (
+        <span key={item} className="petal-soft-falling-petal" />
       ))}
     </div>
   );
 }
 
+function BottomBouquet() {
+  return <div className="petal-soft-bottom-bouquet" aria-hidden="true" />;
+}
+
 function FloralCorner({ position, subtle = false }: { position: "top-left" | "top-right" | "bottom-left" | "bottom-right"; subtle?: boolean }) {
-  return (
-    <div className={cn("petal-soft-floral-corner", `is-${position}`, subtle && "is-subtle")} aria-hidden="true">
-      <span className="petal-soft-leaf leaf-1" />
-      <span className="petal-soft-leaf leaf-2" />
-      <span className="petal-soft-leaf leaf-3" />
-      <span className="petal-soft-leaf leaf-4" />
-      <span className="petal-soft-rose rose-1" />
-      <span className="petal-soft-rose rose-2" />
-      <span className="petal-soft-rose rose-3" />
-      <span className="petal-soft-baby baby-1" />
-      <span className="petal-soft-baby baby-2" />
-      <span className="petal-soft-baby baby-3" />
-    </div>
-  );
+  return <div className={cn("petal-soft-floral-corner", `is-${position}`, subtle && "is-subtle")} aria-hidden="true" />;
 }

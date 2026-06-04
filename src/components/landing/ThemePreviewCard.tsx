@@ -32,10 +32,9 @@ export function ThemePreviewCard({ theme, index, selected = false, compact = fal
       ) : theme.slug === PETAL_SOFT_THEME_KEY || theme.id === PETAL_SOFT_THEME_KEY ? (
         <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[#FDFAF8] text-[#C4919B]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,218,219,0.95),transparent_34%),radial-gradient(circle_at_bottom,rgba(168,197,160,0.32),transparent_42%)]" />
-          <Flower2 className={cn("absolute left-2 top-2 opacity-45", compact ? "h-6 w-6" : "h-9 w-9")} aria-hidden="true" />
-          <Flower2 className={cn("absolute right-2 top-3 rotate-45 opacity-35", compact ? "h-7 w-7" : "h-11 w-11")} aria-hidden="true" />
-          <Leaf className={cn("absolute bottom-2 left-3 -rotate-12 text-[#A8C5A0] opacity-55", compact ? "h-7 w-7" : "h-12 w-12")} aria-hidden="true" />
-          <Leaf className={cn("absolute bottom-2 right-3 rotate-12 text-[#A8C5A0] opacity-55", compact ? "h-7 w-7" : "h-12 w-12")} aria-hidden="true" />
+          <img src="/themes/petal-soft/floral-corner.png" alt="" className={cn("absolute -left-7 -top-5 object-contain", compact ? "w-28" : "w-44")} loading="lazy" />
+          <img src="/themes/petal-soft/floral-corner.png" alt="" className={cn("absolute -right-7 -top-5 scale-x-[-1] object-contain", compact ? "w-28" : "w-44")} loading="lazy" />
+          <img src="/themes/petal-soft/floral-bottom.png" alt="" className={cn("absolute -bottom-5 left-1/2 max-w-none -translate-x-1/2 object-contain opacity-85", compact ? "w-56" : "w-[22rem]")} loading="lazy" />
           <div className="relative text-center">
             <span className={cn("block font-display leading-none text-[#C4919B]", compact ? "text-2xl" : "text-5xl")}>Petal</span>
             <span className={cn("block font-display leading-none text-[#C4919B]", compact ? "text-2xl" : "text-5xl")}>Soft</span>

@@ -174,9 +174,9 @@ export default function SelectThemePage() {
                                 <>
                                     <div className="absolute inset-0 bg-[#FDFAF8]" />
                                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,218,219,0.95),transparent_34%),radial-gradient(circle_at_bottom,rgba(168,197,160,0.34),transparent_44%)]" />
-                                    <div className="absolute left-5 top-6 h-24 w-24 rounded-full bg-[#F8DADB]/80 blur-xl" />
-                                    <div className="absolute right-6 top-8 h-20 w-20 rounded-full bg-[#F4C6C8]/70 blur-xl" />
-                                    <div className="absolute bottom-0 left-0 h-28 w-full bg-[radial-gradient(circle_at_28%_100%,rgba(196,145,155,0.34),transparent_25%),radial-gradient(circle_at_55%_100%,rgba(232,160,160,0.42),transparent_28%),radial-gradient(circle_at_78%_100%,rgba(168,197,160,0.36),transparent_30%)]" />
+                                    <img src="/themes/petal-soft/floral-corner.png" alt="" className="absolute -left-16 -top-10 w-72 object-contain" loading="lazy" />
+                                    <img src="/themes/petal-soft/floral-corner.png" alt="" className="absolute -right-16 -top-10 w-72 scale-x-[-1] object-contain" loading="lazy" />
+                                    <img src="/themes/petal-soft/floral-bottom.png" alt="" className="absolute -bottom-10 left-1/2 w-[30rem] max-w-none -translate-x-1/2 object-contain opacity-90" loading="lazy" />
                                     <div className="relative flex h-56 w-44 flex-col items-center justify-center rounded-[28px] border border-[#E9C9C9] bg-white/58 px-5 text-center shadow-[0_18px_50px_rgba(196,145,155,0.16)] backdrop-blur-sm">
                                         <span className="font-serif text-5xl font-semibold leading-none text-[#C4919B]">Petal</span>
                                         <span className="font-serif text-5xl font-semibold leading-none text-[#C4919B]">Soft</span>
