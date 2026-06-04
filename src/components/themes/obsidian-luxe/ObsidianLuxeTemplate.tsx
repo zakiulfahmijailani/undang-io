@@ -43,6 +43,8 @@ type MessageResponse = {
 };
 
 const DEFAULT_SECTION_ORDER: ObsidianSectionId[] = ["cover", "quote", "couple", "story", "event", "gallery", "rsvp", "gift", "closing"];
+const OBSIDIAN_DIVIDER_SRC = "/themes/obsidian-luxe/obsidian-divider.png";
+const OBSIDIAN_CORNER_SRC = "/themes/obsidian-luxe/obsidian-corner.png";
 const FALLBACK_ARABIC_QUOTE =
   "وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً";
 
@@ -723,9 +725,8 @@ function ClosingSection({ data }: { data: FatehaInvitationData }) {
   return (
     <section id="closing" className="relative isolate overflow-hidden bg-[#050505] px-5 py-28 pb-36 text-center">
       <LuxuryBackdrop frame />
-      <ArtDecoCorners />
-      <GoldFloralCorner className="bottom-0 left-0 w-64 -translate-x-20 translate-y-10 opacity-75" />
-      <GoldFloralCorner className="bottom-0 right-0 w-64 translate-x-20 translate-y-10 scale-x-[-1] opacity-75" />
+      <GoldFloralCorner className="bottom-0 left-0 w-72 -translate-x-24 translate-y-8 opacity-85" />
+      <GoldFloralCorner className="bottom-0 right-0 w-72 translate-x-24 translate-y-8 scale-x-[-1] opacity-85" />
       <div className="relative mx-auto max-w-3xl">
         <ArtDecoCrown className="mx-auto h-32 w-64 text-[#D9B457]" />
         <p className="mt-8 [font-family:var(--font-obsidian-heading)] text-2xl italic leading-9 text-[#F3D889]">
@@ -890,28 +891,6 @@ function AurumFoilRain() {
   );
 }
 
-function ArtDecoCorners() {
-  const base = "absolute h-24 w-24 border-[#D9B457]/55 sm:h-32 sm:w-32";
-  const inner = "absolute h-16 w-16 border-[#D9B457]/35 sm:h-20 sm:w-20";
-
-  return (
-    <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true">
-      <span className={cn(base, "left-5 top-5 border-l border-t")} />
-      <span className={cn(inner, "left-10 top-10 border-l border-t")} />
-      <span className={cn(base, "right-5 top-5 border-r border-t")} />
-      <span className={cn(inner, "right-10 top-10 border-r border-t")} />
-      <span className={cn(base, "bottom-5 left-5 border-b border-l")} />
-      <span className={cn(inner, "bottom-10 left-10 border-b border-l")} />
-      <span className={cn(base, "bottom-5 right-5 border-b border-r")} />
-      <span className={cn(inner, "bottom-10 right-10 border-b border-r")} />
-      <span className="absolute left-8 top-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
-      <span className="absolute right-8 top-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
-      <span className="absolute bottom-8 left-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
-      <span className="absolute bottom-8 right-8 h-4 w-4 rotate-45 border border-[#D9B457]/70" />
-    </div>
-  );
-}
-
 function ArtDecoCrown({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 360 190" className={className} fill="none" aria-hidden="true">
@@ -932,38 +911,25 @@ function ArtDecoCrown({ className }: { className?: string }) {
 
 function GoldFloralCorner({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 210 170" className={cn("pointer-events-none absolute z-0 text-[#D9B457]", className)} fill="none" aria-hidden="true">
-      <path d="M20 146C63 109 100 73 160 34" stroke="currentColor" strokeWidth="1.6" opacity="0.72" />
-      <path d="M56 116C48 93 59 76 80 72C84 94 73 111 56 116Z" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
-      <path d="M87 90C80 68 92 52 115 48C118 72 106 86 87 90Z" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
-      <path d="M121 65C115 45 128 30 151 26C153 48 140 62 121 65Z" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
-      <path d="M64 104C80 97 97 99 111 115C94 126 75 122 64 104Z" stroke="currentColor" strokeWidth="1.4" opacity="0.55" />
-      <path d="M96 76C113 69 132 72 146 88C126 99 108 94 96 76Z" stroke="currentColor" strokeWidth="1.4" opacity="0.55" />
-      <circle cx="155" cy="36" r="10" stroke="currentColor" strokeWidth="1.5" opacity="0.9" />
-      <circle cx="155" cy="36" r="4" fill="currentColor" opacity="0.35" />
-      <path d="M155 19C161 25 165 31 165 36C165 43 161 49 155 54C149 49 145 43 145 36C145 31 149 25 155 19Z" stroke="currentColor" strokeWidth="1.3" opacity="0.72" />
-      <path d="M138 36C145 31 151 29 155 29C161 29 167 31 173 36C167 42 161 44 155 44C151 44 145 42 138 36Z" stroke="currentColor" strokeWidth="1.3" opacity="0.72" />
-      <circle cx="36" cy="136" r="3" fill="currentColor" opacity="0.55" />
-      <circle cx="71" cy="103" r="2.5" fill="currentColor" opacity="0.45" />
-      <circle cx="108" cy="70" r="2.5" fill="currentColor" opacity="0.45" />
-    </svg>
+    <img
+      src={OBSIDIAN_CORNER_SRC}
+      alt=""
+      aria-hidden="true"
+      className={cn("pointer-events-none absolute z-0 select-none object-contain [filter:drop-shadow(0_0_18px_rgba(217,180,87,0.24))]", className)}
+      loading="lazy"
+    />
   );
 }
 
 function GoldFloralSpray({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 320 82" className={className} fill="none" aria-hidden="true">
-      <path d="M32 42H128M192 42H288" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
-      <path d="M160 53L170 42L160 31L150 42L160 53Z" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M100 42C119 25 139 20 160 42C181 20 201 25 220 42" stroke="currentColor" strokeWidth="1.2" opacity="0.52" />
-      <path d="M128 42C122 28 127 18 141 16C146 31 141 39 128 42Z" stroke="currentColor" strokeWidth="1.2" opacity="0.72" />
-      <path d="M192 42C198 28 193 18 179 16C174 31 179 39 192 42Z" stroke="currentColor" strokeWidth="1.2" opacity="0.72" />
-      <path d="M121 48C107 49 98 58 96 72C111 72 121 63 121 48Z" stroke="currentColor" strokeWidth="1.2" opacity="0.55" />
-      <path d="M199 48C213 49 222 58 224 72C209 72 199 63 199 48Z" stroke="currentColor" strokeWidth="1.2" opacity="0.55" />
-      <circle cx="160" cy="42" r="3" fill="currentColor" opacity="0.6" />
-      <circle cx="84" cy="42" r="2" fill="currentColor" opacity="0.55" />
-      <circle cx="236" cy="42" r="2" fill="currentColor" opacity="0.55" />
-    </svg>
+    <img
+      src={OBSIDIAN_DIVIDER_SRC}
+      alt=""
+      aria-hidden="true"
+      className={cn("pointer-events-none select-none object-contain [filter:drop-shadow(0_0_16px_rgba(217,180,87,0.2))]", className)}
+      loading="lazy"
+    />
   );
 }
 
