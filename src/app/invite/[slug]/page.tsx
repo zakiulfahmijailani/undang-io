@@ -8,8 +8,9 @@ import ParallaxWrapper from './ParallaxWrapper';
 import { fetchClassicTheme, mapInvitationToClassicData } from '@/lib/classic-theme-loader';
 import ClassicThemeRendererWrapper from './ClassicThemeRendererWrapper';
 import FatehaThemeRendererWrapper from './FatehaThemeRendererWrapper';
-import { DEFAULT_INVITATION_THEME_KEY } from '@/lib/default-theme';
+import { DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY } from '@/lib/default-theme';
 import { mapInvitationToFatehaData } from '@/lib/fateha-theme-mapper';
+import { PetalSoftTemplate } from '@/components/themes/petal-soft';
 
 export const revalidate = 0;
 
@@ -98,6 +99,49 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
             );
         }
 
+        if (resolvedSearch.theme === PETAL_SOFT_THEME_KEY) {
+            const petalSoftDemoData = mapInvitationToFatehaData({
+                id: 'demo-petal-soft',
+                slug: 'demo-petal-soft',
+                groom_full_name: 'Muhammad Rizki Pratama',
+                groom_nickname: 'Rizki',
+                groom_father_name: 'Bapak Lorem',
+                groom_mother_name: 'Ibu Ipsum',
+                bride_full_name: 'Nazwa Aurelia Putri',
+                bride_nickname: 'Nazwa',
+                bride_father_name: 'Bapak Dolor',
+                bride_mother_name: 'Ibu Sit Amet',
+                akad_datetime: '2025-10-12T08:00:00+07:00',
+                akad_location_name: 'Masjid Al-Ikhlas',
+                akad_location_address: 'Jl. Damai No. 10, Bandung, Jawa Barat',
+                akad_maps_url: demoData.akad.mapsUrl,
+                resepsi_datetime: '2025-10-12T11:00:00+07:00',
+                resepsi_location_name: 'Gedung Harmoni',
+                resepsi_location_address: 'Jl. Bahagia No. 20, Bandung, Jawa Barat',
+                resepsi_maps_url: demoData.reception.mapsUrl,
+                quote_text: 'Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri agar kamu merasa tenteram kepadanya.',
+                quote_source: 'QS. Ar-Rum: 21',
+                love_story: demoData.loveStory,
+                gallery_photos: demoData.gallery,
+                rekening: demoData.bankAccounts,
+                gift_shipping_address: demoData.giftAddress,
+                rsvp_messages: demoData.rsvpMessages.map((message) => ({
+                    id: message.id,
+                    guest_name: message.guestName,
+                    attendance: message.attendance,
+                    message: message.message,
+                    created_at: message.createdAt,
+                })),
+            }, { isPreview: true });
+
+            return (
+                <>
+                    <PetalSoftTemplate data={petalSoftDemoData} />
+                    <ViewTracker slug={slug} isPreview={isPreview} />
+                </>
+            );
+        }
+
         return (
             <>
                 <InvitationClientWrapper data={demoData} />
@@ -167,6 +211,16 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
 
     // ── Classic Theme Route ─────────────────────────────────────────────
     const themeKey = (invitation as any).theme_key as string | null;
+
+    if (themeKey === PETAL_SOFT_THEME_KEY) {
+        const petalSoftData = mapInvitationToFatehaData(invitation, { guestName, isPreview });
+        return (
+            <>
+                <PetalSoftTemplate data={petalSoftData} />
+                <ViewTracker slug={slug} isPreview={isPreview} />
+            </>
+        );
+    }
 
     if (themeKey === DEFAULT_INVITATION_THEME_KEY) {
         const fatehaData = mapInvitationToFatehaData(invitation, { guestName, isPreview });

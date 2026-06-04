@@ -1,6 +1,11 @@
 export const DEFAULT_INVITATION_THEME_KEY = "sakinah-serenity";
 export const DEFAULT_INVITATION_THEME_NAME = "Sakinah Serenity";
 export const DEFAULT_INVITATION_THEME_CATEGORY = "Islami";
+export const PETAL_SOFT_THEME_KEY = "petal-soft";
+export const PETAL_SOFT_THEME_NAME = "Petal Soft";
+export const PETAL_SOFT_THEME_CATEGORY = "Minimalis";
+
+const CODE_RENDERED_THEME_KEYS = new Set([DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY]);
 
 export function normalizeThemeSelection(themeId?: string | null) {
   const value = typeof themeId === "string" ? themeId.trim() : "";
@@ -11,6 +16,10 @@ export function isDefaultThemeSelection(themeId?: string | null) {
   return normalizeThemeSelection(themeId) === DEFAULT_INVITATION_THEME_KEY;
 }
 
+export function isCodeRenderedThemeKey(themeId?: string | null) {
+  return CODE_RENDERED_THEME_KEYS.has(normalizeThemeSelection(themeId));
+}
+
 export function isClassicThemeKey(themeId?: string | null) {
   const value = normalizeThemeSelection(themeId);
   return value.startsWith("classic");
@@ -18,5 +27,5 @@ export function isClassicThemeKey(themeId?: string | null) {
 
 export function shouldResolveAsSupabaseTheme(themeId?: string | null) {
   const value = normalizeThemeSelection(themeId);
-  return value !== DEFAULT_INVITATION_THEME_KEY && !value.startsWith("classic");
+  return !CODE_RENDERED_THEME_KEYS.has(value) && !value.startsWith("classic");
 }

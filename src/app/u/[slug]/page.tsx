@@ -9,8 +9,9 @@ import { AlertTriangle, CheckCircle2, Clock3, Copy, Crown, ExternalLink, Lock, M
 import { toast } from "sonner";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import { FatehaInvitationRenderer } from "@/components/themes/fateha";
+import { PetalSoftTemplate } from "@/components/themes/petal-soft";
 import { demoData } from "@/data/demoInvitation";
-import { DEFAULT_INVITATION_THEME_KEY } from "@/lib/default-theme";
+import { DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 import { mapGuestSessionToFatehaData } from "@/lib/fateha-theme-mapper";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -321,7 +322,11 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
 
   const invitationData = useMemo(() => (sessionData ? mapGuestSessionToInvitation(sessionData) : null), [sessionData]);
   const isFatehaTheme = !sessionData?.theme_id || sessionData.theme_id === DEFAULT_INVITATION_THEME_KEY;
-  const fatehaData = useMemo(() => (sessionData && isFatehaTheme ? mapGuestSessionToFatehaData(sessionData) : null), [isFatehaTheme, sessionData]);
+  const isPetalSoftTheme = sessionData?.theme_id === PETAL_SOFT_THEME_KEY;
+  const weddingThemeData = useMemo(
+    () => (sessionData && (isFatehaTheme || isPetalSoftTheme) ? mapGuestSessionToFatehaData(sessionData) : null),
+    [isFatehaTheme, isPetalSoftTheme, sessionData],
+  );
 
   if (isLoading) {
     return <div className="min-h-screen bg-landing-cream" />;
@@ -333,8 +338,10 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
 
   const isExpired = new Date(sessionData.expires_at).getTime() <= Date.now() && sessionData.status !== "converted";
   const mode: ViewerMode = sessionData.status === "converted" ? "premium" : isExpired ? "expired" : isLoggedIn ? "logged-in" : "guest";
-  const renderedInvitation = isFatehaTheme && fatehaData ? (
-    <FatehaInvitationRenderer data={fatehaData} />
+  const renderedInvitation = isPetalSoftTheme && weddingThemeData ? (
+    <PetalSoftTemplate data={weddingThemeData} />
+  ) : isFatehaTheme && weddingThemeData ? (
+    <FatehaInvitationRenderer data={weddingThemeData} />
   ) : (
     <InvitationClientWrapper data={invitationData} />
   );

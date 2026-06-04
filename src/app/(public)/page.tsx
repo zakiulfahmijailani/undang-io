@@ -32,6 +32,16 @@ function normalizeTheme(row: ThemeRow): LandingTheme | null {
   };
 }
 
+function mergeLandingThemes(themes: LandingTheme[]) {
+  const seen = new Set<string>();
+  return [...fallbackThemes, ...themes].filter((theme) => {
+    const key = theme.slug || theme.id;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 async function fetchLandingThemes(): Promise<LandingTheme[]> {
   try {
     const supabase = (await createServerSupabaseClient()) as SupabaseClient | null;
@@ -52,7 +62,7 @@ async function fetchLandingThemes(): Promise<LandingTheme[]> {
 
     const themes = ((data ?? []) as ThemeRow[]).map(normalizeTheme).filter((theme): theme is LandingTheme => theme !== null);
 
-    return themes.length > 0 ? themes : fallbackThemes;
+    return mergeLandingThemes(themes).slice(0, 6);
   } catch (error) {
     console.error("[landing] Unexpected theme fetch error:", error);
     return fallbackThemes;

@@ -15,16 +15,30 @@ import {
   WalletCards,
 } from "lucide-react";
 import type { LandingTheme } from "./types";
-import { DEFAULT_INVITATION_THEME_KEY, DEFAULT_INVITATION_THEME_NAME, DEFAULT_INVITATION_THEME_CATEGORY } from "@/lib/default-theme";
+import {
+  DEFAULT_INVITATION_THEME_KEY,
+  DEFAULT_INVITATION_THEME_NAME,
+  DEFAULT_INVITATION_THEME_CATEGORY,
+  PETAL_SOFT_THEME_CATEGORY,
+  PETAL_SOFT_THEME_KEY,
+  PETAL_SOFT_THEME_NAME,
+} from "@/lib/default-theme";
 
 export const fallbackThemes: LandingTheme[] = [
   {
     id: DEFAULT_INVITATION_THEME_KEY,
     name: DEFAULT_INVITATION_THEME_NAME,
-    slug: "sakinah",
+    slug: DEFAULT_INVITATION_THEME_KEY,
     thumbnailUrl: null,
     culturalCategory: DEFAULT_INVITATION_THEME_CATEGORY,
-  }
+  },
+  {
+    id: PETAL_SOFT_THEME_KEY,
+    name: PETAL_SOFT_THEME_NAME,
+    slug: PETAL_SOFT_THEME_KEY,
+    thumbnailUrl: null,
+    culturalCategory: PETAL_SOFT_THEME_CATEGORY,
+  },
 ];
 
 export type LandingFeature = {

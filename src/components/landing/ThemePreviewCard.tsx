@@ -3,6 +3,7 @@
 import { Check, Flower2, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LandingTheme } from "./types";
+import { DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 
 const variantClasses = [
   "bg-[linear-gradient(135deg,#fff7f5_0%,#ffffff_48%,#f8d5dc_100%)] text-landing-maroon",
@@ -28,7 +29,23 @@ export function ThemePreviewCard({ theme, index, selected = false, compact = fal
     <>
       {theme.thumbnailUrl ? (
         <img src={theme.thumbnailUrl} alt={theme.name} className="h-full w-full object-cover" loading="lazy" />
-      ) : theme.slug === "sakinah-serenity" || theme.id === "sakinah-serenity" ? (
+      ) : theme.slug === PETAL_SOFT_THEME_KEY || theme.id === PETAL_SOFT_THEME_KEY ? (
+        <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[#FDFAF8] text-[#C4919B]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,218,219,0.95),transparent_34%),radial-gradient(circle_at_bottom,rgba(168,197,160,0.32),transparent_42%)]" />
+          <Flower2 className={cn("absolute left-2 top-2 opacity-45", compact ? "h-6 w-6" : "h-9 w-9")} aria-hidden="true" />
+          <Flower2 className={cn("absolute right-2 top-3 rotate-45 opacity-35", compact ? "h-7 w-7" : "h-11 w-11")} aria-hidden="true" />
+          <Leaf className={cn("absolute bottom-2 left-3 -rotate-12 text-[#A8C5A0] opacity-55", compact ? "h-7 w-7" : "h-12 w-12")} aria-hidden="true" />
+          <Leaf className={cn("absolute bottom-2 right-3 rotate-12 text-[#A8C5A0] opacity-55", compact ? "h-7 w-7" : "h-12 w-12")} aria-hidden="true" />
+          <div className="relative text-center">
+            <span className={cn("block font-display leading-none text-[#C4919B]", compact ? "text-2xl" : "text-5xl")}>Petal</span>
+            <span className={cn("block font-display leading-none text-[#C4919B]", compact ? "text-2xl" : "text-5xl")}>Soft</span>
+            <span className="mx-auto mt-2 block h-px w-10 bg-[#C4919B]/45" />
+            <span className={cn("mt-2 block font-ui font-semibold uppercase text-[#9E8E8E]", compact ? "text-[6px] tracking-[0.14em]" : "text-[8px] tracking-[0.22em]")}>
+              Floral Pastel
+            </span>
+          </div>
+        </div>
+      ) : theme.slug === DEFAULT_INVITATION_THEME_KEY || theme.id === DEFAULT_INVITATION_THEME_KEY ? (
         <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#14213D] via-[#1e305a] to-[#14213D]">
            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%)]" />
            <div className="absolute -left-4 -top-4 h-16 w-16 rounded-full border border-[#C3A36B]/20 bg-[#C3A36B]/5 blur-sm" />

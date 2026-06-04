@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   isClassicThemeKey,
+  isCodeRenderedThemeKey,
   isDefaultThemeSelection,
   normalizeThemeSelection,
 } from "@/lib/default-theme";
@@ -43,6 +44,14 @@ export async function resolveInvitationThemeSelection(
     return {
       themeId: null,
       themeKey: DEFAULT_INVITATION_THEME_KEY,
+      selection,
+    };
+  }
+
+  if (isCodeRenderedThemeKey(selection)) {
+    return {
+      themeId: null,
+      themeKey: selection,
       selection,
     };
   }

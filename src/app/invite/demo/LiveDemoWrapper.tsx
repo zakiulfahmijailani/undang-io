@@ -3,16 +3,44 @@
 import { useEffect, useState } from "react";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import FatehaThemeRendererWrapper from "@/app/invite/[slug]/FatehaThemeRendererWrapper";
+import { PetalSoftTemplate } from "@/components/themes/petal-soft";
 import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
+import { PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 import { demoData as fallbackDemoData } from "@/data/demoInvitation";
+import type { FatehaInvitationData } from "@/components/themes/fateha";
 
-export function LiveDemoWrapper({ initialData, theme }: { initialData: any, theme: string }) {
-  const [data, setData] = useState(initialData);
+type LegacyDemoData = typeof fallbackDemoData;
+type LiveDemoData = LegacyDemoData | FatehaInvitationData;
+type PreviewFormMessage = {
+  type?: string;
+  data?: {
+    groomFullName?: string;
+    groomNickname?: string;
+    groomFather?: string;
+    groomMother?: string;
+    brideFullName?: string;
+    brideNickname?: string;
+    brideFather?: string;
+    brideMother?: string;
+    akadDate?: string;
+    akadTime?: string;
+    receptionDate?: string;
+    receptionTime?: string;
+    venue?: string;
+    address?: string;
+    mapsUrl?: string;
+    quote?: string;
+  };
+};
+
+export function LiveDemoWrapper({ initialData, theme }: { initialData: LiveDemoData; theme: string }) {
+  const [data, setData] = useState<LiveDemoData>(initialData);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === "UPDATE_PREVIEW") {
-        const form = event.data.data;
+      const message = event.data as PreviewFormMessage;
+      if (message.type === "UPDATE_PREVIEW" && message.data) {
+        const form = message.data;
         
         // Map the InvitationForm from buat-undangan-content to the expected structure
         // Since both legacy and fateha themes expect different data structures, we need to map them properly.
@@ -42,7 +70,7 @@ export function LiveDemoWrapper({ initialData, theme }: { initialData: any, them
           gallery_photos: fallbackDemoData.gallery,
           rekening: fallbackDemoData.bankAccounts,
           gift_shipping_address: fallbackDemoData.giftAddress,
-          rsvp_messages: fallbackDemoData.rsvpMessages.map((message: any) => ({
+          rsvp_messages: fallbackDemoData.rsvpMessages.map((message) => ({
             id: message.id,
             guest_name: message.guestName,
             attendance: message.attendance,
@@ -96,8 +124,12 @@ export function LiveDemoWrapper({ initialData, theme }: { initialData: any, them
   }, [theme]);
 
   if (theme === "legacy") {
-    return <InvitationClientWrapper data={data} />;
+    return <InvitationClientWrapper data={data as LegacyDemoData} />;
   }
 
-  return <FatehaThemeRendererWrapper data={data} />;
+  if (theme === PETAL_SOFT_THEME_KEY) {
+    return <PetalSoftTemplate data={data as FatehaInvitationData} />;
+  }
+
+  return <FatehaThemeRendererWrapper data={data as FatehaInvitationData} />;
 }

@@ -29,7 +29,12 @@ import { toast } from "sonner";
 import { fallbackThemes } from "@/components/landing/data";
 import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
 import type { LandingTheme } from "@/components/landing/types";
-import { DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme";
+import {
+  DEFAULT_INVITATION_THEME_KEY,
+  DEFAULT_INVITATION_THEME_NAME,
+  PETAL_SOFT_THEME_KEY,
+  isCodeRenderedThemeKey,
+} from "@/lib/default-theme";
 import { cn } from "@/lib/utils";
 
 export type ActiveTheme = {
@@ -117,6 +122,20 @@ function fallbackActiveThemes(): ActiveTheme[] {
     culturalCategory: theme.culturalCategory,
     description: null,
   }));
+}
+
+function mergeActiveThemes(primary: ActiveTheme[], secondary: ActiveTheme[]) {
+  const seen = new Set<string>();
+  return [...primary, ...secondary].filter((theme) => {
+    const key = theme.slug || theme.id;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function themeSelectionValue(theme: ActiveTheme) {
+  return isCodeRenderedThemeKey(theme.slug) ? theme.slug : theme.id;
 }
 
 function normalizeCategory(category: string | null) {
@@ -273,7 +292,7 @@ function InvitationPreview({ form, themeSlug, large = false }: { form: Invitatio
 export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: ActiveTheme[]; isLoggedIn?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const themeOptions = themes.length > 0 ? themes : fallbackActiveThemes();
+  const themeOptions = useMemo(() => mergeActiveThemes(fallbackActiveThemes(), themes), [themes]);
   const [step, setStep] = useState<WizardStep>(1);
   const [selectedThemeId, setSelectedThemeId] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
@@ -333,7 +352,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
     const response = await fetch("/api/guest-sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionToken, slug, themeId: selectedTheme?.id ?? null, expiresAt, invitationData: form }),
+      body: JSON.stringify({ sessionToken, slug, themeId: selectedTheme ? themeSelectionValue(selectedTheme) : null, expiresAt, invitationData: form }),
     });
 
     const json = (await response.json()) as { error?: { message?: string } };
@@ -356,7 +375,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
         const response = await fetch("/api/invitations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slug, themeId: selectedTheme?.id ?? null, invitationData: form }),
+          body: JSON.stringify({ slug, themeId: selectedTheme ? themeSelectionValue(selectedTheme) : null, invitationData: form }),
         });
 
         if (response.ok) {
@@ -431,7 +450,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {themeOptions
               .filter((theme) => {
-                const themeCategory = theme.name === DEFAULT_INVITATION_THEME_NAME ? "Elegan" : normalizeCategory(theme.culturalCategory);
+                const themeCategory = theme.id === DEFAULT_INVITATION_THEME_KEY ? "Elegan" : normalizeCategory(theme.culturalCategory);
                 const matchCategory = selectedCategory === "Semua" || themeCategory === selectedCategory;
                 const matchPrice = selectedPrice === "Semua" || selectedPrice === "Gratis";
                 return matchCategory && matchPrice;
@@ -444,7 +463,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
                   <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden bg-gray-100">
                     {theme.thumbnailUrl ? (
                       <img src={theme.thumbnailUrl} alt={theme.name} className="h-full w-full object-cover" loading="lazy" />
-                    ) : theme.name === DEFAULT_INVITATION_THEME_NAME ? (
+                    ) : theme.id === DEFAULT_INVITATION_THEME_KEY ? (
                       <>
                         <div className="absolute inset-0 bg-gradient-to-br from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.86),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(195,163,107,0.28),transparent_38%)]" />
@@ -454,6 +473,20 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
                           <span className="font-serif text-5xl font-semibold text-[#8A6F42]">SS</span>
                           <span className="mt-3 h-px w-12 bg-[#C3A36B]/70" />
                           <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#536979]">Sakinah</span>
+                        </div>
+                      </>
+                    ) : theme.id === PETAL_SOFT_THEME_KEY || theme.slug === PETAL_SOFT_THEME_KEY ? (
+                      <>
+                        <div className="absolute inset-0 bg-[#FDFAF8]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,218,219,0.95),transparent_34%),radial-gradient(circle_at_bottom,rgba(168,197,160,0.34),transparent_44%)]" />
+                        <div className="absolute left-5 top-6 h-24 w-24 rounded-full bg-[#F8DADB]/80 blur-xl" />
+                        <div className="absolute right-6 top-8 h-20 w-20 rounded-full bg-[#F4C6C8]/70 blur-xl" />
+                        <div className="absolute bottom-0 left-0 h-28 w-full bg-[radial-gradient(circle_at_28%_100%,rgba(196,145,155,0.34),transparent_25%),radial-gradient(circle_at_55%_100%,rgba(232,160,160,0.42),transparent_28%),radial-gradient(circle_at_78%_100%,rgba(168,197,160,0.36),transparent_30%)]" />
+                        <div className="relative flex h-52 w-40 flex-col items-center justify-center rounded-[28px] border border-[#E9C9C9] bg-white/58 px-5 text-center shadow-[0_18px_50px_rgba(196,145,155,0.16)] backdrop-blur-sm">
+                          <span className="font-landing-serif text-5xl font-semibold leading-none text-[#C4919B]">Petal</span>
+                          <span className="font-landing-serif text-5xl font-semibold leading-none text-[#C4919B]">Soft</span>
+                          <span className="mt-4 h-px w-14 bg-[#C4919B]/55" />
+                          <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#9E8E8E]">Floral Pastel</span>
                         </div>
                       </>
                     ) : (
@@ -474,7 +507,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
 
                   <CardContent className="flex flex-1 flex-col p-5">
                     <span className="mb-1 block font-ui text-xs font-semibold uppercase tracking-wider text-gray-400">
-                      {theme.name === DEFAULT_INVITATION_THEME_NAME ? "Elegan" : normalizeCategory(theme.culturalCategory)}
+                      {theme.id === DEFAULT_INVITATION_THEME_KEY ? "Elegan" : normalizeCategory(theme.culturalCategory)}
                     </span>
                     <h3 className="mb-4 font-landing-serif text-xl font-bold text-[#14213D]">{theme.name}</h3>
 
@@ -499,7 +532,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               ))}
 
             {themeOptions.filter((theme) => {
-              const themeCategory = theme.name === DEFAULT_INVITATION_THEME_NAME ? "Elegan" : normalizeCategory(theme.culturalCategory);
+              const themeCategory = theme.id === DEFAULT_INVITATION_THEME_KEY ? "Elegan" : normalizeCategory(theme.culturalCategory);
               const matchCategory = selectedCategory === "Semua" || themeCategory === selectedCategory;
               const matchPrice = selectedPrice === "Semua" || selectedPrice === "Gratis";
               return matchCategory && matchPrice;

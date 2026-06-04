@@ -25,6 +25,8 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
   const selectedTheme = themes.find((theme) => theme.slug === activeThemeKey || theme.id === activeThemeKey);
 
   function handleSubmit() {
+    const themeParam = selectedTheme?.slug || selectedTheme?.id || "";
+
     if (typeof window !== "undefined") {
       window.sessionStorage.setItem(
         "undang_draft",
@@ -33,12 +35,11 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
           groom_name: groomName,
           bride_full_name: "",
           bride_name: brideName,
-          themeId: selectedTheme?.id ?? "",
+          themeId: themeParam,
         }),
       );
     }
 
-    const themeParam = selectedTheme?.slug || selectedTheme?.id || "";
     router.push(themeParam ? `/buat-undangan?theme=${encodeURIComponent(themeParam)}` : "/buat-undangan");
   }
 

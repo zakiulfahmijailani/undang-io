@@ -6,7 +6,15 @@ import { Badge } from "@/components/ui/badge"
 import { Eye, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { DEFAULT_INVITATION_THEME_CATEGORY, DEFAULT_INVITATION_THEME_KEY, DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme"
+import {
+    DEFAULT_INVITATION_THEME_CATEGORY,
+    DEFAULT_INVITATION_THEME_KEY,
+    DEFAULT_INVITATION_THEME_NAME,
+    PETAL_SOFT_THEME_CATEGORY,
+    PETAL_SOFT_THEME_KEY,
+    PETAL_SOFT_THEME_NAME,
+    isCodeRenderedThemeKey,
+} from "@/lib/default-theme"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
 type DashboardTheme = {
@@ -15,9 +23,37 @@ type DashboardTheme = {
     category: string
     price: "Gratis" | "Premium"
     gradient: string
-    preview: "sakinah" | "placeholder"
+    preview: "sakinah" | "petal-soft" | "placeholder"
     slug: string
 }
+
+type ClassicThemeRow = {
+    id: string
+    name: string | null
+    cultural_category: string | null
+    slug: string | null
+}
+
+const codeRenderedThemes: DashboardTheme[] = [
+    {
+        id: DEFAULT_INVITATION_THEME_KEY,
+        name: DEFAULT_INVITATION_THEME_NAME,
+        category: DEFAULT_INVITATION_THEME_CATEGORY,
+        price: "Gratis",
+        gradient: "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
+        preview: "sakinah",
+        slug: DEFAULT_INVITATION_THEME_KEY,
+    },
+    {
+        id: PETAL_SOFT_THEME_KEY,
+        name: PETAL_SOFT_THEME_NAME,
+        category: PETAL_SOFT_THEME_CATEGORY,
+        price: "Gratis",
+        gradient: "from-[#FDFAF8] via-[#F8DADB] to-[#A8C5A0]",
+        preview: "petal-soft",
+        slug: PETAL_SOFT_THEME_KEY,
+    },
+]
 
 export default function SelectThemePage() {
     const [selectedCategory, setSelectedCategory] = useState("Semua")
@@ -41,19 +77,23 @@ export default function SelectThemePage() {
 
                 if (error) throw error
 
-                const mapped: DashboardTheme[] = (data || []).map(row => ({
+                const mapped: DashboardTheme[] = ((data || []) as ClassicThemeRow[]).map(row => ({
                     id: row.id,
                     name: row.name || "Tanpa Nama",
                     category: row.cultural_category || "Lainnya",
                     price: "Gratis", // Freemium model default
-                    gradient: "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
-                    preview: row.slug === "sakinah-serenity" ? "sakinah" : "placeholder",
+                    gradient: row.slug === PETAL_SOFT_THEME_KEY ? "from-[#FDFAF8] via-[#F8DADB] to-[#A8C5A0]" : "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
+                    preview: row.slug === DEFAULT_INVITATION_THEME_KEY ? "sakinah" : row.slug === PETAL_SOFT_THEME_KEY ? "petal-soft" : "placeholder",
                     slug: row.slug || row.id
                 }))
-                
-                setThemes(mapped)
+
+                setThemes([
+                    ...codeRenderedThemes,
+                    ...mapped.filter((theme) => !codeRenderedThemes.some((codeTheme) => codeTheme.slug === theme.slug)),
+                ])
             } catch (err) {
                 console.error("Failed to fetch themes", err)
+                setThemes(codeRenderedThemes)
             } finally {
                 setIsLoading(false)
             }
@@ -68,7 +108,7 @@ export default function SelectThemePage() {
     });
 
     const previewHref = (theme: DashboardTheme) =>
-        theme.slug === "sakinah-serenity"
+        isCodeRenderedThemeKey(theme.slug)
             ? `/invite/demo?preview=true&theme=${theme.slug}`
             : "/invite/demo?preview=true&theme=legacy";
 
@@ -128,6 +168,20 @@ export default function SelectThemePage() {
                                         <span className="font-serif text-5xl font-semibold text-[#8A6F42]">SS</span>
                                         <span className="mt-3 h-px w-12 bg-[#C3A36B]/70" />
                                         <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#536979]">Sakinah</span>
+                                    </div>
+                                </>
+                            ) : theme.preview === "petal-soft" ? (
+                                <>
+                                    <div className="absolute inset-0 bg-[#FDFAF8]" />
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,218,219,0.95),transparent_34%),radial-gradient(circle_at_bottom,rgba(168,197,160,0.34),transparent_44%)]" />
+                                    <div className="absolute left-5 top-6 h-24 w-24 rounded-full bg-[#F8DADB]/80 blur-xl" />
+                                    <div className="absolute right-6 top-8 h-20 w-20 rounded-full bg-[#F4C6C8]/70 blur-xl" />
+                                    <div className="absolute bottom-0 left-0 h-28 w-full bg-[radial-gradient(circle_at_28%_100%,rgba(196,145,155,0.34),transparent_25%),radial-gradient(circle_at_55%_100%,rgba(232,160,160,0.42),transparent_28%),radial-gradient(circle_at_78%_100%,rgba(168,197,160,0.36),transparent_30%)]" />
+                                    <div className="relative flex h-56 w-44 flex-col items-center justify-center rounded-[28px] border border-[#E9C9C9] bg-white/58 px-5 text-center shadow-[0_18px_50px_rgba(196,145,155,0.16)] backdrop-blur-sm">
+                                        <span className="font-serif text-5xl font-semibold leading-none text-[#C4919B]">Petal</span>
+                                        <span className="font-serif text-5xl font-semibold leading-none text-[#C4919B]">Soft</span>
+                                        <span className="mt-4 h-px w-14 bg-[#C4919B]/55" />
+                                        <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#9E8E8E]">Floral Pastel</span>
                                     </div>
                                 </>
                             ) : (
