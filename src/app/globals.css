@@ -1150,6 +1150,62 @@ body {
     background-position: 100% 50%;
   }
 }
+@keyframes obsidianFoilDrift {
+  0% {
+    opacity: 0;
+    transform: translate3d(-10px, -12vh, 0) rotateX(0deg) rotateZ(18deg) scale(0.78);
+  }
+  10% {
+    opacity: 0.78;
+  }
+  42% {
+    transform: translate3d(24px, 42vh, 0) rotateX(160deg) rotateZ(128deg) scale(1);
+  }
+  76% {
+    opacity: 0.62;
+    transform: translate3d(-18px, 82vh, 0) rotateX(280deg) rotateZ(236deg) scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(16px, 112vh, 0) rotateX(390deg) rotateZ(340deg) scale(0.7);
+  }
+}
+.obsidian-envelope-card {
+  animation: obsidianEnvelopeFloat 4.8s ease-in-out infinite;
+  perspective: 900px;
+}
+.obsidian-envelope-card .obsidian-envelope-back {
+  transform: translateY(0);
+  transition: transform 720ms cubic-bezier(0.2, 0.72, 0.16, 1), opacity 720ms ease;
+}
+.obsidian-envelope-card .obsidian-envelope-flap {
+  transform: rotateX(0deg);
+  transform-style: preserve-3d;
+  transition: transform 720ms cubic-bezier(0.2, 0.72, 0.16, 1), filter 720ms ease;
+}
+.obsidian-envelope-card .obsidian-envelope-seal {
+  transition: opacity 520ms ease, transform 720ms cubic-bezier(0.2, 0.72, 0.16, 1), filter 720ms ease;
+}
+.obsidian-envelope-card.is-opening .obsidian-envelope-back {
+  opacity: 0;
+  transform: translateY(-36px);
+}
+.obsidian-envelope-card.is-opening .obsidian-envelope-flap {
+  filter: brightness(1.18);
+  transform: rotateX(72deg);
+}
+.obsidian-envelope-card.is-opening .obsidian-envelope-seal {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-22px) scale(0.42);
+}
+@keyframes obsidianEnvelopeFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
 @media (max-width: 560px) {
   .petal-soft-floral-corner { width: 244px; }
   .petal-soft-floral-corner.is-top-left { top: -24px; left: -74px; }

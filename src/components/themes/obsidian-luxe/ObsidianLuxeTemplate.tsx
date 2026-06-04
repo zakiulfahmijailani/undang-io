@@ -109,6 +109,21 @@ const sparkleStars = [
   "left-[64%] top-[83%] h-7 w-7 [animation-delay:-5s] [animation-duration:7s]",
 ] as const;
 
+const foilShards = [
+  "left-[7%] top-[-12%] h-8 w-3 [animation-delay:-2s] [animation-duration:15s]",
+  "left-[15%] top-[-18%] h-6 w-2.5 [animation-delay:-9s] [animation-duration:18s]",
+  "left-[23%] top-[-10%] h-10 w-3 [animation-delay:-5s] [animation-duration:17s]",
+  "left-[34%] top-[-16%] h-7 w-2 [animation-delay:-12s] [animation-duration:16s]",
+  "left-[44%] top-[-11%] h-9 w-3.5 [animation-delay:-7s] [animation-duration:19s]",
+  "left-[53%] top-[-20%] h-6 w-2.5 [animation-delay:-3s] [animation-duration:14s]",
+  "left-[62%] top-[-13%] h-10 w-3 [animation-delay:-11s] [animation-duration:18s]",
+  "left-[71%] top-[-17%] h-7 w-2 [animation-delay:-6s] [animation-duration:15s]",
+  "left-[82%] top-[-9%] h-8 w-3 [animation-delay:-13s] [animation-duration:20s]",
+  "left-[91%] top-[-15%] h-6 w-2.5 [animation-delay:-4s] [animation-duration:16s]",
+  "left-[18%] top-[-28%] h-9 w-3 [animation-delay:-16s] [animation-duration:21s]",
+  "left-[76%] top-[-26%] h-10 w-3.5 [animation-delay:-18s] [animation-duration:22s]",
+] as const;
+
 function normalizeSection(section: string): ObsidianSectionId | null {
   return sectionAliases[section] ?? null;
 }
@@ -176,6 +191,7 @@ function shortInitials(data: FatehaInvitationData) {
 }
 
 export function ObsidianLuxeTemplate({ data }: { data: FatehaInvitationData }) {
+  const [opened, setOpened] = useState(false);
   const sectionOrder = useMemo(() => getVisibleSections(data), [data]);
 
   return (
@@ -186,48 +202,132 @@ export function ObsidianLuxeTemplate({ data }: { data: FatehaInvitationData }) {
       )}
     >
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_15%,rgba(201,168,76,0.15),transparent_28rem),linear-gradient(120deg,#020202,#101010_45%,#030303)]" />
-      <main className="relative mx-auto min-h-screen w-full max-w-[780px] overflow-hidden bg-[#060606] shadow-[0_0_120px_rgba(201,168,76,0.18)]">
-        {sectionOrder.map((section) => {
-          if (section === "cover") return <CoverSection key={section} data={data} />;
-          if (section === "quote") return <OpeningQuoteSection key={section} data={data} />;
-          if (section === "couple") return <CoupleSection key={section} data={data} />;
-          if (section === "story" && data.loveStory.length > 0) return <LoveStorySection key={section} data={data} />;
-          if (section === "event") return <EventSection key={section} data={data} />;
-          if (section === "gallery" && data.gallery.length > 0) return <GallerySection key={section} data={data} />;
-          if (section === "rsvp") return <RsvpSection key={section} data={data} />;
-          if (section === "gift" && (data.giftAccounts.length > 0 || data.giftAddress)) return <GiftSection key={section} data={data} />;
-          if (section === "closing") return <ClosingSection key={section} data={data} />;
-          return null;
-        })}
-      </main>
-      <ObsidianNav />
-      {data.musicUrl ? <MusicToggle musicUrl={data.musicUrl} /> : null}
+      {!opened ? <EnvelopeIntro data={data} onOpen={() => setOpened(true)} /> : null}
+      {opened ? (
+        <>
+          <main className="relative mx-auto min-h-screen w-full max-w-[780px] overflow-hidden bg-[#060606] shadow-[0_0_120px_rgba(201,168,76,0.18)]">
+            {sectionOrder.map((section) => {
+              if (section === "cover") return <CoverSection key={section} data={data} />;
+              if (section === "quote") return <OpeningQuoteSection key={section} data={data} />;
+              if (section === "couple") return <CoupleSection key={section} data={data} />;
+              if (section === "story" && data.loveStory.length > 0) return <LoveStorySection key={section} data={data} />;
+              if (section === "event") return <EventSection key={section} data={data} />;
+              if (section === "gallery" && data.gallery.length > 0) return <GallerySection key={section} data={data} />;
+              if (section === "rsvp") return <RsvpSection key={section} data={data} />;
+              if (section === "gift" && (data.giftAccounts.length > 0 || data.giftAddress)) return <GiftSection key={section} data={data} />;
+              if (section === "closing") return <ClosingSection key={section} data={data} />;
+              return null;
+            })}
+          </main>
+          <ObsidianNav />
+          {data.musicUrl ? <MusicToggle musicUrl={data.musicUrl} /> : null}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function EnvelopeIntro({ data, onOpen }: { data: FatehaInvitationData; onOpen: () => void }) {
+  const [phase, setPhase] = useState<"ready" | "opening">("ready");
+  const openTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (openTimerRef.current !== null) window.clearTimeout(openTimerRef.current);
+    };
+  }, []);
+
+  function handleOpen() {
+    if (phase === "opening") return;
+    setPhase("opening");
+    openTimerRef.current = window.setTimeout(onOpen, 780);
+  }
+
+  return (
+    <section
+      className={cn(
+        "relative isolate mx-auto flex min-h-svh w-full max-w-[780px] items-center justify-center overflow-hidden bg-[#050505] px-5 py-12 text-center shadow-[0_0_120px_rgba(201,168,76,0.18)] transition duration-700",
+        phase === "opening" && "scale-[1.02] opacity-0",
+      )}
+    >
+      <LuxuryBackdrop frame />
+      <div className="absolute inset-5 border border-[#F3D889]/28" aria-hidden="true" />
+      <div className="relative z-10 mx-auto flex w-full max-w-[430px] flex-col items-center">
+        <div className="grid h-20 w-20 place-items-center rounded-full border border-[#F3D889]/65 bg-[#070707]/78 text-[#F3D889] shadow-[0_0_48px_rgba(217,180,87,0.32)] backdrop-blur-sm">
+          <span className="[font-family:var(--font-obsidian-heading)] text-lg tracking-[0.28em]">{shortInitials(data).replace(" ✦ ", "")}</span>
+        </div>
+        <p className="mt-8 text-[0.68rem] font-semibold uppercase tracking-[0.5em] text-[#F3D889]/90 [text-shadow:0_0_18px_rgba(217,180,87,0.45)]">
+          Undangan Pernikahan
+        </p>
+        <h1 className="mt-6 bg-[linear-gradient(115deg,#916320,#D9B457_22%,#FFF5C8_40%,#B67D24_62%,#FFE5A1_82%)] bg-[length:260%_100%] bg-clip-text text-transparent [animation:obsidianShimmer_7s_ease-in-out_infinite] [font-family:var(--font-obsidian-script)] [filter:drop-shadow(0_0_18px_rgba(217,180,87,0.28))]">
+          <span className="block text-[clamp(3.7rem,16vw,6.6rem)] font-bold italic leading-[0.82]">{data.bride.nickname}</span>
+          <span className="block py-2 text-[clamp(1.55rem,6vw,2.6rem)] leading-none text-[#F7E1A1]">&amp;</span>
+          <span className="block text-[clamp(3.6rem,15vw,6.3rem)] font-bold italic leading-[0.82]">{data.groom.nickname}</span>
+        </h1>
+        <DiamondRule className="mt-7 w-64 max-w-full" />
+        <ObsidianEnvelopeCard initials={data.monogram || shortInitials(data).replace(" ✦ ", "")} opening={phase === "opening"} />
+        <button
+          type="button"
+          onClick={handleOpen}
+          disabled={phase === "opening"}
+          className="mt-8 inline-flex items-center justify-center border border-[#F3D889]/70 bg-[linear-gradient(135deg,#9A6A25,#F4D984,#B78128)] px-8 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-[#050505] shadow-[0_18px_54px_rgba(217,180,87,0.28)] transition hover:scale-[1.02] hover:brightness-110 disabled:pointer-events-none disabled:opacity-70"
+        >
+          {phase === "opening" ? "Membuka" : "Buka Undangan"}
+        </button>
+        <p className="mt-5 [font-family:var(--font-obsidian-heading)] text-sm tracking-[0.22em] text-[#F6EBD1]/80">
+          {formatDate(data.wedding.date)}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ObsidianEnvelopeCard({ initials, opening }: { initials: string; opening: boolean }) {
+  const seal = initials.replace(/\s+/g, " ").trim() || "OL";
+
+  return (
+    <div className={cn("obsidian-envelope-card relative mt-10 h-40 w-72 max-w-full", opening && "is-opening")} aria-hidden="true">
+      <div className="absolute inset-x-7 -top-7 flex h-28 flex-col items-center justify-center border border-[#F3D889]/52 bg-[linear-gradient(145deg,rgba(23,23,23,0.96),rgba(5,5,5,0.96))] px-5 shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
+        <span className="text-[0.56rem] font-semibold uppercase tracking-[0.34em] text-[#D9B457]/80">Kepada Yth.</span>
+        <span className="mt-3 [font-family:var(--font-obsidian-heading)] text-lg italic text-[#F6EBD1]/82">Bapak/Ibu/Saudara/i</span>
+        <span className="mt-3 h-px w-28 bg-gradient-to-r from-transparent via-[#D9B457]/70 to-transparent" />
+      </div>
+      <div className="obsidian-envelope-back absolute inset-x-0 bottom-0 h-32 overflow-hidden border border-[#F3D889]/58 bg-[linear-gradient(145deg,#111111,#050505_62%,#18140B)] shadow-[0_26px_80px_rgba(0,0,0,0.45)]">
+        <span className="absolute inset-3 border border-[#D9B457]/24" />
+        <span className="absolute left-0 top-0 h-full w-full bg-[radial-gradient(circle_at_50%_10%,rgba(243,216,137,0.18),transparent_55%)]" />
+      </div>
+      <div className="obsidian-envelope-flap absolute inset-x-0 top-8 h-24 origin-top border-x border-t border-[#F3D889]/66 bg-[linear-gradient(160deg,#211A0D,#090909_54%,#30230F)] shadow-[0_18px_48px_rgba(0,0,0,0.42)] [clip-path:polygon(0_0,100%_0,50%_100%)]" />
+      <div className="absolute bottom-0 left-0 h-32 w-1/2 border-b border-l border-[#F3D889]/58 bg-[linear-gradient(145deg,rgba(13,13,13,0.94),rgba(47,35,14,0.72))] [clip-path:polygon(0_0,100%_50%,0_100%)]" />
+      <div className="absolute bottom-0 right-0 h-32 w-1/2 border-b border-r border-[#F3D889]/58 bg-[linear-gradient(215deg,rgba(13,13,13,0.94),rgba(47,35,14,0.72))] [clip-path:polygon(100%_0,0_50%,100%_100%)]" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 border-x border-b border-[#F3D889]/66 bg-[linear-gradient(180deg,rgba(8,8,8,0.8),rgba(18,13,6,0.95))] [clip-path:polygon(0_100%,50%_14%,100%_100%)]" />
+      <div className="obsidian-envelope-seal absolute left-1/2 top-[5.2rem] grid h-14 w-14 -translate-x-1/2 place-items-center rounded-full border border-[#FFF1BB]/80 bg-[radial-gradient(circle_at_35%_30%,#FFE9A8,#B9852B_58%,#5E3A10)] text-[#050505] shadow-[0_0_36px_rgba(217,180,87,0.55)]">
+        <span className="[font-family:var(--font-obsidian-heading)] text-[0.7rem] font-semibold tracking-[0.18em]">{seal}</span>
+      </div>
     </div>
   );
 }
 
 function CoverSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <section id="cover" className="relative isolate flex min-h-svh items-center justify-center overflow-hidden px-6 pb-32 pt-14 text-center sm:py-16">
-      <LuxuryBackdrop />
-      <ArtDecoCorners />
-      <GoldFloralCorner className="left-0 top-20 w-44 -translate-x-16 opacity-70 sm:w-56" />
-      <GoldFloralCorner className="right-0 top-28 w-44 translate-x-16 scale-x-[-1] opacity-70 sm:w-56" />
-      <GoldFloralCorner className="bottom-0 left-0 w-52 -translate-x-16 translate-y-6 -rotate-12 opacity-80 sm:w-64" />
-      <GoldFloralCorner className="bottom-0 right-0 w-52 translate-x-16 translate-y-6 rotate-12 scale-x-[-1] opacity-80 sm:w-64" />
+    <section id="cover" className="relative isolate flex min-h-svh items-center justify-center overflow-hidden px-6 pb-32 pt-16 text-center sm:py-16">
+      <LuxuryBackdrop frame />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-64 bg-[radial-gradient(circle_at_50%_0%,rgba(255,231,168,0.2),transparent_32rem)]" aria-hidden="true" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center">
-        <ArtDecoCrown className="h-32 w-64 text-[#D9B457] sm:h-40 sm:w-80" />
-        <p className="mt-2 text-[0.72rem] font-medium tracking-[0.48em] text-[#D9B457]/90 [font-family:var(--font-obsidian-heading)]">{shortInitials(data)}</p>
-        <DiamondRule className="mt-6 w-56" />
-        <p className="mt-10 text-[0.62rem] font-semibold uppercase tracking-[0.42em] text-[#CDB06A]/85">Undangan Pernikahan</p>
-        <h1 className="mt-8 w-full bg-[linear-gradient(115deg,#8F6425,#D9B457_28%,#FFF1BB_45%,#C4973D_62%,#FFE5A1_82%)] bg-[length:240%_100%] bg-clip-text text-transparent [animation:obsidianShimmer_9s_ease-in-out_infinite] [font-family:var(--font-obsidian-script)] [text-shadow:0_0_34px_rgba(217,180,87,0.2)]">
-          <span className="block text-[clamp(4.8rem,18vw,11.5rem)] font-bold italic leading-[0.72]">{data.bride.nickname}</span>
+        <div className="grid h-20 w-20 place-items-center rounded-full border border-[#F3D889]/70 bg-[#070707]/70 text-[#F3D889] shadow-[0_0_52px_rgba(217,180,87,0.3)] backdrop-blur-sm">
+          <span className="[font-family:var(--font-obsidian-heading)] text-lg tracking-[0.28em]">{shortInitials(data).replace(" ✦ ", "")}</span>
+        </div>
+        <DiamondRule className="mt-8 w-64" />
+        <p className="mt-10 bg-[#070707]/72 px-4 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.48em] text-[#F3D889]/90 shadow-[0_0_28px_rgba(0,0,0,0.62)] backdrop-blur-sm [text-shadow:0_0_18px_rgba(217,180,87,0.45)]">
+          Undangan Pernikahan
+        </p>
+        <h1 className="mt-8 w-full bg-[linear-gradient(115deg,#916320,#D9B457_22%,#FFF5C8_38%,#B67D24_58%,#FFE5A1_78%,#A87324)] bg-[length:260%_100%] bg-clip-text text-transparent [animation:obsidianShimmer_7s_ease-in-out_infinite] [font-family:var(--font-obsidian-script)] [filter:drop-shadow(0_0_20px_rgba(217,180,87,0.32))_drop-shadow(0_12px_24px_rgba(0,0,0,0.65))]">
+          <span className="block text-[clamp(5.2rem,20vw,12rem)] font-bold italic leading-[0.7]">{data.bride.nickname}</span>
           <span className="block py-5 text-[clamp(2.1rem,8vw,4.2rem)] leading-none text-[#F7E1A1]">&amp;</span>
-          <span className="block text-[clamp(4.6rem,17vw,10.8rem)] font-bold italic leading-[0.72]">{data.groom.nickname}</span>
+          <span className="block text-[clamp(5rem,19vw,11.2rem)] font-bold italic leading-[0.7]">{data.groom.nickname}</span>
         </h1>
-        <DiamondRule className="mt-10 w-80 max-w-full" />
-        <p className="mt-8 text-[0.68rem] font-semibold uppercase tracking-[0.48em] text-[#D9B457]">Mengundang Anda</p>
+        <DiamondRule className="mt-12 w-96 max-w-full" />
+        <p className="mt-8 text-[0.72rem] font-semibold uppercase tracking-[0.5em] text-[#F3D889] [text-shadow:0_0_18px_rgba(217,180,87,0.42)]">Mengundang Anda</p>
         <p className="mt-5 [font-family:var(--font-obsidian-heading)] text-xl font-light text-[#F6EBD1] sm:text-2xl">{formatDate(data.wedding.date)}</p>
       </div>
     </section>
@@ -622,7 +722,7 @@ function GiftAccountCard({ account }: { account: FatehaGiftAccount }) {
 function ClosingSection({ data }: { data: FatehaInvitationData }) {
   return (
     <section id="closing" className="relative isolate overflow-hidden bg-[#050505] px-5 py-28 pb-36 text-center">
-      <LuxuryBackdrop />
+      <LuxuryBackdrop frame />
       <ArtDecoCorners />
       <GoldFloralCorner className="bottom-0 left-0 w-64 -translate-x-20 translate-y-10 opacity-75" />
       <GoldFloralCorner className="bottom-0 right-0 w-64 translate-x-20 translate-y-10 scale-x-[-1] opacity-75" />
@@ -719,12 +819,22 @@ function MusicToggle({ musicUrl }: { musicUrl: string }) {
   );
 }
 
-function LuxuryBackdrop({ muted = false }: { muted?: boolean }) {
+function LuxuryBackdrop({ muted = false, frame = false }: { muted?: boolean; frame?: boolean }) {
   return (
     <>
+      {frame ? (
+        <img
+          src="/themes/obsidian-luxe/obsidian-luxe-frame.png"
+          alt=""
+          className="absolute inset-0 -z-10 h-full w-full object-cover object-center opacity-90 saturate-[1.08]"
+          aria-hidden="true"
+          loading="eager"
+        />
+      ) : null}
       <div
         className={cn(
           "absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_7%,rgba(217,180,87,0.22),transparent_22rem),radial-gradient(circle_at_12%_58%,rgba(217,180,87,0.1),transparent_16rem),radial-gradient(circle_at_82%_72%,rgba(217,180,87,0.13),transparent_18rem),linear-gradient(180deg,#050505_0%,#101010_48%,#050505_100%)]",
+          frame && "bg-[radial-gradient(circle_at_50%_42%,rgba(0,0,0,0.08),rgba(0,0,0,0.74)_62%,rgba(0,0,0,0.38)_100%)]",
           muted && "opacity-55",
         )}
       />
@@ -732,6 +842,7 @@ function LuxuryBackdrop({ muted = false }: { muted?: boolean }) {
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(115deg,transparent_0%,rgba(255,241,187,0.035)_45%,transparent_58%)]" />
       <GoldDust />
       <SparkleField />
+      <AurumFoilRain />
     </>
   );
 }
@@ -761,6 +872,22 @@ function SparkleField() {
           <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gradient-to-r from-transparent via-current to-transparent" />
           <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current shadow-[0_0_22px_rgba(248,231,168,0.9)]" />
         </span>
+      ))}
+    </div>
+  );
+}
+
+function AurumFoilRain() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {foilShards.map((classes, index) => (
+        <span
+          key={`foil-${index}`}
+          className={cn(
+            "absolute rounded-[1px] bg-[linear-gradient(110deg,rgba(130,82,18,0.2),#F6D77A_34%,#FFF2BD_52%,#A87324_78%)] opacity-0 shadow-[0_0_18px_rgba(217,180,87,0.5)] [animation:obsidianFoilDrift_linear_infinite] [clip-path:polygon(42%_0%,100%_18%,62%_100%,0%_76%)]",
+            classes,
+          )}
+        />
       ))}
     </div>
   );
