@@ -205,7 +205,7 @@ export function ObsidianLuxeTemplate({ data }: { data: FatehaInvitationData }) {
       {!opened ? <EnvelopeIntro data={data} onOpen={() => setOpened(true)} /> : null}
       {opened ? (
         <>
-          <main className="relative mx-auto min-h-screen w-full max-w-[780px] overflow-hidden bg-[#060606] shadow-[0_0_120px_rgba(201,168,76,0.18)]">
+          <main className="relative min-h-screen w-full overflow-hidden bg-[#060606] shadow-[0_0_120px_rgba(201,168,76,0.18)]">
             {sectionOrder.map((section) => {
               if (section === "cover") return <CoverSection key={section} data={data} />;
               if (section === "quote") return <OpeningQuoteSection key={section} data={data} />;
@@ -246,7 +246,7 @@ function EnvelopeIntro({ data, onOpen }: { data: FatehaInvitationData; onOpen: (
   return (
     <section
       className={cn(
-        "relative isolate mx-auto flex min-h-svh w-full max-w-[780px] items-center justify-center overflow-hidden bg-[#050505] px-5 py-12 text-center shadow-[0_0_120px_rgba(201,168,76,0.18)] transition duration-700",
+        "relative isolate flex min-h-svh w-full items-center justify-center overflow-hidden bg-[#050505] px-5 py-12 text-center shadow-[0_0_120px_rgba(201,168,76,0.18)] transition duration-700",
         phase === "opening" && "scale-[1.02] opacity-0",
       )}
     >
@@ -823,12 +823,9 @@ function LuxuryBackdrop({ muted = false, frame = false }: { muted?: boolean; fra
   return (
     <>
       {frame ? (
-        <img
-          src="/themes/obsidian-luxe/obsidian-luxe-frame.png"
-          alt=""
-          className="absolute inset-0 -z-10 h-full w-full object-cover object-center opacity-90 saturate-[1.08]"
+        <div
+          className="absolute inset-0 -z-10 bg-[url('/themes/obsidian-luxe/obsidian-luxe-frame.png')] bg-contain bg-center bg-no-repeat opacity-95 saturate-[1.08] [filter:drop-shadow(0_0_46px_rgba(217,180,87,0.14))]"
           aria-hidden="true"
-          loading="eager"
         />
       ) : null}
       <div
