@@ -103,27 +103,104 @@ function parentLine(kind: "Putra" | "Putri", father: string | null, mother: stri
 }
 
 export function PetalSoftTemplate({ data }: { data: FatehaInvitationData }) {
+  const [opened, setOpened] = useState(false);
   const sectionOrder = useMemo(() => getVisibleSections(data), [data]);
 
   return (
     <div className={cn("petal-soft-theme", petalSoftFontClassName)}>
       <FloatingPetals />
-      <MusicToggle musicUrl={data.musicUrl || DEFAULT_AUDIO} />
-      <PetalSoftNav />
-      <main className="petal-soft-shell">
-        {sectionOrder.map((section) => {
-          if (section === "cover") return <CoverSection key={section} data={data} />;
-          if (section === "quote") return <QuoteSection key={section} data={data} />;
-          if (section === "couple") return <CoupleSection key={section} data={data} />;
-          if (section === "event") return <EventSection key={section} data={data} />;
-          if (section === "story" && data.loveStory.length > 0) return <StorySection key={section} data={data} />;
-          if (section === "gallery" && data.gallery.length > 0) return <GallerySection key={section} data={data} />;
-          if (section === "rsvp") return <RsvpSection key={section} data={data} />;
-          if (section === "gift" && (data.giftAccounts.length > 0 || data.giftAddress)) return <GiftSection key={section} data={data} />;
-          if (section === "closing") return <ClosingSection key={section} data={data} />;
-          return null;
-        })}
-      </main>
+      {!opened ? <EnvelopeIntro data={data} onOpen={() => setOpened(true)} /> : null}
+      {opened ? (
+        <>
+          <MusicToggle musicUrl={data.musicUrl || DEFAULT_AUDIO} />
+          <PetalSoftNav />
+          <main className="petal-soft-shell">
+            {sectionOrder.map((section) => {
+              if (section === "cover") return <CoverSection key={section} data={data} />;
+              if (section === "quote") return <QuoteSection key={section} data={data} />;
+              if (section === "couple") return <CoupleSection key={section} data={data} />;
+              if (section === "event") return <EventSection key={section} data={data} />;
+              if (section === "story" && data.loveStory.length > 0) return <StorySection key={section} data={data} />;
+              if (section === "gallery" && data.gallery.length > 0) return <GallerySection key={section} data={data} />;
+              if (section === "rsvp") return <RsvpSection key={section} data={data} />;
+              if (section === "gift" && (data.giftAccounts.length > 0 || data.giftAddress)) return <GiftSection key={section} data={data} />;
+              if (section === "closing") return <ClosingSection key={section} data={data} />;
+              return null;
+            })}
+          </main>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function EnvelopeIntro({ data, onOpen }: { data: FatehaInvitationData; onOpen: () => void }) {
+  const [phase, setPhase] = useState<"ready" | "opening">("ready");
+  const openTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (openTimerRef.current !== null) {
+        window.clearTimeout(openTimerRef.current);
+      }
+    };
+  }, []);
+
+  function handleOpen() {
+    if (phase === "opening") return;
+    setPhase("opening");
+    openTimerRef.current = window.setTimeout(onOpen, 760);
+  }
+
+  return (
+    <section className={cn("petal-soft-intro", phase === "opening" && "is-opening")}>
+      <FloralCorner position="top-left" />
+      <FloralCorner position="top-right" />
+      <FloralCorner position="bottom-left" />
+      <FloralCorner position="bottom-right" />
+      <BottomBouquet />
+      <div className="petal-soft-intro-frame" aria-hidden="true" />
+      <div className="petal-soft-intro-card">
+        <Monogram value={data.monogram} />
+        <p className="petal-soft-intro-title">Undangan Pernikahan</p>
+        <div className="petal-soft-script petal-soft-intro-names">
+          <span>{data.bride.nickname}</span>
+          <span className="petal-soft-intro-and">dan</span>
+          <span>{data.groom.nickname}</span>
+        </div>
+        <div className="petal-soft-divider mx-auto my-5 w-56" aria-hidden="true">
+          <Heart className="h-4 w-4 fill-current" />
+        </div>
+        <EnvelopeIllustration initials={data.monogram} />
+        <button type="button" className="petal-soft-button petal-soft-intro-button" onClick={handleOpen} disabled={phase === "opening"}>
+          Buka Undangan
+        </button>
+        <p className="petal-soft-intro-date">{data.wedding.dateDisplay}</p>
+      </div>
+    </section>
+  );
+}
+
+function Monogram({ value }: { value: string }) {
+  const initials = value.replace(/\s+/g, " ").trim() || "PS";
+
+  return (
+    <div className="petal-soft-monogram" aria-label={`Monogram ${initials}`}>
+      {initials}
+    </div>
+  );
+}
+
+function EnvelopeIllustration({ initials }: { initials: string }) {
+  return (
+    <div className="petal-soft-envelope" aria-hidden="true">
+      <div className="petal-soft-envelope-card">
+        <span>{initials}</span>
+      </div>
+      <div className="petal-soft-envelope-back" />
+      <div className="petal-soft-envelope-flap" />
+      <div className="petal-soft-envelope-front" />
+      <div className="petal-soft-envelope-seal">{initials}</div>
     </div>
   );
 }
