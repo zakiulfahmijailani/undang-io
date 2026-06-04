@@ -1,6 +1,6 @@
 import { demoData } from "@/data/demoInvitation";
 import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
-import { DEFAULT_INVITATION_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
+import { DEFAULT_INVITATION_THEME_KEY, JAWA_AGUNG_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 import { LiveDemoWrapper } from "./LiveDemoWrapper";
 
 type InviteDemoPageProps = {
@@ -124,6 +124,45 @@ function createObsidianLuxeDemoData() {
   );
 }
 
+function createJawaAgungDemoData() {
+  return mapInvitationToFatehaData(
+    {
+      id: "demo-jawa-agung",
+      slug: "demo-jawa-agung",
+      groom_full_name: "Raden Bagus Wiratama",
+      groom_nickname: "Wira",
+      groom_father_name: "Bapak Suryadiningrat",
+      groom_mother_name: "Ibu Sekar Arum",
+      bride_full_name: "Ajeng Larasati Kusuma",
+      bride_nickname: "Laras",
+      bride_father_name: "Bapak Kertanegara",
+      bride_mother_name: "Ibu Puspita Dewi",
+      akad_datetime: "2026-08-08T09:00:00+07:00",
+      akad_location_name: "Pendopo Agung Taman Budaya",
+      akad_location_address: "Jl. Sriwedari No. 18, Surakarta, Jawa Tengah",
+      akad_maps_url: "https://maps.google.com/?q=Taman+Budaya+Surakarta",
+      resepsi_datetime: "2026-08-08T19:00:00+07:00",
+      resepsi_location_name: "Balai Kartini Adiningrat",
+      resepsi_location_address: "Jl. Slamet Riyadi No. 120, Surakarta, Jawa Tengah",
+      resepsi_maps_url: "https://maps.google.com/?q=Balai+Kartini+Surakarta",
+      quote_text: "Dalam restu keluarga dan doa yang tulus, kami melangkah bersama merawat cinta sebagai jalan pulang.",
+      quote_source: "Laras & Wira",
+      love_story: demoData.loveStory,
+      gallery_photos: demoData.gallery,
+      rekening: demoData.bankAccounts,
+      gift_shipping_address: demoData.giftAddress,
+      rsvp_messages: demoData.rsvpMessages.map((message) => ({
+        id: message.id,
+        guest_name: message.guestName,
+        attendance: message.attendance,
+        message: message.message,
+        created_at: message.createdAt,
+      })),
+    },
+    { isPreview: true },
+  );
+}
+
 export default async function InviteDemoPage({ searchParams }: InviteDemoPageProps) {
   const resolvedSearch = await searchParams;
   const theme = resolvedSearch.theme || DEFAULT_INVITATION_THEME_KEY;
@@ -138,6 +177,10 @@ export default async function InviteDemoPage({ searchParams }: InviteDemoPagePro
 
   if (theme === OBSIDIAN_LUXE_THEME_KEY) {
     return <LiveDemoWrapper initialData={createObsidianLuxeDemoData()} theme={theme} />;
+  }
+
+  if (theme === JAWA_AGUNG_THEME_KEY) {
+    return <LiveDemoWrapper initialData={createJawaAgungDemoData()} theme={theme} />;
   }
 
   return <LiveDemoWrapper initialData={createSakinahDemoData()} theme={theme} />;

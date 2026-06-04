@@ -10,6 +10,9 @@ import {
     DEFAULT_INVITATION_THEME_CATEGORY,
     DEFAULT_INVITATION_THEME_KEY,
     DEFAULT_INVITATION_THEME_NAME,
+    JAWA_AGUNG_THEME_CATEGORY,
+    JAWA_AGUNG_THEME_KEY,
+    JAWA_AGUNG_THEME_NAME,
     OBSIDIAN_LUXE_THEME_CATEGORY,
     OBSIDIAN_LUXE_THEME_KEY,
     OBSIDIAN_LUXE_THEME_NAME,
@@ -26,7 +29,7 @@ type DashboardTheme = {
     category: string
     price: "Gratis" | "Premium"
     gradient: string
-    preview: "sakinah" | "petal-soft" | "obsidian-luxe" | "placeholder"
+    preview: "sakinah" | "petal-soft" | "obsidian-luxe" | "jawa-agung" | "placeholder"
     slug: string
 }
 
@@ -65,6 +68,15 @@ const codeRenderedThemes: DashboardTheme[] = [
         preview: "obsidian-luxe",
         slug: OBSIDIAN_LUXE_THEME_KEY,
     },
+    {
+        id: JAWA_AGUNG_THEME_KEY,
+        name: JAWA_AGUNG_THEME_NAME,
+        category: JAWA_AGUNG_THEME_CATEGORY,
+        price: "Gratis",
+        gradient: "from-[#F5EDD6] via-[#EDE0C0] to-[#D4A843]",
+        preview: "jawa-agung",
+        slug: JAWA_AGUNG_THEME_KEY,
+    },
 ]
 
 export default function SelectThemePage() {
@@ -73,7 +85,7 @@ export default function SelectThemePage() {
     const [themes, setThemes] = useState<DashboardTheme[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
-    const categories = ["Semua", DEFAULT_INVITATION_THEME_CATEGORY, "Minimalis", "Jawa", "Sunda", "Modern", "Romantis"]
+    const categories = ["Semua", DEFAULT_INVITATION_THEME_CATEGORY, "Minimalis", "Adat", "Jawa", "Sunda", "Modern", "Romantis"]
     const prices = ["Semua", "Gratis", "Premium"]
 
     useEffect(() => {
@@ -98,8 +110,10 @@ export default function SelectThemePage() {
                         ? "from-[#FDFAF8] via-[#F8DADB] to-[#A8C5A0]"
                         : row.slug === OBSIDIAN_LUXE_THEME_KEY
                             ? "from-[#0A0A0A] via-[#141414] to-[#0F0F1A]"
-                            : "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
-                    preview: row.slug === DEFAULT_INVITATION_THEME_KEY ? "sakinah" : row.slug === PETAL_SOFT_THEME_KEY ? "petal-soft" : row.slug === OBSIDIAN_LUXE_THEME_KEY ? "obsidian-luxe" : "placeholder",
+                            : row.slug === JAWA_AGUNG_THEME_KEY
+                                ? "from-[#F5EDD6] via-[#EDE0C0] to-[#D4A843]"
+                                : "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
+                    preview: row.slug === DEFAULT_INVITATION_THEME_KEY ? "sakinah" : row.slug === PETAL_SOFT_THEME_KEY ? "petal-soft" : row.slug === OBSIDIAN_LUXE_THEME_KEY ? "obsidian-luxe" : row.slug === JAWA_AGUNG_THEME_KEY ? "jawa-agung" : "placeholder",
                     slug: row.slug || row.id
                 }))
 
@@ -213,6 +227,23 @@ export default function SelectThemePage() {
                                         <span className="font-serif text-5xl font-semibold italic leading-none text-[#E8D5A3]">Luxe</span>
                                         <span className="mt-5 h-px w-16 bg-[#C9A84C]/65" />
                                         <span className="mt-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">Dark Gold</span>
+                                    </div>
+                                </>
+                            ) : theme.preview === "jawa-agung" ? (
+                                <>
+                                    <div className="absolute inset-0 bg-[#F5EDD6]" />
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,168,67,0.24),transparent_38%),radial-gradient(circle_at_bottom,rgba(44,74,30,0.13),transparent_44%)]" />
+                                    <div className="absolute inset-x-0 top-0 h-7 bg-[repeating-linear-gradient(90deg,rgba(212,168,67,0.86)_0_10px,transparent_10px_20px)] opacity-70" />
+                                    <div className="absolute inset-x-0 bottom-0 h-7 bg-[repeating-linear-gradient(90deg,rgba(212,168,67,0.86)_0_10px,transparent_10px_20px)] opacity-70" />
+                                    <div className="absolute inset-5 border border-[#D4A843]/45" />
+                                    <div className="absolute left-8 top-8 h-16 w-16 border-l border-t border-[#7B3F1A]/50" />
+                                    <div className="absolute bottom-8 right-8 h-16 w-16 border-b border-r border-[#7B3F1A]/50" />
+                                    <div className="relative flex h-56 w-44 flex-col items-center justify-center border border-[#D4A843]/55 bg-[#FAF4E6]/72 px-5 text-center shadow-[0_20px_58px_rgba(123,63,26,0.16)]">
+                                        <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#7A5C3A]">Adat Jawa</span>
+                                        <span className="mt-5 font-serif text-5xl font-semibold leading-none text-[#7B3F1A]">Jawa</span>
+                                        <span className="font-serif text-5xl font-semibold leading-none text-[#D4A843]">Agung</span>
+                                        <span className="mt-5 h-px w-16 bg-[#D4A843]/75" />
+                                        <span className="mt-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#7B3F1A]">Batik Klasik</span>
                                     </div>
                                 </>
                             ) : (

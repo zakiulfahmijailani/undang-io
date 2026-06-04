@@ -7,7 +7,7 @@ import {
   Image as ImageIcon, Plus, Trash2, ToggleLeft, ToggleRight
 } from "lucide-react"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
-import { DEFAULT_INVITATION_THEME_NAME } from "@/lib/default-theme"
+import { DEFAULT_INVITATION_THEME_NAME, JAWA_AGUNG_THEME_KEY, JAWA_AGUNG_THEME_NAME } from "@/lib/default-theme"
 
 const STEPS = [
   "Data Mempelai",
@@ -36,6 +36,7 @@ const FALLBACK_THEMES: ThemeOption[] = [
   { id: "minimalist-white", name: "Modern Minimalis", cat: "Modern", thumbnailUrl: null },
   { id: "garden-romance", name: "Garden Romance", cat: "Modern", thumbnailUrl: null },
   { id: "jawa-klasik", name: "Jawa Klasik", cat: "Budaya", thumbnailUrl: null },
+  { id: JAWA_AGUNG_THEME_KEY, name: JAWA_AGUNG_THEME_NAME, cat: "Adat", thumbnailUrl: null },
   { id: "bali-tropis", name: "Bali Tropis", cat: "Budaya", thumbnailUrl: null },
   { id: "islami", name: "Islami Elegan", cat: "Islami", thumbnailUrl: null },
   { id: "modern-bold", name: "Modern Bold", cat: "Modern", thumbnailUrl: null },

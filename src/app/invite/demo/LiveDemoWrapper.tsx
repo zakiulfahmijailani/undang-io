@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import FatehaThemeRendererWrapper from "@/app/invite/[slug]/FatehaThemeRendererWrapper";
+import { JawaAgungTemplate } from "@/components/themes/jawa-agung";
 import { ObsidianLuxeTemplate } from "@/components/themes/obsidian-luxe";
 import { PetalSoftTemplate } from "@/components/themes/petal-soft";
 import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
-import { OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
+import { JAWA_AGUNG_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 import { demoData as fallbackDemoData } from "@/data/demoInvitation";
 import type { FatehaInvitationData } from "@/components/themes/fateha";
 
@@ -134,6 +135,10 @@ export function LiveDemoWrapper({ initialData, theme }: { initialData: LiveDemoD
 
   if (theme === OBSIDIAN_LUXE_THEME_KEY) {
     return <ObsidianLuxeTemplate data={data as FatehaInvitationData} />;
+  }
+
+  if (theme === JAWA_AGUNG_THEME_KEY) {
+    return <JawaAgungTemplate data={data as FatehaInvitationData} />;
   }
 
   return <FatehaThemeRendererWrapper data={data as FatehaInvitationData} />;

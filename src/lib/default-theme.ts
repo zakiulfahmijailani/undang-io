@@ -7,8 +7,11 @@ export const PETAL_SOFT_THEME_CATEGORY = "Minimalis";
 export const OBSIDIAN_LUXE_THEME_KEY = "obsidian-luxe";
 export const OBSIDIAN_LUXE_THEME_NAME = "Obsidian Luxe";
 export const OBSIDIAN_LUXE_THEME_CATEGORY = "Modern";
+export const JAWA_AGUNG_THEME_KEY = "jawa-agung";
+export const JAWA_AGUNG_THEME_NAME = "Jawa Agung";
+export const JAWA_AGUNG_THEME_CATEGORY = "Adat";
 
-const CODE_RENDERED_THEME_KEYS = new Set([DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY]);
+const CODE_RENDERED_THEME_KEYS = new Set([DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, JAWA_AGUNG_THEME_KEY]);
 
 export function normalizeThemeSelection(themeId?: string | null) {
   const value = typeof themeId === "string" ? themeId.trim() : "";

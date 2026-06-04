@@ -9,10 +9,11 @@ import { AlertTriangle, CheckCircle2, Clock3, Copy, Crown, ExternalLink, Lock, M
 import { toast } from "sonner";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import { FatehaInvitationRenderer } from "@/components/themes/fateha";
+import { JawaAgungTemplate } from "@/components/themes/jawa-agung";
 import { ObsidianLuxeTemplate } from "@/components/themes/obsidian-luxe";
 import { PetalSoftTemplate } from "@/components/themes/petal-soft";
 import { demoData } from "@/data/demoInvitation";
-import { DEFAULT_INVITATION_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
+import { DEFAULT_INVITATION_THEME_KEY, JAWA_AGUNG_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 import { mapGuestSessionToFatehaData } from "@/lib/fateha-theme-mapper";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -325,9 +326,10 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
   const isFatehaTheme = !sessionData?.theme_id || sessionData.theme_id === DEFAULT_INVITATION_THEME_KEY;
   const isPetalSoftTheme = sessionData?.theme_id === PETAL_SOFT_THEME_KEY;
   const isObsidianLuxeTheme = sessionData?.theme_id === OBSIDIAN_LUXE_THEME_KEY;
+  const isJawaAgungTheme = sessionData?.theme_id === JAWA_AGUNG_THEME_KEY;
   const weddingThemeData = useMemo(
-    () => (sessionData && (isFatehaTheme || isPetalSoftTheme || isObsidianLuxeTheme) ? mapGuestSessionToFatehaData(sessionData) : null),
-    [isFatehaTheme, isObsidianLuxeTheme, isPetalSoftTheme, sessionData],
+    () => (sessionData && (isFatehaTheme || isPetalSoftTheme || isObsidianLuxeTheme || isJawaAgungTheme) ? mapGuestSessionToFatehaData(sessionData) : null),
+    [isFatehaTheme, isJawaAgungTheme, isObsidianLuxeTheme, isPetalSoftTheme, sessionData],
   );
 
   if (isLoading) {
@@ -344,6 +346,8 @@ export default function GuestInvitationView(props: { params: Promise<{ slug: str
     <PetalSoftTemplate data={weddingThemeData} />
   ) : isObsidianLuxeTheme && weddingThemeData ? (
     <ObsidianLuxeTemplate data={weddingThemeData} />
+  ) : isJawaAgungTheme && weddingThemeData ? (
+    <JawaAgungTemplate data={weddingThemeData} />
   ) : isFatehaTheme && weddingThemeData ? (
     <FatehaInvitationRenderer data={weddingThemeData} />
   ) : (

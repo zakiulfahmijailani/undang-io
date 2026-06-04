@@ -2,6 +2,8 @@ import { InvitationThemePreference, Theme } from "@/types/theme";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   DEFAULT_INVITATION_THEME_NAME,
+  JAWA_AGUNG_THEME_KEY,
+  JAWA_AGUNG_THEME_NAME,
   OBSIDIAN_LUXE_THEME_KEY,
   OBSIDIAN_LUXE_THEME_NAME,
   PETAL_SOFT_THEME_KEY,
@@ -107,7 +109,40 @@ const themeObsidianLuxe: Theme = {
   updatedAt: "2026-06-04T08:30:00",
 };
 
-export const dummyThemes: Theme[] = [themeSakinah, themePetalSoft, themeObsidianLuxe];
+const themeJawaAgung: Theme = {
+  id: JAWA_AGUNG_THEME_KEY,
+  name: JAWA_AGUNG_THEME_NAME,
+  slug: JAWA_AGUNG_THEME_KEY,
+  description: "Tema pernikahan adat Jawa yang megah dan bermartabat dengan motif batik klasik dan ornamen tradisional.",
+  culturalCategory: "jawa",
+  status: "active",
+  thumbnailUrl: "https://picsum.photos/seed/jawa-agung/400/600",
+  musicUrl: null,
+  videoUrl: null,
+  colors: {
+    primary: "#7B3F1A",
+    secondary: "#C8922A",
+    accent: "#2C4A1E",
+    surface: "#F5EDD6",
+    textPrimary: "#2A1A0E",
+    textSecondary: "#7A5C3A",
+  },
+  typography: { headingFont: "Cormorant Garamond", bodyFont: "Lora" },
+  animationSettings: {
+    heroAnimation: "petals",
+    intensity: "low",
+    parallax: true,
+    scrollReveal: true,
+    musicAutoplay: false,
+    videoIntro: false,
+  },
+  styleSettings: { borderRadius: "ornate", shadow: "medium" },
+  assetSlots: [],
+  createdAt: "2026-06-04T22:00:00",
+  updatedAt: "2026-06-04T22:00:00",
+};
+
+export const dummyThemes: Theme[] = [themeSakinah, themePetalSoft, themeObsidianLuxe, themeJawaAgung];
 
 export const dummyUserPreferences: InvitationThemePreference[] = [
   {
@@ -121,4 +156,4 @@ export const dummyUserPreferences: InvitationThemePreference[] = [
   },
 ];
 
-export { themeObsidianLuxe, themePetalSoft, themeSakinah };
+export { themeJawaAgung, themeObsidianLuxe, themePetalSoft, themeSakinah };

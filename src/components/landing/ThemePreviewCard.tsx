@@ -3,7 +3,7 @@
 import { Check, Flower2, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LandingTheme } from "./types";
-import { DEFAULT_INVITATION_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
+import { DEFAULT_INVITATION_THEME_KEY, JAWA_AGUNG_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 
 const variantClasses = [
   "bg-[linear-gradient(135deg,#fff7f5_0%,#ffffff_48%,#f8d5dc_100%)] text-landing-maroon",
@@ -56,6 +56,23 @@ export function ThemePreviewCard({ theme, index, selected = false, compact = fal
             <span className="mx-auto mt-3 block h-px w-12 bg-[#C9A84C]/55" />
             <span className={cn("mt-3 block font-ui font-semibold uppercase text-[#8A8070]", compact ? "text-[6px] tracking-[0.14em]" : "text-[8px] tracking-[0.22em]")}>
               Dark Gold
+            </span>
+          </div>
+        </div>
+      ) : theme.slug === JAWA_AGUNG_THEME_KEY || theme.id === JAWA_AGUNG_THEME_KEY ? (
+        <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[#F5EDD6] text-[#7B3F1A]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,168,67,0.24),transparent_38%),radial-gradient(circle_at_bottom,rgba(44,74,30,0.12),transparent_46%)]" />
+          <div className="absolute inset-x-0 top-0 h-5 bg-[repeating-linear-gradient(90deg,rgba(212,168,67,0.85)_0_8px,transparent_8px_16px)] opacity-70" />
+          <div className="absolute inset-x-0 bottom-0 h-5 bg-[repeating-linear-gradient(90deg,rgba(212,168,67,0.85)_0_8px,transparent_8px_16px)] opacity-70" />
+          <div className="absolute inset-4 border border-[#D4A843]/45" />
+          <div className="absolute left-4 top-4 h-10 w-10 border-l border-t border-[#7B3F1A]/50" />
+          <div className="absolute bottom-4 right-4 h-10 w-10 border-b border-r border-[#7B3F1A]/50" />
+          <div className="relative text-center">
+            <span className={cn("block font-landing-serif font-semibold leading-none text-[#7B3F1A]", compact ? "text-2xl" : "text-5xl")}>Jawa</span>
+            <span className={cn("block font-display leading-none text-[#D4A843]", compact ? "text-2xl" : "text-5xl")}>Agung</span>
+            <span className="mx-auto mt-3 block h-px w-12 bg-[#D4A843]/70" />
+            <span className={cn("mt-3 block font-ui font-semibold uppercase text-[#7A5C3A]", compact ? "text-[6px] tracking-[0.14em]" : "text-[8px] tracking-[0.22em]")}>
+              Batik Klasik
             </span>
           </div>
         </div>

@@ -8,8 +8,9 @@ import ParallaxWrapper from './ParallaxWrapper';
 import { fetchClassicTheme, mapInvitationToClassicData } from '@/lib/classic-theme-loader';
 import ClassicThemeRendererWrapper from './ClassicThemeRendererWrapper';
 import FatehaThemeRendererWrapper from './FatehaThemeRendererWrapper';
-import { DEFAULT_INVITATION_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from '@/lib/default-theme';
+import { DEFAULT_INVITATION_THEME_KEY, JAWA_AGUNG_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from '@/lib/default-theme';
 import { mapInvitationToFatehaData } from '@/lib/fateha-theme-mapper';
+import { JawaAgungTemplate } from '@/components/themes/jawa-agung';
 import { ObsidianLuxeTemplate } from '@/components/themes/obsidian-luxe';
 import { PetalSoftTemplate } from '@/components/themes/petal-soft';
 
@@ -186,6 +187,49 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
             );
         }
 
+        if (resolvedSearch.theme === JAWA_AGUNG_THEME_KEY) {
+            const jawaAgungDemoData = mapInvitationToFatehaData({
+                id: 'demo-jawa-agung',
+                slug: 'demo-jawa-agung',
+                groom_full_name: 'Raden Bagus Wiratama',
+                groom_nickname: 'Wira',
+                groom_father_name: 'Bapak Suryadiningrat',
+                groom_mother_name: 'Ibu Sekar Arum',
+                bride_full_name: 'Ajeng Larasati Kusuma',
+                bride_nickname: 'Laras',
+                bride_father_name: 'Bapak Kertanegara',
+                bride_mother_name: 'Ibu Puspita Dewi',
+                akad_datetime: '2026-08-08T09:00:00+07:00',
+                akad_location_name: 'Pendopo Agung Taman Budaya',
+                akad_location_address: 'Jl. Sriwedari No. 18, Surakarta, Jawa Tengah',
+                akad_maps_url: 'https://maps.google.com/?q=Taman+Budaya+Surakarta',
+                resepsi_datetime: '2026-08-08T19:00:00+07:00',
+                resepsi_location_name: 'Balai Kartini Adiningrat',
+                resepsi_location_address: 'Jl. Slamet Riyadi No. 120, Surakarta, Jawa Tengah',
+                resepsi_maps_url: 'https://maps.google.com/?q=Balai+Kartini+Surakarta',
+                quote_text: 'Dalam restu keluarga dan doa yang tulus, kami melangkah bersama merawat cinta sebagai jalan pulang.',
+                quote_source: 'Laras & Wira',
+                love_story: demoData.loveStory,
+                gallery_photos: demoData.gallery,
+                rekening: demoData.bankAccounts,
+                gift_shipping_address: demoData.giftAddress,
+                rsvp_messages: demoData.rsvpMessages.map((message) => ({
+                    id: message.id,
+                    guest_name: message.guestName,
+                    attendance: message.attendance,
+                    message: message.message,
+                    created_at: message.createdAt,
+                })),
+            }, { isPreview: true });
+
+            return (
+                <>
+                    <JawaAgungTemplate data={jawaAgungDemoData} />
+                    <ViewTracker slug={slug} isPreview={isPreview} />
+                </>
+            );
+        }
+
         return (
             <>
                 <InvitationClientWrapper data={demoData} />
@@ -275,6 +319,16 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
         return (
             <>
                 <ObsidianLuxeTemplate data={obsidianData} />
+                <ViewTracker slug={slug} isPreview={isPreview} />
+            </>
+        );
+    }
+
+    if (themeKey === JAWA_AGUNG_THEME_KEY) {
+        const jawaAgungData = mapInvitationToFatehaData(invitation, { guestName, isPreview });
+        return (
+            <>
+                <JawaAgungTemplate data={jawaAgungData} />
                 <ViewTracker slug={slug} isPreview={isPreview} />
             </>
         );

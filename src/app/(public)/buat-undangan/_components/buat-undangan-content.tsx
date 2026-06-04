@@ -32,6 +32,7 @@ import type { LandingTheme } from "@/components/landing/types";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   DEFAULT_INVITATION_THEME_NAME,
+  JAWA_AGUNG_THEME_KEY,
   OBSIDIAN_LUXE_THEME_KEY,
   PETAL_SOFT_THEME_KEY,
   isCodeRenderedThemeKey,
@@ -414,7 +415,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
             <div className="flex flex-col gap-2">
               <span className="font-ui text-xs font-bold uppercase tracking-wider text-gray-500">Kategori Tema</span>
               <div className="flex flex-wrap gap-2">
-                {["Semua", "Elegan", "Minimalis", "Jawa", "Sunda", "Modern", "Romantis"].map((cat) => (
+                {["Semua", "Elegan", "Minimalis", "Adat", "Jawa", "Sunda", "Modern", "Romantis"].map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
@@ -503,6 +504,23 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
                           <span className="font-landing-serif text-5xl font-semibold italic leading-none text-[#E8D5A3]">Luxe</span>
                           <span className="mt-5 h-px w-16 bg-[#C9A84C]/65" />
                           <span className="mt-4 font-ui text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">Dark Gold</span>
+                        </div>
+                      </>
+                    ) : theme.id === JAWA_AGUNG_THEME_KEY || theme.slug === JAWA_AGUNG_THEME_KEY ? (
+                      <>
+                        <div className="absolute inset-0 bg-[#F5EDD6]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,168,67,0.24),transparent_38%),radial-gradient(circle_at_bottom,rgba(44,74,30,0.13),transparent_44%)]" />
+                        <div className="absolute inset-x-0 top-0 h-7 bg-[repeating-linear-gradient(90deg,rgba(212,168,67,0.86)_0_10px,transparent_10px_20px)] opacity-70" />
+                        <div className="absolute inset-x-0 bottom-0 h-7 bg-[repeating-linear-gradient(90deg,rgba(212,168,67,0.86)_0_10px,transparent_10px_20px)] opacity-70" />
+                        <div className="absolute inset-5 border border-[#D4A843]/45" />
+                        <div className="absolute left-8 top-8 h-16 w-16 border-l border-t border-[#7B3F1A]/50" />
+                        <div className="absolute bottom-8 right-8 h-16 w-16 border-b border-r border-[#7B3F1A]/50" />
+                        <div className="relative flex h-52 w-40 flex-col items-center justify-center border border-[#D4A843]/55 bg-[#FAF4E6]/72 px-5 text-center shadow-[0_20px_58px_rgba(123,63,26,0.16)]">
+                          <span className="font-ui text-[10px] font-semibold uppercase tracking-[0.28em] text-[#7A5C3A]">Adat Jawa</span>
+                          <span className="mt-5 font-landing-serif text-5xl font-semibold leading-none text-[#7B3F1A]">Jawa</span>
+                          <span className="font-display text-5xl leading-none text-[#D4A843]">Agung</span>
+                          <span className="mt-5 h-px w-16 bg-[#D4A843]/75" />
+                          <span className="mt-4 font-ui text-[10px] font-semibold uppercase tracking-[0.22em] text-[#7B3F1A]">Batik Klasik</span>
                         </div>
                       </>
                     ) : (
