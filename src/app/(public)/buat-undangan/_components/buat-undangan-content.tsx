@@ -32,6 +32,7 @@ import type { LandingTheme } from "@/components/landing/types";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   DEFAULT_INVITATION_THEME_NAME,
+  OBSIDIAN_LUXE_THEME_KEY,
   PETAL_SOFT_THEME_KEY,
   isCodeRenderedThemeKey,
 } from "@/lib/default-theme";
@@ -487,6 +488,21 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
                           <span className="font-landing-serif text-5xl font-semibold leading-none text-[#C4919B]">Soft</span>
                           <span className="mt-4 h-px w-14 bg-[#C4919B]/55" />
                           <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#9E8E8E]">Floral Pastel</span>
+                        </div>
+                      </>
+                    ) : theme.id === OBSIDIAN_LUXE_THEME_KEY || theme.slug === OBSIDIAN_LUXE_THEME_KEY ? (
+                      <>
+                        <div className="absolute inset-0 bg-[#0A0A0A]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(201,168,76,0.22),transparent_38%),radial-gradient(circle_at_bottom,rgba(232,213,163,0.1),transparent_44%)]" />
+                        <div className="absolute inset-5 border border-[#C9A84C]/30" />
+                        <div className="absolute left-8 top-8 h-16 w-16 border-l border-t border-[#C9A84C]/45" />
+                        <div className="absolute bottom-8 right-8 h-16 w-16 border-b border-r border-[#C9A84C]/45" />
+                        <div className="relative flex h-52 w-40 flex-col items-center justify-center border border-[#C9A84C]/45 bg-[#0F0F1A]/78 px-5 text-center shadow-[0_22px_70px_rgba(0,0,0,0.45)]">
+                          <span className="font-ui text-[10px] font-semibold uppercase tracking-[0.28em] text-[#8A8070]">Luxury</span>
+                          <span className="mt-5 font-landing-serif text-5xl font-semibold italic leading-none text-[#C9A84C]">Obsidian</span>
+                          <span className="font-landing-serif text-5xl font-semibold italic leading-none text-[#E8D5A3]">Luxe</span>
+                          <span className="mt-5 h-px w-16 bg-[#C9A84C]/65" />
+                          <span className="mt-4 font-ui text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">Dark Gold</span>
                         </div>
                       </>
                     ) : (

@@ -1,0 +1,1 @@
+export { ObsidianLuxeTemplate } from "./ObsidianLuxeTemplate";

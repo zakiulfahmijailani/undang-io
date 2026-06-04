@@ -10,6 +10,9 @@ import {
     DEFAULT_INVITATION_THEME_CATEGORY,
     DEFAULT_INVITATION_THEME_KEY,
     DEFAULT_INVITATION_THEME_NAME,
+    OBSIDIAN_LUXE_THEME_CATEGORY,
+    OBSIDIAN_LUXE_THEME_KEY,
+    OBSIDIAN_LUXE_THEME_NAME,
     PETAL_SOFT_THEME_CATEGORY,
     PETAL_SOFT_THEME_KEY,
     PETAL_SOFT_THEME_NAME,
@@ -23,7 +26,7 @@ type DashboardTheme = {
     category: string
     price: "Gratis" | "Premium"
     gradient: string
-    preview: "sakinah" | "petal-soft" | "placeholder"
+    preview: "sakinah" | "petal-soft" | "obsidian-luxe" | "placeholder"
     slug: string
 }
 
@@ -53,6 +56,15 @@ const codeRenderedThemes: DashboardTheme[] = [
         preview: "petal-soft",
         slug: PETAL_SOFT_THEME_KEY,
     },
+    {
+        id: OBSIDIAN_LUXE_THEME_KEY,
+        name: OBSIDIAN_LUXE_THEME_NAME,
+        category: OBSIDIAN_LUXE_THEME_CATEGORY,
+        price: "Premium",
+        gradient: "from-[#0A0A0A] via-[#141414] to-[#0F0F1A]",
+        preview: "obsidian-luxe",
+        slug: OBSIDIAN_LUXE_THEME_KEY,
+    },
 ]
 
 export default function SelectThemePage() {
@@ -81,9 +93,13 @@ export default function SelectThemePage() {
                     id: row.id,
                     name: row.name || "Tanpa Nama",
                     category: row.cultural_category || "Lainnya",
-                    price: "Gratis", // Freemium model default
-                    gradient: row.slug === PETAL_SOFT_THEME_KEY ? "from-[#FDFAF8] via-[#F8DADB] to-[#A8C5A0]" : "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
-                    preview: row.slug === DEFAULT_INVITATION_THEME_KEY ? "sakinah" : row.slug === PETAL_SOFT_THEME_KEY ? "petal-soft" : "placeholder",
+                    price: row.slug === OBSIDIAN_LUXE_THEME_KEY ? "Premium" : "Gratis",
+                    gradient: row.slug === PETAL_SOFT_THEME_KEY
+                        ? "from-[#FDFAF8] via-[#F8DADB] to-[#A8C5A0]"
+                        : row.slug === OBSIDIAN_LUXE_THEME_KEY
+                            ? "from-[#0A0A0A] via-[#141414] to-[#0F0F1A]"
+                            : "from-[#EFF7FB] via-[#DCECF5] to-[#C9DDEB]",
+                    preview: row.slug === DEFAULT_INVITATION_THEME_KEY ? "sakinah" : row.slug === PETAL_SOFT_THEME_KEY ? "petal-soft" : row.slug === OBSIDIAN_LUXE_THEME_KEY ? "obsidian-luxe" : "placeholder",
                     slug: row.slug || row.id
                 }))
 
@@ -182,6 +198,21 @@ export default function SelectThemePage() {
                                         <span className="font-serif text-5xl font-semibold leading-none text-[#C4919B]">Soft</span>
                                         <span className="mt-4 h-px w-14 bg-[#C4919B]/55" />
                                         <span className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#9E8E8E]">Floral Pastel</span>
+                                    </div>
+                                </>
+                            ) : theme.preview === "obsidian-luxe" ? (
+                                <>
+                                    <div className="absolute inset-0 bg-[#0A0A0A]" />
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(201,168,76,0.22),transparent_38%),radial-gradient(circle_at_bottom,rgba(232,213,163,0.1),transparent_44%)]" />
+                                    <div className="absolute inset-5 border border-[#C9A84C]/30" />
+                                    <div className="absolute left-8 top-8 h-16 w-16 border-l border-t border-[#C9A84C]/45" />
+                                    <div className="absolute bottom-8 right-8 h-16 w-16 border-b border-r border-[#C9A84C]/45" />
+                                    <div className="relative flex h-56 w-44 flex-col items-center justify-center border border-[#C9A84C]/45 bg-[#0F0F1A]/78 px-5 text-center shadow-[0_22px_70px_rgba(0,0,0,0.45)]">
+                                        <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#8A8070]">Luxury</span>
+                                        <span className="mt-5 font-serif text-5xl font-semibold italic leading-none text-[#C9A84C]">Obsidian</span>
+                                        <span className="font-serif text-5xl font-semibold italic leading-none text-[#E8D5A3]">Luxe</span>
+                                        <span className="mt-5 h-px w-16 bg-[#C9A84C]/65" />
+                                        <span className="mt-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">Dark Gold</span>
                                     </div>
                                 </>
                             ) : (

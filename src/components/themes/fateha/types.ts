@@ -52,6 +52,11 @@ export type FatehaInvitationData = {
   slug?: string | null;
   invitationId?: string | null;
   isPreview?: boolean;
+  sections_order?: string[] | null;
+  sections_visibility?: Record<string, boolean> | null;
+  show_couple_photos?: boolean;
+  show_prewed_gallery?: boolean;
+  show_gift_section?: boolean;
   monogram: string;
   groom: FatehaPerson;
   bride: FatehaPerson;

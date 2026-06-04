@@ -4,8 +4,11 @@ export const DEFAULT_INVITATION_THEME_CATEGORY = "Islami";
 export const PETAL_SOFT_THEME_KEY = "petal-soft";
 export const PETAL_SOFT_THEME_NAME = "Petal Soft";
 export const PETAL_SOFT_THEME_CATEGORY = "Minimalis";
+export const OBSIDIAN_LUXE_THEME_KEY = "obsidian-luxe";
+export const OBSIDIAN_LUXE_THEME_NAME = "Obsidian Luxe";
+export const OBSIDIAN_LUXE_THEME_CATEGORY = "Modern";
 
-const CODE_RENDERED_THEME_KEYS = new Set([DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY]);
+const CODE_RENDERED_THEME_KEYS = new Set([DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY]);
 
 export function normalizeThemeSelection(themeId?: string | null) {
   const value = typeof themeId === "string" ? themeId.trim() : "";

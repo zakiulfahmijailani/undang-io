@@ -3,7 +3,7 @@
 import { Check, Flower2, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LandingTheme } from "./types";
-import { DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
+import { DEFAULT_INVITATION_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 
 const variantClasses = [
   "bg-[linear-gradient(135deg,#fff7f5_0%,#ffffff_48%,#f8d5dc_100%)] text-landing-maroon",
@@ -41,6 +41,21 @@ export function ThemePreviewCard({ theme, index, selected = false, compact = fal
             <span className="mx-auto mt-2 block h-px w-10 bg-[#C4919B]/45" />
             <span className={cn("mt-2 block font-ui font-semibold uppercase text-[#9E8E8E]", compact ? "text-[6px] tracking-[0.14em]" : "text-[8px] tracking-[0.22em]")}>
               Floral Pastel
+            </span>
+          </div>
+        </div>
+      ) : theme.slug === OBSIDIAN_LUXE_THEME_KEY || theme.id === OBSIDIAN_LUXE_THEME_KEY ? (
+        <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[#0A0A0A] text-[#C9A84C]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(201,168,76,0.22),transparent_40%),radial-gradient(circle_at_bottom,rgba(232,213,163,0.1),transparent_48%)]" />
+          <div className="absolute inset-3 border border-[#C9A84C]/30" />
+          <div className="absolute left-3 top-3 h-10 w-10 border-l border-t border-[#C9A84C]/45" />
+          <div className="absolute bottom-3 right-3 h-10 w-10 border-b border-r border-[#C9A84C]/45" />
+          <div className="relative text-center">
+            <span className={cn("block font-landing-serif font-semibold italic leading-none text-[#C9A84C]", compact ? "text-2xl" : "text-5xl")}>Obsidian</span>
+            <span className={cn("block font-landing-serif font-semibold italic leading-none text-[#E8D5A3]", compact ? "text-2xl" : "text-5xl")}>Luxe</span>
+            <span className="mx-auto mt-3 block h-px w-12 bg-[#C9A84C]/55" />
+            <span className={cn("mt-3 block font-ui font-semibold uppercase text-[#8A8070]", compact ? "text-[6px] tracking-[0.14em]" : "text-[8px] tracking-[0.22em]")}>
+              Dark Gold
             </span>
           </div>
         </div>

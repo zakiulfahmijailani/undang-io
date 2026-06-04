@@ -55,6 +55,27 @@ function readArray<T>(source: LooseRecord, keys: string[], mapper: (item: unknow
   return [];
 }
 
+function readStringArray(source: LooseRecord, keys: string[]): string[] | null {
+  for (const key of keys) {
+    const value = source[key];
+    if (Array.isArray(value)) {
+      const items = value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+      return items.length > 0 ? items : null;
+    }
+  }
+  return null;
+}
+
+function readBooleanRecord(source: LooseRecord, keys: string[]): Record<string, boolean> | null {
+  for (const key of keys) {
+    const value = source[key];
+    if (!value || typeof value !== "object" || Array.isArray(value)) continue;
+    const entries = Object.entries(value).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean");
+    if (entries.length > 0) return Object.fromEntries(entries);
+  }
+  return null;
+}
+
 function combineDateTime(date: string | null, time: string | null): string | null {
   if (!date) return null;
   if (!time) return date;
@@ -237,6 +258,11 @@ function buildFatehaData(source: LooseRecord, options: { slug?: string | null; i
     slug: options.slug ?? readString(source, ["slug"]),
     invitationId: options.invitationId ?? readString(source, ["id", "invitation_id"]),
     isPreview: options.isPreview ?? false,
+    sections_order: readStringArray(source, ["sections_order", "sectionsOrder"]),
+    sections_visibility: readBooleanRecord(source, ["sections_visibility", "sectionsVisibility"]),
+    show_couple_photos: readBoolean(source, ["show_couple_photos", "showCouplePhotos"], true),
+    show_prewed_gallery: readBoolean(source, ["show_prewed_gallery", "showPrewedGallery"], true),
+    show_gift_section: readBoolean(source, ["show_gift_section", "showGiftSection"], true),
     monogram: getInitials(groomNickname, brideNickname),
     groom: {
       fullName: groomFullName,

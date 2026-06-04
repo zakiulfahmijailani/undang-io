@@ -2,6 +2,8 @@ import { InvitationThemePreference, Theme } from "@/types/theme";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   DEFAULT_INVITATION_THEME_NAME,
+  OBSIDIAN_LUXE_THEME_KEY,
+  OBSIDIAN_LUXE_THEME_NAME,
   PETAL_SOFT_THEME_KEY,
   PETAL_SOFT_THEME_NAME,
 } from "@/lib/default-theme";
@@ -72,7 +74,40 @@ const themePetalSoft: Theme = {
   updatedAt: "2026-06-04T07:14:00",
 };
 
-export const dummyThemes: Theme[] = [themeSakinah, themePetalSoft];
+const themeObsidianLuxe: Theme = {
+  id: OBSIDIAN_LUXE_THEME_KEY,
+  name: OBSIDIAN_LUXE_THEME_NAME,
+  slug: OBSIDIAN_LUXE_THEME_KEY,
+  description: "Tema pernikahan mewah berkelas dengan estetika hitam dan emas. Dramatis, sinematik, dan timeless untuk pasangan modern.",
+  culturalCategory: "modern",
+  status: "active",
+  thumbnailUrl: "https://picsum.photos/seed/obsidian-luxe/400/600",
+  musicUrl: null,
+  videoUrl: null,
+  colors: {
+    primary: "#C9A84C",
+    secondary: "#E8D5A3",
+    accent: "#8A8070",
+    surface: "#0A0A0A",
+    textPrimary: "#F5F0E8",
+    textSecondary: "#8A8070",
+  },
+  typography: { headingFont: "Cormorant Garamond", bodyFont: "Jost" },
+  animationSettings: {
+    heroAnimation: "sparkles",
+    intensity: "medium",
+    parallax: true,
+    scrollReveal: true,
+    musicAutoplay: false,
+    videoIntro: false,
+  },
+  styleSettings: { borderRadius: "medium", shadow: "dramatic" },
+  assetSlots: [],
+  createdAt: "2026-06-04T08:30:00",
+  updatedAt: "2026-06-04T08:30:00",
+};
+
+export const dummyThemes: Theme[] = [themeSakinah, themePetalSoft, themeObsidianLuxe];
 
 export const dummyUserPreferences: InvitationThemePreference[] = [
   {
@@ -86,4 +121,4 @@ export const dummyUserPreferences: InvitationThemePreference[] = [
   },
 ];
 
-export { themePetalSoft, themeSakinah };
+export { themeObsidianLuxe, themePetalSoft, themeSakinah };

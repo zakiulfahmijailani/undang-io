@@ -1,6 +1,6 @@
 import { demoData } from "@/data/demoInvitation";
 import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
-import { DEFAULT_INVITATION_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
+import { DEFAULT_INVITATION_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 import { LiveDemoWrapper } from "./LiveDemoWrapper";
 
 type InviteDemoPageProps = {
@@ -85,6 +85,45 @@ function createPetalSoftDemoData() {
   );
 }
 
+function createObsidianLuxeDemoData() {
+  return mapInvitationToFatehaData(
+    {
+      id: "demo-obsidian-luxe",
+      slug: "demo-obsidian-luxe",
+      groom_full_name: "Rafi Narendra",
+      groom_nickname: "Rafi",
+      groom_father_name: "Bapak Arman",
+      groom_mother_name: "Ibu Lestari",
+      bride_full_name: "Adelia Maharani",
+      bride_nickname: "Adelia",
+      bride_father_name: "Bapak Surya",
+      bride_mother_name: "Ibu Kirana",
+      akad_datetime: "2026-02-14T10:00:00+07:00",
+      akad_location_name: "The Dharmawangsa Ballroom",
+      akad_location_address: "Jl. Brawijaya Raya No. 26, Jakarta Selatan",
+      akad_maps_url: "https://maps.google.com/?q=The+Dharmawangsa+Jakarta",
+      resepsi_datetime: "2026-02-14T19:00:00+07:00",
+      resepsi_location_name: "Grand Ballroom Ritz-Carlton",
+      resepsi_location_address: "Jl. DR. Ide Anak Agung Gde Agung, Jakarta Selatan",
+      resepsi_maps_url: "https://maps.google.com/?q=Ritz+Carlton+Mega+Kuningan",
+      quote_text: "Cinta adalah janji yang dipilih setiap hari, dengan hati yang sama dan doa yang semakin dalam.",
+      quote_source: "Adelia & Rafi",
+      love_story: demoData.loveStory,
+      gallery_photos: demoData.gallery,
+      rekening: demoData.bankAccounts,
+      gift_shipping_address: demoData.giftAddress,
+      rsvp_messages: demoData.rsvpMessages.map((message) => ({
+        id: message.id,
+        guest_name: message.guestName,
+        attendance: message.attendance,
+        message: message.message,
+        created_at: message.createdAt,
+      })),
+    },
+    { isPreview: true },
+  );
+}
+
 export default async function InviteDemoPage({ searchParams }: InviteDemoPageProps) {
   const resolvedSearch = await searchParams;
   const theme = resolvedSearch.theme || DEFAULT_INVITATION_THEME_KEY;
@@ -95,6 +134,10 @@ export default async function InviteDemoPage({ searchParams }: InviteDemoPagePro
 
   if (theme === PETAL_SOFT_THEME_KEY) {
     return <LiveDemoWrapper initialData={createPetalSoftDemoData()} theme={theme} />;
+  }
+
+  if (theme === OBSIDIAN_LUXE_THEME_KEY) {
+    return <LiveDemoWrapper initialData={createObsidianLuxeDemoData()} theme={theme} />;
   }
 
   return <LiveDemoWrapper initialData={createSakinahDemoData()} theme={theme} />;

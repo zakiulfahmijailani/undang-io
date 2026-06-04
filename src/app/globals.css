@@ -1111,6 +1111,23 @@ body {
     transform: translate3d(-28px, 112vh, 0) rotate(320deg) scale(0.72);
   }
 }
+@keyframes obsidianGoldDust {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.72);
+  }
+  20% {
+    opacity: 0.72;
+  }
+  55% {
+    opacity: 0.54;
+    transform: translate3d(18px, -44px, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-12px, -96px, 0) scale(0.55);
+  }
+}
 @media (max-width: 560px) {
   .petal-soft-floral-corner { width: 244px; }
   .petal-soft-floral-corner.is-top-left { top: -24px; left: -74px; }
