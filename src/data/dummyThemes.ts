@@ -113,10 +113,10 @@ const themeJawaAgung: Theme = {
   id: JAWA_AGUNG_THEME_KEY,
   name: JAWA_AGUNG_THEME_NAME,
   slug: JAWA_AGUNG_THEME_KEY,
-  description: "Tema pernikahan adat Jawa yang megah dan bermartabat dengan motif batik klasik dan ornamen tradisional.",
+  description: "Tema pernikahan adat Jawa yang megah dan bermartabat, memadukan motif batik klasik, ornamen tradisional, dan tipografi elegan untuk merayakan warisan budaya Nusantara.",
   culturalCategory: "jawa",
   status: "active",
-  thumbnailUrl: "https://picsum.photos/seed/jawa-agung/400/600",
+  thumbnailUrl: "/themes/jawa-agung/hero-ornament.webp",
   musicUrl: null,
   videoUrl: null,
   colors: {
@@ -129,7 +129,7 @@ const themeJawaAgung: Theme = {
   },
   typography: { headingFont: "Cormorant Garamond", bodyFont: "Lora" },
   animationSettings: {
-    heroAnimation: "petals",
+    heroAnimation: "sparkles",
     intensity: "low",
     parallax: true,
     scrollReveal: true,
