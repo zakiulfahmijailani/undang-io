@@ -1,13 +1,13 @@
-/* Full-page Jawa Agung royal Javanese wedding invitation renderer based on the June 5 visual implementation spec. */
+/* Full-page SVG-only Jawa Agung wedding invitation renderer based on the June 5 rebuild brief. */
 
 "use client";
 
 import { FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Copy, Gift, Heart, MapPin, MessageCircle, Navigation, Send, UserRound, Volume2, VolumeX } from "lucide-react";
+import { CalendarDays, Check, Copy, Heart, Home, MapPin, MessageCircle, Navigation, Send, UserRound, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import type { FatehaEvent, FatehaGiftAccount, FatehaInvitationData, FatehaRsvpMessage, FatehaStoryItem } from "@/components/themes/fateha";
 import { cn } from "@/lib/utils";
-import { batikBorderSVG, cornerOrnamentSVG, dividerOrnamentSVG, melatiBulletSVG, wayangSilhouetteSVG } from "./ornaments";
+import { BatikBorder, CornerOrnament, DividerOrnament, JanurArch, KawungBackground, MelatiCluster, WayangSilhouette } from "./JawaAgungSVG";
 import { jawaAgungFontClassName } from "./fonts";
 
 type JawaAgungSectionId = "cover" | "quote" | "couple" | "story" | "event" | "gallery" | "rsvp" | "gift" | "closing";
@@ -30,9 +30,6 @@ type MessageResponse = {
 };
 
 const DEFAULT_SECTION_ORDER: JawaAgungSectionId[] = ["cover", "quote", "couple", "story", "event", "gallery", "rsvp", "gift", "closing"];
-const FALLBACK_ARABIC_QUOTE =
-  "وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنْفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً";
-
 const sectionAliases: Record<string, JawaAgungSectionId> = {
   hero: "cover",
   cover: "cover",
@@ -56,24 +53,20 @@ const sectionAliases: Record<string, JawaAgungSectionId> = {
 };
 
 const navItems = [
-  { href: "#cover", icon: UserRound, label: "Utama" },
-  { href: "#couple", icon: Heart, label: "Mempelai" },
-  { href: "#event", icon: Gift, label: "Acara" },
+  { href: "#cover", icon: Home, label: "Utama" },
+  { href: "#couple", icon: UserRound, label: "Mempelai" },
+  { href: "#event", icon: CalendarDays, label: "Acara" },
   { href: "#rsvp", icon: MessageCircle, label: "RSVP" },
-  { href: "#closing", icon: Gift, label: "Penutup" },
+  { href: "#closing", icon: Heart, label: "Penutup" },
 ] as const;
 
-const melatiParticles = Array.from({ length: 10 }, (_, index) => `melati-${index + 1}`);
-
-const jawaAssets = {
-  heroOrnament: { src: "/themes/jawa-agung/hero-ornament.webp", width: 1254, height: 1254 },
-  batikKawungPanel: { src: "/themes/jawa-agung/batik-kawung-panel.webp", width: 1400, height: 933 },
-  janurKuning: { src: "/themes/jawa-agung/janur-kuning.webp", width: 933, height: 1400 },
-  wayangArjuna: { src: "/themes/jawa-agung/wayang-arjuna.webp", width: 800, height: 1200 },
-  melatiCloseup: { src: "/themes/jawa-agung/melati-closeup.webp", width: 1200, height: 900 },
-  kerisOrnament: { src: "/themes/jawa-agung/keris-ornament.webp", width: 1400, height: 933 },
-  goldLeafTexture: "/themes/jawa-agung/gold-leaf-texture.webp",
-} as const;
+const melatiParticles = Array.from({ length: 8 }, (_, index) => ({
+  id: `melati-${index + 1}`,
+  left: `${15 + (index * 11) % 72}%`,
+  bottom: `${8 + (index * 6) % 18}%`,
+  duration: `${3.5 + index * 0.35}s`,
+  delay: `${index * 0.5}s`,
+}));
 
 const jawaAgungStyles = `
 .jawa-agung-theme {
@@ -86,120 +79,93 @@ const jawaAgungStyles = `
   --jawa-green: #2C4A1E;
   --jawa-body: #2A1A0E;
   --jawa-muted: #7A5C3A;
+  color: var(--jawa-body);
   font-family: var(--font-jawa-body), Georgia, serif;
+  scroll-behavior: smooth;
 }
 .jawa-agung-theme *, .jawa-agung-theme *::before, .jawa-agung-theme *::after { box-sizing: border-box; }
 .jawa-agung-theme a { color: inherit; text-decoration: none; }
 .jawa-agung-theme button, .jawa-agung-theme input, .jawa-agung-theme textarea, .jawa-agung-theme select { font: inherit; }
-.jawa-agung-shell {
-  max-width: 520px;
-  margin: 0 auto;
-  background: var(--jawa-bg-primary);
-  color: var(--jawa-body);
-  box-shadow: 0 30px 100px rgba(73, 38, 12, 0.22);
-  overflow: hidden;
-}
 .jawa-section {
   position: relative;
+  display: flex;
   min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   isolation: isolate;
   overflow: hidden;
+  padding: 5rem 1rem;
 }
-.jawa-section-inner {
+.jawa-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(212,168,67,.12) 0 1px, transparent 2px),
+    radial-gradient(circle at 76% 64%, rgba(123,63,26,.1) 0 1px, transparent 2px),
+    radial-gradient(circle at 44% 82%, rgba(212,168,67,.09) 0 1px, transparent 2px),
+    linear-gradient(115deg, transparent 0 32%, rgba(212,168,67,.08) 33%, transparent 36% 68%, rgba(200,146,42,.06) 69%, transparent 72%);
+  background-size: 180px 180px, 230px 230px, 160px 160px, 100% 100%;
+  opacity: .4;
+  mix-blend-mode: multiply;
+  animation: goldPulse 8s ease-in-out infinite;
+}
+.jawa-content {
   position: relative;
   z-index: 10;
-  min-height: inherit;
-}
-.jawa-gold-text {
-  color: #D4A843;
-  background: linear-gradient(135deg, #F2D879 0%, #D4A843 45%, #C8922A 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 10px 30px rgba(123, 63, 26, .12);
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
 }
 .jawa-display { font-family: var(--font-jawa-display), serif; }
 .jawa-heading { font-family: var(--font-jawa-heading), Georgia, serif; }
 .jawa-script { font-family: var(--font-jawa-script), cursive; }
 .jawa-arabic { font-family: var(--font-jawa-arabic), serif; }
-.jawa-batik svg, .jawa-divider svg, .jawa-corner svg, .jawa-wayang svg, .jawa-melati-svg svg {
+.jawa-gold-text {
+  color: #D4A843;
+  background: linear-gradient(135deg, #EBD17A 0%, #D4A843 45%, #A96F15 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 16px 40px rgba(123, 63, 26, .16);
+}
+.jawa-card {
+  border: 1px solid rgba(212,168,67,.5);
+  background: rgba(250,244,230,.9);
+  box-shadow: 0 22px 60px rgba(123,63,26,.12);
+}
+.jawa-field {
   width: 100%;
-  height: 100%;
-  display: block;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 1px solid rgba(212,168,67,.86);
+  background: transparent;
+  padding: .7rem 0 .55rem;
+  color: var(--jawa-body);
+  outline: none;
+  transition: border-color .2s ease;
 }
-.jawa-divider svg path {
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-}
-.jawa-revealed .jawa-divider svg path {
-  animation: drawDivider 1.5s ease-out .15s forwards;
-}
-#cover .jawa-divider svg path {
-  animation: drawDivider 1.5s ease-out .25s forwards;
-}
-.jawa-corner {
-  color: var(--jawa-gold);
-  filter: drop-shadow(0 5px 12px rgba(123, 63, 26, .14));
-}
-.jawa-kawung-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background-image: url('${jawaAssets.batikKawungPanel.src}');
-  background-size: cover;
-  background-position: center;
-  opacity: .05;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-.jawa-texture-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: url('${jawaAssets.goldLeafTexture}');
-  background-size: 500px;
-  background-repeat: repeat;
-  opacity: .04;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  animation: goldPulse 8s ease-in-out infinite;
-}
-.jawa-cover-bg {
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(212,168,67,.12) 0%, transparent 70%),
-    linear-gradient(180deg, #F5EDD6 0%, #FAF4E6 48%, #EDE0C0 100%);
-}
-.jawa-hero-ornament {
-  filter: drop-shadow(0 8px 32px rgba(123,63,26,.15));
-}
-.jawa-melati-corner {
-  mix-blend-mode: multiply;
-  mask-image: linear-gradient(135deg, #000 0%, rgba(0,0,0,.74) 48%, transparent 84%);
-}
-.jawa-image-formal {
-  transition: transform .4s ease, filter .4s ease;
-}
-.jawa-image-formal:hover {
-  transform: scale(1.03);
-  filter: sepia(.25);
-}
+.jawa-field::placeholder { color: rgba(122,92,58,.72); }
+.jawa-field:focus { border-color: var(--jawa-soga); }
 .jawa-reveal {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translateY(24px);
 }
 .jawa-revealed {
-  animation: revealUp .9s ease-out forwards;
-}
-.jawa-stagger > * {
-  opacity: 0;
-  transform: translateY(16px);
-}
-.jawa-section:not(.jawa-reveal) .jawa-stagger > * {
-  opacity: 1;
-  transform: none;
+  animation: jawaReveal .85s ease-out forwards;
 }
 .jawa-revealed .jawa-stagger > * {
-  animation: revealUp .8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: jawaReveal .8s ease-out forwards;
 }
 .jawa-revealed .jawa-stagger > *:nth-child(1) { animation-delay: .05s; }
 .jawa-revealed .jawa-stagger > *:nth-child(2) { animation-delay: .15s; }
@@ -207,52 +173,26 @@ const jawaAgungStyles = `
 .jawa-revealed .jawa-stagger > *:nth-child(4) { animation-delay: .35s; }
 .jawa-revealed .jawa-stagger > *:nth-child(5) { animation-delay: .45s; }
 .jawa-revealed .jawa-stagger > *:nth-child(6) { animation-delay: .55s; }
-.jawa-input {
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid rgba(212, 168, 67, .82);
-  background: transparent;
-  padding: .65rem 0 .55rem;
-  color: var(--jawa-body);
-  outline: none;
-  transition: border-color .2s ease;
+.jawa-divider-line {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
 }
-.jawa-input::placeholder { color: rgba(122, 92, 58, .72); }
-.jawa-input:focus { border-color: var(--jawa-soga); }
-.jawa-radio-input:checked + .jawa-radio-mark {
-  background: var(--jawa-gold);
-  border-color: var(--jawa-gold);
+.jawa-revealed .jawa-divider-line,
+#cover .jawa-divider-line {
+  animation: drawDivider 1.4s ease-out .2s forwards;
 }
-.jawa-radio-input:checked + .jawa-radio-mark::after {
-  content: "✓";
+.jawa-melati-particle {
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: white;
-  font-size: .68rem;
-  font-weight: 700;
-}
-.melati-particle {
-  position: absolute;
-  width: .58rem;
-  height: .58rem;
+  z-index: 7;
+  width: .375rem;
+  height: .375rem;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 0 14px rgba(255,255,255,.55), 0 0 18px rgba(212,168,67,.3);
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 0 14px rgba(255,255,255,.5), 0 0 18px rgba(212,168,67,.24);
   opacity: 0;
   animation: melatiFloat 4s ease-in-out infinite;
+  pointer-events: none;
 }
-.melati-particle:nth-child(1) { left: 8%; bottom: 7%; animation-duration: 3.2s; animation-delay: 0s; }
-.melati-particle:nth-child(2) { left: 19%; bottom: 16%; animation-duration: 3.8s; animation-delay: .6s; }
-.melati-particle:nth-child(3) { left: 31%; bottom: 11%; animation-duration: 4.2s; animation-delay: 1.2s; }
-.melati-particle:nth-child(4) { left: 46%; bottom: 20%; animation-duration: 4.6s; animation-delay: 1.8s; }
-.melati-particle:nth-child(5) { left: 62%; bottom: 7%; animation-duration: 5s; animation-delay: 2.4s; }
-.melati-particle:nth-child(6) { left: 76%; bottom: 17%; animation-duration: 5.4s; animation-delay: 3s; }
-.melati-particle:nth-child(7) { left: 87%; bottom: 10%; animation-duration: 5.8s; animation-delay: 3.6s; }
-.melati-particle:nth-child(8) { left: 95%; bottom: 19%; animation-duration: 6.2s; animation-delay: 4.2s; }
-.melati-particle:nth-child(9) { left: 14%; bottom: 24%; animation-duration: 4.4s; animation-delay: 4.8s; }
-.melati-particle:nth-child(10) { left: 71%; bottom: 25%; animation-duration: 5.2s; animation-delay: 5.4s; }
 .jawa-copy-bounce {
   animation: copyBounce .42s ease-out;
 }
@@ -260,15 +200,15 @@ const jawaAgungStyles = `
   0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
   15% { opacity: .65; }
   85% { opacity: .4; }
-  100% { transform: translateY(-100px) translateX(20px) rotate(60deg); opacity: 0; }
+  100% { transform: translateY(-90px) translateX(18px) rotate(55deg); opacity: 0; }
 }
-@keyframes revealUp {
-  from { opacity: 0; transform: translateY(28px); }
+@keyframes jawaReveal {
+  from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes goldPulse {
-  0%, 100% { opacity: .03; }
-  50% { opacity: .08; }
+  0%, 100% { opacity: .34; }
+  50% { opacity: .55; }
 }
 @keyframes drawDivider {
   from { stroke-dashoffset: 400; }
@@ -279,6 +219,13 @@ const jawaAgungStyles = `
   45% { transform: scale(1.05); }
   100% { transform: scale(1); }
 }
+@media (min-width: 640px) {
+  .jawa-section { padding: 5.5rem 2rem; }
+}
+@media (min-width: 1024px) {
+  .jawa-section { padding: 6rem 4rem; }
+  .jawa-content { max-width: 58rem; }
+}
 @media (prefers-reduced-motion: reduce) {
   .jawa-agung-theme *,
   .jawa-agung-theme *::before,
@@ -286,14 +233,14 @@ const jawaAgungStyles = `
     animation: none !important;
     transition-duration: .01ms !important;
   }
-  .melati-particle,
   .jawa-reveal,
-  .jawa-stagger > *,
-  .jawa-revealed {
+  .jawa-revealed,
+  .jawa-revealed .jawa-stagger > *,
+  .jawa-melati-particle {
     opacity: 1 !important;
     transform: none !important;
   }
-  .jawa-divider svg path {
+  .jawa-divider-line {
     stroke-dashoffset: 0 !important;
   }
 }
@@ -310,17 +257,6 @@ function formatDateUpper(value: string | null) {
   return formatDate(value).replace(",", " -").toUpperCase();
 }
 
-function formatDateCompact(value: string | null) {
-  if (!value) return "Tanggal menyusul";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  const parts = new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" }).formatToParts(date);
-  const day = parts.find((part) => part.type === "day")?.value ?? "";
-  const month = parts.find((part) => part.type === "month")?.value ?? "";
-  const year = parts.find((part) => part.type === "year")?.value ?? "";
-  return [day, month, year].filter(Boolean).join(" • ").toUpperCase();
-}
-
 function formatTime(event: FatehaEvent) {
   const value = event.time ?? event.date;
   if (!value) return "Waktu menyusul";
@@ -330,8 +266,8 @@ function formatTime(event: FatehaEvent) {
   return `${new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(date)} WIB`;
 }
 
-function cleanArabic(value: string | null | undefined) {
-  if (!value || value.includes("Ãƒ") || value.includes("Ã™") || value.includes("Ã˜") || value.includes("Ù")) return FALLBACK_ARABIC_QUOTE;
+function safeArabic(value: string | null | undefined) {
+  if (!value || value.includes("Ã") || value.includes("Ù")) return "";
   return value;
 }
 
@@ -349,19 +285,10 @@ function isSectionVisible(data: FatehaInvitationData, section: JawaAgungSectionI
   return !Object.entries(sectionAliases).some(([alias, normalized]) => normalized === section && visibility[alias] === false);
 }
 
-function parentLine(kind: "Putra" | "Putri", father: string | null, mother: string | null) {
-  const parentNames = [father, mother].filter(Boolean).join(" dan ");
-  if (!parentNames) return `${kind} tercinta dari keluarga besar`;
-  return `${kind} dari: ${parentNames}`;
-}
-
-function closingGreetings(data: FatehaInvitationData) {
-  const marker = `${data.quote.translation} ${data.quote.source} ${data.quote.arabic}`.toLowerCase();
-  const isIslamic = /allah|ar-rum|assalamu|bismillah|rahmat|quran|qs\./i.test(marker);
-  const isNonIslamic = /rahayu|pemberkatan|gereja|om swastiastu|namaste/i.test(marker);
-  if (isIslamic) return "Wassalamualaikum Warahmatullahi Wabarakatuh";
-  if (isNonIslamic) return "Salam Rahayu";
-  return "Salam Rahayu";
+function parentText(kind: "Putra" | "Putri", father: string | null, mother: string | null) {
+  const names = [father, mother].filter(Boolean).join(" dan ");
+  if (!names) return `${kind} tercinta dari keluarga besar`;
+  return `${kind} dari ${names}`;
 }
 
 function eventExists(event: FatehaEvent) {
@@ -373,33 +300,37 @@ function cityFromEvent(event: FatehaEvent) {
   return parts.at(-1) || event.venue || "Lokasi akan diumumkan";
 }
 
+function closingGreeting(data: FatehaInvitationData) {
+  const marker = `${data.quote.translation} ${data.quote.source} ${data.quote.arabic} ${data.wedding.akad.venue} ${data.wedding.reception.venue}`.toLowerCase();
+  if (/assalamu|allah|ar-rum|bismillah|quran|masjid|akad/i.test(marker)) return "Wassalamualaikum Warahmatullahi Wabarakatuh";
+  return "Salam Rahayu";
+}
+
 export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
   const sectionOrder = useMemo(() => getVisibleSections(data), [data]);
   const [closingVisible, setClosingVisible] = useState(false);
 
   useEffect(() => {
+    const elements = document.querySelectorAll(".jawa-reveal");
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        entries.forEach((entry, index) => {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add("jawa-revealed");
-          if (entry.target.id === "closing") setClosingVisible(true);
-          observer.unobserve(entry.target);
+          const element = entry.target as HTMLElement;
+          element.style.animationDelay = `${index * 0.1}s`;
+          element.classList.add("jawa-revealed");
+          observer.unobserve(element);
         });
       },
       { threshold: 0.12 },
     );
 
-    const elements = document.querySelectorAll(".jawa-reveal");
     elements.forEach((element) => observer.observe(element));
 
     const closing = document.getElementById("closing");
     let closingObserver: IntersectionObserver | null = null;
     if (closing) {
-      closingObserver = new IntersectionObserver(
-        ([entry]) => setClosingVisible(Boolean(entry?.isIntersecting)),
-        { threshold: 0.35 },
-      );
+      closingObserver = new IntersectionObserver(([entry]) => setClosingVisible(Boolean(entry?.isIntersecting)), { threshold: 0.35 });
       closingObserver.observe(closing);
     }
 
@@ -410,15 +341,14 @@ export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
   }, [sectionOrder]);
 
   return (
-    <div className={cn("jawa-agung-theme min-h-screen bg-[#E8D6AD] text-[#2A1A0E]", jawaAgungFontClassName)}>
+    <div className={cn("jawa-agung-theme min-h-screen bg-[#E8D6AD]", jawaAgungFontClassName)}>
       <style>{jawaAgungStyles}</style>
-      <FloatingMelati />
       <MusicToggle musicUrl={data.musicUrl} closingVisible={closingVisible} />
       <JawaNav />
-      <main className="jawa-agung-shell">
+      <main>
         {sectionOrder.map((section) => {
           if (section === "cover") return <CoverSection key={section} data={data} />;
-          if (section === "quote") return <OpeningQuoteSection key={section} data={data} />;
+          if (section === "quote" && (safeArabic(data.quote.arabic) || data.quote.translation)) return <OpeningQuoteSection key={section} data={data} />;
           if (section === "couple") return <CoupleSection key={section} data={data} />;
           if (section === "story" && data.loveStory.length > 0) return <LoveStorySection key={section} items={data.loveStory} />;
           if (section === "event") return <EventSection key={section} data={data} />;
@@ -433,243 +363,260 @@ export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
   );
 }
 
-function SectionWrapper({
+function SectionFrame({
   id,
   children,
   className,
-  innerClassName,
-  withBatik,
+  contentClassName,
+  withKawung = true,
+  withCorners = true,
   reveal = true,
 }: {
-  id: string;
+  id: JawaAgungSectionId;
   children: ReactNode;
   className?: string;
-  innerClassName?: string;
-  withBatik?: boolean;
+  contentClassName?: string;
+  withKawung?: boolean;
+  withCorners?: boolean;
   reveal?: boolean;
 }) {
   return (
     <section id={id} className={cn("jawa-section", reveal && "jawa-reveal", className)}>
-      <div className="jawa-texture-layer" aria-hidden="true" />
-      {withBatik ? <div className="jawa-kawung-layer" aria-hidden="true" /> : null}
-      <div className={cn("jawa-section-inner", innerClassName)}>{children}</div>
+      {withKawung ? <KawungBackground opacity={0.045} color="#D4A843" /> : null}
+      {withCorners ? <CornerSet /> : null}
+      <div className="absolute inset-x-0 top-0 z-[4]" aria-hidden="true">
+        <BatikBorder color="#D4A843" opacity={0.7} />
+      </div>
+      <div className="absolute inset-x-0 bottom-0 z-[4]" aria-hidden="true">
+        <BatikBorder color="#D4A843" opacity={0.7} className="rotate-180" />
+      </div>
+      <div className={cn("jawa-content", contentClassName)}>{children}</div>
     </section>
   );
 }
 
-function CoverSection({ data }: { data: FatehaInvitationData }) {
-  const location = cityFromEvent(data.wedding.akad);
+function CornerSet({ subtle = false }: { subtle?: boolean }) {
+  const opacity = subtle ? 0.36 : 0.62;
 
   return (
-    <SectionWrapper id="cover" className="jawa-cover-bg text-center" innerClassName="flex flex-col" reveal={false}>
-      <BatikStrip className="text-[#D4A843]" />
-      <CornerOrnaments />
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-7 py-20 pb-28">
-        <div className="jawa-stagger grid place-items-center">
-          <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.35em] text-[#7B3F1A]">Mengundang Anda Untuk Hadir</p>
-          <img
-            src={jawaAssets.heroOrnament.src}
-            alt=""
-            width={jawaAssets.heroOrnament.width}
-            height={jawaAssets.heroOrnament.height}
-            loading="lazy"
-            decoding="async"
-            role="presentation"
-            aria-hidden="true"
-            className="jawa-hero-ornament mt-8 w-[min(280px,70vw)] opacity-[0.92]"
-          />
-          <h1 className="mt-7 text-center">
-            <span className="jawa-script jawa-gold-text block text-[clamp(3rem,10vw,5.5rem)] leading-[0.82]">{data.bride.nickname}</span>
-            <span className="jawa-heading block py-4 text-xl text-[#D4A843]" aria-hidden="true">✦</span>
-            <span className="jawa-script jawa-gold-text block text-[clamp(3rem,10vw,5.5rem)] leading-[0.82]">{data.groom.nickname}</span>
-          </h1>
-          <Divider className="mt-8 w-[min(280px,70vw)] text-[#D4A843]" />
-          <p className="jawa-display mt-6 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{formatDateUpper(data.wedding.date)}</p>
-          <p className="mt-3 text-[0.85rem] italic leading-6 text-[#7A5C3A]">{location}</p>
-        </div>
+    <div className="pointer-events-none absolute inset-0 z-[5]" aria-hidden="true">
+      <CornerOrnament position="tl" color="#D4A843" opacity={opacity} size={62} className="absolute left-4 top-4 sm:left-6 sm:top-6" />
+      <CornerOrnament position="tr" color="#D4A843" opacity={opacity} size={62} className="absolute right-4 top-4 sm:right-6 sm:top-6" />
+      <CornerOrnament position="bl" color="#D4A843" opacity={opacity} size={62} className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6" />
+      <CornerOrnament position="br" color="#D4A843" opacity={opacity} size={62} className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6" />
+    </div>
+  );
+}
+
+function CoverSection({ data }: { data: FatehaInvitationData }) {
+  return (
+    <SectionFrame
+      id="cover"
+      className="bg-[#F5EDD6] text-center"
+      contentClassName="max-w-[34rem] gap-4 pb-20 pt-8 lg:pb-24"
+      withKawung={false}
+      reveal={false}
+    >
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_70%_60%_at_50%_45%,rgba(212,168,67,0.12)_0%,transparent_65%)]" aria-hidden="true" />
+      <div className="jawa-stagger relative z-10 flex w-full flex-col items-center">
+        <p className="jawa-display text-[0.5rem] font-bold uppercase tracking-[0.3em] text-[#7B3F1A] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
+        <DividerOrnament color="#D4A843" width={280} className="mt-4 w-[min(280px,72vw)]" />
+        <MelatiCluster count={9} spread={160} color="#D4A843" opacity={0.44} className="absolute left-1/2 top-[8.5rem] -translate-x-1/2" />
+        <h1 className="mt-12 text-center">
+          <span className="jawa-script jawa-gold-text block text-[clamp(2.8rem,10vw,5rem)] leading-[0.82]">{data.bride.nickname}</span>
+          <span className="jawa-heading block py-4 text-xl text-[#D4A843]" aria-hidden="true">✦</span>
+          <span className="jawa-script jawa-gold-text block text-[clamp(2.8rem,10vw,5rem)] leading-[0.82]">{data.groom.nickname}</span>
+        </h1>
+        <DividerOrnament color="#D4A843" width={300} className="mt-6 w-[min(300px,78vw)]" />
+        <p className="jawa-display mt-5 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{formatDateUpper(data.wedding.date)}</p>
+        <p className="mt-2 text-[0.85rem] italic leading-6 text-[#7A5C3A]">{cityFromEvent(data.wedding.akad)}</p>
       </div>
-      <img
-        src={jawaAssets.janurKuning.src}
-        alt=""
-        width={jawaAssets.janurKuning.width}
-        height={jawaAssets.janurKuning.height}
-        loading="lazy"
-        decoding="async"
-        role="presentation"
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-5 z-[2] hidden max-h-[140px] w-full object-contain object-bottom opacity-75 sm:block"
-      />
-      <BatikStrip className="absolute inset-x-0 bottom-0 rotate-180 text-[#D4A843]" />
-    </SectionWrapper>
+      <FloatingMelati />
+      <JanurArch color="#D4A843" opacity={0.62} width={360} className="absolute bottom-8 left-1/2 z-[3] w-[min(360px,90vw)] -translate-x-1/2" />
+    </SectionFrame>
   );
 }
 
 function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
-  const quoteText = data.quote.translation.trim();
-  const quoteSource = data.quote.source.trim();
-  const arabic = cleanArabic(data.quote.arabic);
-  if (!quoteText && !quoteSource && !arabic) return null;
+  const arabic = safeArabic(data.quote.arabic);
 
   return (
-    <SectionWrapper id="quote" className="bg-[#EDE0C0] text-center" innerClassName="flex flex-col" withBatik>
-      <BatikStrip className="text-[#D4A843]" />
-      <CornerOrnaments subtle />
-      <div className="jawa-stagger mx-auto flex flex-1 max-w-xl flex-col items-center justify-center px-8 py-20">
-        <Divider className="w-72 max-w-full text-[#D4A843]" />
-        {arabic ? <p className="jawa-arabic mt-10 text-3xl leading-[2] text-[#7B3F1A]">{arabic}</p> : null}
-        {quoteText ? <p className="mx-auto mt-8 max-w-[55ch] text-base italic leading-[1.8] text-[#2A1A0E]">&ldquo;{quoteText}&rdquo;</p> : null}
-        {quoteSource ? <p className="jawa-display mt-4 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A]">{quoteSource}</p> : null}
-        <Divider className="mt-10 w-72 max-w-full rotate-180 text-[#D4A843]" />
+    <SectionFrame id="quote" className="bg-[#EDE0C0]" contentClassName="max-w-3xl">
+      <WayangSilhouette color="#7B3F1A" opacity={0.05} height={420} width={180} className="absolute -right-8 top-1/2 z-[2] h-[65%] w-auto -translate-y-1/2 lg:right-[5%]" />
+      <div className="jawa-stagger relative z-10 flex flex-col items-center gap-7">
+        <DividerOrnament color="#D4A843" width={320} className="w-[min(320px,78vw)]" />
+        {arabic ? <p className="jawa-arabic max-w-3xl text-center text-[1.8rem] leading-[2.2] text-[#7B3F1A] sm:text-[2.2rem]">{arabic}</p> : null}
+        {data.quote.translation ? <p className="mx-auto max-w-[52ch] text-center text-base italic leading-[1.9] text-[#2A1A0E]">{data.quote.translation}</p> : null}
+        {data.quote.source ? <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A]">{data.quote.source}</p> : null}
+        <DividerOrnament color="#D4A843" width={320} className="w-[min(320px,78vw)] rotate-180" />
       </div>
-      <BatikStrip className="rotate-180 text-[#D4A843]" />
-    </SectionWrapper>
+    </SectionFrame>
   );
 }
 
 function CoupleSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <SectionWrapper id="couple" className="bg-[#FAF4E6]" innerClassName="flex items-center px-7 py-20">
-      <img
-        src={jawaAssets.melatiCloseup.src}
-        alt=""
-        width={jawaAssets.melatiCloseup.width}
-        height={jawaAssets.melatiCloseup.height}
-        loading="lazy"
-        decoding="async"
-        role="presentation"
-        aria-hidden="true"
-        className="jawa-melati-corner pointer-events-none absolute -right-20 top-8 z-[1] w-[220px] opacity-10"
-      />
-      <div className="jawa-stagger mx-auto w-full max-w-xl">
-        <SectionHeading eyebrow="Mempelai" title="Dua Keluarga, Satu Restu" />
-        <div className="relative mt-14 grid gap-14 text-center sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-7">
-          <PersonCard kind="Putri" label="Mempelai Wanita" person={data.bride} showPhoto={data.show_couple_photos !== false} />
-          <div className="jawa-heading hidden text-5xl italic text-[#D4A843] sm:block" aria-hidden="true">❧</div>
-          <PersonCard kind="Putra" label="Mempelai Pria" person={data.groom} showPhoto={data.show_couple_photos !== false} />
+    <SectionFrame id="couple" className="bg-[#FAF4E6]" contentClassName="max-w-5xl">
+      <div className="jawa-stagger flex w-full flex-col items-center">
+        <SectionHeading eyebrow="Mempelai" title="Putra & Putri" />
+        <div className="mt-10 flex w-full flex-col items-center gap-12 lg:flex-row lg:items-stretch lg:justify-center lg:gap-0">
+          <PersonCard
+            label="Mempelai Wanita"
+            person={data.bride}
+            kind="Putri"
+            showPhoto={data.show_couple_photos !== false}
+          />
+          <div className="hidden flex-col items-center justify-center px-12 lg:flex" aria-hidden="true">
+            <DividerOrnament color="#D4A843" width={200} className="rotate-90 opacity-80" />
+          </div>
+          <PersonCard
+            label="Mempelai Pria"
+            person={data.groom}
+            kind="Putra"
+            showPhoto={data.show_couple_photos !== false}
+          />
         </div>
       </div>
-    </SectionWrapper>
+    </SectionFrame>
   );
 }
 
 function PersonCard({
-  kind,
   label,
   person,
+  kind,
   showPhoto,
 }: {
-  kind: "Putra" | "Putri";
   label: string;
   person: FatehaInvitationData["bride"];
+  kind: "Putra" | "Putri";
   showPhoto: boolean;
 }) {
   return (
-    <article>
+    <article className="relative flex max-w-[280px] flex-1 flex-col items-center text-center">
       {showPhoto ? (
-        <div className="mx-auto h-[140px] w-[140px] rounded-full border-2 border-[#7B3F1A] bg-[#EDE0C0] p-1 shadow-[0_8px_32px_rgba(123,63,26,0.2)] outline outline-[3px] outline-offset-[5px] outline-[#D4A843]">
-          <img src={person.photo} alt={`Foto ${person.nickname}`} width={140} height={140} className="h-full w-full rounded-full object-cover sepia-[0.12]" loading="lazy" decoding="async" />
-        </div>
+        person.photo ? (
+          <img
+            src={person.photo}
+            alt={`Foto ${person.fullName}`}
+            width={140}
+            height={140}
+            loading="lazy"
+            decoding="async"
+            className="h-[120px] w-[120px] rounded-full border-2 border-[#7B3F1A] object-cover shadow-[0_8px_24px_rgba(123,63,26,0.18)] ring-2 ring-[#D4A843] ring-offset-4 ring-offset-[#FAF4E6] sm:h-[140px] sm:w-[140px]"
+          />
+        ) : (
+          <div className="grid h-[120px] w-[120px] place-items-center rounded-full border-2 border-[#7B3F1A] bg-[#EDE0C0] text-[#D4A843] shadow-[0_8px_24px_rgba(123,63,26,0.18)] ring-2 ring-[#D4A843] ring-offset-4 sm:h-[140px] sm:w-[140px]" aria-hidden="true">
+            <MelatiCluster count={5} spread={84} color="#D4A843" opacity={0.7} />
+          </div>
+        )
       ) : null}
-      <p className="jawa-display mt-8 text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A]">{label}</p>
-      <h3 className="jawa-heading mt-3 text-[1.3rem] font-bold leading-tight text-[#7B3F1A]">{person.fullName}</h3>
-      <p className="mt-3 text-[0.8rem] italic text-[#7A5C3A]">{kind} dari:</p>
-      <p className="mt-1 text-[0.85rem] leading-7 text-[#2A1A0E]">{parentLine(kind, person.father, person.mother).replace(`${kind} dari: `, "")}</p>
-      <SvgOrnament svg={melatiBulletSVG} className="jawa-melati-svg mx-auto mt-4 h-4 w-4 text-[#D4A843]" />
+      <p className="jawa-display mt-7 text-[0.5rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A]">{label}</p>
+      <h3 className="jawa-heading mt-2 text-[1.35rem] font-bold leading-tight text-[#7B3F1A]">{person.fullName}</h3>
+      <p className="mt-3 text-[0.8rem] italic text-[#7A5C3A]">{parentText(kind, person.father, person.mother)}</p>
+      {person.child ? <p className="mt-2 text-[0.85rem] leading-6 text-[#2A1A0E]">{person.child}</p> : null}
+      <MelatiCluster count={3} spread={54} color="#D4A843" opacity={0.52} className="mt-4" />
     </article>
   );
 }
 
 function LoveStorySection({ items }: { items: FatehaStoryItem[] }) {
   return (
-    <SectionWrapper id="story" className="bg-[#F5EDD6]" innerClassName="flex items-center px-7 py-20">
-      <div className="jawa-stagger mx-auto w-full max-w-xl">
-        <SectionHeading eyebrow="Perjalanan Cinta Kami" title="Kisah Kami" />
-        <div className="relative mx-auto mt-12 max-w-lg">
-          <div className="absolute left-4 top-3 h-[calc(100%-1.5rem)] border-l border-dashed border-[#C8922A]" aria-hidden="true" />
-          {items.map((item, index) => (
-            <article key={`${item.year}-${item.title}-${index}`} className={cn("relative mb-5 ml-10 border border-[#D4A843]/35 p-6 shadow-[0_18px_36px_rgba(123,63,26,0.08)]", index % 2 === 0 ? "bg-[#FAF4E6]" : "bg-[#F5EDD6]")}>
-              <SvgOrnament svg={cornerOrnamentSVG} className="jawa-corner absolute -left-[2.8rem] top-6 h-5 w-5 rotate-45 bg-[#F5EDD6]" />
-              <p className="jawa-display text-[0.6rem] font-bold uppercase tracking-[0.24em] text-[#D4A843]">{item.year}</p>
-              <h3 className="jawa-heading mt-3 text-[1.1rem] font-bold text-[#7B3F1A]">{item.title}</h3>
-              <p className="mt-3 text-[0.9rem] leading-7 text-[#2A1A0E]">{item.description}</p>
-            </article>
-          ))}
+    <SectionFrame id="story" className="bg-[#F5EDD6]" contentClassName="max-w-3xl">
+      <div className="jawa-stagger w-full">
+        <SectionHeading eyebrow="Perjalanan Cinta Kami" title="Kisah" />
+        <div className="relative mx-auto mt-10 w-full max-w-[600px]">
+          <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 border-l border-dashed border-[#C8922A]/65" aria-hidden="true" />
+          <div className="grid gap-8">
+            {items.map((item, index) => (
+              <article key={`${item.year}-${item.title}-${index}`} className="relative mx-auto w-full max-w-md bg-[#FAF4E6]/72 px-6 py-7 text-center shadow-[0_18px_44px_rgba(123,63,26,0.08)]">
+                <CornerOrnament position="tl" color="#D4A843" size={28} className="absolute left-3 top-3" />
+                <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#C8922A]">{item.year}</p>
+                <h3 className="jawa-heading mt-2 text-[1.2rem] font-bold text-[#7B3F1A]">{item.title}</h3>
+                <p className="mt-3 text-[0.9rem] leading-7 text-[#2A1A0E]">{item.description}</p>
+                <DividerOrnament color="#D4A843" opacity={0.42} width={160} className="mx-auto mt-5" />
+              </article>
+            ))}
+          </div>
         </div>
       </div>
-    </SectionWrapper>
+    </SectionFrame>
   );
 }
 
 function EventSection({ data }: { data: FatehaInvitationData }) {
-  const showKeris = eventExists(data.wedding.akad) && eventExists(data.wedding.reception);
+  const hasAkad = eventExists(data.wedding.akad);
+  const hasReception = eventExists(data.wedding.reception);
 
   return (
-    <SectionWrapper id="event" className="bg-[#EDE0C0]" innerClassName="flex flex-col px-7 py-20" withBatik>
-      <BatikStrip className="absolute inset-x-0 top-0 text-[#D4A843]" />
-      <div className="jawa-stagger mx-auto flex w-full max-w-xl flex-1 flex-col justify-center">
+    <SectionFrame id="event" className="bg-[#EDE0C0]" contentClassName="max-w-5xl">
+      <div className="jawa-stagger w-full">
         <SectionHeading eyebrow="Rangkaian Acara" title="Hari Bahagia" />
-        <div className={cn("mt-12 grid gap-5 sm:items-center", showKeris ? "sm:grid-cols-[1fr_80px_1fr]" : "sm:grid-cols-2")}>
-          <EventCard event={data.wedding.akad} title="Akad Nikah" />
-          {showKeris ? (
-            <img
-              src={jawaAssets.kerisOrnament.src}
-              alt=""
-              width={jawaAssets.kerisOrnament.width}
-              height={jawaAssets.kerisOrnament.height}
-              loading="lazy"
-              decoding="async"
-              role="presentation"
-              aria-hidden="true"
-              className="hidden w-20 rotate-45 object-contain opacity-50 sm:block"
-            />
-          ) : null}
-          <EventCard event={data.wedding.reception} title="Resepsi Pernikahan" />
+        <div className="mt-10 flex flex-col items-center gap-6 lg:flex-row lg:justify-center lg:gap-8">
+          {hasAkad ? <EventCard title="Akad Nikah" event={data.wedding.akad} /> : null}
+          {hasAkad && hasReception ? <KerisSeparator /> : null}
+          {hasReception ? <EventCard title="Resepsi Pernikahan" event={data.wedding.reception} /> : null}
         </div>
       </div>
-      <BatikStrip className="absolute inset-x-0 bottom-0 rotate-180 text-[#D4A843]" />
-    </SectionWrapper>
+    </SectionFrame>
   );
 }
 
-function EventCard({ event, title }: { event: FatehaEvent; title: string }) {
+function EventCard({ title, event }: { title: string; event: FatehaEvent }) {
   return (
-    <article className="relative min-h-[24rem] overflow-hidden border border-[#D4A843]/50 bg-[#FAF4E6] px-6 py-10 text-center shadow-[0_18px_40px_rgba(123,63,26,0.1)] sm:px-8">
-      <SvgOrnament svg={cornerOrnamentSVG} className="jawa-corner absolute left-3 top-3 h-12 w-12 opacity-55" />
-      <SvgOrnament svg={cornerOrnamentSVG} className="jawa-corner absolute right-3 top-3 h-12 w-12 scale-x-[-1] opacity-55" />
-      <div className="relative z-10">
-        <p className="jawa-display text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{title}</p>
-        <Divider className="mx-auto my-6 w-40 scale-75 text-[#D4A843]" />
-        <h3 className="jawa-heading text-[1.4rem] font-bold leading-tight text-[#7B3F1A]">{formatDate(event.date)}</h3>
-        <p className="mt-3 text-[0.9rem] italic text-[#7A5C3A]">{formatTime(event)}</p>
-        <p className="jawa-heading mt-7 text-[1.1rem] font-semibold text-[#2A1A0E]">{event.venue}</p>
-        <p className="mt-2 line-clamp-2 text-[0.85rem] leading-6 text-[#7A5C3A]">{event.address}</p>
-        {event.mapsUrl ? (
-          <a href={event.mapsUrl} target="_blank" rel="noreferrer" className="jawa-display mt-8 inline-flex min-h-11 items-center justify-center gap-2 border border-[#7B3F1A] px-6 py-3 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-[#7B3F1A] transition duration-300 hover:bg-[#7B3F1A] hover:text-[#F5EDD6]">
-            <Navigation className="h-4 w-4" aria-hidden="true" />
-            Lihat Lokasi
-          </a>
-        ) : null}
-      </div>
+    <article className="jawa-card relative w-full max-w-[360px] p-8 text-center lg:p-10">
+      <CornerOrnament position="tl" color="#D4A843" opacity={0.42} size={48} className="absolute left-3 top-3" />
+      <CornerOrnament position="tr" color="#D4A843" opacity={0.42} size={48} className="absolute right-3 top-3" />
+      <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{title}</p>
+      <DividerOrnament color="#D4A843" width={160} className="mx-auto my-6" />
+      <h3 className="jawa-heading text-[1.3rem] font-bold leading-tight text-[#7B3F1A]">{formatDate(event.date)}</h3>
+      <p className="mt-3 text-[0.9rem] italic text-[#7A5C3A]">{formatTime(event)}</p>
+      <p className="jawa-heading mt-6 text-[1.08rem] font-semibold text-[#2A1A0E]">{event.venue || "Tempat acara menyusul"}</p>
+      <p className="mt-2 line-clamp-2 text-[0.82rem] leading-6 text-[#7A5C3A]">{event.address || "Alamat lengkap akan diumumkan."}</p>
+      {event.mapsUrl ? (
+        <a href={event.mapsUrl} target="_blank" rel="noreferrer" className="jawa-display mt-7 inline-flex min-h-11 items-center justify-center gap-2 border border-[#7B3F1A] px-6 py-2.5 text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#7B3F1A] transition duration-300 hover:bg-[#7B3F1A] hover:text-[#F5EDD6]">
+          <Navigation className="h-4 w-4" aria-hidden="true" />
+          Lihat Lokasi
+        </a>
+      ) : null}
     </article>
+  );
+}
+
+function KerisSeparator() {
+  return (
+    <svg width="44" height="128" viewBox="0 0 44 128" className="hidden opacity-45 lg:block" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <path d="M22 2C18 14 25 22 20 34C17 42 26 50 20 62C16 72 24 80 21 92L18 126L22 116L26 126L23 92C20 80 28 72 24 62C18 50 27 42 24 34C19 22 26 14 22 2Z" fill="#7B3F1A" />
+      <path d="M22 14C20 26 24 35 22 49C20 63 24 76 22 91" fill="none" stroke="#D4A843" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M13 102H31M15 109H29" stroke="#D4A843" strokeWidth="1" strokeLinecap="round" />
+    </svg>
   );
 }
 
 function GallerySection({ data }: { data: FatehaInvitationData }) {
   return (
-    <SectionWrapper id="gallery" className="bg-[#FAF4E6]" innerClassName="flex flex-col px-7 py-20">
-      <BatikStrip className="absolute inset-x-0 top-0 text-[#D4A843]" />
-      <div className="jawa-stagger mx-auto flex w-full max-w-xl flex-1 flex-col justify-center">
+    <SectionFrame id="gallery" className="bg-[#FAF4E6]" contentClassName="max-w-5xl">
+      <div className="jawa-stagger w-full">
         <SectionHeading eyebrow="Kenangan Kami" title="Galeri" />
-        <div className="mt-10 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {data.gallery.slice(0, 6).map((item, index) => (
-            <figure key={`${item.src}-${index}`} className="group overflow-hidden border border-[#D4A843]/35 bg-[#EDE0C0]">
-              <img src={item.src} alt={item.alt} width={320} height={index % 3 === 1 ? 320 : 426} className={cn("jawa-image-formal w-full object-cover", index % 3 === 1 ? "aspect-square" : "aspect-[3/4]")} loading="lazy" decoding="async" />
-              {item.caption ? <figcaption className="px-3 py-2 text-center text-xs italic text-[#7A5C3A]">{item.caption}</figcaption> : null}
+        <div className="mt-10 grid grid-cols-2 gap-1.5 sm:gap-2 lg:grid-cols-3">
+          {data.gallery.slice(0, 9).map((item, index) => (
+            <figure key={`${item.src}-${index}`} className="group relative overflow-hidden bg-[#EDE0C0]">
+              <img
+                src={item.src}
+                alt={item.alt || "Foto galeri"}
+                width={420}
+                height={index % 3 === 1 ? 420 : 560}
+                className={cn("h-full w-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] group-hover:sepia-[0.2]", index % 3 === 1 ? "aspect-square" : "aspect-[3/4]")}
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="absolute inset-0 bg-[#D4A843]/0 transition-colors duration-500 group-hover:bg-[#D4A843]/10" aria-hidden="true" />
+              {item.caption ? <figcaption className="absolute inset-x-0 bottom-0 bg-[#2A1A0E]/55 px-3 py-2 text-center text-xs italic text-[#F5EDD6]">{item.caption}</figcaption> : null}
             </figure>
           ))}
         </div>
       </div>
-    </SectionWrapper>
+    </SectionFrame>
   );
 }
 
@@ -700,7 +647,7 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
           })),
         );
       } catch {
-        // Keep seed messages visible when public messages are unavailable.
+        // Seed messages stay visible when public messages cannot be loaded.
       }
     }
 
@@ -772,15 +719,13 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
   }
 
   return (
-    <SectionWrapper id="rsvp" className="bg-[#EDE0C0]" innerClassName="flex flex-col px-7 py-20" withBatik>
-      <BatikStrip className="absolute inset-x-0 top-0 text-[#D4A843]" />
-      <BatikStrip className="absolute inset-x-0 bottom-0 rotate-180 text-[#D4A843]" />
-      <CornerOrnaments subtle />
-      <div className="jawa-stagger mx-auto flex w-full max-w-xl flex-1 flex-col justify-center">
-        <SectionHeading eyebrow="Konfirmasi Kehadiran" title="Kehadiran Anda" subtitle="Kehadiran Anda adalah kehormatan bagi kami." />
-        <div className="mx-auto mt-10 w-full max-w-[480px] border border-[#D4A843]/45 bg-[#FAF4E6]/88 p-5 shadow-[0_20px_42px_rgba(123,63,26,0.1)]">
+    <SectionFrame id="rsvp" className="bg-[#EDE0C0]" contentClassName="max-w-3xl">
+      <WayangSilhouette color="#7B3F1A" opacity={0.04} height={420} width={180} className="absolute -left-12 top-1/2 z-[2] h-[68%] w-auto -translate-y-1/2" />
+      <div className="jawa-stagger w-full">
+        <SectionHeading eyebrow="Konfirmasi Kehadiran" title="RSVP" subtitle="Kehadiran Anda adalah kehormatan bagi kami." />
+        <div className="jawa-card mx-auto mt-10 w-full max-w-[440px] p-6 sm:p-8">
           {submitted ? (
-            <div className="py-10 text-center">
+            <div className="py-9 text-center">
               <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#7B3F1A] text-[#F5EDD6]">
                 <Check className="h-8 w-8" aria-hidden="true" />
               </span>
@@ -792,51 +737,55 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
           ) : (
             <form onSubmit={handleSubmit} className="grid gap-5">
               <JawaField label="Nama">
-                <input className="jawa-input" value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Masukkan nama Anda" autoComplete="name" />
+                <input className="jawa-field" value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Masukkan nama Anda" autoComplete="name" />
               </JawaField>
               <JawaField label="Jumlah Tamu">
-                <select className="jawa-input" value={form.guests} onChange={(event) => update("guests", event.target.value)}>
+                <select className="jawa-field" value={form.guests} onChange={(event) => update("guests", event.target.value)}>
                   {[1, 2, 3, 4, 5].map((count) => <option key={count} value={count}>{count} orang</option>)}
                 </select>
               </JawaField>
               <div>
                 <p className="jawa-display mb-3 text-[0.55rem] font-bold uppercase tracking-[0.15em] text-[#7B3F1A]">Kehadiran</p>
-                <div className="grid gap-2 sm:grid-cols-3">
+                <div className="grid gap-2">
                   {[
                     ["hadir", "Hadir"],
                     ["tidak_hadir", "Tidak Hadir"],
                     ["masih_ragu", "Belum Pasti"],
                   ].map(([value, label]) => (
-                    <label key={value} className="flex min-h-11 cursor-pointer items-center gap-2 border border-[#D4A843]/35 bg-[#F5EDD6]/55 px-3 py-3 text-xs font-semibold text-[#7B3F1A]">
+                    <label key={value} className="flex min-h-11 cursor-pointer items-center gap-3 text-left">
                       <input
                         type="radio"
                         name="attendance"
                         value={value}
                         checked={form.attendance === value}
                         onChange={(event) => update("attendance", event.target.value as AttendanceChoice)}
-                        className="jawa-radio-input sr-only"
+                        className="sr-only"
                       />
-                      <span className="jawa-radio-mark relative h-4 w-4 rounded-full border border-[#7B3F1A]" aria-hidden="true" />
-                      {label}
+                      <span className={cn("grid h-5 w-5 place-items-center rounded-full border-2 border-[#7B3F1A] transition duration-200", form.attendance === value && "border-[#D4A843] bg-[#D4A843]")} aria-hidden="true">
+                        {form.attendance === value ? <span className="h-2 w-2 rounded-full bg-white" /> : null}
+                      </span>
+                      <span className="text-sm text-[#2A1A0E]">{label}</span>
                     </label>
                   ))}
                 </div>
               </div>
               <JawaField label="Pesan / Ucapan">
-                <textarea className="jawa-input min-h-28 resize-none" value={form.message} onChange={(event) => update("message", event.target.value)} placeholder="Tulis doa atau ucapan untuk kami..." />
+                <textarea className="jawa-field min-h-28 resize-none" value={form.message} onChange={(event) => update("message", event.target.value)} placeholder="Tulis doa atau ucapan untuk kami..." />
               </JawaField>
               {error ? <p className="border border-[#7B3F1A]/20 bg-[#EDE0C0] px-4 py-3 text-sm text-[#7B3F1A]">{error}</p> : null}
-              <button type="submit" className="jawa-display inline-flex min-h-11 w-full items-center justify-center gap-2 bg-[#7B3F1A] px-12 py-4 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#F5EDD6] transition duration-300 hover:bg-[#C8922A] hover:text-[#2A1A0E]" disabled={loading}>
-                <Send className="h-4 w-4" aria-hidden="true" />
-                {loading ? "Mengirim" : "Kirim Konfirmasi"}
+              <button type="submit" className="jawa-display min-h-[52px] w-full bg-[#7B3F1A] px-8 py-4 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#F5EDD6] transition duration-300 hover:bg-[#C8922A] active:scale-[0.98]" disabled={loading}>
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Send className="h-4 w-4" aria-hidden="true" />
+                  {loading ? "Mengirim" : "Kirim Konfirmasi"}
+                </span>
               </button>
             </form>
           )}
         </div>
         {messages.length > 0 ? (
-          <div className="mx-auto mt-8 grid max-w-[480px] gap-3">
+          <div className="mx-auto mt-8 grid max-w-[440px] gap-3">
             {messages.slice(0, 3).map((message) => (
-              <article key={message.id} className="border border-[#D4A843]/30 bg-[#FAF4E6]/72 p-4">
+              <article key={message.id} className="border border-[#D4A843]/30 bg-[#FAF4E6]/72 p-4 text-left">
                 <strong className="text-sm text-[#7B3F1A]">{message.name}</strong>
                 <p className="mt-2 text-sm italic leading-6 text-[#7A5C3A]">&ldquo;{message.message}&rdquo;</p>
               </article>
@@ -844,19 +793,19 @@ function RsvpSection({ data }: { data: FatehaInvitationData }) {
           </div>
         ) : null}
       </div>
-    </SectionWrapper>
+    </SectionFrame>
   );
 }
 
 function GiftSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <SectionWrapper id="gift" className="bg-[#FAF4E6]" innerClassName="flex items-center px-7 py-20">
-      <div className="jawa-stagger mx-auto w-full max-w-xl">
+    <SectionFrame id="gift" className="bg-[#FAF4E6]" contentClassName="max-w-3xl">
+      <div className="jawa-stagger w-full">
         <SectionHeading eyebrow="Doa & Hadiah" title="Amplop Digital" subtitle="Doa restu Anda adalah hadiah yang paling bermakna bagi kami." />
         <div className="mx-auto mt-10 grid max-w-lg gap-4">
           {data.giftAccounts.map((account) => <GiftAccountCard key={`${account.bank}-${account.number}`} account={account} />)}
           {data.giftAddress ? (
-            <article className="relative border border-[#D4A843]/45 bg-[#EDE0C0] p-6 text-center">
+            <article className="jawa-card relative p-7 text-center">
               <MapPin className="mx-auto h-7 w-7 text-[#7B3F1A]" aria-hidden="true" />
               <h3 className="jawa-heading mt-3 text-2xl font-semibold text-[#7B3F1A]">Alamat Hadiah</h3>
               <p className="mt-3 text-sm leading-7 text-[#7A5C3A]">{data.giftAddress}</p>
@@ -864,7 +813,7 @@ function GiftSection({ data }: { data: FatehaInvitationData }) {
           ) : null}
         </div>
       </div>
-    </SectionWrapper>
+    </SectionFrame>
   );
 }
 
@@ -879,9 +828,9 @@ function GiftAccountCard({ account }: { account: FatehaGiftAccount }) {
   }
 
   return (
-    <article className="relative overflow-hidden border border-[#D4A843]/60 bg-[#EDE0C0] p-8 text-center">
-      <SvgOrnament svg={cornerOrnamentSVG} className="jawa-corner absolute left-3 top-3 h-12 w-12 opacity-55" />
-      <SvgOrnament svg={cornerOrnamentSVG} className="jawa-corner absolute right-3 top-3 h-12 w-12 scale-x-[-1] opacity-55" />
+    <article className="jawa-card relative mx-auto w-full max-w-[320px] p-8 text-center">
+      <CornerOrnament position="tl" color="#D4A843" opacity={0.5} size={42} className="absolute left-3 top-3" />
+      <CornerOrnament position="tr" color="#D4A843" opacity={0.5} size={42} className="absolute right-3 top-3" />
       <p className="jawa-display text-[0.68rem] font-bold uppercase tracking-[0.24em] text-[#7B3F1A]">{account.bank}</p>
       <strong className="jawa-heading mt-4 block text-[1.3rem] font-bold text-[#7B3F1A]">{account.number}</strong>
       <p className="mt-2 text-sm text-[#7A5C3A]">a.n. {account.name}</p>
@@ -899,54 +848,32 @@ function GiftAccountCard({ account }: { account: FatehaGiftAccount }) {
 
 function ClosingSection({ data }: { data: FatehaInvitationData }) {
   return (
-    <SectionWrapper id="closing" className="bg-[#EDE0C0] text-center" innerClassName="flex flex-col" withBatik>
-      <BatikStrip className="text-[#D4A843]" />
-      <CornerOrnaments subtle />
-      <img
-        src={jawaAssets.wayangArjuna.src}
-        alt=""
-        width={jawaAssets.wayangArjuna.width}
-        height={jawaAssets.wayangArjuna.height}
-        loading="lazy"
-        decoding="async"
-        role="presentation"
-        aria-hidden="true"
-        className="pointer-events-none absolute right-[-7rem] top-1/2 z-[2] h-[70%] w-auto -translate-y-1/2 object-contain opacity-[0.07]"
-      />
-      <div className="jawa-stagger mx-auto flex flex-1 max-w-xl flex-col items-center justify-center px-8 py-20 pb-32">
-        <Divider className="w-80 max-w-full text-[#D4A843]" />
-        <p className="jawa-script mt-10 text-[clamp(1.5rem,5vw,2.5rem)] leading-tight text-[#D4A843]">{closingGreetings(data)}</p>
-        <h2 className="jawa-script mt-8 text-[clamp(2rem,7vw,4rem)] leading-none text-[#7B3F1A]">
+    <SectionFrame id="closing" className="bg-[#EDE0C0]" contentClassName="max-w-4xl">
+      <WayangSilhouette color="#7B3F1A" opacity={0.06} height={480} width={206} className="absolute -right-12 top-1/2 z-[2] h-[70%] w-auto -translate-y-1/2 lg:right-[8%]" />
+      <div className="jawa-stagger relative z-10 flex flex-col items-center gap-7 text-center">
+        <DividerOrnament color="#D4A843" width={340} className="w-[min(340px,82vw)]" />
+        <p className="jawa-script text-[clamp(1.3rem,5vw,2.2rem)] leading-tight text-[#D4A843]">{closingGreeting(data)}</p>
+        <h2 className="jawa-script text-[clamp(1.8rem,6vw,3.5rem)] leading-none text-[#7B3F1A]">
           {data.bride.fullName}
           <span className="jawa-heading block py-3 text-2xl italic text-[#D4A843]">&amp;</span>
           {data.groom.fullName}
         </h2>
-        <p className="mx-auto mt-6 max-w-md text-[0.9rem] italic leading-7 text-[#7A5C3A]">Terima kasih atas doa dan kehadiran Anda</p>
-        <img
-          src={jawaAssets.heroOrnament.src}
-          alt=""
-          width={jawaAssets.heroOrnament.width}
-          height={jawaAssets.heroOrnament.height}
-          loading="lazy"
-          decoding="async"
-          role="presentation"
-          aria-hidden="true"
-          className="jawa-hero-ornament mt-10 w-[min(160px,40vw)] opacity-70"
-        />
-        <Divider className="mt-10 w-80 max-w-full rotate-180 text-[#D4A843]" />
+        <p className="text-[0.9rem] italic leading-7 text-[#7A5C3A]">Terima kasih atas doa dan kehadiran Anda</p>
+        <MelatiCluster count={9} spread={200} color="#D4A843" opacity={0.5} />
+        <DividerOrnament color="#D4A843" width={340} className="w-[min(340px,82vw)] rotate-180" />
       </div>
-      <BatikStrip className="absolute inset-x-0 bottom-0 rotate-180 text-[#D4A843]" />
-    </SectionWrapper>
+      <JanurArch color="#D4A843" opacity={0.48} width={300} className="absolute bottom-8 left-1/2 z-[3] w-[min(300px,82vw)] -translate-x-1/2" />
+    </SectionFrame>
   );
 }
 
 function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
   return (
     <header className="mx-auto max-w-xl text-center">
-      <Divider className="mx-auto w-56 text-[#D4A843]" />
+      <DividerOrnament color="#D4A843" width={260} className="mx-auto w-[min(260px,72vw)]" />
       <p className="jawa-display mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-[#7B3F1A]">{eyebrow}</p>
       <h2 className="jawa-heading mt-4 text-4xl font-bold text-[#7B3F1A]">{title}</h2>
-      <Divider className="mx-auto my-5 w-56 rotate-180 text-[#D4A843]" />
+      <DividerOrnament color="#D4A843" width={260} className="mx-auto my-5 w-[min(260px,72vw)] rotate-180" />
       {subtitle ? <p className="text-sm italic leading-7 text-[#7A5C3A]">{subtitle}</p> : null}
     </header>
   );
@@ -954,7 +881,7 @@ function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: 
 
 function JawaField({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="grid gap-1">
+    <label className="grid gap-1 text-left">
       <span className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.15em] text-[#7B3F1A]">{label}</span>
       {children}
     </label>
@@ -963,7 +890,7 @@ function JawaField({ label, children }: { label: string; children: ReactNode }) 
 
 function JawaNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-3 z-40 mx-auto flex w-[min(calc(100%_-_2rem),430px)] items-center justify-center border border-[#D4A843]/55 bg-[#FAF4E6]/90 p-1 shadow-[0_18px_45px_rgba(123,63,26,0.16)] backdrop-blur-xl">
+    <nav className="fixed bottom-3 left-4 right-4 z-40 flex items-center justify-center border border-[#D4A843]/55 bg-[#FAF4E6]/90 p-1 shadow-[0_18px_45px_rgba(123,63,26,0.16)] backdrop-blur-xl sm:left-1/2 sm:right-auto sm:w-[430px] sm:-translate-x-1/2">
       {navItems.map((item) => (
         <a key={item.href} href={item.href} className="flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[9px] font-semibold uppercase tracking-wide text-[#7A5C3A] transition hover:bg-[#EDE0C0] hover:text-[#7B3F1A]">
           <item.icon className="h-4 w-4" aria-hidden="true" />
@@ -1004,7 +931,7 @@ function MusicToggle({ musicUrl, closingVisible }: { musicUrl: string | null; cl
           closingVisible && "opacity-100",
         )}
       >
-        <SvgOrnament svg={cornerOrnamentSVG} className="jawa-corner pointer-events-none absolute left-0 top-0 h-5 w-5 opacity-50" />
+        <CornerOrnament position="tl" color="#D4A843" opacity={0.5} size={22} className="absolute left-0 top-0" />
         {playing ? <Volume2 className="h-5 w-5" aria-hidden="true" /> : <VolumeX className="h-5 w-5" aria-hidden="true" />}
       </button>
     </>
@@ -1013,32 +940,14 @@ function MusicToggle({ musicUrl, closingVisible }: { musicUrl: string | null; cl
 
 function FloatingMelati() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-30 overflow-hidden" aria-hidden="true">
-      {melatiParticles.map((item) => <span key={item} className="melati-particle" />)}
+    <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden" aria-hidden="true">
+      {melatiParticles.map((particle) => (
+        <span
+          key={particle.id}
+          className="jawa-melati-particle"
+          style={{ left: particle.left, bottom: particle.bottom, animationDuration: particle.duration, animationDelay: particle.delay }}
+        />
+      ))}
     </div>
   );
-}
-
-function BatikStrip({ className }: { className?: string }) {
-  return <SvgOrnament svg={batikBorderSVG} className={cn("jawa-batik h-7 w-full shrink-0", className)} />;
-}
-
-function Divider({ className }: { className?: string }) {
-  return <SvgOrnament svg={dividerOrnamentSVG} className={cn("jawa-divider h-9", className)} />;
-}
-
-function CornerOrnaments({ subtle = false }: { subtle?: boolean }) {
-  const opacity = subtle ? "opacity-35" : "opacity-75";
-  return (
-    <div className="pointer-events-none absolute inset-0 z-[3]" aria-hidden="true">
-      <SvgOrnament svg={cornerOrnamentSVG} className={cn("jawa-corner absolute left-5 top-10 h-16 w-16", opacity)} />
-      <SvgOrnament svg={cornerOrnamentSVG} className={cn("jawa-corner absolute right-5 top-10 h-16 w-16 scale-x-[-1]", opacity)} />
-      <SvgOrnament svg={cornerOrnamentSVG} className={cn("jawa-corner absolute bottom-10 left-5 h-16 w-16 scale-y-[-1]", opacity)} />
-      <SvgOrnament svg={cornerOrnamentSVG} className={cn("jawa-corner absolute bottom-10 right-5 h-16 w-16 scale-x-[-1] scale-y-[-1]", opacity)} />
-    </div>
-  );
-}
-
-function SvgOrnament({ svg, className }: { svg: string; className?: string }) {
-  return <span className={className} aria-hidden="true" dangerouslySetInnerHTML={{ __html: svg }} />;
 }

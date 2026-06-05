@@ -56,7 +56,7 @@ export const fallbackThemes: LandingTheme[] = [
     id: JAWA_AGUNG_THEME_KEY,
     name: JAWA_AGUNG_THEME_NAME,
     slug: JAWA_AGUNG_THEME_KEY,
-    thumbnailUrl: "/themes/jawa-agung/hero-ornament.webp",
+    thumbnailUrl: "https://picsum.photos/seed/jawa-agung/400/600",
     culturalCategory: JAWA_AGUNG_THEME_CATEGORY,
   },
 ];
