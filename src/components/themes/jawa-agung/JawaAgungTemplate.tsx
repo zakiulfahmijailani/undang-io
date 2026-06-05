@@ -9,6 +9,7 @@ import type { FatehaEvent, FatehaGiftAccount, FatehaInvitationData, FatehaRsvpMe
 import { cn } from "@/lib/utils";
 import {
   CornerOrnament,
+  CoverDateArch,
   DividerOrnament,
   EventMedallion,
   GununganCrest,
@@ -17,6 +18,7 @@ import {
   KawungBackground,
   MelatiCluster,
   RoyalCoverCrown,
+  RoyalCoverFrame,
   RoyalFrame,
   WayangSilhouette,
 } from "./JawaAgungSVG";
@@ -185,10 +187,15 @@ const jawaAgungStyles = `
   text-shadow: 0 1px 0 rgba(255,255,255,.7), 0 12px 28px rgba(123,63,26,.1);
 }
 .jawa-cover-name {
-  color: #5F3515;
+  color: #693C12;
   background: none;
   -webkit-text-fill-color: currentColor;
-  letter-spacing: -.045em;
+  -webkit-text-stroke: .45px #C79B43;
+  letter-spacing: -.055em;
+  text-shadow:
+    0 1px 0 #FFF8E8,
+    0 3px 0 rgba(182,129,44,.42),
+    0 12px 26px rgba(105,60,18,.12);
 }
 .jawa-card {
   border: 1px solid rgba(123,63,26,.58);
@@ -242,14 +249,29 @@ const jawaAgungStyles = `
 .jawa-melati-particle {
   position: absolute;
   z-index: 7;
-  width: .375rem;
-  height: .375rem;
-  border-radius: 999px;
-  background: rgba(255,255,255,.78);
-  box-shadow: 0 0 14px rgba(255,255,255,.5), 0 0 18px rgba(212,168,67,.24);
+  width: .65rem;
+  height: .65rem;
+  background: rgba(182,129,44,.72);
+  clip-path: polygon(50% 0, 58% 41%, 100% 50%, 58% 59%, 50% 100%, 42% 59%, 0 50%, 42% 41%);
+  filter: drop-shadow(0 0 5px rgba(212,168,67,.32));
   opacity: 0;
   animation: melatiFloat 4s ease-in-out infinite;
   pointer-events: none;
+}
+.jawa-melati-particle:nth-child(3n) {
+  width: .42rem;
+  height: .42rem;
+  background: rgba(255,248,232,.9);
+}
+.jawa-nav {
+  border-color: rgba(182,129,44,.7);
+  background:
+    linear-gradient(90deg, rgba(182,129,44,.06), transparent 18% 82%, rgba(182,129,44,.06)),
+    rgba(255,249,235,.94);
+  box-shadow:
+    inset 0 0 0 3px rgba(255,255,255,.72),
+    inset 0 0 0 4px rgba(182,129,44,.14),
+    0 18px 45px rgba(123,63,26,.16);
 }
 .jawa-copy-bounce {
   animation: copyBounce .42s ease-out;
@@ -433,6 +455,7 @@ function SectionFrame({
   className,
   contentClassName,
   withKawung = true,
+  withFrame = true,
   reveal = true,
 }: {
   id: JawaAgungSectionId;
@@ -440,12 +463,13 @@ function SectionFrame({
   className?: string;
   contentClassName?: string;
   withKawung?: boolean;
+  withFrame?: boolean;
   reveal?: boolean;
 }) {
   return (
     <section id={id} className={cn("jawa-section", reveal && "jawa-reveal", className)}>
       {withKawung ? <KawungBackground opacity={0.045} color="#D4A843" /> : null}
-      <RoyalFrame color="#8A5518" opacity={id === "cover" || id === "closing" ? 0.64 : 0.38} className="z-[4]" />
+      {withFrame ? <RoyalFrame color="#8A5518" opacity={id === "closing" ? 0.64 : 0.38} className="z-[4]" /> : null}
       <div className={cn("jawa-content", contentClassName)}>{children}</div>
     </section>
   );
@@ -458,24 +482,27 @@ function CoverSection({ data }: { data: FatehaInvitationData }) {
       className="bg-[#F5EDD6] text-center"
       contentClassName="max-w-[42rem]"
       withKawung={false}
+      withFrame={false}
       reveal={false}
     >
       <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_72%_62%_at_50%_43%,rgba(212,168,67,0.19)_0%,transparent_68%)]" aria-hidden="true" />
+      <RoyalCoverFrame color="#B6812C" opacity={0.86} className="z-[4]" />
       <div className="jawa-stagger relative z-10 flex w-full flex-col items-center">
-        <RoyalCoverCrown color="#6D421C" opacity={0.88} className="jawa-cover-crown h-auto w-[min(560px,88vw)] drop-shadow-[0_14px_24px_rgba(123,63,26,0.1)]" />
-        <p className="jawa-display -mt-7 bg-[#F5EDD6]/80 px-4 text-[0.5rem] font-bold uppercase tracking-[0.32em] text-[#6D421C] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
-        <DividerOrnament color="#8A5518" width={280} className="mt-2 w-[min(280px,72vw)] opacity-75" />
-        <h1 className="mt-2 max-w-full text-center">
-          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(3.7rem,14vw,6.2rem)] leading-[0.8]">{data.bride.nickname}</span>
-          <span className="jawa-heading block py-3 text-[1.4rem] italic leading-none text-[#9B641F]" aria-hidden="true">&amp;</span>
-          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(3.7rem,14vw,6.2rem)] leading-[0.8]">{data.groom.nickname}</span>
+        <RoyalCoverCrown color="#8A5518" opacity={0.9} className="jawa-cover-crown h-auto w-[min(500px,78vw)] drop-shadow-[0_14px_24px_rgba(123,63,26,0.1)]" />
+        <p className="jawa-display -mt-8 bg-[#F5EDD6]/85 px-5 text-[0.5rem] font-bold uppercase tracking-[0.36em] text-[#6D421C] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
+        <DividerOrnament color="#B6812C" width={260} className="mt-2 w-[min(260px,68vw)] opacity-75" />
+        <h1 className="mt-1 max-w-full text-center">
+          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(4rem,15vw,7rem)] leading-[0.78]">{data.bride.nickname}</span>
+          <span className="jawa-heading block py-2 text-[1.55rem] italic leading-none text-[#9B641F]" aria-hidden="true">&amp;</span>
+          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(4rem,15vw,7rem)] leading-[0.78]">{data.groom.nickname}</span>
         </h1>
-        <DividerOrnament color="#8A5518" width={300} className="mt-6 w-[min(300px,78vw)] opacity-75" />
-        <p className="jawa-display mt-3 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#6D421C]">{formatDateUpper(data.wedding.date)}</p>
-        <p className="mt-2 text-[0.85rem] italic leading-6 text-[#7A5C3A]">{cityFromEvent(data.wedding.akad)}</p>
+        <div className="relative mt-3 flex min-h-32 w-[min(430px,82vw)] flex-col items-center justify-center pt-10">
+          <CoverDateArch color="#B6812C" opacity={0.8} width={440} className="absolute inset-x-0 top-0 mx-auto h-auto w-full" />
+          <p className="jawa-display relative z-10 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#6D421C]">{formatDateUpper(data.wedding.date)}</p>
+          <p className="relative z-10 mt-2 text-[0.85rem] italic leading-6 text-[#7A5C3A]">{cityFromEvent(data.wedding.akad)}</p>
+        </div>
       </div>
       <FloatingMelati />
-      <JanurArch color="#8A5518" opacity={0.42} width={420} className="absolute bottom-5 left-1/2 z-[3] w-[min(420px,92vw)] -translate-x-1/2" />
     </SectionFrame>
   );
 }
@@ -942,7 +969,7 @@ function JawaField({ label, children }: { label: string; children: ReactNode }) 
 
 function JawaNav() {
   return (
-    <nav className="fixed bottom-3 left-4 right-4 z-40 flex items-center justify-center border border-[#D4A843]/55 bg-[#FAF4E6]/90 p-1 shadow-[0_18px_45px_rgba(123,63,26,0.16)] backdrop-blur-xl sm:left-1/2 sm:right-auto sm:w-[430px] sm:-translate-x-1/2">
+    <nav className="jawa-nav fixed bottom-3 left-4 right-4 z-40 flex items-center justify-center border p-1 backdrop-blur-xl sm:left-1/2 sm:right-auto sm:w-[470px] sm:-translate-x-1/2">
       {navItems.map((item) => (
         <a key={item.href} href={item.href} className="flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[9px] font-semibold uppercase tracking-wide text-[#7A5C3A] transition hover:bg-[#EDE0C0] hover:text-[#7B3F1A]">
           <item.icon className="h-4 w-4" aria-hidden="true" />

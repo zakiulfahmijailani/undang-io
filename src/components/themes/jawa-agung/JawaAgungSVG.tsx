@@ -45,6 +45,10 @@ type EventMedallionProps = BaseSvgProps & {
   size?: number;
 };
 
+type CoverDateArchProps = BaseSvgProps & {
+  width?: number;
+};
+
 function safeId(prefix: string, rawId: string) {
   return `${prefix}-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 }
@@ -327,6 +331,85 @@ export function RoyalFrame({ color = "#8A5518", opacity = 1, inset = 10, classNa
   );
 }
 
+export function RoyalCoverFrame({ color = "#B6812C", opacity = 1, className }: BaseSvgProps) {
+  return (
+    <div className={cn("pointer-events-none absolute inset-3", className)} style={{ opacity }} aria-hidden="true">
+      <div className="absolute inset-0 border border-current" style={{ color }} />
+      <div className="absolute inset-[7px] border border-current opacity-45" style={{ color }} />
+      <CoverFrameCorner color={color} className="absolute left-0 top-0 w-[38%] max-w-[360px]" />
+      <CoverFrameCorner color={color} className="absolute right-0 top-0 w-[38%] max-w-[360px] -scale-x-100" />
+      <CoverFrameCorner color={color} className="absolute bottom-0 left-0 w-[38%] max-w-[360px] -scale-y-100" />
+      <CoverFrameCorner color={color} className="absolute bottom-0 right-0 w-[38%] max-w-[360px] -scale-100" />
+      <span className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-current bg-[#FBF4E4]" style={{ color }} />
+    </div>
+  );
+}
+
+function CoverFrameCorner({ color, className }: { color: string; className?: string }) {
+  const patternId = safeId("jawa-cover-kawung", useId());
+
+  return (
+    <svg className={cn("block h-auto", className)} viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <defs>
+        <pattern id={patternId} width="28" height="28" patternUnits="userSpaceOnUse">
+          <path d="M14 2C20 7 20 21 14 26C8 21 8 7 14 2Z" fill="none" stroke={color} strokeWidth=".75" />
+          <path d="M2 14C7 8 21 8 26 14C21 20 7 20 2 14Z" fill="none" stroke={color} strokeWidth=".75" />
+          <circle cx="14" cy="14" r="1.2" fill={color} />
+        </pattern>
+      </defs>
+      <path d="M0 0H360V42H310V78H268V118H226V163H183V213H139V263H96V310H45V360H0Z" fill={`url(#${patternId})`} opacity=".62" />
+      <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 352H49V305H98V258H141V208H184V159H228V114H270V74H313V38H352" strokeWidth="2.2" />
+        <path d="M18 352H58V313H105V266H149V216H192V167H236V122H278V83H321V48H352" strokeWidth=".7" opacity=".58" />
+        <path d="M82 270C107 230 135 205 170 190C202 176 222 154 235 120" strokeWidth="1.25" />
+        <path d="M118 232C130 207 150 195 176 199C167 224 148 236 118 232Z" strokeWidth="1" />
+        <path d="M164 190C174 163 194 151 221 157C211 183 191 194 164 190Z" strokeWidth="1" />
+        <path d="M218 139C230 112 251 102 277 111C265 136 246 146 218 139Z" strokeWidth="1" />
+        <path d="M86 275C70 293 65 314 72 338M240 121C258 99 280 88 307 91" strokeWidth=".7" opacity=".75" />
+      </g>
+      <g fill="#FFF9EB" stroke={color} strokeWidth=".8">
+        {[{ x: 105, y: 245, s: .85 }, { x: 157, y: 196, s: .68 }, { x: 225, y: 137, s: .72 }].map((flower) => (
+          <g key={`${flower.x}-${flower.y}`} transform={`translate(${flower.x} ${flower.y}) scale(${flower.s})`}>
+            <ellipse cy="-10" rx="5.2" ry="10" />
+            <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(72)" />
+            <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(144)" />
+            <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(216)" />
+            <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(288)" />
+            <circle r="3" fill="#C8922A" />
+          </g>
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+export function CoverDateArch({ color = "#B6812C", opacity = 1, width = 440, className }: CoverDateArchProps) {
+  return (
+    <svg width={width} viewBox="0 0 440 190" xmlns="http://www.w3.org/2000/svg" className={cn("pointer-events-none block max-w-full", className)} aria-hidden="true" focusable="false">
+      <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round" opacity={opacity}>
+        <path d="M64 180C72 89 129 34 220 34C311 34 368 89 376 180" strokeWidth="1.8" />
+        <path d="M82 180C89 101 139 52 220 52C301 52 351 101 358 180" strokeWidth=".75" opacity=".62" />
+        <path d="M108 180C115 119 153 82 220 82C287 82 325 119 332 180" strokeWidth=".6" opacity=".48" />
+        <path d="M102 144H338M136 116H304" strokeWidth=".65" opacity=".5" />
+        <path d="M220 12L230 22L220 32L210 22Z" strokeWidth="1" />
+        <path d="M54 180H386" strokeWidth=".8" />
+      </g>
+      <g fill="#9A8142" opacity={opacity * .72}>
+        {Array.from({ length: 18 }, (_, index) => {
+          const side = index < 9 ? -1 : 1;
+          const local = index % 9;
+          const x = side < 0 ? 94 + local * 13 : 346 - local * 13;
+          const y = 166 - Math.sin((local + 1) / 10 * Math.PI) * 98;
+          return <path key={index} d="M0 0C7-7 16-7 23 0C16 7 7 7 0 0Z" transform={`translate(${x} ${y}) rotate(${side < 0 ? -52 + local * 8 : 52 - local * 8}) scale(.55)`} />;
+        })}
+      </g>
+      <g transform="translate(208 10)">
+        <MelatiFlower color={color} opacity={opacity} />
+      </g>
+    </svg>
+  );
+}
+
 function RoyalFrameCorner({ color, className }: { color: string; className?: string }) {
   const patternId = safeId("jawa-royal-kawung", useId());
 
@@ -398,10 +481,18 @@ export function RoyalCoverCrown({ color = "#6D421C", opacity = 1, className }: B
           <path d="M320 21C332 48 354 69 358 99C363 134 346 169 320 205C294 169 277 134 282 99C286 69 308 48 320 21Z" fill={`url(#${gradientId})`} fillOpacity=".16" strokeWidth="1.9" />
           <path d="M320 42C328 65 343 81 345 104C348 130 337 154 320 181C303 154 292 130 295 104C297 81 312 65 320 42Z" strokeWidth=".85" />
           <path d="M320 56V175M305 83C318 94 322 109 320 126M335 83C322 94 318 109 320 126" strokeWidth=".75" opacity=".74" />
+          <path d="M314 76C299 65 288 73 292 86C296 97 308 97 314 88C304 91 299 85 302 81C305 77 310 79 314 76Z" strokeWidth=".75" />
+          <path d="M326 76C341 65 352 73 348 86C344 97 332 97 326 88C336 91 341 85 338 81C335 77 330 79 326 76Z" strokeWidth=".75" />
+          <path d="M315 112C296 98 283 108 288 124C293 137 307 137 315 126C303 129 297 122 301 116C305 112 311 114 315 112Z" strokeWidth=".8" />
+          <path d="M325 112C344 98 357 108 352 124C347 137 333 137 325 126C337 129 343 122 339 116C335 112 329 114 325 112Z" strokeWidth=".8" />
+          <path d="M314 146C301 137 292 144 295 155C299 164 309 164 314 157C306 159 302 154 305 151C307 148 311 149 314 146Z" strokeWidth=".65" />
+          <path d="M326 146C339 137 348 144 345 155C341 164 331 164 326 157C334 159 338 154 335 151C333 148 329 149 326 146Z" strokeWidth=".65" />
           <path d="M248 130C224 107 199 111 187 131C211 142 230 142 248 130ZM392 130C416 107 441 111 453 131C429 142 410 142 392 130Z" fill="#77713F" fillOpacity=".82" strokeWidth=".75" />
           <path d="M205 162C180 145 157 151 149 173C174 180 192 176 205 162ZM435 162C460 145 483 151 491 173C466 180 448 176 435 162Z" fill="#77713F" fillOpacity=".72" strokeWidth=".75" />
           <path d="M135 188C119 204 116 224 126 245M505 188C521 204 524 224 514 245" strokeWidth="1.1" />
           <path d="M173 178C162 200 163 224 176 250M467 178C478 200 477 224 464 250" strokeWidth=".85" opacity=".75" />
+          <path d="M126 197L135 208L126 219L117 208ZM126 219L135 230L126 241L117 230M514 197L523 208L514 219L505 208ZM514 219L523 230L514 241L505 230" strokeWidth=".75" />
+          <path d="M126 241V254M121 248L126 258L131 248M514 241V254M509 248L514 258L519 248" strokeWidth=".7" />
         </g>
         <g fill="#FFF9E9" stroke={color} strokeWidth=".9">
           {[{ x: 219, y: 139, s: 1.1 }, { x: 177, y: 170, s: .82 }, { x: 421, y: 139, s: 1.1 }, { x: 463, y: 170, s: .82 }].map((flower) => (
