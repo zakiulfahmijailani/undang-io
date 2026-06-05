@@ -317,10 +317,10 @@ export function RoyalFrame({ color = "#8A5518", opacity = 1, inset = 10, classNa
     >
       <div className="absolute inset-0 border border-current" style={{ color }} />
       <div className="absolute inset-2 border border-current opacity-45" style={{ color }} />
-      <RoyalFrameCorner color={color} className="absolute left-0 top-0 w-[46%] max-w-[220px]" />
-      <RoyalFrameCorner color={color} className="absolute right-0 top-0 w-[46%] max-w-[220px] -scale-x-100" />
-      <RoyalFrameCorner color={color} className="absolute bottom-0 left-0 w-[46%] max-w-[220px] -scale-y-100" />
-      <RoyalFrameCorner color={color} className="absolute bottom-0 right-0 w-[46%] max-w-[220px] -scale-100" />
+      <RoyalFrameCorner color={color} className="absolute left-0 top-0 w-[42%] max-w-[205px]" />
+      <RoyalFrameCorner color={color} className="absolute right-0 top-0 w-[42%] max-w-[205px] -scale-x-100" />
+      <RoyalFrameCorner color={color} className="absolute bottom-0 left-0 w-[42%] max-w-[205px] -scale-y-100" />
+      <RoyalFrameCorner color={color} className="absolute bottom-0 right-0 w-[42%] max-w-[205px] -scale-100" />
       <span className="absolute left-1/2 top-2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-current bg-[#F5EDD6]" style={{ color }} />
       <span className="absolute bottom-2 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-current bg-[#F5EDD6]" style={{ color }} />
     </div>
@@ -329,7 +329,6 @@ export function RoyalFrame({ color = "#8A5518", opacity = 1, inset = 10, classNa
 
 function RoyalFrameCorner({ color, className }: { color: string; className?: string }) {
   const patternId = safeId("jawa-royal-kawung", useId());
-  const clipId = safeId("jawa-royal-corner", useId());
 
   return (
     <svg
@@ -341,32 +340,26 @@ function RoyalFrameCorner({ color, className }: { color: string; className?: str
     >
       <defs>
         <pattern id={patternId} width="30" height="30" patternUnits="userSpaceOnUse">
-          <path d="M15 2C22 7 22 23 15 28C8 23 8 7 15 2Z" fill="none" stroke={color} strokeWidth="1" />
-          <path d="M2 15C7 8 23 8 28 15C23 22 7 22 2 15Z" fill="none" stroke={color} strokeWidth="1" />
-          <path d="M15 10L20 15L15 20L10 15Z" fill="none" stroke={color} strokeWidth=".6" opacity=".72" />
-          <circle cx="15" cy="15" r="1.4" fill={color} />
+          <path d="M15 3C21 8 21 22 15 27C9 22 9 8 15 3Z" fill="none" stroke={color} strokeWidth=".8" />
+          <path d="M3 15C8 9 22 9 27 15C22 21 8 21 3 15Z" fill="none" stroke={color} strokeWidth=".8" />
+          <circle cx="15" cy="15" r="1.2" fill={color} />
         </pattern>
-        <clipPath id={clipId}>
-          <path d="M0 0H184V34H151C151 58 139 74 116 85C104 91 95 103 91 117C85 139 65 151 35 151V184H0Z" />
-        </clipPath>
       </defs>
-      <g clipPath={`url(#${clipId})`}>
-        <rect width="190" height="190" fill={`url(#${patternId})`} opacity=".9" />
-      </g>
+      <path d="M0 0H188V34H153C153 59 140 76 116 87C96 96 86 111 82 132C77 159 59 174 30 174V190H0Z" fill={`url(#${patternId})`} opacity=".58" />
       <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7 184H48C48 154 63 134 91 126C111 120 126 105 132 84C140 56 158 42 188 42" strokeWidth="1.8" />
-        <path d="M14 184H54C54 158 68 141 94 133C118 126 136 108 142 84C148 62 162 51 188 51" strokeWidth=".7" opacity=".72" />
-        <path d="M12 12H176M12 12V176" strokeWidth=".8" opacity=".72" />
-        <path d="M22 22H145M22 22V145" strokeWidth=".45" opacity=".46" />
-        <path d="M149 42C156 25 172 19 184 26C176 37 165 43 149 42Z" strokeWidth="1" />
-        <path d="M42 149C25 156 19 172 26 184C37 176 43 165 42 149Z" strokeWidth="1" />
-        <path d="M119 105C137 100 151 107 158 124C139 127 126 121 119 105Z" strokeWidth=".9" />
-        <path d="M105 119C100 137 107 151 124 158C127 139 121 126 105 119Z" strokeWidth=".9" />
-        <circle cx="132" cy="84" r="2.5" fill={color} stroke="none" />
-        <circle cx="91" cy="126" r="1.8" fill={color} stroke="none" />
+        <path d="M8 188H38C38 159 53 141 80 134C101 128 116 112 121 91C128 63 149 45 188 45" strokeWidth="2" />
+        <path d="M17 188H45C45 164 57 149 83 142C108 135 124 118 130 94C136 70 154 55 188 55" strokeWidth=".7" opacity=".68" />
+        <path d="M11 11H181M11 11V181" strokeWidth=".75" opacity=".62" />
+        <path d="M135 82C153 68 171 72 181 88C162 94 148 92 135 82Z" strokeWidth="1.1" />
+        <path d="M82 135C68 153 72 171 88 181C94 162 92 148 82 135Z" strokeWidth="1.1" />
+        <path d="M119 96C139 92 153 102 157 121C138 121 125 113 119 96Z" strokeWidth=".95" />
+        <path d="M96 119C92 139 102 153 121 157C121 138 113 125 96 119Z" strokeWidth=".95" />
+        <path d="M125 87C134 76 146 71 158 72M87 125C76 134 71 146 72 158" strokeWidth=".65" opacity=".75" />
+        <circle cx="121" cy="91" r="2.3" fill={color} stroke="none" />
+        <circle cx="80" cy="134" r="1.7" fill={color} stroke="none" />
       </g>
       <g fill="#FDF8EA" stroke={color} strokeWidth=".65">
-        {[{ x: 112, y: 103, s: 0.72 }, { x: 139, y: 75, s: 0.58 }, { x: 82, y: 132, s: 0.54 }].map((flower) => (
+        {[{ x: 118, y: 99, s: 0.78 }, { x: 87, y: 130, s: 0.62 }].map((flower) => (
           <g key={`${flower.x}-${flower.y}`} transform={`translate(${flower.x} ${flower.y}) scale(${flower.s})`}>
             <ellipse cy="-7" rx="3.7" ry="7" />
             <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(72)" />
@@ -376,6 +369,59 @@ function RoyalFrameCorner({ color, className }: { color: string; className?: str
             <circle r="2" fill="#D4A843" />
           </g>
         ))}
+      </g>
+    </svg>
+  );
+}
+
+export function RoyalCoverCrown({ color = "#6D421C", opacity = 1, className }: BaseSvgProps) {
+  const gradientId = safeId("jawa-cover-crown", useId());
+
+  return (
+    <svg
+      viewBox="0 0 640 260"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("pointer-events-none block overflow-visible", className)}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#E1BD66" />
+          <stop offset="1" stopColor="#9B641F" />
+        </linearGradient>
+      </defs>
+      <g opacity={opacity}>
+        <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 198C117 202 178 174 235 122C271 89 299 72 320 66C341 72 369 89 405 122C462 174 523 202 618 198" strokeWidth="2.5" />
+          <path d="M42 211C128 211 190 182 244 134M598 211C512 211 450 182 396 134" strokeWidth=".85" opacity=".62" />
+          <path d="M320 21C332 48 354 69 358 99C363 134 346 169 320 205C294 169 277 134 282 99C286 69 308 48 320 21Z" fill={`url(#${gradientId})`} fillOpacity=".16" strokeWidth="1.9" />
+          <path d="M320 42C328 65 343 81 345 104C348 130 337 154 320 181C303 154 292 130 295 104C297 81 312 65 320 42Z" strokeWidth=".85" />
+          <path d="M320 56V175M305 83C318 94 322 109 320 126M335 83C322 94 318 109 320 126" strokeWidth=".75" opacity=".74" />
+          <path d="M248 130C224 107 199 111 187 131C211 142 230 142 248 130ZM392 130C416 107 441 111 453 131C429 142 410 142 392 130Z" fill="#77713F" fillOpacity=".82" strokeWidth=".75" />
+          <path d="M205 162C180 145 157 151 149 173C174 180 192 176 205 162ZM435 162C460 145 483 151 491 173C466 180 448 176 435 162Z" fill="#77713F" fillOpacity=".72" strokeWidth=".75" />
+          <path d="M135 188C119 204 116 224 126 245M505 188C521 204 524 224 514 245" strokeWidth="1.1" />
+          <path d="M173 178C162 200 163 224 176 250M467 178C478 200 477 224 464 250" strokeWidth=".85" opacity=".75" />
+        </g>
+        <g fill="#FFF9E9" stroke={color} strokeWidth=".9">
+          {[{ x: 219, y: 139, s: 1.1 }, { x: 177, y: 170, s: .82 }, { x: 421, y: 139, s: 1.1 }, { x: 463, y: 170, s: .82 }].map((flower) => (
+            <g key={flower.x} transform={`translate(${flower.x} ${flower.y}) scale(${flower.s})`}>
+              <ellipse cy="-10" rx="5.2" ry="10" />
+              <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(72)" />
+              <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(144)" />
+              <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(216)" />
+              <ellipse cy="-10" rx="5.2" ry="10" transform="rotate(288)" />
+              <circle r="3" fill="#C8922A" />
+            </g>
+          ))}
+          {Array.from({ length: 5 }, (_, index) => (
+            <g key={index}>
+              <path d="M0 0C-5-8-4-16 0-20C4-16 5-8 0 0Z" transform={`translate(${135 + (index % 2) * 3} ${192 + index * 13}) scale(${1 - index * .07})`} />
+              <path d="M0 0C-5-8-4-16 0-20C4-16 5-8 0 0Z" transform={`translate(${505 - (index % 2) * 3} ${192 + index * 13}) scale(${1 - index * .07})`} />
+            </g>
+          ))}
+        </g>
+        <circle cx="320" cy="111" r="8" fill={`url(#${gradientId})`} stroke={color} strokeWidth=".8" />
       </g>
     </svg>
   );

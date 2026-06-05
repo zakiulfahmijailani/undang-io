@@ -16,6 +16,7 @@ import {
   JanurArch,
   KawungBackground,
   MelatiCluster,
+  RoyalCoverCrown,
   RoyalFrame,
   WayangSilhouette,
 } from "./JawaAgungSVG";
@@ -180,8 +181,14 @@ const jawaAgungStyles = `
   font-family: var(--font-jawa-heading), Georgia, serif;
   font-weight: 600;
   letter-spacing: -.035em;
-  color: #7B3F1A;
-  text-shadow: 0 2px 0 rgba(255,255,255,.5), 0 18px 38px rgba(123,63,26,.16);
+  color: #5F3515;
+  text-shadow: 0 1px 0 rgba(255,255,255,.7), 0 12px 28px rgba(123,63,26,.1);
+}
+.jawa-cover-name {
+  color: #5F3515;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  letter-spacing: -.045em;
 }
 .jawa-card {
   border: 1px solid rgba(123,63,26,.58);
@@ -280,7 +287,7 @@ const jawaAgungStyles = `
 }
 @media (min-width: 640px) and (max-height: 800px) {
   #cover { padding-block: 3.5rem; }
-  #cover .jawa-cover-crest { width: 82px; }
+  #cover .jawa-cover-crown { width: min(480px, 78vw); }
   #cover .jawa-cover-name { font-size: clamp(3rem, 8vw, 5rem); }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -438,7 +445,7 @@ function SectionFrame({
   return (
     <section id={id} className={cn("jawa-section", reveal && "jawa-reveal", className)}>
       {withKawung ? <KawungBackground opacity={0.045} color="#D4A843" /> : null}
-      <RoyalFrame color="#8A5518" opacity={id === "cover" || id === "closing" ? 0.82 : 0.5} className="z-[4]" />
+      <RoyalFrame color="#8A5518" opacity={id === "cover" || id === "closing" ? 0.64 : 0.38} className="z-[4]" />
       <div className={cn("jawa-content", contentClassName)}>{children}</div>
     </section>
   );
@@ -454,18 +461,17 @@ function CoverSection({ data }: { data: FatehaInvitationData }) {
       reveal={false}
     >
       <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_72%_62%_at_50%_43%,rgba(212,168,67,0.19)_0%,transparent_68%)]" aria-hidden="true" />
-      <JasmineGarland color="#8A5518" opacity={0.76} className="absolute left-1/2 top-[3.5rem] z-[5] w-[min(560px,92vw)] -translate-x-1/2" />
       <div className="jawa-stagger relative z-10 flex w-full flex-col items-center">
-        <GununganCrest color="#8A5518" opacity={0.94} className="jawa-cover-crest h-auto w-[92px] drop-shadow-[0_12px_20px_rgba(123,63,26,0.16)] sm:w-[108px]" />
-        <p className="jawa-display -mt-2 text-[0.5rem] font-bold uppercase tracking-[0.32em] text-[#7B3F1A] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
-        <DividerOrnament color="#8A5518" width={300} className="mt-3 w-[min(300px,76vw)]" />
-        <h1 className="mt-4 max-w-full text-center">
-          <span className="jawa-cover-name jawa-royal-title jawa-gold-text block break-words text-[clamp(3.45rem,14vw,6rem)] leading-[0.76]">{data.bride.nickname}</span>
-          <span className="jawa-script block py-5 text-[2rem] leading-none text-[#8A5518]" aria-hidden="true">&amp;</span>
-          <span className="jawa-cover-name jawa-royal-title jawa-gold-text block break-words text-[clamp(3.45rem,14vw,6rem)] leading-[0.76]">{data.groom.nickname}</span>
+        <RoyalCoverCrown color="#6D421C" opacity={0.88} className="jawa-cover-crown h-auto w-[min(560px,88vw)] drop-shadow-[0_14px_24px_rgba(123,63,26,0.1)]" />
+        <p className="jawa-display -mt-7 bg-[#F5EDD6]/80 px-4 text-[0.5rem] font-bold uppercase tracking-[0.32em] text-[#6D421C] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
+        <DividerOrnament color="#8A5518" width={280} className="mt-2 w-[min(280px,72vw)] opacity-75" />
+        <h1 className="mt-2 max-w-full text-center">
+          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(3.7rem,14vw,6.2rem)] leading-[0.8]">{data.bride.nickname}</span>
+          <span className="jawa-heading block py-3 text-[1.4rem] italic leading-none text-[#9B641F]" aria-hidden="true">&amp;</span>
+          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(3.7rem,14vw,6.2rem)] leading-[0.8]">{data.groom.nickname}</span>
         </h1>
-        <DividerOrnament color="#8A5518" width={320} className="mt-8 w-[min(320px,80vw)]" />
-        <p className="jawa-display mt-5 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{formatDateUpper(data.wedding.date)}</p>
+        <DividerOrnament color="#8A5518" width={300} className="mt-6 w-[min(300px,78vw)] opacity-75" />
+        <p className="jawa-display mt-3 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#6D421C]">{formatDateUpper(data.wedding.date)}</p>
         <p className="mt-2 text-[0.85rem] italic leading-6 text-[#7A5C3A]">{cityFromEvent(data.wedding.akad)}</p>
       </div>
       <FloatingMelati />
