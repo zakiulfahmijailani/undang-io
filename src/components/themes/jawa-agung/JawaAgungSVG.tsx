@@ -36,6 +36,15 @@ type MelatiClusterProps = BaseSvgProps & {
   spread?: number;
 };
 
+type RoyalFrameProps = BaseSvgProps & {
+  inset?: number;
+};
+
+type EventMedallionProps = BaseSvgProps & {
+  kind?: "akad" | "resepsi";
+  size?: number;
+};
+
 function safeId(prefix: string, rawId: string) {
   return `${prefix}-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 }
@@ -295,6 +304,210 @@ export function MelatiCluster({ count = 5, spread = 60, color = "#D4A843", opaci
           </g>
         </g>
       ))}
+    </svg>
+  );
+}
+
+export function RoyalFrame({ color = "#8A5518", opacity = 1, inset = 10, className }: RoyalFrameProps) {
+  return (
+    <div
+      className={cn("pointer-events-none absolute", className)}
+      style={{ inset, opacity }}
+      aria-hidden="true"
+    >
+      <div className="absolute inset-0 border border-current" style={{ color }} />
+      <div className="absolute inset-2 border border-current opacity-45" style={{ color }} />
+      <RoyalFrameCorner color={color} className="absolute left-0 top-0 w-[46%] max-w-[220px]" />
+      <RoyalFrameCorner color={color} className="absolute right-0 top-0 w-[46%] max-w-[220px] -scale-x-100" />
+      <RoyalFrameCorner color={color} className="absolute bottom-0 left-0 w-[46%] max-w-[220px] -scale-y-100" />
+      <RoyalFrameCorner color={color} className="absolute bottom-0 right-0 w-[46%] max-w-[220px] -scale-100" />
+      <span className="absolute left-1/2 top-2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-current bg-[#F5EDD6]" style={{ color }} />
+      <span className="absolute bottom-2 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-current bg-[#F5EDD6]" style={{ color }} />
+    </div>
+  );
+}
+
+function RoyalFrameCorner({ color, className }: { color: string; className?: string }) {
+  const patternId = safeId("jawa-royal-kawung", useId());
+  const clipId = safeId("jawa-royal-corner", useId());
+
+  return (
+    <svg
+      className={cn("pointer-events-none block h-auto", className)}
+      viewBox="0 0 190 190"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <pattern id={patternId} width="30" height="30" patternUnits="userSpaceOnUse">
+          <path d="M15 2C22 7 22 23 15 28C8 23 8 7 15 2Z" fill="none" stroke={color} strokeWidth="1" />
+          <path d="M2 15C7 8 23 8 28 15C23 22 7 22 2 15Z" fill="none" stroke={color} strokeWidth="1" />
+          <path d="M15 10L20 15L15 20L10 15Z" fill="none" stroke={color} strokeWidth=".6" opacity=".72" />
+          <circle cx="15" cy="15" r="1.4" fill={color} />
+        </pattern>
+        <clipPath id={clipId}>
+          <path d="M0 0H184V34H151C151 58 139 74 116 85C104 91 95 103 91 117C85 139 65 151 35 151V184H0Z" />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>
+        <rect width="190" height="190" fill={`url(#${patternId})`} opacity=".9" />
+      </g>
+      <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M7 184H48C48 154 63 134 91 126C111 120 126 105 132 84C140 56 158 42 188 42" strokeWidth="1.8" />
+        <path d="M14 184H54C54 158 68 141 94 133C118 126 136 108 142 84C148 62 162 51 188 51" strokeWidth=".7" opacity=".72" />
+        <path d="M12 12H176M12 12V176" strokeWidth=".8" opacity=".72" />
+        <path d="M22 22H145M22 22V145" strokeWidth=".45" opacity=".46" />
+        <path d="M149 42C156 25 172 19 184 26C176 37 165 43 149 42Z" strokeWidth="1" />
+        <path d="M42 149C25 156 19 172 26 184C37 176 43 165 42 149Z" strokeWidth="1" />
+        <path d="M119 105C137 100 151 107 158 124C139 127 126 121 119 105Z" strokeWidth=".9" />
+        <path d="M105 119C100 137 107 151 124 158C127 139 121 126 105 119Z" strokeWidth=".9" />
+        <circle cx="132" cy="84" r="2.5" fill={color} stroke="none" />
+        <circle cx="91" cy="126" r="1.8" fill={color} stroke="none" />
+      </g>
+      <g fill="#FDF8EA" stroke={color} strokeWidth=".65">
+        {[{ x: 112, y: 103, s: 0.72 }, { x: 139, y: 75, s: 0.58 }, { x: 82, y: 132, s: 0.54 }].map((flower) => (
+          <g key={`${flower.x}-${flower.y}`} transform={`translate(${flower.x} ${flower.y}) scale(${flower.s})`}>
+            <ellipse cy="-7" rx="3.7" ry="7" />
+            <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(72)" />
+            <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(144)" />
+            <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(216)" />
+            <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(288)" />
+            <circle r="2" fill="#D4A843" />
+          </g>
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+export function GununganCrest({ color = "#8A5518", opacity = 1, className }: BaseSvgProps) {
+  const gradientId = safeId("jawa-gunungan-gold", useId());
+
+  return (
+    <svg
+      viewBox="0 0 220 300"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("pointer-events-none block", className)}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#F1D47A" />
+          <stop offset=".5" stopColor="#C8922A" />
+          <stop offset="1" stopColor="#8A5518" />
+        </linearGradient>
+      </defs>
+      <g opacity={opacity} stroke={color} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M110 5C125 43 157 73 166 112C178 165 154 216 110 282C66 216 42 165 54 112C63 73 95 43 110 5Z" fill={`url(#${gradientId})`} fillOpacity=".18" strokeWidth="2.2" />
+        <path d="M110 24C119 56 145 82 150 117C158 158 141 201 110 253C79 201 62 158 70 117C75 82 101 56 110 24Z" fill="none" strokeWidth="1.15" />
+        <path d="M110 43V247M91 71C109 88 112 109 110 139M129 71C111 88 108 109 110 139" fill="none" strokeWidth="1" opacity=".75" />
+        <path d="M106 60C85 47 72 58 78 75C83 88 99 87 107 77C93 79 87 72 92 66C96 62 102 63 106 60Z" fill={`url(#${gradientId})`} fillOpacity=".46" strokeWidth=".8" />
+        <path d="M114 60C135 47 148 58 142 75C137 88 121 87 113 77C127 79 133 72 128 66C124 62 118 63 114 60Z" fill={`url(#${gradientId})`} fillOpacity=".46" strokeWidth=".8" />
+        <path d="M109 94C88 78 72 91 78 109C83 124 100 123 108 111C94 114 87 106 92 99C96 94 103 96 109 94Z" fill="none" strokeWidth="1.2" />
+        <path d="M111 94C132 78 148 91 142 109C137 124 120 123 112 111C126 114 133 106 128 99C124 94 117 96 111 94Z" fill="none" strokeWidth="1.2" />
+        <path d="M109 130C85 111 65 126 72 148C78 166 99 164 108 150C91 154 83 144 89 136C94 130 102 133 109 130Z" fill={`url(#${gradientId})`} fillOpacity=".26" strokeWidth="1.15" />
+        <path d="M111 130C135 111 155 126 148 148C142 166 121 164 112 150C129 154 137 144 131 136C126 130 118 133 111 130Z" fill={`url(#${gradientId})`} fillOpacity=".26" strokeWidth="1.15" />
+        <path d="M109 169C87 151 69 165 75 185C80 201 100 200 108 187C93 190 85 181 91 174C95 168 103 171 109 169Z" fill="none" strokeWidth="1.15" />
+        <path d="M111 169C133 151 151 165 145 185C140 201 120 200 112 187C127 190 135 181 129 174C125 168 117 171 111 169Z" fill="none" strokeWidth="1.15" />
+        <path d="M109 210C92 195 78 206 83 222C87 235 101 235 108 225C97 227 91 220 95 215C99 211 104 213 109 210Z" fill={`url(#${gradientId})`} fillOpacity=".32" strokeWidth=".9" />
+        <path d="M111 210C128 195 142 206 137 222C133 235 119 235 112 225C123 227 129 220 125 215C121 211 116 213 111 210Z" fill={`url(#${gradientId})`} fillOpacity=".32" strokeWidth=".9" />
+        <path d="M52 143C31 137 17 148 19 166C21 184 37 190 53 179C39 178 33 169 38 161C41 155 48 155 55 157" fill="none" strokeWidth="1.4" />
+        <path d="M168 143C189 137 203 148 201 166C199 184 183 190 167 179C181 178 187 169 182 161C179 155 172 155 165 157" fill="none" strokeWidth="1.4" />
+        <path d="M48 181C26 182 18 196 25 211C32 226 49 227 61 213C48 217 39 211 40 202C41 195 48 192 56 191" fill="none" strokeWidth="1.15" />
+        <path d="M172 181C194 182 202 196 195 211C188 226 171 227 159 213C172 217 181 211 180 202C179 195 172 192 164 191" fill="none" strokeWidth="1.15" />
+        <path d="M74 251C85 263 97 274 110 286C123 274 135 263 146 251" fill="none" strokeWidth="1.4" />
+        <circle cx="110" cy="151" r="9" fill={`url(#${gradientId})`} fillOpacity=".55" strokeWidth="1" />
+        <circle cx="110" cy="151" r="3" fill="#F5EDD6" strokeWidth=".6" />
+      </g>
+    </svg>
+  );
+}
+
+export function JasmineGarland({ color = "#8A5518", opacity = 1, className }: BaseSvgProps) {
+  const flowers = [
+    { x: 64, y: 72, s: 1.1 },
+    { x: 99, y: 53, s: 0.85 },
+    { x: 133, y: 69, s: 1.15 },
+    { x: 227, y: 69, s: 1.15 },
+    { x: 261, y: 53, s: 0.85 },
+    { x: 296, y: 72, s: 1.1 },
+  ];
+  const buds = Array.from({ length: 7 }, (_, index) => ({ y: 96 + index * 13, scale: 1 - index * 0.055 }));
+
+  return (
+    <svg
+      viewBox="0 0 360 210"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("pointer-events-none block", className)}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g opacity={opacity}>
+        <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 92C68 100 112 78 151 48C166 37 174 29 180 18C186 29 194 37 209 48C248 78 292 100 348 92" strokeWidth="1.5" />
+          <path d="M17 103C74 112 117 92 156 60M343 103C286 112 243 92 204 60" strokeWidth=".75" opacity=".62" />
+          <path d="M52 92C45 124 46 156 57 190M308 92C315 124 314 156 303 190" strokeWidth="1" />
+          <path d="M82 89C77 116 79 142 88 168M278 89C283 116 281 142 272 168" strokeWidth=".8" opacity=".8" />
+        </g>
+        <g fill="#FDF8EA" stroke={color} strokeWidth=".7">
+          {flowers.map((flower) => (
+            <g key={flower.x} transform={`translate(${flower.x} ${flower.y}) scale(${flower.s})`}>
+              <ellipse cy="-7" rx="3.7" ry="7" />
+              <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(72)" />
+              <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(144)" />
+              <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(216)" />
+              <ellipse cy="-7" rx="3.7" ry="7" transform="rotate(288)" />
+              <circle r="2" fill="#D4A843" />
+            </g>
+          ))}
+          {buds.map((bud, index) => (
+            <g key={bud.y}>
+              <path d="M0 0C-5 -7 -4 -14 0 -18C4 -14 5 -7 0 0Z" transform={`translate(${52 + (index % 2) * 4} ${bud.y}) scale(${bud.scale})`} />
+              <path d="M0 0C-5 -7 -4 -14 0 -18C4 -14 5 -7 0 0Z" transform={`translate(${308 - (index % 2) * 4} ${bud.y}) scale(${bud.scale})`} />
+            </g>
+          ))}
+        </g>
+        <g fill="#7D713C" stroke={color} strokeWidth=".5">
+          <path d="M22 91C35 73 49 72 62 84C47 91 35 94 22 91Z" />
+          <path d="M338 91C325 73 311 72 298 84C313 91 325 94 338 91Z" />
+          <path d="M112 72C119 51 132 45 148 54C138 66 126 72 112 72Z" />
+          <path d="M248 72C241 51 228 45 212 54C222 66 234 72 248 72Z" />
+        </g>
+        <circle cx="180" cy="18" r="4" fill="#D4A843" stroke={color} strokeWidth=".8" />
+      </g>
+    </svg>
+  );
+}
+
+export function EventMedallion({ kind = "akad", color = "#8A5518", opacity = 1, size = 92, className }: EventMedallionProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("pointer-events-none block", className)}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round" opacity={opacity}>
+        <path d="M50 3L58 8L68 7L73 15L83 18L84 28L92 35L89 45L96 54L89 63L91 73L82 79L79 89L69 90L61 97L50 93L40 97L31 90L21 89L18 79L9 73L11 63L4 54L11 45L8 35L16 28L17 18L27 15L32 7L42 8Z" strokeWidth="1.2" />
+        <circle cx="50" cy="50" r="38" strokeWidth=".8" opacity=".65" />
+        {kind === "akad" ? (
+          <>
+            <path d="M50 19C58 36 68 47 66 62C64 75 57 81 50 86C43 81 36 75 34 62C32 47 42 36 50 19Z" strokeWidth="1.4" />
+            <path d="M50 28V76M40 44C48 49 52 57 50 67M60 44C52 49 48 57 50 67" strokeWidth=".9" />
+          </>
+        ) : (
+          <>
+            <path d="M50 25C64 25 75 36 75 50C75 64 64 75 50 75C36 75 25 64 25 50C25 36 36 25 50 25Z" strokeWidth="1.1" />
+            <path d="M50 31C55 39 55 61 50 69C45 61 45 39 50 31ZM31 50C39 45 61 45 69 50C61 55 39 55 31 50Z" strokeWidth=".9" />
+            <circle cx="50" cy="50" r="4" fill="#D4A843" strokeWidth=".7" />
+          </>
+        )}
+      </g>
     </svg>
   );
 }

@@ -7,7 +7,18 @@ import { CalendarDays, Check, Copy, Heart, Home, MapPin, MessageCircle, Navigati
 import { toast } from "sonner";
 import type { FatehaEvent, FatehaGiftAccount, FatehaInvitationData, FatehaRsvpMessage, FatehaStoryItem } from "@/components/themes/fateha";
 import { cn } from "@/lib/utils";
-import { BatikBorder, CornerOrnament, DividerOrnament, JanurArch, KawungBackground, MelatiCluster, WayangSilhouette } from "./JawaAgungSVG";
+import {
+  CornerOrnament,
+  DividerOrnament,
+  EventMedallion,
+  GununganCrest,
+  JasmineGarland,
+  JanurArch,
+  KawungBackground,
+  MelatiCluster,
+  RoyalFrame,
+  WayangSilhouette,
+} from "./JawaAgungSVG";
 import { jawaAgungFontClassName } from "./fonts";
 
 type JawaAgungSectionId = "cover" | "quote" | "couple" | "story" | "event" | "gallery" | "rsvp" | "gift" | "closing";
@@ -82,20 +93,28 @@ const jawaAgungStyles = `
   color: var(--jawa-body);
   font-family: var(--font-jawa-body), Georgia, serif;
   scroll-behavior: smooth;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(212,168,67,.22), transparent 38rem),
+    #d8c093;
 }
+.jawa-agung-theme main { overflow: hidden; }
 .jawa-agung-theme *, .jawa-agung-theme *::before, .jawa-agung-theme *::after { box-sizing: border-box; }
 .jawa-agung-theme a { color: inherit; text-decoration: none; }
 .jawa-agung-theme button, .jawa-agung-theme input, .jawa-agung-theme textarea, .jawa-agung-theme select { font: inherit; }
 .jawa-section {
   position: relative;
   display: flex;
+  width: min(100%, 62rem);
   min-height: 100dvh;
+  margin-inline: auto;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   isolation: isolate;
   overflow: hidden;
-  padding: 5rem 1rem;
+  border-inline: 1px solid rgba(123,63,26,.14);
+  padding: 6.5rem 2.4rem;
+  box-shadow: 0 0 90px rgba(79,45,13,.12);
 }
 .jawa-section::before {
   content: "";
@@ -104,14 +123,34 @@ const jawaAgungStyles = `
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 22% 18%, rgba(212,168,67,.12) 0 1px, transparent 2px),
-    radial-gradient(circle at 76% 64%, rgba(123,63,26,.1) 0 1px, transparent 2px),
-    radial-gradient(circle at 44% 82%, rgba(212,168,67,.09) 0 1px, transparent 2px),
-    linear-gradient(115deg, transparent 0 32%, rgba(212,168,67,.08) 33%, transparent 36% 68%, rgba(200,146,42,.06) 69%, transparent 72%);
-  background-size: 180px 180px, 230px 230px, 160px 160px, 100% 100%;
-  opacity: .4;
+    radial-gradient(circle at 8% 12%, rgba(123,63,26,.18) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 84% 62%, rgba(212,168,67,.2) 0 1px, transparent 2px),
+    radial-gradient(circle at 38% 88%, rgba(123,63,26,.12) 0 1px, transparent 1.8px),
+    linear-gradient(112deg, transparent 0 27%, rgba(212,168,67,.1) 28%, transparent 31% 68%, rgba(200,146,42,.08) 69%, transparent 72%);
+  background-size: 130px 130px, 180px 180px, 110px 110px, 100% 100%;
+  opacity: .48;
   mix-blend-mode: multiply;
   animation: goldPulse 8s ease-in-out infinite;
+}
+.jawa-section::after {
+  content: "";
+  position: absolute;
+  inset: 1.2rem;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 12% 16%, rgba(212,168,67,.16), transparent 16%),
+    radial-gradient(ellipse at 91% 72%, rgba(123,63,26,.1), transparent 19%),
+    radial-gradient(ellipse at 38% 96%, rgba(212,168,67,.12), transparent 18%);
+  border: 1px solid rgba(123,63,26,.12);
+  box-shadow: inset 0 0 0 5px rgba(212,168,67,.035);
+  opacity: .78;
+}
+#cover {
+  padding-block: 5.5rem;
+}
+#cover .jawa-content {
+  gap: .5rem;
 }
 .jawa-content {
   position: relative;
@@ -137,10 +176,22 @@ const jawaAgungStyles = `
   -webkit-text-fill-color: transparent;
   text-shadow: 0 16px 40px rgba(123, 63, 26, .16);
 }
+.jawa-royal-title {
+  font-family: var(--font-jawa-heading), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -.035em;
+  color: #7B3F1A;
+  text-shadow: 0 2px 0 rgba(255,255,255,.5), 0 18px 38px rgba(123,63,26,.16);
+}
 .jawa-card {
-  border: 1px solid rgba(212,168,67,.5);
-  background: rgba(250,244,230,.9);
-  box-shadow: 0 22px 60px rgba(123,63,26,.12);
+  border: 1px solid rgba(123,63,26,.58);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(212,168,67,.12), transparent 48%),
+    rgba(250,244,230,.94);
+  box-shadow:
+    inset 0 0 0 4px rgba(212,168,67,.08),
+    inset 0 0 0 5px rgba(123,63,26,.12),
+    0 22px 60px rgba(123,63,26,.12);
 }
 .jawa-field {
   width: 100%;
@@ -220,11 +271,17 @@ const jawaAgungStyles = `
   100% { transform: scale(1); }
 }
 @media (min-width: 640px) {
-  .jawa-section { padding: 5.5rem 2rem; }
+  .jawa-section { padding: 7rem 4.5rem; }
 }
 @media (min-width: 1024px) {
-  .jawa-section { padding: 6rem 4rem; }
+  .jawa-section { padding: 7rem 6rem; }
   .jawa-content { max-width: 58rem; }
+  #cover { padding-block: 4.5rem; }
+}
+@media (min-width: 640px) and (max-height: 800px) {
+  #cover { padding-block: 3.5rem; }
+  #cover .jawa-cover-crest { width: 82px; }
+  #cover .jawa-cover-name { font-size: clamp(3rem, 8vw, 5rem); }
 }
 @media (prefers-reduced-motion: reduce) {
   .jawa-agung-theme *,
@@ -369,7 +426,6 @@ function SectionFrame({
   className,
   contentClassName,
   withKawung = true,
-  withCorners = true,
   reveal = true,
 }: {
   id: JawaAgungSectionId;
@@ -377,34 +433,14 @@ function SectionFrame({
   className?: string;
   contentClassName?: string;
   withKawung?: boolean;
-  withCorners?: boolean;
   reveal?: boolean;
 }) {
   return (
     <section id={id} className={cn("jawa-section", reveal && "jawa-reveal", className)}>
       {withKawung ? <KawungBackground opacity={0.045} color="#D4A843" /> : null}
-      {withCorners ? <CornerSet /> : null}
-      <div className="absolute inset-x-0 top-0 z-[4]" aria-hidden="true">
-        <BatikBorder color="#D4A843" opacity={0.7} />
-      </div>
-      <div className="absolute inset-x-0 bottom-0 z-[4]" aria-hidden="true">
-        <BatikBorder color="#D4A843" opacity={0.7} className="rotate-180" />
-      </div>
+      <RoyalFrame color="#8A5518" opacity={id === "cover" || id === "closing" ? 0.82 : 0.5} className="z-[4]" />
       <div className={cn("jawa-content", contentClassName)}>{children}</div>
     </section>
-  );
-}
-
-function CornerSet({ subtle = false }: { subtle?: boolean }) {
-  const opacity = subtle ? 0.36 : 0.62;
-
-  return (
-    <div className="pointer-events-none absolute inset-0 z-[5]" aria-hidden="true">
-      <CornerOrnament position="tl" color="#D4A843" opacity={opacity} size={62} className="absolute left-4 top-4 sm:left-6 sm:top-6" />
-      <CornerOrnament position="tr" color="#D4A843" opacity={opacity} size={62} className="absolute right-4 top-4 sm:right-6 sm:top-6" />
-      <CornerOrnament position="bl" color="#D4A843" opacity={opacity} size={62} className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6" />
-      <CornerOrnament position="br" color="#D4A843" opacity={opacity} size={62} className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6" />
-    </div>
   );
 }
 
@@ -413,26 +449,27 @@ function CoverSection({ data }: { data: FatehaInvitationData }) {
     <SectionFrame
       id="cover"
       className="bg-[#F5EDD6] text-center"
-      contentClassName="max-w-[34rem] gap-4 pb-20 pt-8 lg:pb-24"
+      contentClassName="max-w-[42rem]"
       withKawung={false}
       reveal={false}
     >
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_70%_60%_at_50%_45%,rgba(212,168,67,0.12)_0%,transparent_65%)]" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_72%_62%_at_50%_43%,rgba(212,168,67,0.19)_0%,transparent_68%)]" aria-hidden="true" />
+      <JasmineGarland color="#8A5518" opacity={0.76} className="absolute left-1/2 top-[3.5rem] z-[5] w-[min(560px,92vw)] -translate-x-1/2" />
       <div className="jawa-stagger relative z-10 flex w-full flex-col items-center">
-        <p className="jawa-display text-[0.5rem] font-bold uppercase tracking-[0.3em] text-[#7B3F1A] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
-        <DividerOrnament color="#D4A843" width={280} className="mt-4 w-[min(280px,72vw)]" />
-        <MelatiCluster count={9} spread={160} color="#D4A843" opacity={0.44} className="absolute left-1/2 top-[8.5rem] -translate-x-1/2" />
-        <h1 className="mt-12 text-center">
-          <span className="jawa-script jawa-gold-text block text-[clamp(2.8rem,10vw,5rem)] leading-[0.82]">{data.bride.nickname}</span>
-          <span className="jawa-heading block py-4 text-xl text-[#D4A843]" aria-hidden="true">✦</span>
-          <span className="jawa-script jawa-gold-text block text-[clamp(2.8rem,10vw,5rem)] leading-[0.82]">{data.groom.nickname}</span>
+        <GununganCrest color="#8A5518" opacity={0.94} className="jawa-cover-crest h-auto w-[92px] drop-shadow-[0_12px_20px_rgba(123,63,26,0.16)] sm:w-[108px]" />
+        <p className="jawa-display -mt-2 text-[0.5rem] font-bold uppercase tracking-[0.32em] text-[#7B3F1A] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
+        <DividerOrnament color="#8A5518" width={300} className="mt-3 w-[min(300px,76vw)]" />
+        <h1 className="mt-4 max-w-full text-center">
+          <span className="jawa-cover-name jawa-royal-title jawa-gold-text block break-words text-[clamp(3.45rem,14vw,6rem)] leading-[0.76]">{data.bride.nickname}</span>
+          <span className="jawa-script block py-5 text-[2rem] leading-none text-[#8A5518]" aria-hidden="true">&amp;</span>
+          <span className="jawa-cover-name jawa-royal-title jawa-gold-text block break-words text-[clamp(3.45rem,14vw,6rem)] leading-[0.76]">{data.groom.nickname}</span>
         </h1>
-        <DividerOrnament color="#D4A843" width={300} className="mt-6 w-[min(300px,78vw)]" />
+        <DividerOrnament color="#8A5518" width={320} className="mt-8 w-[min(320px,80vw)]" />
         <p className="jawa-display mt-5 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{formatDateUpper(data.wedding.date)}</p>
         <p className="mt-2 text-[0.85rem] italic leading-6 text-[#7A5C3A]">{cityFromEvent(data.wedding.akad)}</p>
       </div>
       <FloatingMelati />
-      <JanurArch color="#D4A843" opacity={0.62} width={360} className="absolute bottom-8 left-1/2 z-[3] w-[min(360px,90vw)] -translate-x-1/2" />
+      <JanurArch color="#8A5518" opacity={0.42} width={420} className="absolute bottom-5 left-1/2 z-[3] w-[min(420px,92vw)] -translate-x-1/2" />
     </SectionFrame>
   );
 }
@@ -443,6 +480,7 @@ function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
   return (
     <SectionFrame id="quote" className="bg-[#EDE0C0]" contentClassName="max-w-3xl">
       <WayangSilhouette color="#7B3F1A" opacity={0.05} height={420} width={180} className="absolute -right-8 top-1/2 z-[2] h-[65%] w-auto -translate-y-1/2 lg:right-[5%]" />
+      <JasmineGarland color="#8A5518" opacity={0.24} className="absolute bottom-8 left-1/2 z-[2] w-[min(520px,88vw)] -translate-x-1/2" />
       <div className="jawa-stagger relative z-10 flex flex-col items-center gap-7">
         <DividerOrnament color="#D4A843" width={320} className="w-[min(320px,78vw)]" />
         {arabic ? <p className="jawa-arabic max-w-3xl text-center text-[1.8rem] leading-[2.2] text-[#7B3F1A] sm:text-[2.2rem]">{arabic}</p> : null}
@@ -457,6 +495,7 @@ function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
 function CoupleSection({ data }: { data: FatehaInvitationData }) {
   return (
     <SectionFrame id="couple" className="bg-[#FAF4E6]" contentClassName="max-w-5xl">
+      <JasmineGarland color="#8A5518" opacity={0.25} className="absolute left-1/2 top-8 z-[2] w-[min(540px,90vw)] -translate-x-1/2" />
       <div className="jawa-stagger flex w-full flex-col items-center">
         <SectionHeading eyebrow="Mempelai" title="Putra & Putri" />
         <div className="mt-10 flex w-full flex-col items-center gap-12 lg:flex-row lg:items-stretch lg:justify-center lg:gap-0">
@@ -550,6 +589,7 @@ function EventSection({ data }: { data: FatehaInvitationData }) {
 
   return (
     <SectionFrame id="event" className="bg-[#EDE0C0]" contentClassName="max-w-5xl">
+      <JasmineGarland color="#8A5518" opacity={0.22} className="absolute bottom-4 left-1/2 z-[2] w-[min(560px,92vw)] -translate-x-1/2 rotate-180" />
       <div className="jawa-stagger w-full">
         <SectionHeading eyebrow="Rangkaian Acara" title="Hari Bahagia" />
         <div className="mt-10 flex flex-col items-center gap-6 lg:flex-row lg:justify-center lg:gap-8">
@@ -563,10 +603,13 @@ function EventSection({ data }: { data: FatehaInvitationData }) {
 }
 
 function EventCard({ title, event }: { title: string; event: FatehaEvent }) {
+  const kind = title.startsWith("Akad") ? "akad" : "resepsi";
+
   return (
     <article className="jawa-card relative w-full max-w-[360px] p-8 text-center lg:p-10">
       <CornerOrnament position="tl" color="#D4A843" opacity={0.42} size={48} className="absolute left-3 top-3" />
       <CornerOrnament position="tr" color="#D4A843" opacity={0.42} size={48} className="absolute right-3 top-3" />
+      <EventMedallion kind={kind} color="#8A5518" opacity={0.84} size={86} className="mx-auto mb-5" />
       <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{title}</p>
       <DividerOrnament color="#D4A843" width={160} className="mx-auto my-6" />
       <h3 className="jawa-heading text-[1.3rem] font-bold leading-tight text-[#7B3F1A]">{formatDate(event.date)}</h3>
@@ -850,7 +893,9 @@ function ClosingSection({ data }: { data: FatehaInvitationData }) {
   return (
     <SectionFrame id="closing" className="bg-[#EDE0C0]" contentClassName="max-w-4xl">
       <WayangSilhouette color="#7B3F1A" opacity={0.06} height={480} width={206} className="absolute -right-12 top-1/2 z-[2] h-[70%] w-auto -translate-y-1/2 lg:right-[8%]" />
+      <JasmineGarland color="#8A5518" opacity={0.48} className="absolute left-1/2 top-10 z-[3] w-[min(600px,92vw)] -translate-x-1/2" />
       <div className="jawa-stagger relative z-10 flex flex-col items-center gap-7 text-center">
+        <GununganCrest color="#8A5518" opacity={0.84} className="h-auto w-[92px]" />
         <DividerOrnament color="#D4A843" width={340} className="w-[min(340px,82vw)]" />
         <p className="jawa-script text-[clamp(1.3rem,5vw,2.2rem)] leading-tight text-[#D4A843]">{closingGreeting(data)}</p>
         <h2 className="jawa-script text-[clamp(1.8rem,6vw,3.5rem)] leading-none text-[#7B3F1A]">
@@ -869,7 +914,8 @@ function ClosingSection({ data }: { data: FatehaInvitationData }) {
 
 function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
   return (
-    <header className="mx-auto max-w-xl text-center">
+    <header className="relative mx-auto max-w-xl text-center">
+      <GununganCrest color="#8A5518" opacity={0.72} className="mx-auto h-auto w-12 sm:w-14" />
       <DividerOrnament color="#D4A843" width={260} className="mx-auto w-[min(260px,72vw)]" />
       <p className="jawa-display mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-[#7B3F1A]">{eyebrow}</p>
       <h2 className="jawa-heading mt-4 text-4xl font-bold text-[#7B3F1A]">{title}</h2>
