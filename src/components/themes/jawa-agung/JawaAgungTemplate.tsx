@@ -8,18 +8,19 @@ import { toast } from "sonner";
 import type { FatehaEvent, FatehaGiftAccount, FatehaInvitationData, FatehaRsvpMessage, FatehaStoryItem } from "@/components/themes/fateha";
 import { cn } from "@/lib/utils";
 import {
+  BatikBorder,
+  BorderFrame,
+  BottomArch,
   CornerOrnament,
-  CoverDateArch,
   DividerOrnament,
   EventMedallion,
+  GununganCrown,
   GununganCrest,
   JasmineGarland,
   JanurArch,
   KawungBackground,
   MelatiCluster,
-  RoyalCoverCrown,
-  RoyalCoverFrame,
-  RoyalFrame,
+  SparkleField,
   WayangSilhouette,
 } from "./JawaAgungSVG";
 import { jawaAgungFontClassName } from "./fonts";
@@ -74,14 +75,6 @@ const navItems = [
   { href: "#closing", icon: Heart, label: "Penutup" },
 ] as const;
 
-const melatiParticles = Array.from({ length: 8 }, (_, index) => ({
-  id: `melati-${index + 1}`,
-  left: `${15 + (index * 11) % 72}%`,
-  bottom: `${8 + (index * 6) % 18}%`,
-  duration: `${3.5 + index * 0.35}s`,
-  delay: `${index * 0.5}s`,
-}));
-
 const jawaAgungStyles = `
 .jawa-agung-theme {
   --jawa-bg-primary: #F5EDD6;
@@ -116,7 +109,7 @@ const jawaAgungStyles = `
   isolation: isolate;
   overflow: hidden;
   border-inline: 1px solid rgba(123,63,26,.14);
-  padding: 6.5rem 2.4rem;
+  padding: 6.5rem 1rem;
   box-shadow: 0 0 90px rgba(79,45,13,.12);
 }
 .jawa-section::before {
@@ -150,7 +143,7 @@ const jawaAgungStyles = `
   opacity: .78;
 }
 #cover {
-  padding-block: 5.5rem;
+  padding-block: 5rem 6.5rem;
 }
 #cover .jawa-content {
   gap: .5rem;
@@ -187,15 +180,17 @@ const jawaAgungStyles = `
   text-shadow: 0 1px 0 rgba(255,255,255,.7), 0 12px 28px rgba(123,63,26,.1);
 }
 .jawa-cover-name {
-  color: #693C12;
+  color: #3D1F0A;
   background: none;
   -webkit-text-fill-color: currentColor;
-  -webkit-text-stroke: .45px #C79B43;
-  letter-spacing: -.055em;
+  -webkit-text-stroke: .35px #B6812C;
+  letter-spacing: -.04em;
+  white-space: nowrap;
+  word-break: keep-all;
   text-shadow:
     0 1px 0 #FFF8E8,
-    0 3px 0 rgba(182,129,44,.42),
-    0 12px 26px rgba(105,60,18,.12);
+    0 2px 0 rgba(182,129,44,.35),
+    0 15px 34px rgba(61,31,10,.14);
 }
 .jawa-card {
   border: 1px solid rgba(123,63,26,.58);
@@ -272,6 +267,63 @@ const jawaAgungStyles = `
     inset 0 0 0 3px rgba(255,255,255,.72),
     inset 0 0 0 4px rgba(182,129,44,.14),
     0 18px 45px rgba(123,63,26,.16);
+  padding-bottom: max(.25rem, env(safe-area-inset-bottom));
+}
+.jawa-nav-item {
+  position: relative;
+}
+.jawa-nav-item::after {
+  content: "";
+  position: absolute;
+  left: 28%;
+  right: 28%;
+  bottom: .15rem;
+  height: 1px;
+  background: #B6812C;
+  opacity: 0;
+  transform: scaleX(.25);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.jawa-nav-item[data-active="true"] {
+  color: #8A5518;
+  background: rgba(212,168,67,.09);
+}
+.jawa-nav-item[data-active="true"]::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+.jawa-sparkle {
+  animation: sparkleTwinkle 3.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(212,168,67,.32));
+}
+.jawa-frame-line {
+  stroke-dasharray: 1800;
+  stroke-dashoffset: 0;
+}
+#cover .jawa-frame-line {
+  stroke-dashoffset: 1800;
+  animation: drawRoyalFrame 1.4s ease-out .35s forwards;
+}
+.jawa-cover-corners {
+  animation: ornateCornerEnter .8s ease-out .15s both;
+}
+.jawa-cover-crown-enter {
+  animation: crownEnter .8s ease-out .55s both;
+}
+.jawa-cover-label-enter {
+  animation: jawaReveal .65s ease-out .75s both;
+}
+.jawa-cover-bride-enter {
+  animation: royalNameEnter .8s ease-out .95s both;
+}
+.jawa-cover-amp-enter {
+  animation: jawaReveal .55s ease-out 1.15s both;
+}
+.jawa-cover-groom-enter {
+  animation: royalNameEnter .8s ease-out 1.3s both;
+}
+.jawa-cover-arch-enter {
+  animation: jawaReveal .75s ease-out 1.55s both;
 }
 .jawa-copy-bounce {
   animation: copyBounce .42s ease-out;
@@ -294,6 +346,26 @@ const jawaAgungStyles = `
   from { stroke-dashoffset: 400; }
   to { stroke-dashoffset: 0; }
 }
+@keyframes drawRoyalFrame {
+  from { stroke-dashoffset: 1800; opacity: .2; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes ornateCornerEnter {
+  from { opacity: 0; transform: scale(.76); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes crownEnter {
+  from { opacity: 0; transform: translateY(-24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes royalNameEnter {
+  from { opacity: 0; transform: translateY(22px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: .18; transform: scale(.8) rotate(0); }
+  50% { opacity: .82; transform: scale(1.28) rotate(22deg); }
+}
 @keyframes copyBounce {
   0% { transform: scale(1); }
   45% { transform: scale(1.05); }
@@ -308,9 +380,9 @@ const jawaAgungStyles = `
   #cover { padding-block: 4.5rem; }
 }
 @media (min-width: 640px) and (max-height: 800px) {
-  #cover { padding-block: 3.5rem; }
-  #cover .jawa-cover-crown { width: min(480px, 78vw); }
-  #cover .jawa-cover-name { font-size: clamp(3rem, 8vw, 5rem); }
+  #cover { padding-block: 3.8rem 5.5rem; }
+  #cover .jawa-cover-crown { width: min(320px, 60vw); }
+  #cover .jawa-cover-name { font-size: clamp(4rem, 9vw, 6.7rem); }
 }
 @media (prefers-reduced-motion: reduce) {
   .jawa-agung-theme *,
@@ -395,6 +467,7 @@ function closingGreeting(data: FatehaInvitationData) {
 export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
   const sectionOrder = useMemo(() => getVisibleSections(data), [data]);
   const [closingVisible, setClosingVisible] = useState(false);
+  const [activeSection, setActiveSection] = useState<JawaAgungSectionId>("cover");
 
   useEffect(() => {
     const elements = document.querySelectorAll(".jawa-reveal");
@@ -420,9 +493,22 @@ export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
       closingObserver.observe(closing);
     }
 
+    const navObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.find((entry) => entry.isIntersecting);
+        if (visible?.target.id) setActiveSection(visible.target.id as JawaAgungSectionId);
+      },
+      { rootMargin: "-42% 0px -42% 0px", threshold: 0 },
+    );
+    sectionOrder.forEach((section) => {
+      const element = document.getElementById(section);
+      if (element) navObserver.observe(element);
+    });
+
     return () => {
       observer.disconnect();
       closingObserver?.disconnect();
+      navObserver.disconnect();
     };
   }, [sectionOrder]);
 
@@ -430,7 +516,7 @@ export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
     <div className={cn("jawa-agung-theme min-h-screen bg-[#E8D6AD]", jawaAgungFontClassName)}>
       <style>{jawaAgungStyles}</style>
       <MusicToggle musicUrl={data.musicUrl} closingVisible={closingVisible} />
-      <JawaNav />
+      <JawaNav activeSection={activeSection} />
       <main>
         {sectionOrder.map((section) => {
           if (section === "cover") return <CoverSection key={section} data={data} />;
@@ -468,8 +554,15 @@ function SectionFrame({
 }) {
   return (
     <section id={id} className={cn("jawa-section", reveal && "jawa-reveal", className)}>
-      {withKawung ? <KawungBackground opacity={0.045} color="#D4A843" /> : null}
-      {withFrame ? <RoyalFrame color="#8A5518" opacity={id === "closing" ? 0.64 : 0.38} className="z-[4]" /> : null}
+      {withKawung ? <KawungBackground opacity={id === "cover" ? 0.022 : 0.032} color="#D4A843" /> : null}
+      <SparkleField count={id === "cover" ? 19 : 10} color="#B6812C" opacity={id === "cover" ? 0.72 : 0.42} className="z-[2]" />
+      {withFrame ? <BorderFrame color="#B6812C" opacity={id === "closing" ? 0.82 : 0.72} className={cn("z-[4]", id === "cover" && "jawa-cover-corners")} /> : null}
+      {withFrame ? (
+        <>
+          <BatikBorder color="#B6812C" opacity={0.46} className="absolute inset-x-0 top-0 z-[3]" />
+          <BatikBorder color="#B6812C" opacity={0.46} className="absolute inset-x-0 bottom-0 z-[3]" />
+        </>
+      ) : null}
       <div className={cn("jawa-content", contentClassName)}>{children}</div>
     </section>
   );
@@ -480,29 +573,27 @@ function CoverSection({ data }: { data: FatehaInvitationData }) {
     <SectionFrame
       id="cover"
       className="bg-[#F5EDD6] text-center"
-      contentClassName="max-w-[42rem]"
-      withKawung={false}
-      withFrame={false}
+      contentClassName="max-w-[48rem]"
+      withKawung
+      withFrame
       reveal={false}
     >
       <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_72%_62%_at_50%_43%,rgba(212,168,67,0.19)_0%,transparent_68%)]" aria-hidden="true" />
-      <RoyalCoverFrame color="#B6812C" opacity={0.86} className="z-[4]" />
       <div className="jawa-stagger relative z-10 flex w-full flex-col items-center">
-        <RoyalCoverCrown color="#8A5518" opacity={0.9} className="jawa-cover-crown h-auto w-[min(500px,78vw)] drop-shadow-[0_14px_24px_rgba(123,63,26,0.1)]" />
-        <p className="jawa-display -mt-8 bg-[#F5EDD6]/85 px-5 text-[0.5rem] font-bold uppercase tracking-[0.36em] text-[#6D421C] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
-        <DividerOrnament color="#B6812C" width={260} className="mt-2 w-[min(260px,68vw)] opacity-75" />
-        <h1 className="mt-1 max-w-full text-center">
-          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(4rem,15vw,7rem)] leading-[0.78]">{data.bride.nickname}</span>
-          <span className="jawa-heading block py-2 text-[1.55rem] italic leading-none text-[#9B641F]" aria-hidden="true">&amp;</span>
-          <span className="jawa-cover-name jawa-royal-title block break-words text-[clamp(4rem,15vw,7rem)] leading-[0.78]">{data.groom.nickname}</span>
+        <GununganCrown color="#8A5518" opacity={0.94} className="jawa-cover-crown jawa-cover-crown-enter h-auto w-[min(350px,82vw)] drop-shadow-[0_14px_24px_rgba(123,63,26,0.1)]" />
+        <p className="jawa-cover-label-enter jawa-display -mt-1 bg-[#F5EDD6]/88 px-5 text-[0.5rem] font-bold uppercase tracking-[0.36em] text-[#6D421C] sm:text-[0.6rem]">Mengundang Anda Untuk Hadir</p>
+        <DividerOrnament color="#B6812C" width={220} className="jawa-cover-label-enter mt-1 w-[min(220px,62vw)] opacity-80" />
+        <h1 className="mt-2 max-w-full text-center">
+          <span className="jawa-cover-name jawa-cover-bride-enter jawa-heading block text-[clamp(4rem,16vw,7rem)] font-bold leading-[0.78]">{data.bride.nickname}</span>
+          <span className="jawa-cover-amp-enter jawa-heading block py-2 text-[1.8rem] italic leading-none text-[#7B3F1A]" aria-hidden="true">&amp;</span>
+          <span className="jawa-cover-name jawa-cover-groom-enter jawa-heading block text-[clamp(4rem,16vw,7rem)] font-bold leading-[0.78]">{data.groom.nickname}</span>
         </h1>
-        <div className="relative mt-3 flex min-h-32 w-[min(430px,82vw)] flex-col items-center justify-center pt-10">
-          <CoverDateArch color="#B6812C" opacity={0.8} width={440} className="absolute inset-x-0 top-0 mx-auto h-auto w-full" />
-          <p className="jawa-display relative z-10 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-[#6D421C]">{formatDateUpper(data.wedding.date)}</p>
-          <p className="relative z-10 mt-2 text-[0.85rem] italic leading-6 text-[#7A5C3A]">{cityFromEvent(data.wedding.akad)}</p>
+        <div className="jawa-cover-arch-enter relative mt-2 flex min-h-36 w-[min(360px,86vw)] flex-col items-center justify-center pt-14">
+          <BottomArch color="#B6812C" opacity={0.86} width={360} className="absolute inset-x-0 top-0 mx-auto h-auto w-full" />
+          <p className="jawa-display relative z-10 text-[0.58rem] font-bold uppercase tracking-[0.22em] text-[#6D421C]">{formatDateUpper(data.wedding.date)}</p>
+          <p className="jawa-script relative z-10 mt-2 text-[1.15rem] leading-6 text-[#7A5C3A]">{cityFromEvent(data.wedding.akad)}</p>
         </div>
       </div>
-      <FloatingMelati />
     </SectionFrame>
   );
 }
@@ -567,21 +658,27 @@ function PersonCard({
   return (
     <article className="relative flex max-w-[280px] flex-1 flex-col items-center text-center">
       {showPhoto ? (
-        person.photo ? (
-          <img
-            src={person.photo}
-            alt={`Foto ${person.fullName}`}
-            width={140}
-            height={140}
-            loading="lazy"
-            decoding="async"
-            className="h-[120px] w-[120px] rounded-full border-2 border-[#7B3F1A] object-cover shadow-[0_8px_24px_rgba(123,63,26,0.18)] ring-2 ring-[#D4A843] ring-offset-4 ring-offset-[#FAF4E6] sm:h-[140px] sm:w-[140px]"
-          />
-        ) : (
-          <div className="grid h-[120px] w-[120px] place-items-center rounded-full border-2 border-[#7B3F1A] bg-[#EDE0C0] text-[#D4A843] shadow-[0_8px_24px_rgba(123,63,26,0.18)] ring-2 ring-[#D4A843] ring-offset-4 sm:h-[140px] sm:w-[140px]" aria-hidden="true">
-            <MelatiCluster count={5} spread={84} color="#D4A843" opacity={0.7} />
+        <div className="relative grid h-[132px] w-[132px] place-items-center bg-[#D4A843] p-[2px] shadow-[0_12px_34px_rgba(123,63,26,0.2)] [clip-path:polygon(20%_0%,80%_0%,100%_20%,100%_80%,80%_100%,20%_100%,0%_80%,0%_20%)] sm:h-[152px] sm:w-[152px]">
+          <div className="grid h-full w-full place-items-center bg-[#FAF4E6] p-[5px] [clip-path:polygon(20%_0%,80%_0%,100%_20%,100%_80%,80%_100%,20%_100%,0%_80%,0%_20%)]">
+            {person.photo ? (
+              <img
+                src={person.photo}
+                alt={`Foto ${person.fullName}`}
+                width={140}
+                height={140}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover [clip-path:polygon(20%_0%,80%_0%,100%_20%,100%_80%,80%_100%,20%_100%,0%_80%,0%_20%)]"
+              />
+            ) : (
+              <div className="grid h-full w-full place-items-center bg-[#EDE0C0] text-[#D4A843] [clip-path:polygon(20%_0%,80%_0%,100%_20%,100%_80%,80%_100%,20%_100%,0%_80%,0%_20%)]" aria-hidden="true">
+                <MelatiCluster count={5} spread={84} color="#D4A843" opacity={0.7} />
+              </div>
+            )}
           </div>
-        )
+          <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border border-[#B6812C] bg-[#FAF4E6]" aria-hidden="true" />
+          <span className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border border-[#B6812C] bg-[#FAF4E6]" aria-hidden="true" />
+        </div>
       ) : null}
       <p className="jawa-display mt-7 text-[0.5rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A]">{label}</p>
       <h3 className="jawa-heading mt-2 text-[1.35rem] font-bold leading-tight text-[#7B3F1A]">{person.fullName}</h3>
@@ -642,6 +739,7 @@ function EventCard({ title, event }: { title: string; event: FatehaEvent }) {
     <article className="jawa-card relative w-full max-w-[360px] p-8 text-center lg:p-10">
       <CornerOrnament position="tl" color="#D4A843" opacity={0.42} size={48} className="absolute left-3 top-3" />
       <CornerOrnament position="tr" color="#D4A843" opacity={0.42} size={48} className="absolute right-3 top-3" />
+      <GununganCrown color="#8A5518" opacity={0.52} className="pointer-events-none absolute inset-x-0 top-2 mx-auto h-auto w-[110px]" />
       <EventMedallion kind={kind} color="#8A5518" opacity={0.84} size={86} className="mx-auto mb-5" />
       <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.25em] text-[#7B3F1A]">{title}</p>
       <DividerOrnament color="#D4A843" width={160} className="mx-auto my-6" />
@@ -925,7 +1023,8 @@ function GiftAccountCard({ account }: { account: FatehaGiftAccount }) {
 function ClosingSection({ data }: { data: FatehaInvitationData }) {
   return (
     <SectionFrame id="closing" className="bg-[#EDE0C0]" contentClassName="max-w-4xl">
-      <WayangSilhouette color="#7B3F1A" opacity={0.06} height={480} width={206} className="absolute -right-12 top-1/2 z-[2] h-[70%] w-auto -translate-y-1/2 lg:right-[8%]" />
+      <WayangSilhouette color="#7B3F1A" opacity={0.055} height={480} width={206} className="absolute -left-12 top-1/2 z-[2] h-[70%] w-auto -translate-y-1/2 lg:left-[8%]" />
+      <WayangSilhouette color="#7B3F1A" opacity={0.055} height={480} width={206} className="absolute -right-12 top-1/2 z-[2] h-[70%] w-auto -translate-y-1/2 -scale-x-100 lg:right-[8%]" />
       <JasmineGarland color="#8A5518" opacity={0.48} className="absolute left-1/2 top-10 z-[3] w-[min(600px,92vw)] -translate-x-1/2" />
       <div className="jawa-stagger relative z-10 flex flex-col items-center gap-7 text-center">
         <GununganCrest color="#8A5518" opacity={0.84} className="h-auto w-[92px]" />
@@ -967,12 +1066,18 @@ function JawaField({ label, children }: { label: string; children: ReactNode }) 
   );
 }
 
-function JawaNav() {
+function JawaNav({ activeSection }: { activeSection: JawaAgungSectionId }) {
   return (
-    <nav className="jawa-nav fixed bottom-3 left-4 right-4 z-40 flex items-center justify-center border p-1 backdrop-blur-xl sm:left-1/2 sm:right-auto sm:w-[470px] sm:-translate-x-1/2">
+    <nav className="jawa-nav fixed bottom-3 left-3 right-3 z-40 flex items-center justify-center overflow-hidden rounded-t-2xl border p-1 backdrop-blur-xl sm:left-1/2 sm:right-auto sm:w-[500px] sm:-translate-x-1/2" aria-label="Navigasi undangan">
       {navItems.map((item) => (
-        <a key={item.href} href={item.href} className="flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[9px] font-semibold uppercase tracking-wide text-[#7A5C3A] transition hover:bg-[#EDE0C0] hover:text-[#7B3F1A]">
-          <item.icon className="h-4 w-4" aria-hidden="true" />
+        <a
+          key={item.href}
+          href={item.href}
+          className="jawa-nav-item flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[9px] font-semibold uppercase tracking-wide text-[#7A5C3A] transition hover:bg-[#EDE0C0] hover:text-[#7B3F1A]"
+          data-active={activeSection === item.href.slice(1)}
+          aria-current={activeSection === item.href.slice(1) ? "page" : undefined}
+        >
+          <item.icon className="h-[18px] w-[18px]" strokeWidth={1.7} aria-hidden="true" />
           <span className="truncate">{item.label}</span>
         </a>
       ))}
@@ -1014,19 +1119,5 @@ function MusicToggle({ musicUrl, closingVisible }: { musicUrl: string | null; cl
         {playing ? <Volume2 className="h-5 w-5" aria-hidden="true" /> : <VolumeX className="h-5 w-5" aria-hidden="true" />}
       </button>
     </>
-  );
-}
-
-function FloatingMelati() {
-  return (
-    <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden" aria-hidden="true">
-      {melatiParticles.map((particle) => (
-        <span
-          key={particle.id}
-          className="jawa-melati-particle"
-          style={{ left: particle.left, bottom: particle.bottom, animationDuration: particle.duration, animationDelay: particle.delay }}
-        />
-      ))}
-    </div>
   );
 }

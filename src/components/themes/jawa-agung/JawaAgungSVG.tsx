@@ -49,6 +49,14 @@ type CoverDateArchProps = BaseSvgProps & {
   width?: number;
 };
 
+type BorderFrameProps = BaseSvgProps & {
+  inset?: number;
+};
+
+type SparkleFieldProps = BaseSvgProps & {
+  count?: number;
+};
+
 function safeId(prefix: string, rawId: string) {
   return `${prefix}-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 }
@@ -308,6 +316,171 @@ export function MelatiCluster({ count = 5, spread = 60, color = "#D4A843", opaci
           </g>
         </g>
       ))}
+    </svg>
+  );
+}
+
+export function SparkleField({ count = 16, color = "#D4A843", opacity = 1, className }: SparkleFieldProps) {
+  const sparkles = Array.from({ length: count }, (_, index) => ({
+    left: `${8 + ((index * 31) % 84)}%`,
+    top: `${7 + ((index * 47) % 84)}%`,
+    size: 5 + ((index * 7) % 9),
+    delay: `${(index % 7) * 0.38}s`,
+    duration: `${3.1 + (index % 5) * 0.42}s`,
+  }));
+
+  return (
+    <div className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)} aria-hidden="true">
+      {sparkles.map((sparkle, index) => (
+        <svg
+          key={`${sparkle.left}-${sparkle.top}-${index}`}
+          viewBox="0 0 20 20"
+          className="jawa-sparkle absolute"
+          style={{
+            left: sparkle.left,
+            top: sparkle.top,
+            width: sparkle.size,
+            height: sparkle.size,
+            color,
+            opacity,
+            animationDelay: sparkle.delay,
+            animationDuration: sparkle.duration,
+          }}
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M10 0C10.8 6.2 13.8 9.2 20 10C13.8 10.8 10.8 13.8 10 20C9.2 13.8 6.2 10.8 0 10C6.2 9.2 9.2 6.2 10 0Z" fill="currentColor" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+export function CornerOrnamentElaborate({ position = "tl", color = "#B6812C", opacity = 1, size = 180, className }: CornerOrnamentProps) {
+  const patternId = safeId("jawa-dense-corner-kawung", useId());
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 180 180"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("pointer-events-none block overflow-visible", className)}
+      style={{ transform: cornerTransform(position), transformOrigin: "center" }}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <pattern id={patternId} width="18" height="18" patternUnits="userSpaceOnUse">
+          <path d="M9 1.5C13.4 5.1 13.4 12.9 9 16.5C4.6 12.9 4.6 5.1 9 1.5ZM1.5 9C5.1 4.6 12.9 4.6 16.5 9C12.9 13.4 5.1 13.4 1.5 9Z" fill="none" stroke={color} strokeWidth=".55" />
+          <path d="M9 5.2L12.8 9L9 12.8L5.2 9Z" fill="none" stroke={color} strokeWidth=".38" />
+          <circle cx="9" cy="9" r=".9" fill={color} />
+        </pattern>
+      </defs>
+      <g opacity={opacity}>
+        <path d="M0 0H180V36H151C151 57 140 70 119 79C98 88 88 99 79 119C70 140 57 151 36 151V180H0Z" fill={`url(#${patternId})`} opacity=".52" />
+        <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+          <path className="jawa-frame-line" d="M3 177H31C31 147 47 128 75 120C97 114 113 98 120 76C128 48 147 31 177 31" strokeWidth="2.2" />
+          <path d="M10 177H39C39 153 52 138 79 130C104 123 122 105 130 79C138 52 153 39 177 39" strokeWidth=".7" opacity=".72" />
+          <path d="M6 6H171M6 6V171" strokeWidth=".8" opacity=".7" />
+          <path d="M13 15H164M15 13V164" strokeWidth=".42" strokeDasharray="1 5" opacity=".72" />
+          <path d="M22 177C20 165 20 157 22 147M177 22C165 20 157 20 147 22" strokeWidth=".9" />
+          <path d="M45 148C55 128 70 113 91 102C112 91 128 75 139 51" strokeWidth="1.5" />
+          <path d="M49 144C42 130 45 119 58 112C64 127 61 137 49 144ZM71 121C61 105 66 92 82 87C87 104 83 115 71 121ZM98 99C89 82 95 70 111 65C116 82 111 93 98 99ZM124 72C116 57 121 45 136 41C141 56 137 66 124 72Z" fill="#9A8142" fillOpacity=".62" strokeWidth=".72" />
+          <path d="M147 45C128 51 113 64 102 85M45 147C51 128 64 113 85 102" strokeWidth=".65" opacity=".7" />
+          <path d="M7 151C12 151 16 155 16 160C16 165 12 169 7 169M151 7C151 12 155 16 160 16C165 16 169 12 169 7" strokeWidth=".8" />
+        </g>
+        <g transform="translate(35 145)" fill="#FFF9EB" stroke={color} strokeWidth=".75">
+          {Array.from({ length: 10 }, (_, index) => <ellipse key={index} cy="-14" rx="5.6" ry="14" transform={`rotate(${index * 36})`} />)}
+          {Array.from({ length: 8 }, (_, index) => <ellipse key={`inner-${index}`} cy="-8" rx="3.4" ry="8" transform={`rotate(${index * 45})`} fill="#E4C779" />)}
+          <circle r="4.5" fill="#B6812C" />
+        </g>
+        <g fill="#FFF9EB" stroke={color} strokeWidth=".7">
+          {[{ x: 61, y: 124, s: .65 }, { x: 88, y: 101, s: .82 }, { x: 116, y: 73, s: .72 }, { x: 142, y: 45, s: .58 }].map((flower) => (
+            <g key={`${flower.x}-${flower.y}`} transform={`translate(${flower.x} ${flower.y}) scale(${flower.s})`}>
+              {Array.from({ length: 5 }, (_, index) => <ellipse key={index} cy="-8" rx="4.1" ry="8" transform={`rotate(${index * 72})`} />)}
+              <circle r="2.3" fill="#B6812C" />
+            </g>
+          ))}
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+export function BorderFrame({ color = "#B6812C", opacity = 1, inset = 10, className }: BorderFrameProps) {
+  return (
+    <div className={cn("pointer-events-none absolute", className)} style={{ inset, opacity, color }} aria-hidden="true">
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 390 844" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path className="jawa-frame-line" d="M4 4H386V840H4Z" fill="none" stroke="currentColor" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+        <path className="jawa-frame-line" d="M11 11H379V833H11Z" fill="none" stroke="currentColor" strokeWidth=".55" strokeDasharray="1 4" vectorEffect="non-scaling-stroke" opacity=".78" />
+        <path className="jawa-frame-line" d="M20 20H370V824H20Z" fill="none" stroke="currentColor" strokeWidth=".75" vectorEffect="non-scaling-stroke" opacity=".68" />
+        <path d="M195 4L202 11L195 18L188 11ZM195 826L202 833L195 840L188 833Z" fill="#F5EDD6" stroke="currentColor" strokeWidth=".8" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <CornerOrnamentElaborate position="tl" color={color} className="absolute left-0 top-0 h-auto w-[80px] sm:w-[110px] lg:w-[180px]" />
+      <CornerOrnamentElaborate position="tr" color={color} className="absolute right-0 top-0 h-auto w-[80px] sm:w-[110px] lg:w-[180px]" />
+      <CornerOrnamentElaborate position="bl" color={color} className="absolute bottom-0 left-0 h-auto w-[80px] sm:w-[110px] lg:w-[180px]" />
+      <CornerOrnamentElaborate position="br" color={color} className="absolute bottom-0 right-0 h-auto w-[80px] sm:w-[110px] lg:w-[180px]" />
+    </div>
+  );
+}
+
+export function GununganCrown({ color = "#8A5518", opacity = 1, className }: BaseSvgProps) {
+  return (
+    <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg" className={cn("pointer-events-none block overflow-visible", className)} aria-hidden="true" focusable="false">
+      <g opacity={opacity} fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M160 4C170 26 192 45 195 68C198 91 181 111 160 132C139 111 122 91 125 68C128 45 150 26 160 4Z" strokeWidth="1.7" />
+        <path d="M160 19C167 38 181 52 182 70C184 87 173 103 160 118C147 103 136 87 138 70C139 52 153 38 160 19Z" strokeWidth=".7" />
+        <path d="M160 30V112M146 48C159 57 163 68 160 81M174 48C161 57 157 68 160 81M146 87C154 78 166 78 174 87C168 99 152 99 146 87Z" strokeWidth=".65" />
+        <path d="M12 104C62 111 98 91 129 66M308 104C258 111 222 91 191 66" strokeWidth="1.5" />
+        <path d="M18 113C69 120 104 101 133 79M302 113C251 120 216 101 187 79" strokeWidth=".6" opacity=".68" />
+        <path d="M55 99C49 113 50 126 58 138M265 99C271 113 270 126 262 138" strokeWidth=".8" />
+        <path d="M55 105L62 113L55 121L48 113ZM55 121L62 129L55 137L48 129M265 105L272 113L265 121L258 113ZM265 121L272 129L265 137L258 129" strokeWidth=".62" />
+        <path d="M95 91C83 78 67 78 56 91C70 99 84 99 95 91ZM225 91C237 78 253 78 264 91C250 99 236 99 225 91Z" fill="#78804B" fillOpacity=".62" />
+        <path d="M128 126H24L15 120M192 126H296L305 120" strokeWidth=".75" />
+      </g>
+      <g fill="#FFF9EB" stroke={color} strokeWidth=".72" opacity={opacity}>
+        {[{ x: 103, y: 82, s: .75 }, { x: 73, y: 99, s: .62 }, { x: 217, y: 82, s: .75 }, { x: 247, y: 99, s: .62 }].map((flower) => (
+          <g key={flower.x} transform={`translate(${flower.x} ${flower.y}) scale(${flower.s})`}>
+            {Array.from({ length: 5 }, (_, index) => <ellipse key={index} cy="-8" rx="4" ry="8" transform={`rotate(${index * 72})`} />)}
+            <circle r="2.4" fill="#B6812C" />
+          </g>
+        ))}
+      </g>
+      <g fill={color} opacity={opacity * .78}>
+        <path d="M32 55C33 62 36 65 43 66C36 67 33 70 32 77C31 70 28 67 21 66C28 65 31 62 32 55ZM286 48C287 54 290 57 296 58C290 59 287 62 286 68C285 62 282 59 276 58C282 57 285 54 286 48Z" />
+      </g>
+    </svg>
+  );
+}
+
+export function BottomArch({ color = "#B6812C", opacity = 1, width = 360, className }: CoverDateArchProps) {
+  return (
+    <svg width={width} viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" className={cn("pointer-events-none block max-w-full", className)} aria-hidden="true" focusable="false">
+      <g opacity={opacity} fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M35 188C43 89 95 35 180 35C265 35 317 89 325 188" strokeWidth="1.7" />
+        <path d="M52 188C60 102 104 53 180 53C256 53 300 102 308 188" strokeWidth=".72" />
+        <path d="M76 188C84 122 119 84 180 84C241 84 276 122 284 188" strokeWidth=".55" strokeDasharray="2 6" opacity=".72" />
+        <path d="M28 188H74M286 188H332M43 174V196H70M317 174V196H290" strokeWidth="1" />
+        <path d="M92 144H268M117 112H243" strokeWidth=".55" opacity=".58" />
+      </g>
+      <g fill="#78804B" stroke={color} strokeWidth=".48" opacity={opacity * .72}>
+        {Array.from({ length: 16 }, (_, index) => {
+          const side = index < 8 ? -1 : 1;
+          const local = index % 8;
+          const x = side < 0 ? 65 + local * 14 : 295 - local * 14;
+          const y = 169 - Math.sin((local + 1) / 9 * Math.PI) * 96;
+          return <path key={index} d="M0 0C7-7 16-7 23 0C16 7 7 7 0 0Z" transform={`translate(${x} ${y}) rotate(${side < 0 ? -55 + local * 8 : 55 - local * 8}) scale(.48)`} />;
+        })}
+      </g>
+      <g transform="translate(180 34)" fill="#FFF9EB" stroke={color} strokeWidth=".72" opacity={opacity}>
+        {Array.from({ length: 12 }, (_, index) => <ellipse key={index} cy="-16" rx="6" ry="16" transform={`rotate(${index * 30})`} />)}
+        {Array.from({ length: 8 }, (_, index) => <ellipse key={`inner-${index}`} cy="-9" rx="3.6" ry="9" transform={`rotate(${index * 45})`} fill="#D8B45B" />)}
+        <circle r="4.5" fill="#8A5518" />
+      </g>
+      <g fill={color} opacity={opacity}>
+        <path d="M180 152L187 159L180 166L173 159ZM146 176L151 181L146 186L141 181ZM214 176L219 181L214 186L209 181Z" />
+      </g>
     </svg>
   );
 }
