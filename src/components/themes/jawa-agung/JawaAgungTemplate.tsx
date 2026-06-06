@@ -20,6 +20,7 @@ import {
   JanurArch,
   KawungBackground,
   MelatiCluster,
+  RoyalEnvelope,
   SparkleField,
   WayangSilhouette,
 } from "./JawaAgungSVG";
@@ -379,116 +380,163 @@ const jawaAgungStyles = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #E8D6AD;
-  padding: 1.5rem;
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,249,233,.98) 0 15%, rgba(245,232,200,.86) 47%, transparent 74%),
+    linear-gradient(135deg, #D8BD85, #F4E4BB 48%, #CEAC6C);
+  padding: 1rem;
+  transition: opacity 1s ease-out, transform 1s ease-out, filter 1s ease-out;
 }
 .jawa-envelope-intro.is-opening {
   opacity: 0;
-  transform: translateY(-20px) scale(0.98);
+  transform: translateY(-28px) scale(1.035);
+  filter: brightness(1.12);
   pointer-events: none;
+}
+.jawa-envelope-intro::before {
+  content: "";
+  position: absolute;
+  inset: 1rem;
+  z-index: 2;
+  pointer-events: none;
+  border: 1px solid rgba(123,63,26,.34);
+  box-shadow:
+    inset 0 0 0 5px rgba(255,249,233,.36),
+    inset 0 0 0 6px rgba(182,129,44,.18),
+    inset 0 0 100px rgba(123,63,26,.08);
+}
+.jawa-envelope-intro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(123,63,26,.08), transparent 13% 87%, rgba(123,63,26,.08)),
+    radial-gradient(circle at 50% 50%, transparent 42%, rgba(123,63,26,.13));
+  mix-blend-mode: multiply;
 }
 .jawa-envelope-card {
   position: relative;
-  z-index: 10;
+  z-index: 12;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #FAF4E6;
+  background:
+    radial-gradient(circle at 50% 37%, rgba(255,252,242,.98), rgba(248,238,212,.96) 68%, rgba(225,199,145,.94)),
+    #FAF4E6;
   width: 100%;
-  max-width: 24rem;
-  padding: 2.5rem 1.5rem;
-  border: 1px solid rgba(182,129,44,.5);
-  box-shadow: 0 24px 64px rgba(123,63,26,.15);
+  max-width: 34rem;
+  min-height: min(92dvh, 47rem);
+  padding: 2.4rem 2rem 2rem;
+  border: 1px solid rgba(123,63,26,.7);
+  box-shadow:
+    inset 0 0 0 6px rgba(255,250,237,.72),
+    inset 0 0 0 7px rgba(182,129,44,.28),
+    0 36px 100px rgba(77,38,11,.24);
 }
 .jawa-envelope-card::before {
   content: "";
   position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(212,168,67,.4);
+  inset: 13px;
+  border: 1px solid rgba(182,129,44,.46);
   pointer-events: none;
 }
+.jawa-envelope-card::after {
+  content: "";
+  position: absolute;
+  inset: 20px;
+  border: 1px dashed rgba(182,129,44,.22);
+  pointer-events: none;
+}
+.jawa-envelope-heading {
+  color: #5A2D0D;
+  text-shadow: 0 1px #fff8e8, 0 8px 22px rgba(123,63,26,.12);
+}
 .jawa-envelope-button {
+  position: relative;
+  isolation: isolate;
+  min-width: min(20rem, 82vw);
   font-family: var(--font-jawa-display), serif;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.28em;
   color: #F5EDD6;
-  background: #7B3F1A;
-  padding: 1rem 1.5rem;
-  border: 1px solid #7B3F1A;
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #5A2D0D, #8C501B 52%, #5A2D0D);
+  padding: 1rem 2rem;
+  border: 1px solid #C5902B;
+  box-shadow: inset 0 0 0 3px #6A350F, inset 0 0 0 4px rgba(240,208,119,.55), 0 12px 28px rgba(77,38,11,.2);
+  transition: transform .35s ease, filter .35s ease, box-shadow .35s ease;
   cursor: pointer;
 }
+.jawa-envelope-button::before,
+.jawa-envelope-button::after {
+  position: absolute;
+  content: "✦";
+  color: #EACB70;
+  font-size: .7rem;
+}
+.jawa-envelope-button::before { left: 1.1rem; }
+.jawa-envelope-button::after { right: 1.1rem; }
 .jawa-envelope-button:hover {
-  background: #5F3515;
-  color: #F5EDD6;
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 3px #6A350F, inset 0 0 0 4px rgba(240,208,119,.7), 0 18px 34px rgba(77,38,11,.26);
 }
 .jawa-envelope-illustration {
   position: relative;
-  width: 14rem;
-  height: 9rem;
-  margin: 1.5rem auto;
+  width: min(28rem, 88vw);
+  max-width: 100%;
+  margin: -.8rem auto -1rem;
+  perspective: 1200px;
 }
-.jawa-envelope-back {
-  position: absolute;
-  inset-x: 0;
-  bottom: 0;
-  height: 7rem;
-  background: #D8C093;
-  border: 1px solid rgba(123,63,26,.2);
+.jawa-envelope-svg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 22px 30px rgba(77,38,11,.11));
 }
-.jawa-envelope-flap {
-  position: absolute;
-  inset-x: 0;
-  top: 1rem;
-  height: 5.5rem;
-  background: #D4A843;
-  border-bottom: 1px solid rgba(123,63,26,.2);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  transform-origin: top;
-  transition: transform 0.6s ease;
-  z-index: 3;
+.jawa-envelope-letter {
+  transform-origin: center bottom;
+  transition: transform .9s cubic-bezier(.22,.9,.34,1), opacity .5s ease;
 }
-.is-opening .jawa-envelope-flap {
-  transform: rotateX(180deg);
+.jawa-envelope-flap-vector {
+  transform-origin: 240px 153px;
+  transition: transform .72s cubic-bezier(.4,0,.2,1), opacity .45s ease;
 }
-.jawa-envelope-front {
-  position: absolute;
-  inset-x: 0;
-  bottom: 0;
-  height: 7rem;
-  background: #E8D6AD;
-  border: 1px solid rgba(123,63,26,.15);
-  clip-path: polygon(0 100%, 0 0, 50% 35%, 100% 0, 100% 100%);
-  z-index: 4;
+.jawa-envelope-seal-vector {
+  transform-origin: 240px 278px;
+  transition: transform .45s ease, opacity .35s ease;
 }
-.jawa-envelope-seal {
-  position: absolute;
-  left: 50%;
-  top: 5.5rem;
-  transform: translate(-50%, -50%);
-  width: 3.2rem;
-  height: 3.2rem;
-  background: #7B3F1A;
-  border-radius: 50%;
-  border: 2px solid #D4A843;
-  display: grid;
-  place-items: center;
-  color: #F5EDD6;
-  font-family: var(--font-jawa-heading), serif;
-  font-size: 1.15rem;
-  z-index: 5;
-  box-shadow: 0 4px 12px rgba(123,63,26,.3);
-  transition: opacity 0.3s ease;
+.is-opening .jawa-envelope-flap-vector {
+  transform: rotateX(165deg) translateY(-8px);
+  opacity: .42;
 }
-.is-opening .jawa-envelope-seal {
+.is-opening .jawa-envelope-seal-vector {
+  transform: translate(240px,278px) scale(.35) rotate(35deg);
   opacity: 0;
+}
+.is-opening .jawa-envelope-letter {
+  transform: translateY(-76px) scale(1.04);
 }
 @media (min-width: 640px) {
   .jawa-section { padding: 7rem 4.5rem; }
+}
+@media (max-width: 639px) {
+  .jawa-envelope-intro { padding: .45rem; }
+  .jawa-envelope-intro::before { inset: .45rem; }
+  .jawa-envelope-card {
+    min-height: calc(100dvh - .9rem);
+    padding: 1.8rem 1rem 1.3rem;
+  }
+  .jawa-envelope-card::before { inset: 8px; }
+  .jawa-envelope-card::after { inset: 14px; }
+  .jawa-envelope-illustration {
+    width: 100%;
+    margin-block: -1.5rem -1.2rem;
+  }
 }
 @media (min-width: 1024px) {
   .jawa-section { padding: 7rem 6rem; }
@@ -668,7 +716,7 @@ function JawaEnvelopeIntro({ data, onOpen }: { data: FatehaInvitationData; onOpe
   function handleOpen() {
     if (phase === "opening") return;
     setPhase("opening");
-    setTimeout(onOpen, 800);
+    setTimeout(onOpen, 1050);
   }
 
   const initials = data.monogram || `${data.bride.nickname[0]}&${data.groom.nickname[0]}`;
@@ -679,32 +727,26 @@ function JawaEnvelopeIntro({ data, onOpen }: { data: FatehaInvitationData; onOpe
       <SparkleField count={15} color="#B6812C" opacity={0.6} />
       <BatikBorder color="#D4A843" opacity={0.4} className="absolute left-0 top-0 w-full z-[1]" />
       <BatikBorder color="#D4A843" opacity={0.4} className="absolute bottom-0 left-0 w-full rotate-180 z-[1]" />
-      
+
       <div className="jawa-envelope-card">
-        <CornerOrnament position="tl" color="#B6812C" size={42} opacity={0.6} className="absolute left-2 top-2" />
-        <CornerOrnament position="tr" color="#B6812C" size={42} opacity={0.6} className="absolute right-2 top-2" />
-        <CornerOrnament position="bl" color="#B6812C" size={42} opacity={0.6} className="absolute left-2 bottom-2" />
-        <CornerOrnament position="br" color="#B6812C" size={42} opacity={0.6} className="absolute right-2 bottom-2" />
-        
-        <GununganCrown color="#8A5518" opacity={0.8} className="w-[90px] mb-4" />
-        <p className="jawa-display text-[0.6rem] font-bold uppercase tracking-[0.3em] text-[#7B3F1A]">Undangan Pernikahan</p>
-        
+        <BorderFrame color="#B6812C" opacity={0.78} inset={7} className="z-[1]" />
+        <GununganCrown color="#8A5518" opacity={0.9} className="relative z-[3] -mb-2 w-[min(240px,58vw)]" />
+        <p className="jawa-display relative z-[3] text-[0.55rem] font-bold uppercase tracking-[0.34em] text-[#7B3F1A]">Pahargyan Temanten</p>
+
         <div className="jawa-envelope-illustration">
-          <div className="jawa-envelope-back" />
-          <div className="jawa-envelope-flap" />
-          <div className="jawa-envelope-front" />
-          <div className="jawa-envelope-seal">{initials}</div>
+          <RoyalEnvelope initials={initials} color="#7B3F1A" opacity={0.96} />
         </div>
 
-        <h2 className="jawa-heading text-3xl font-bold text-[#3D1F0A] mt-2 mb-2">
-          {data.bride.nickname} <span className="text-[#D4A843] italic font-normal text-2xl">&amp;</span> {data.groom.nickname}
+        <h2 className="jawa-envelope-heading jawa-heading relative z-[3] -mt-2 mb-1 text-[clamp(2rem,7vw,3.4rem)] font-bold leading-none">
+          {data.bride.nickname} <span className="text-[#B6812C] italic font-normal">&amp;</span> {data.groom.nickname}
         </h2>
-        
-        <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A] mb-8">
+
+        <DividerOrnament color="#B6812C" width={230} className="relative z-[3] -my-1 w-[min(230px,58vw)]" />
+        <p className="jawa-display relative z-[3] mb-5 text-[0.5rem] font-bold uppercase tracking-[0.22em] text-[#7A5C3A]">
           {formatDateUpper(data.wedding.date)}
         </p>
-        
-        <button type="button" onClick={handleOpen} disabled={phase === "opening"} className="jawa-envelope-button flex items-center justify-center gap-2">
+
+        <button type="button" onClick={handleOpen} disabled={phase === "opening"} className="jawa-envelope-button relative z-[3] flex min-h-[52px] items-center justify-center gap-3">
           <BookOpen className="w-4 h-4" aria-hidden="true" />
           Buka Undangan
         </button>

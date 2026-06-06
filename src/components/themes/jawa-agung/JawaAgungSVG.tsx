@@ -57,6 +57,10 @@ type SparkleFieldProps = BaseSvgProps & {
   count?: number;
 };
 
+type RoyalEnvelopeProps = BaseSvgProps & {
+  initials: string;
+};
+
 function safeId(prefix: string, rawId: string) {
   return `${prefix}-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 }
@@ -819,6 +823,98 @@ export function JasmineGarland({ color = "#8A5518", opacity = 1, className }: Ba
           <path d="M248 72C241 51 228 45 212 54C222 66 234 72 248 72Z" />
         </g>
         <circle cx="180" cy="18" r="4" fill="#D4A843" stroke={color} strokeWidth=".8" />
+      </g>
+    </svg>
+  );
+}
+
+export function RoyalEnvelope({ initials, color = "#8A5518", opacity = 1, className }: RoyalEnvelopeProps) {
+  const kawungId = safeId("jawa-envelope-kawung", useId());
+  const paperId = safeId("jawa-envelope-paper", useId());
+  const goldId = safeId("jawa-envelope-gold", useId());
+  const shadowId = safeId("jawa-envelope-shadow", useId());
+  const flowers = [{ x: 161, y: 151 }, { x: 188, y: 166 }, { x: 292, y: 166 }, { x: 319, y: 151 }];
+
+  return (
+    <svg viewBox="0 0 480 390" xmlns="http://www.w3.org/2000/svg" className={cn("jawa-envelope-svg block overflow-visible", className)} aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id={paperId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFF9EC" />
+          <stop offset=".5" stopColor="#F5E8C8" />
+          <stop offset="1" stopColor="#DFC48D" />
+        </linearGradient>
+        <linearGradient id={goldId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#F3D98B" />
+          <stop offset=".42" stopColor="#C5902B" />
+          <stop offset="1" stopColor="#794215" />
+        </linearGradient>
+        <filter id={shadowId} x="-30%" y="-30%" width="160%" height="180%">
+          <feDropShadow dx="0" dy="14" stdDeviation="11" floodColor="#4D260B" floodOpacity=".23" />
+        </filter>
+        <pattern id={kawungId} width="24" height="24" patternUnits="userSpaceOnUse">
+          <path d="M12 2C17 6 17 18 12 22C7 18 7 6 12 2ZM2 12C6 7 18 7 22 12C18 17 6 17 2 12Z" fill="none" stroke={color} strokeWidth=".62" />
+          <path d="M12 7L17 12L12 17L7 12Z" fill="none" stroke={color} strokeWidth=".38" />
+          <circle cx="12" cy="12" r="1.1" fill={color} />
+        </pattern>
+      </defs>
+
+      <g opacity={opacity}>
+        <ellipse cx="240" cy="354" rx="190" ry="23" fill="#6A390F" opacity=".13" />
+
+        <g className="jawa-envelope-letter" filter={`url(#${shadowId})`}>
+          <path d="M106 28H374L398 52V282H82V52Z" fill={`url(#${paperId})`} stroke={color} strokeWidth="1.3" />
+          <path d="M94 40H362L386 64V270H94Z" fill="none" stroke="#C5902B" strokeWidth=".75" />
+          <path d="M106 52H350L374 76V258H106Z" fill="none" stroke="#C5902B" strokeWidth=".4" strokeDasharray="2 5" />
+          <path d="M82 52H106V28M374 28V52H398M82 282H106V258M374 258V282H398" fill="none" stroke="#C5902B" strokeWidth="2" />
+          <path d="M119 72C144 50 167 51 190 70C170 78 147 79 119 72ZM361 72C336 50 313 51 290 70C310 78 333 79 361 72Z" fill="#77804A" opacity=".62" stroke={color} strokeWidth=".55" />
+          <g transform="translate(240 80)" fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M0-45C9-24 27-9 28 11C29 30 16 47 0 64C-16 47-29 30-28 11C-27-9-9-24 0-45Z" fill={`url(#${goldId})`} fillOpacity=".13" strokeWidth="1.35" />
+            <path d="M0-31V51M-12-14C0-6 3 4 0 17M12-14C0-6-3 4 0 17M-13 24C-4 14 5 14 13 24C7 36-7 36-13 24Z" strokeWidth=".62" />
+            <path d="M-29 42H-82L-91 37M29 42H82L91 37" strokeWidth=".65" />
+          </g>
+          <path d="M148 175H332M168 192H312M190 209H290" fill="none" stroke="#B6812C" strokeWidth=".55" opacity=".68" />
+        </g>
+
+        <g className="jawa-envelope-body" filter={`url(#${shadowId})`}>
+          <path d="M42 153H438V350H42Z" fill={`url(#${paperId})`} stroke={color} strokeWidth="1.4" />
+          <path d="M54 165H426V338H54Z" fill="none" stroke="#C5902B" strokeWidth=".72" />
+          <path d="M42 153L240 281L438 153V350H42Z" fill="#E7D2A2" stroke={color} strokeWidth="1.1" />
+          <path d="M42 350L185 224L240 281L295 224L438 350Z" fill="#F4E6C5" stroke="#B6812C" strokeWidth=".85" />
+          <path d="M42 153L185 256L240 281L295 256L438 153" fill="none" stroke="#B6812C" strokeWidth=".72" opacity=".75" />
+          <path d="M42 153H118L142 177H42ZM438 153H362L338 177H438Z" fill={`url(#${kawungId})`} opacity=".68" />
+          <path d="M42 350H438" stroke="#C5902B" strokeWidth="2.2" />
+          <path d="M54 338H426" stroke="#C5902B" strokeWidth=".55" strokeDasharray="2 5" />
+          <path d="M59 324C86 303 109 302 131 320M421 324C394 303 371 302 349 320" fill="none" stroke={color} strokeWidth=".9" />
+          <path d="M65 319C77 302 91 299 104 309C94 320 81 323 65 319ZM415 319C403 302 389 299 376 309C386 320 399 323 415 319Z" fill="#77804A" fillOpacity=".72" stroke={color} strokeWidth=".48" />
+        </g>
+
+        <g className="jawa-envelope-flap-vector" filter={`url(#${shadowId})`}>
+          <path d="M42 153L240 292L438 153L408 118H72Z" fill={`url(#${paperId})`} stroke={color} strokeWidth="1.5" />
+          <path d="M61 151L240 276L419 151L397 130H83Z" fill="none" stroke="#C5902B" strokeWidth=".78" />
+          <path d="M83 130H397L419 151L240 276L61 151Z" fill={`url(#${kawungId})`} opacity=".2" />
+          <path d="M118 148C153 161 190 186 240 226C290 186 327 161 362 148" fill="none" stroke={color} strokeWidth="1.15" />
+          <path d="M131 145C149 130 168 132 184 147C166 155 149 154 131 145ZM349 145C331 130 312 132 296 147C314 155 331 154 349 145Z" fill="#77804A" fillOpacity=".74" stroke={color} strokeWidth=".55" />
+          <g transform="translate(240 194)" fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M0-58C10-34 31-17 33 5C35 29 18 50 0 70C-18 50-35 29-33 5C-31-17-10-34 0-58Z" fill={`url(#${goldId})`} fillOpacity=".22" strokeWidth="1.45" />
+            <path d="M0-39V51M-15-20C-2-11 3 1 0 16M15-20C2-11-3 1 0 16M-15 24C-5 12 5 12 15 24C8 38-8 38-15 24Z" strokeWidth=".72" />
+          </g>
+          <g fill="#FFF9E9" stroke={color} strokeWidth=".65">
+            {flowers.map((flower) => (
+              <g key={`${flower.x}-${flower.y}`} transform={`translate(${flower.x} ${flower.y}) scale(.7)`}>
+                {Array.from({ length: 5 }, (_, index) => <ellipse key={index} cy="-8" rx="4" ry="8" transform={`rotate(${index * 72})`} />)}
+                <circle r="2.4" fill="#C5902B" />
+              </g>
+            ))}
+          </g>
+        </g>
+
+        <g className="jawa-envelope-seal-vector" transform="translate(240 278)" filter={`url(#${shadowId})`}>
+          <path d="M0-37L9-27L23-30L27-17L39-10L34 3L39 16L27 23L23 36L9 33L0 43L-9 33L-23 36L-27 23L-39 16L-34 3L-39-10L-27-17L-23-30L-9-27Z" fill={`url(#${goldId})`} stroke="#6A390F" strokeWidth="1.4" />
+          <circle r="29" fill="#7B3F1A" stroke="#F0D077" strokeWidth="1.1" />
+          <circle r="22" fill="none" stroke="#F0D077" strokeWidth=".55" strokeDasharray="1.5 3" />
+          <path d="M0-17C4-8 12-2 13 7C14 15 7 22 0 28C-7 22-14 15-13 7C-12-2-4-8 0-17Z" fill="none" stroke="#F0D077" strokeWidth=".65" opacity=".72" />
+          <text x="0" y="8" textAnchor="middle" fill="#FFF4D4" fontFamily="Georgia, serif" fontSize="16" letterSpacing="1.5">{initials.replace("&", " ")}</text>
+        </g>
       </g>
     </svg>
   );
