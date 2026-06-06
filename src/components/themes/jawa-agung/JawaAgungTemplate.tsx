@@ -3,7 +3,7 @@
 "use client";
 
 import { FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, Check, Copy, Heart, Home, MapPin, MessageCircle, Navigation, Send, UserRound, Volume2, VolumeX } from "lucide-react";
+import { BookOpen, CalendarDays, Check, Copy, Heart, Home, MapPin, MessageCircle, Navigation, Send, UserRound, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import type { FatehaEvent, FatehaGiftAccount, FatehaInvitationData, FatehaRsvpMessage, FatehaStoryItem } from "@/components/themes/fateha";
 import { cn } from "@/lib/utils";
@@ -371,6 +371,122 @@ const jawaAgungStyles = `
   45% { transform: scale(1.05); }
   100% { transform: scale(1); }
 }
+.jawa-envelope-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #E8D6AD;
+  padding: 1.5rem;
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.jawa-envelope-intro.is-opening {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.98);
+  pointer-events: none;
+}
+.jawa-envelope-card {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #FAF4E6;
+  width: 100%;
+  max-width: 24rem;
+  padding: 2.5rem 1.5rem;
+  border: 1px solid rgba(182,129,44,.5);
+  box-shadow: 0 24px 64px rgba(123,63,26,.15);
+}
+.jawa-envelope-card::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(212,168,67,.4);
+  pointer-events: none;
+}
+.jawa-envelope-button {
+  font-family: var(--font-jawa-display), serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: #F5EDD6;
+  background: #7B3F1A;
+  padding: 1rem 1.5rem;
+  border: 1px solid #7B3F1A;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.jawa-envelope-button:hover {
+  background: #5F3515;
+  color: #F5EDD6;
+}
+.jawa-envelope-illustration {
+  position: relative;
+  width: 14rem;
+  height: 9rem;
+  margin: 1.5rem auto;
+}
+.jawa-envelope-back {
+  position: absolute;
+  inset-x: 0;
+  bottom: 0;
+  height: 7rem;
+  background: #D8C093;
+  border: 1px solid rgba(123,63,26,.2);
+}
+.jawa-envelope-flap {
+  position: absolute;
+  inset-x: 0;
+  top: 1rem;
+  height: 5.5rem;
+  background: #D4A843;
+  border-bottom: 1px solid rgba(123,63,26,.2);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top;
+  transition: transform 0.6s ease;
+  z-index: 3;
+}
+.is-opening .jawa-envelope-flap {
+  transform: rotateX(180deg);
+}
+.jawa-envelope-front {
+  position: absolute;
+  inset-x: 0;
+  bottom: 0;
+  height: 7rem;
+  background: #E8D6AD;
+  border: 1px solid rgba(123,63,26,.15);
+  clip-path: polygon(0 100%, 0 0, 50% 35%, 100% 0, 100% 100%);
+  z-index: 4;
+}
+.jawa-envelope-seal {
+  position: absolute;
+  left: 50%;
+  top: 5.5rem;
+  transform: translate(-50%, -50%);
+  width: 3.2rem;
+  height: 3.2rem;
+  background: #7B3F1A;
+  border-radius: 50%;
+  border: 2px solid #D4A843;
+  display: grid;
+  place-items: center;
+  color: #F5EDD6;
+  font-family: var(--font-jawa-heading), serif;
+  font-size: 1.15rem;
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(123,63,26,.3);
+  transition: opacity 0.3s ease;
+}
+.is-opening .jawa-envelope-seal {
+  opacity: 0;
+}
 @media (min-width: 640px) {
   .jawa-section { padding: 7rem 4.5rem; }
 }
@@ -468,8 +584,10 @@ export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
   const sectionOrder = useMemo(() => getVisibleSections(data), [data]);
   const [closingVisible, setClosingVisible] = useState(false);
   const [activeSection, setActiveSection] = useState<JawaAgungSectionId>("cover");
+  const [opened, setOpened] = useState(false);
 
   useEffect(() => {
+    if (!opened) return;
     const elements = document.querySelectorAll(".jawa-reveal");
     const observer = new IntersectionObserver(
       (entries) => {
@@ -510,28 +628,88 @@ export function JawaAgungTemplate({ data }: { data: FatehaInvitationData }) {
       closingObserver?.disconnect();
       navObserver.disconnect();
     };
-  }, [sectionOrder]);
+  }, [sectionOrder, opened]);
 
   return (
     <div className={cn("jawa-agung-theme min-h-screen bg-[#E8D6AD]", jawaAgungFontClassName)}>
       <style>{jawaAgungStyles}</style>
-      <MusicToggle musicUrl={data.musicUrl} closingVisible={closingVisible} />
-      <JawaNav activeSection={activeSection} />
-      <main>
-        {sectionOrder.map((section) => {
-          if (section === "cover") return <CoverSection key={section} data={data} />;
-          if (section === "quote" && (safeArabic(data.quote.arabic) || data.quote.translation)) return <OpeningQuoteSection key={section} data={data} />;
-          if (section === "couple") return <CoupleSection key={section} data={data} />;
-          if (section === "story" && data.loveStory.length > 0) return <LoveStorySection key={section} items={data.loveStory} />;
-          if (section === "event") return <EventSection key={section} data={data} />;
-          if (section === "gallery" && data.show_prewed_gallery !== false && data.gallery.length > 0) return <GallerySection key={section} data={data} />;
-          if (section === "rsvp") return <RsvpSection key={section} data={data} />;
-          if (section === "gift" && data.show_gift_section !== false && (data.giftAccounts.length > 0 || data.giftAddress)) return <GiftSection key={section} data={data} />;
-          if (section === "closing") return <ClosingSection key={section} data={data} />;
-          return null;
-        })}
-      </main>
+      
+      {!opened ? (
+        <JawaEnvelopeIntro data={data} onOpen={() => setOpened(true)} />
+      ) : null}
+      
+      {opened ? (
+        <>
+          <MusicToggle musicUrl={data.musicUrl} closingVisible={closingVisible} />
+          <JawaNav activeSection={activeSection} />
+          <main>
+            {sectionOrder.map((section) => {
+              if (section === "cover") return <CoverSection key={section} data={data} />;
+              if (section === "quote" && (safeArabic(data.quote.arabic) || data.quote.translation)) return <OpeningQuoteSection key={section} data={data} />;
+              if (section === "couple") return <CoupleSection key={section} data={data} />;
+              if (section === "story" && data.loveStory.length > 0) return <LoveStorySection key={section} items={data.loveStory} />;
+              if (section === "event") return <EventSection key={section} data={data} />;
+              if (section === "gallery" && data.show_prewed_gallery !== false && data.gallery.length > 0) return <GallerySection key={section} data={data} />;
+              if (section === "rsvp") return <RsvpSection key={section} data={data} />;
+              if (section === "gift" && data.show_gift_section !== false && (data.giftAccounts.length > 0 || data.giftAddress)) return <GiftSection key={section} data={data} />;
+              if (section === "closing") return <ClosingSection key={section} data={data} />;
+              return null;
+            })}
+          </main>
+        </>
+      ) : null}
     </div>
+  );
+}
+
+function JawaEnvelopeIntro({ data, onOpen }: { data: FatehaInvitationData; onOpen: () => void }) {
+  const [phase, setPhase] = useState<"ready" | "opening">("ready");
+
+  function handleOpen() {
+    if (phase === "opening") return;
+    setPhase("opening");
+    setTimeout(onOpen, 800);
+  }
+
+  const initials = data.monogram || `${data.bride.nickname[0]}&${data.groom.nickname[0]}`;
+
+  return (
+    <section className={cn("jawa-envelope-intro", phase === "opening" && "is-opening")}>
+      <KawungBackground color="#D4A843" opacity={0.05} />
+      <SparkleField count={15} color="#B6812C" opacity={0.6} />
+      <BatikBorder color="#D4A843" opacity={0.4} className="absolute left-0 top-0 w-full z-[1]" />
+      <BatikBorder color="#D4A843" opacity={0.4} className="absolute bottom-0 left-0 w-full rotate-180 z-[1]" />
+      
+      <div className="jawa-envelope-card">
+        <CornerOrnament position="tl" color="#B6812C" size={42} opacity={0.6} className="absolute left-2 top-2" />
+        <CornerOrnament position="tr" color="#B6812C" size={42} opacity={0.6} className="absolute right-2 top-2" />
+        <CornerOrnament position="bl" color="#B6812C" size={42} opacity={0.6} className="absolute left-2 bottom-2" />
+        <CornerOrnament position="br" color="#B6812C" size={42} opacity={0.6} className="absolute right-2 bottom-2" />
+        
+        <GununganCrown color="#8A5518" opacity={0.8} className="w-[90px] mb-4" />
+        <p className="jawa-display text-[0.6rem] font-bold uppercase tracking-[0.3em] text-[#7B3F1A]">Undangan Pernikahan</p>
+        
+        <div className="jawa-envelope-illustration">
+          <div className="jawa-envelope-back" />
+          <div className="jawa-envelope-flap" />
+          <div className="jawa-envelope-front" />
+          <div className="jawa-envelope-seal">{initials}</div>
+        </div>
+
+        <h2 className="jawa-heading text-3xl font-bold text-[#3D1F0A] mt-2 mb-2">
+          {data.bride.nickname} <span className="text-[#D4A843] italic font-normal text-2xl">&amp;</span> {data.groom.nickname}
+        </h2>
+        
+        <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A] mb-8">
+          {formatDateUpper(data.wedding.date)}
+        </p>
+        
+        <button type="button" onClick={handleOpen} disabled={phase === "opening"} className="jawa-envelope-button flex items-center justify-center gap-2">
+          <BookOpen className="w-4 h-4" aria-hidden="true" />
+          Buka Undangan
+        </button>
+      </div>
+    </section>
   );
 }
 
