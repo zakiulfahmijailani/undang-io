@@ -304,10 +304,22 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
 
   useEffect(() => {
     const themeFromUrl = searchParams.get("theme");
+    const groomFromUrl = searchParams.get("groom")?.trim();
+    const brideFromUrl = searchParams.get("bride")?.trim();
     const match = themeOptions.find((theme) => theme.id === themeFromUrl || theme.slug === themeFromUrl);
     if (match) {
       setSelectedThemeId(match.id);
       setStep(2);
+    }
+
+    if (groomFromUrl || brideFromUrl) {
+      setForm((previous) => ({
+        ...previous,
+        groomFullName: groomFromUrl || previous.groomFullName,
+        groomNickname: groomFromUrl || previous.groomNickname,
+        brideFullName: brideFromUrl || previous.brideFullName,
+        brideNickname: brideFromUrl || previous.brideNickname,
+      }));
     }
 
     try {

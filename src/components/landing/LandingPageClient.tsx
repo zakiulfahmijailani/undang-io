@@ -3,7 +3,7 @@
 import { CtaStrip } from "./CtaStrip";
 import { FeatureCards } from "./FeatureCards";
 import { LandingFooter } from "./LandingFooter";
-import { LandingHero } from "./LandingHero";
+import { LandingHeroConversion } from "./LandingHeroConversion";
 import { LandingNav } from "./LandingNav";
 import { PricingCards } from "./PricingCards";
 import { TestimonialCards } from "./TestimonialCards";
@@ -20,7 +20,7 @@ export function LandingPageClient({ themes }: LandingPageClientProps) {
     <div className="min-h-screen bg-landing-paper text-landing-ink">
       <LandingNav />
       <main>
-        <LandingHero themes={themes} />
+        <LandingHeroConversion themes={themes} />
         <TrustStrip />
         <FeatureCards />
         <ThemeShowcase themes={themes} />
