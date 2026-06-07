@@ -1,1 +1,5 @@
-export { default } from "../undangan/baru/wizard/page";
+import { redirect } from "next/navigation";
+
+export default function CreateRedirectPage() {
+  redirect("/dashboard/undangan/baru/wizard");
+}

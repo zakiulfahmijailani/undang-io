@@ -54,7 +54,7 @@ export function ThemeInfoForm({ theme }: Props) {
     setIsSaving(true)
     setSaveSuccess(false)
     try {
-      const res = await updateThemeInfo(theme.theme_key, formData)
+      const res = await updateThemeInfo(theme.theme_key, formData as any)
       if (res.success) {
         setSaveSuccess(true)
         // Update live preview

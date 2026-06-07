@@ -32,7 +32,7 @@ export default function UserThemeSelectionPage() {
 
                 if (error) throw error;
                 
-                const themes: Theme[] = (data || []).map(row => ({
+                const themes: Theme[] = (data || []).map((row: any) => ({
                     id: row.id,
                     name: row.name || "",
                     slug: row.slug || "",

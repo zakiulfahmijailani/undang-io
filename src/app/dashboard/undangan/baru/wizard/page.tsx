@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import FormContent from "../form/FormContent";
+import FormContent from "@/app/dashboard/undangan/baru/form/FormContent";
 
 export default function NewInvitationWizardPage() {
   return (
