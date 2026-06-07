@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Eye, Image as ImageIcon, Layers3, Music, Palette, Settings, Sparkles, Upload } from "lucide-react";
+import { UniversalThemePreview } from "@/components/admin/UniversalThemePreview";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -156,6 +157,13 @@ export default async function ThemeDetailPage({ params }: { params: Promise<{ th
         </aside>
 
         <div className="grid gap-6">
+          <UniversalThemePreview
+            themeKey={theme.slug || themeKey}
+            src={`/dashboard/themes/${themeKey}/preview`}
+            label={`Pratinjau ${themeName}`}
+            className="h-[calc(100dvh-7rem)] min-h-[640px] xl:sticky xl:top-20"
+          />
+
           <section className="rounded-3xl border border-landing-border bg-white p-6 shadow-landing-card">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-landing-maroon text-white">

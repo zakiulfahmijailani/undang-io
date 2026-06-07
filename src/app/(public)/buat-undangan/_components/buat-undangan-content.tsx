@@ -29,6 +29,8 @@ import { toast } from "sonner";
 import { fallbackThemes } from "@/components/landing/data";
 import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
 import type { LandingTheme } from "@/components/landing/types";
+import { InvitationPreviewRenderer } from "@/components/preview/InvitationPreviewRenderer";
+import { PreviewShell, type PreviewMode } from "@/components/preview/PreviewShell";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   DEFAULT_INVITATION_THEME_NAME,
@@ -263,34 +265,6 @@ function TextArea({
   );
 }
 
-import { useRef } from "react";
-
-function InvitationPreview({ form, themeSlug, large = false }: { form: InvitationForm; themeSlug?: string; large?: boolean }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({ type: "UPDATE_PREVIEW", data: form }, "*");
-    }
-  }, [form]);
-
-  return (
-    <div
-      className={cn(
-        "relative mx-auto overflow-hidden rounded-2xl border border-landing-border shadow-landing-card bg-landing-cream",
-        large ? "aspect-[1.52/1] w-full max-w-[650px]" : "aspect-[3/4] w-full max-w-[300px]",
-      )}
-    >
-      <iframe
-        ref={iframeRef}
-        src={`/invite/demo?preview=true&theme=${themeSlug || "sakinah-serenity"}`}
-        className="h-full w-full border-0"
-        sandbox="allow-scripts allow-same-origin"
-      />
-    </div>
-  );
-}
-
 export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: ActiveTheme[]; isLoggedIn?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -301,6 +275,13 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const [selectedPrice, setSelectedPrice] = useState("Semua");
   const [form, setForm] = useState<InvitationForm>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
+
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      setPreviewMode("mobile");
+    }
+  }, []);
 
   useEffect(() => {
     const themeFromUrl = searchParams.get("theme");
@@ -697,22 +678,36 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
             </div>
           </section>
 
-          <aside className="hidden bg-landing-cream px-6 py-8 lg:block">
+          <aside className="bg-landing-cream px-4 py-6 sm:px-6 lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start lg:py-4">
             <div className="mb-4 flex items-center gap-2 font-ui text-xs font-bold text-landing-success">
               <span className="h-2 w-2 rounded-full bg-landing-success" />
               LIVE
             </div>
-            <InvitationPreview form={form} themeSlug={selectedTheme?.slug} />
+            <PreviewShell
+              mode={previewMode}
+              onModeChange={setPreviewMode}
+              label="Pratinjau undangan"
+              className="h-[720px] lg:h-[calc(100dvh-7rem)]"
+            >
+              <InvitationPreviewRenderer themeKey={selectedTheme?.slug} data={{ ...form }} />
+            </PreviewShell>
             <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? DEFAULT_INVITATION_THEME_NAME}</p>
-            <p className="mt-10 border-t border-landing-border pt-4 text-center font-ui text-xs text-landing-muted">Langkah 2 dari 3</p>
+            <p className="mt-4 border-t border-landing-border pt-4 text-center font-ui text-xs text-landing-muted">Langkah 2 dari 3</p>
           </aside>
         </main>
       ) : null}
 
       {step === 3 ? (
         <main className="grid min-h-[calc(100vh-4rem)] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_0.95fr] lg:px-10">
-          <section className="flex items-center">
-            <InvitationPreview form={form} themeSlug={selectedTheme?.slug} large />
+          <section className="min-w-0">
+            <PreviewShell
+              mode={previewMode}
+              onModeChange={setPreviewMode}
+              label="Pratinjau final"
+              className="h-[720px]"
+            >
+              <InvitationPreviewRenderer themeKey={selectedTheme?.slug} data={{ ...form }} />
+            </PreviewShell>
           </section>
 
           <section className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">

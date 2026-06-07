@@ -4,9 +4,16 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, ImagePlus, Layers3, Loader2, Palette, Sparkles } from "lucide-react";
+import { ArrowRight, Check, ImagePlus, Layers3, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { createTheme } from "@/app/dashboard/themes/actions";
+import { UniversalThemePreview } from "@/components/admin/UniversalThemePreview";
+import {
+  DEFAULT_INVITATION_THEME_KEY,
+  JAWA_AGUNG_THEME_KEY,
+  OBSIDIAN_LUXE_THEME_KEY,
+  PETAL_SOFT_THEME_KEY,
+} from "@/lib/default-theme";
 import { cn } from "@/lib/utils";
 
 const categories = ["modern", "jawa", "sunda", "minang", "internasional"];
@@ -27,6 +34,28 @@ export function CreateThemeWizard() {
   const [isPremium, setIsPremium] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const generatedSlug = useMemo(() => slug || slugify(name), [name, slug]);
+  const previewThemeKey = useMemo(() => {
+    if (category === "jawa") return JAWA_AGUNG_THEME_KEY;
+    if (category === "internasional") return OBSIDIAN_LUXE_THEME_KEY;
+    if (category === "modern") return PETAL_SOFT_THEME_KEY;
+    return DEFAULT_INVITATION_THEME_KEY;
+  }, [category]);
+  const previewData = useMemo(
+    () => ({
+      groomFullName: "Rizky Pratama",
+      groomNickname: "Rizky",
+      brideFullName: "Amara Putri",
+      brideNickname: "Amara",
+      akadDate: "2026-08-15",
+      akadTime: "10:00",
+      receptionDate: "2026-08-15",
+      receptionTime: "19:00",
+      venue: "The Grand Ballroom, Jakarta",
+      address: "Jakarta, Indonesia",
+      quote: "Bersama keluarga besar kami, dengan penuh kebahagiaan mengundang Anda.",
+    }),
+    [],
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,7 +82,7 @@ export function CreateThemeWizard() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1fr_380px]">
+    <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(520px,0.9fr)]">
       <section className="rounded-3xl border border-landing-border bg-white p-6 shadow-landing-card lg:p-8">
         <div className="grid gap-5 md:grid-cols-3">
           {["Identitas", "Gaya Visual", "Aset Awal"].map((label, index) => (
@@ -144,14 +173,13 @@ export function CreateThemeWizard() {
         </button>
       </section>
 
-      <aside className="rounded-3xl border border-landing-border bg-landing-paper p-6 shadow-landing-card">
-        <div className="aspect-[9/13] rounded-2xl border border-landing-border bg-landing-cream p-5 text-center">
-          <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-landing-gold/50">
-            <Palette className="h-10 w-10 text-landing-gold" aria-hidden="true" />
-            <p className="mt-4 font-landing-serif text-3xl font-semibold text-landing-ink">{name || "Nama Tema"}</p>
-            <p className="mt-2 font-ui text-xs font-semibold uppercase tracking-[0.2em] text-landing-muted">{category}</p>
-          </div>
-        </div>
+      <aside className="min-w-0 xl:sticky xl:top-20 xl:self-start">
+        <UniversalThemePreview
+          themeKey={previewThemeKey}
+          data={previewData}
+          label={name ? `Pratinjau ${name}` : "Pratinjau tema baru"}
+          className="h-[720px]"
+        />
         <div className="mt-5 grid gap-3">
           {[
             { icon: Layers3, text: "Buat struktur tema lebih dulu." },
