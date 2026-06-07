@@ -236,7 +236,7 @@ export default function InvitationEditorForm({
   const ActiveSection = sectionComponents[activeSection];
 
   const topBar = (
-    <div className="sticky top-0 z-10 bg-white border-b border-border px-6 py-3 flex items-center justify-between">
+    <div className="bg-white border-b border-border px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         {!wizardMode && (
           <Button variant="ghost" className="w-8 h-8 p-0" onClick={() => router.back()}>
@@ -338,6 +338,7 @@ export default function InvitationEditorForm({
     <LivePreviewWorkspace
       className="-m-5 min-h-screen md:-m-8"
       topBar={topBar}
+      topBarClassName={wizardMode ? "top-16" : "top-0"}
       form={formPanel}
       preview={preview}
       previewVisible={previewVisible}

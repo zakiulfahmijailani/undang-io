@@ -12,6 +12,7 @@ export type LivePreviewWorkspaceProps = {
   className?: string;
   formClassName?: string;
   previewClassName?: string;
+  topBarClassName?: string;
   previewVisible?: boolean;
   onPreviewVisibleChange?: (visible: boolean) => void;
   showDesktopToggle?: boolean;
@@ -24,6 +25,7 @@ export function LivePreviewWorkspace({
   className,
   formClassName,
   previewClassName,
+  topBarClassName,
   previewVisible: controlledVisible,
   onPreviewVisibleChange,
   showDesktopToggle = false,
@@ -39,7 +41,7 @@ export function LivePreviewWorkspace({
 
   return (
     <div className={cn("relative min-w-0", className)}>
-      {topBar ? <div className="sticky top-0 z-30">{topBar}</div> : null}
+      {topBar ? <div className={cn("sticky top-0 z-30", topBarClassName)}>{topBar}</div> : null}
 
       <div
         className={cn(
