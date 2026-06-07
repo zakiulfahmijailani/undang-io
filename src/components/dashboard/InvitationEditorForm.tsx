@@ -10,6 +10,7 @@ import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace"
 import { DEFAULT_INVITATION_THEME_KEY } from "@/lib/default-theme";
 import { normalizeSectionOrder } from "@/lib/preview/section-aliases";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import { InformasiDasarSection } from "./sections/InformasiDasarSection";
 import { DataMempelaiSection } from "./sections/DataMempelaiSection";
@@ -256,7 +257,7 @@ export default function InvitationEditorForm({
       </div>
       <div className="flex items-center gap-2">
         {wizardMode ? (
-          <Button size="sm" onClick={() => onWizardNext?.(localDraft)}>
+          <Button size="sm" className="bg-landing-maroon text-white hover:bg-landing-maroon-dark rounded-full shadow-sm" onClick={() => onWizardNext?.(localDraft)}>
             Lanjut Pratinjau 🚀
           </Button>
         ) : (
@@ -336,7 +337,7 @@ export default function InvitationEditorForm({
 
   return (
     <LivePreviewWorkspace
-      className="-m-5 min-h-screen md:-m-8"
+      className={cn("min-h-[calc(100dvh-4rem)]", !wizardMode && "-m-5 min-h-screen md:-m-8")}
       topBar={topBar}
       topBarClassName={wizardMode ? "top-16" : "top-0"}
       form={formPanel}
