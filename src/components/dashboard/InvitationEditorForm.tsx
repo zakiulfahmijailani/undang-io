@@ -97,11 +97,15 @@ export default function InvitationEditorForm({
   isCreateMode,
   themeId,
   themeKey,
+  wizardMode,
+  onWizardNext,
 }: {
   initialData?: Partial<InvitationEditorInitialData>;
   isCreateMode?: boolean;
   themeId?: string;
   themeKey?: string;
+  wizardMode?: boolean;
+  onWizardNext?: (data: Partial<InvitationEditorInitialData>) => void;
 }) {
   const router = useRouter();
   
@@ -234,23 +238,33 @@ export default function InvitationEditorForm({
   const topBar = (
     <div className="sticky top-0 z-10 bg-white border-b border-border px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" className="w-8 h-8 p-0" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+        {!wizardMode && (
+          <Button variant="ghost" className="w-8 h-8 p-0" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        )}
         <div>
           <h1 className="text-sm font-semibold">
-            Edit: {localDraft.groom_nickname || "Pria"} & {localDraft.bride_nickname || "Wanita"}
+            {wizardMode ? "Lengkapi Data Undangan" : `Edit: ${localDraft.groom_nickname || "Pria"} & ${localDraft.bride_nickname || "Wanita"}`}
           </h1>
-          <p className="text-xs text-muted-foreground">
-            undang.io/invite/{localDraft.slug || "nama-pasangan"}
-          </p>
+          {!wizardMode && (
+            <p className="text-xs text-muted-foreground">
+              undang.io/invite/{localDraft.slug || "nama-pasangan"}
+            </p>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>
-          {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          Simpan Semua
-        </Button>
+        {wizardMode ? (
+          <Button size="sm" onClick={() => onWizardNext?.(localDraft)}>
+            Lanjut Pratinjau 🚀
+          </Button>
+        ) : (
+          <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            Simpan Semua
+          </Button>
+        )}
       </div>
     </div>
   );

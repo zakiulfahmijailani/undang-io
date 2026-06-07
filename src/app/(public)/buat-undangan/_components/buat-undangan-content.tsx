@@ -31,6 +31,7 @@ import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
 import type { LandingTheme } from "@/components/landing/types";
 import { InvitationPreviewShell } from "@/components/preview/InvitationPreviewShell";
 import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
+import InvitationEditorForm, { type InvitationEditorInitialData } from "@/components/dashboard/InvitationEditorForm";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   DEFAULT_INVITATION_THEME_NAME,
@@ -52,46 +53,15 @@ export type ActiveTheme = {
 
 type WizardStep = 1 | 2 | 3;
 
-type InvitationForm = {
-  groomFullName: string;
-  groomNickname: string;
-  groomFather: string;
-  groomMother: string;
-  brideFullName: string;
-  brideNickname: string;
-  brideFather: string;
-  brideMother: string;
-  akadDate: string;
-  akadTime: string;
-  receptionDate: string;
-  receptionTime: string;
-  venue: string;
-  address: string;
-  mapsUrl: string;
-  quote: string;
-  guestMessage: string;
-};
+
 
 const PREVIEW_DURATION_MS = 25 * 60 * 1000;
 
-const defaultForm: InvitationForm = {
-  groomFullName: "",
-  groomNickname: "",
-  groomFather: "",
-  groomMother: "",
-  brideFullName: "",
-  brideNickname: "",
-  brideFather: "",
-  brideMother: "",
-  akadDate: "",
-  akadTime: "",
-  receptionDate: "",
-  receptionTime: "",
-  venue: "",
-  address: "",
-  mapsUrl: "",
-  quote: "",
-  guestMessage: "",
+const defaultForm: Partial<InvitationEditorInitialData> = {
+  groom_full_name: "",
+  groom_nickname: "",
+  bride_full_name: "",
+  bride_nickname: "",
 };
 
 const stepLabels = ["Pilih Tema", "Isi Data", "Pratinjau"] as const;
@@ -273,7 +243,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const [selectedThemeId, setSelectedThemeId] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [selectedPrice, setSelectedPrice] = useState("Semua");
-  const [form, setForm] = useState<InvitationForm>(defaultForm);
+  const [form, setForm] = useState<Partial<InvitationEditorInitialData>>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -286,32 +256,23 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
       setStep(2);
     }
 
-    if (groomFromUrl || brideFromUrl) {
+if (groomFromUrl || brideFromUrl) {
       setForm((previous) => ({
         ...previous,
-        groomFullName: groomFromUrl || previous.groomFullName,
-        groomNickname: groomFromUrl || previous.groomNickname,
-        brideFullName: brideFromUrl || previous.brideFullName,
-        brideNickname: brideFromUrl || previous.brideNickname,
+        groom_full_name: groomFromUrl || previous.groom_full_name,
+        groom_nickname: groomFromUrl || previous.groom_nickname,
+        bride_full_name: brideFromUrl || previous.bride_full_name,
+        bride_nickname: brideFromUrl || previous.bride_nickname,
       }));
     }
 
     try {
       const raw = sessionStorage.getItem("undang_draft");
       if (raw) {
-        const draft = JSON.parse(raw) as {
-          groom_name?: string;
-          groom_full_name?: string;
-          bride_name?: string;
-          bride_full_name?: string;
-          themeId?: string;
-        };
+        const draft = JSON.parse(raw) as any;
         setForm((previous) => ({
           ...previous,
-          groomFullName: draft.groom_name || draft.groom_full_name || previous.groomFullName,
-          groomNickname: draft.groom_name || previous.groomNickname,
-          brideFullName: draft.bride_name || draft.bride_full_name || previous.brideFullName,
-          brideNickname: draft.bride_name || previous.brideNickname,
+          ...draft,
         }));
         if (draft.themeId) {
           const draftTheme = themeOptions.find((theme) => theme.id === draft.themeId || theme.slug === draft.themeId);
@@ -329,9 +290,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
     [selectedThemeId, themeOptions],
   );
 
-  function update(key: keyof InvitationForm, value: string) {
-    setForm((previous) => ({ ...previous, [key]: value }));
-  }
+
 
   async function handleGuestPublish(slug: string) {
     const sessionToken = crypto.randomUUID();
@@ -356,7 +315,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
 
   async function handlePublish() {
     setIsSubmitting(true);
-    const slug = generateSlug(form.groomNickname || form.groomFullName, form.brideNickname || form.brideFullName);
+    const slug = generateSlug(form.groom_nickname || form.groom_full_name || "", form.bride_nickname || form.bride_full_name || "");
 
     try {
       if (isLoggedIn) {
@@ -594,112 +553,18 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
       ) : null}
 
       {step === 2 ? (
-        <LivePreviewWorkspace
-          className="min-h-[calc(100dvh-4rem)]"
-          form={
-          <section className="px-4 py-6 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl">
-              <SectionTitle number="1" title="Identitas Pasangan" />
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
-                <Field label="Nama Lengkap Pria" required value={form.groomFullName} onChange={(value) => update("groomFullName", value)} />
-                <Field label="Nama Lengkap Wanita" required value={form.brideFullName} onChange={(value) => update("brideFullName", value)} />
-                <Field label="Panggilan Pria" required value={form.groomNickname} onChange={(value) => update("groomNickname", value)} />
-                <Field label="Panggilan Wanita" required value={form.brideNickname} onChange={(value) => update("brideNickname", value)} />
-                <Field label="Nama Ayah Pria" value={form.groomFather} onChange={(value) => update("groomFather", value)} />
-                <Field label="Nama Ibu Pria" value={form.groomMother} onChange={(value) => update("groomMother", value)} />
-                <Field label="Nama Ayah Wanita" value={form.brideFather} onChange={(value) => update("brideFather", value)} />
-                <Field label="Nama Ibu Wanita" value={form.brideMother} onChange={(value) => update("brideMother", value)} />
-              </div>
-
-              <SectionTitle number="2" title="Detail Acara" className="mt-6" />
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Field
-                  label="Tanggal Akad"
-                  required
-                  type="date"
-                  value={form.akadDate}
-                  onChange={(value) => update("akadDate", value)}
-                  icon={<Calendar className="h-4 w-4" />}
-                />
-                <Field
-                  label="Waktu Akad"
-                  required
-                  type="time"
-                  value={form.akadTime}
-                  onChange={(value) => update("akadTime", value)}
-                  icon={<Clock3 className="h-4 w-4" />}
-                />
-                <Field
-                  label="Tanggal Resepsi"
-                  required
-                  type="date"
-                  value={form.receptionDate}
-                  onChange={(value) => update("receptionDate", value)}
-                  icon={<Calendar className="h-4 w-4" />}
-                />
-                <Field
-                  label="Waktu Resepsi"
-                  required
-                  type="time"
-                  value={form.receptionTime}
-                  onChange={(value) => update("receptionTime", value)}
-                  icon={<Clock3 className="h-4 w-4" />}
-                />
-                <div className="sm:col-span-2">
-                  <Field label="Nama Venue" required value={form.venue} onChange={(value) => update("venue", value)} />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block font-ui text-xs font-semibold text-landing-ink">
-                    Alamat Lengkap <span className="text-landing-maroon">*</span>
-                    <textarea
-                      value={form.address}
-                      onChange={(event) => update("address", event.target.value)}
-                      rows={4}
-                      className="mt-1.5 w-full resize-none rounded-md border border-landing-border bg-white px-3 py-2 font-ui text-sm text-landing-ink outline-none transition focus:border-landing-gold focus:ring-2 focus:ring-landing-gold/20"
-                    />
-                  </label>
-                </div>
-                <div className="sm:col-span-2">
-                  <Field label="Link Google Maps (opsional)" value={form.mapsUrl} onChange={(value) => update("mapsUrl", value)} />
-                </div>
-              </div>
-
-              <SectionTitle number="3" title="Pesan & Kutipan" className="mt-6" />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <TextArea label="Kutipan / Ayat" maxLength={200} value={form.quote} onChange={(value) => update("quote", value)} />
-                <TextArea label="Pesan untuk Tamu" maxLength={300} value={form.guestMessage} onChange={(value) => update("guestMessage", value)} />
-              </div>
-
-              <button
-                type="button"
-                className="mt-6 flex w-full items-center justify-between border-t border-landing-border py-4 font-landing-serif text-xl text-landing-ink"
-              >
-                Bagian 4 - Informasi Tambahan <span className="font-ui text-xs text-landing-muted">(opsional)</span>
-              </button>
-
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setStep(3)}
-                  className="inline-flex h-12 items-center gap-2 rounded-md bg-landing-maroon px-7 font-ui text-sm font-bold text-white shadow-landing-button transition hover:bg-landing-maroon-dark"
-                >
-                  Lihat Pratinjau
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
-            </div>
-          </section>
-          }
-          preview={
-            <InvitationPreviewShell
-              themeKey={selectedTheme?.slug}
-              invitationData={{ ...form }}
-              title="Pratinjau undangan"
-              url={`/invite/${generateSlug(form.groomNickname, form.brideNickname)}`}
-              className="h-full"
-            />
-          }
-        />
+        <div className="min-h-[calc(100dvh-4rem)]">
+          <InvitationEditorForm
+            initialData={form}
+            themeId={selectedThemeId}
+            themeKey={selectedTheme?.slug}
+            wizardMode={true}
+            onWizardNext={(data) => {
+              setForm(data);
+              setStep(3);
+            }}
+          />
+        </div>
       ) : null}
 
       {step === 3 ? (
@@ -758,7 +623,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               <div className="mt-3 flex gap-2">
                 <input
                   readOnly
-                  value={`https://undang.io/u/${generateSlug(form.groomNickname, form.brideNickname)}`}
+                  value={`https://undang.io/u/${generateSlug(form.groom_nickname || form.groom_full_name || "", form.bride_nickname || form.bride_full_name || "")}`}
                   className="h-10 min-w-0 flex-1 rounded-md border border-landing-border px-3 font-ui text-sm text-landing-ink"
                 />
                 <button type="button" className="rounded-md border border-landing-gold px-3 font-ui text-sm font-semibold text-landing-gold">
@@ -791,7 +656,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               themeKey={selectedTheme?.slug}
               invitationData={{ ...form }}
               title="Pratinjau final"
-              url={`/invite/${generateSlug(form.groomNickname, form.brideNickname)}`}
+              url={`/invite/${generateSlug(form.groom_nickname || form.groom_full_name || "", form.bride_nickname || form.bride_full_name || "")}`}
               className="h-full"
             />
           }

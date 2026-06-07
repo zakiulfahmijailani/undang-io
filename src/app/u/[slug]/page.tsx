@@ -25,23 +25,39 @@ type InvitationData = typeof demoData & {
 
 type GuestInvitationData = {
   groomNickname?: string;
+  groom_nickname?: string;
   brideNickname?: string;
+  bride_nickname?: string;
   groomFullName?: string;
+  groom_full_name?: string;
   brideFullName?: string;
+  bride_full_name?: string;
   groomFather?: string;
+  groom_father_name?: string;
   groomMother?: string;
+  groom_mother_name?: string;
   brideFather?: string;
+  bride_father_name?: string;
   brideMother?: string;
+  bride_mother_name?: string;
   akadDate?: string;
+  akad_datetime?: string;
   akadTime?: string;
   akadVenue?: string;
+  akad_location_name?: string;
   akadAddress?: string;
+  akad_location_address?: string;
   receptionDate?: string;
+  resepsi_datetime?: string;
   receptionTime?: string;
   receptionVenue?: string;
+  resepsi_location_name?: string;
   receptionAddress?: string;
+  resepsi_location_address?: string;
   quote?: string;
+  quote_text?: string;
   quoteSource?: string;
+  quote_source?: string;
 };
 
 type GuestSession = {
@@ -68,8 +84,8 @@ function joinDateTime(date?: string, time?: string) {
 
 function mapGuestSessionToInvitation(session: GuestSession): InvitationData {
   const invitation = session.invitation_data;
-  const groomNickname = invitation.groomNickname || "Mempelai Pria";
-  const brideNickname = invitation.brideNickname || "Mempelai Wanita";
+  const groomNickname = invitation.groomNickname || invitation.groom_nickname || "Mempelai Pria";
+  const brideNickname = invitation.brideNickname || invitation.bride_nickname || "Mempelai Wanita";
 
   return {
     ...demoData,
@@ -77,31 +93,31 @@ function mapGuestSessionToInvitation(session: GuestSession): InvitationData {
     theme: session.theme_id || undefined,
     groom: {
       ...demoData.groom,
-      fullName: invitation.groomFullName || groomNickname,
-      father: invitation.groomFather ? `Bapak ${invitation.groomFather}` : demoData.groom.father,
-      mother: invitation.groomMother ? `Ibu ${invitation.groomMother}` : demoData.groom.mother,
+      fullName: invitation.groomFullName || invitation.groom_full_name || groomNickname,
+      father: invitation.groomFather || invitation.groom_father_name ? `Bapak ${invitation.groomFather || invitation.groom_father_name}` : demoData.groom.father,
+      mother: invitation.groomMother || invitation.groom_mother_name ? `Ibu ${invitation.groomMother || invitation.groom_mother_name}` : demoData.groom.mother,
     },
     bride: {
       ...demoData.bride,
-      fullName: invitation.brideFullName || brideNickname,
-      father: invitation.brideFather ? `Bapak ${invitation.brideFather}` : demoData.bride.father,
-      mother: invitation.brideMother ? `Ibu ${invitation.brideMother}` : demoData.bride.mother,
+      fullName: invitation.brideFullName || invitation.bride_full_name || brideNickname,
+      father: invitation.brideFather || invitation.bride_father_name ? `Bapak ${invitation.brideFather || invitation.bride_father_name}` : demoData.bride.father,
+      mother: invitation.brideMother || invitation.bride_mother_name ? `Ibu ${invitation.brideMother || invitation.bride_mother_name}` : demoData.bride.mother,
     },
     akad: {
       ...demoData.akad,
-      date: joinDateTime(invitation.akadDate, invitation.akadTime) || demoData.akad.date,
-      venue: invitation.akadVenue || demoData.akad.venue,
-      address: invitation.akadAddress || demoData.akad.address,
+      date: joinDateTime(invitation.akadDate, invitation.akadTime) || invitation.akad_datetime || demoData.akad.date,
+      venue: invitation.akadVenue || invitation.akad_location_name || demoData.akad.venue,
+      address: invitation.akadAddress || invitation.akad_location_address || demoData.akad.address,
     },
     reception: {
       ...demoData.reception,
-      date: joinDateTime(invitation.receptionDate, invitation.receptionTime) || demoData.reception.date,
-      venue: invitation.receptionVenue || demoData.reception.venue,
-      address: invitation.receptionAddress || demoData.reception.address,
+      date: joinDateTime(invitation.receptionDate, invitation.receptionTime) || invitation.resepsi_datetime || demoData.reception.date,
+      venue: invitation.receptionVenue || invitation.resepsi_location_name || demoData.reception.venue,
+      address: invitation.receptionAddress || invitation.resepsi_location_address || demoData.reception.address,
     },
     quote: {
-      text: invitation.quote || demoData.quote.text,
-      source: invitation.quoteSource || demoData.quote.source,
+      text: invitation.quote || invitation.quote_text || demoData.quote.text,
+      source: invitation.quoteSource || invitation.quote_source || demoData.quote.source,
     },
   };
 }
