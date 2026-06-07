@@ -57,11 +57,34 @@ type WizardStep = 1 | 2 | 3;
 
 const PREVIEW_DURATION_MS = 25 * 60 * 1000;
 
+import { demoData } from "@/data/demoInvitation";
+
 const defaultForm: Partial<InvitationEditorInitialData> = {
   groom_full_name: "",
   groom_nickname: "",
   bride_full_name: "",
   bride_nickname: "",
+  quote_text: demoData.quote.text,
+  quote_source: demoData.quote.source,
+  love_story: demoData.loveStory.map(item => ({
+    year: item.year,
+    title: item.title,
+    description: item.description,
+    photo: item.photo,
+  })),
+  gallery_photos: demoData.gallery,
+  gift_bank_name: demoData.bankAccounts[0]?.bank || "",
+  gift_bank_account: demoData.bankAccounts[0]?.number || "",
+  gift_bank_account_name: demoData.bankAccounts[0]?.name || "",
+  gift_shipping_address: demoData.giftAddress,
+  akad_datetime: demoData.akad.date,
+  akad_location_name: demoData.akad.venue,
+  akad_location_address: demoData.akad.address,
+  akad_maps_url: demoData.akad.mapsUrl,
+  resepsi_datetime: demoData.reception.date,
+  resepsi_location_name: demoData.reception.venue,
+  resepsi_location_address: demoData.reception.address,
+  resepsi_maps_url: demoData.reception.mapsUrl,
 };
 
 const stepLabels = ["Pilih Tema", "Isi Data", "Pratinjau"] as const;

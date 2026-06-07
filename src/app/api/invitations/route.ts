@@ -127,6 +127,8 @@ function combineDateTime(date?: string, time?: string) {
     return `${date}T${time}`;
 }
 
+import { demoData } from '@/data/demoInvitation';
+
 function buildInvitationInsertData(parsed: InvitationDraftData) {
     const form = parsed.invitationData ?? {};
     const details = parsed.details ?? {};
@@ -154,10 +156,10 @@ function buildInvitationInsertData(parsed: InvitationDraftData) {
         brideName;
     const akadDate =
         combineDateTime(details.akad_date, details.akad_time) ??
-        combineDateTime(readRecordString(form, ['akadDate', 'akad_date']), readRecordString(form, ['akadTime', 'akad_time']));
+        combineDateTime(readRecordString(form, ['akadDate', 'akad_date']), readRecordString(form, ['akadTime', 'akad_time'])) ?? demoData.akad.date;
     const receptionDate =
         combineDateTime(details.reception_date, details.reception_time) ??
-        combineDateTime(readRecordString(form, ['receptionDate', 'reception_date']), readRecordString(form, ['receptionTime', 'reception_time']));
+        combineDateTime(readRecordString(form, ['receptionDate', 'reception_date']), readRecordString(form, ['receptionTime', 'reception_time'])) ?? demoData.reception.date;
     const venue = readRecordString(form, ['venue']);
     const address = readRecordString(form, ['address']);
 
@@ -175,13 +177,27 @@ function buildInvitationInsertData(parsed: InvitationDraftData) {
             bride_father_name: details.bride_father ?? readRecordString(form, ['brideFather', 'bride_father']),
             bride_mother_name: details.bride_mother ?? readRecordString(form, ['brideMother', 'bride_mother']),
             akad_datetime: akadDate,
-            akad_location_name: details.akad_venue ?? readRecordString(form, ['akadVenue', 'akad_venue']) ?? venue,
-            akad_location_address: details.akad_address ?? readRecordString(form, ['akadAddress', 'akad_address']) ?? address,
+            akad_location_name: details.akad_venue ?? readRecordString(form, ['akadVenue', 'akad_venue']) ?? venue ?? demoData.akad.venue,
+            akad_location_address: details.akad_address ?? readRecordString(form, ['akadAddress', 'akad_address']) ?? address ?? demoData.akad.address,
             resepsi_datetime: receptionDate,
-            resepsi_location_name: details.reception_venue ?? readRecordString(form, ['receptionVenue', 'reception_venue']) ?? venue,
-            resepsi_location_address: details.reception_address ?? readRecordString(form, ['receptionAddress', 'reception_address']) ?? address,
-            quote_text: details.quote_text ?? readRecordString(form, ['quote', 'quoteText', 'greetingText']),
-            quote_source: details.quote_source ?? readRecordString(form, ['quoteSource', 'quote_source']),
+            resepsi_location_name: details.reception_venue ?? readRecordString(form, ['receptionVenue', 'reception_venue']) ?? venue ?? demoData.reception.venue,
+            resepsi_location_address: details.reception_address ?? readRecordString(form, ['receptionAddress', 'reception_address']) ?? address ?? demoData.reception.address,
+            quote_text: details.quote_text ?? readRecordString(form, ['quote', 'quoteText', 'greetingText']) ?? demoData.quote.text,
+            quote_source: details.quote_source ?? readRecordString(form, ['quoteSource', 'quote_source']) ?? demoData.quote.source,
+            love_story: form.loveStory ?? form.love_story ?? demoData.loveStory.map(item => ({
+                year: item.year,
+                title: item.title,
+                description: item.description,
+                photo: item.photo,
+            })),
+            gallery_photos: form.galleryPhotos ?? form.gallery_photos ?? demoData.gallery,
+            gift_bank_name: form.giftBankName ?? form.gift_bank_name ?? demoData.bankAccounts[0]?.bank,
+            gift_bank_account: form.giftBankAccount ?? form.gift_bank_account ?? demoData.bankAccounts[0]?.number,
+            gift_bank_account_name: form.giftBankAccountName ?? form.gift_bank_account_name ?? demoData.bankAccounts[0]?.name,
+            gift_shipping_address: form.giftShippingAddress ?? form.gift_shipping_address ?? demoData.giftAddress,
+            show_couple_photos: form.showCouplePhotos ?? form.show_couple_photos ?? true,
+            show_prewed_gallery: form.showPrewedGallery ?? form.show_prewed_gallery ?? true,
+            show_gift_section: form.showGiftSection ?? form.show_gift_section ?? true,
         },
     };
 }

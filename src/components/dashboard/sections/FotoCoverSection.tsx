@@ -64,9 +64,16 @@ export function FotoCoverSection({ data, onChange }: SectionFormProps) {
      <div className="flex flex-1 flex-col items-center sm:items-start gap-4 text-center sm:text-left">
       <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => void handleUpload(e.target.files?.[0] ?? null)} className="hidden" />
       <div className="flex flex-col items-center sm:items-start gap-2">
-        <Button type="button" variant="outline" className="h-10 rounded-full border-landing-gold text-landing-gold hover:bg-landing-gold hover:text-white transition-colors" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+        <Button 
+          type="button" 
+          variant="secondary"
+          size="sm" 
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 shadow-sm transition-all"
+        >
          {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-         Unggah Foto Utama
+         Foto Utama
         </Button>
         <p className="text-xs text-landing-muted max-w-[220px] leading-relaxed">
          Rekomendasi ukuran: 1080x1080px (Rasio 1:1) dengan format JPG/PNG, maks 5MB.
