@@ -23,6 +23,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { toast } from "sonner";
+import { isCanonicalSectionVisible, normalizeSectionOrder } from "@/lib/preview/section-aliases";
 import { cn } from "@/lib/utils";
 import type { FatehaEvent, FatehaGiftAccount, FatehaInvitationData, FatehaRsvpMessage } from "@/components/themes/fateha";
 import { petalSoftFontClassName } from "./fonts";
@@ -89,11 +90,12 @@ function cleanArabic(value: string | null | undefined, fallback: string) {
 
 function getVisibleSections(data: FatehaInvitationData): PetalSoftSectionId[] {
   const configurable = data as SectionConfigurableData;
-  const order = Array.isArray(configurable.sections_order) && configurable.sections_order.length > 0
-    ? configurable.sections_order
-    : DEFAULT_SECTION_ORDER;
+  const supported = new Set<PetalSoftSectionId>(DEFAULT_SECTION_ORDER);
+  const order = normalizeSectionOrder(configurable.sections_order).filter(
+    (section): section is PetalSoftSectionId => supported.has(section as PetalSoftSectionId),
+  );
 
-  return order.filter((section) => configurable.sections_visibility?.[section] !== false);
+  return order.filter((section) => isCanonicalSectionVisible(configurable.sections_visibility, section));
 }
 
 function parentLine(kind: "Putra" | "Putri", father: string | null, mother: string | null) {

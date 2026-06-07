@@ -1,145 +1,191 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
 import FatehaThemeRendererWrapper from "@/app/invite/[slug]/FatehaThemeRendererWrapper";
 import { JawaAgungTemplate } from "@/components/themes/jawa-agung";
 import { ObsidianLuxeTemplate } from "@/components/themes/obsidian-luxe";
 import { PetalSoftTemplate } from "@/components/themes/petal-soft";
-import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
-import { JAWA_AGUNG_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
 import { demoData as fallbackDemoData } from "@/data/demoInvitation";
+import { DEFAULT_INVITATION_THEME_KEY, JAWA_AGUNG_THEME_KEY, OBSIDIAN_LUXE_THEME_KEY, PETAL_SOFT_THEME_KEY } from "@/lib/default-theme";
+import { mapInvitationToFatehaData } from "@/lib/fateha-theme-mapper";
 import type { FatehaInvitationData } from "@/components/themes/fateha";
+import type { InvitationPreviewPayload, PreviewMessage, ThemePreviewOverride } from "@/types/preview";
 
 type LegacyDemoData = typeof fallbackDemoData;
 type LiveDemoData = LegacyDemoData | FatehaInvitationData;
-type PreviewFormMessage = {
-  type?: string;
-  data?: {
-    groomFullName?: string;
-    groomNickname?: string;
-    groomFather?: string;
-    groomMother?: string;
-    brideFullName?: string;
-    brideNickname?: string;
-    brideFather?: string;
-    brideMother?: string;
-    akadDate?: string;
-    akadTime?: string;
-    receptionDate?: string;
-    receptionTime?: string;
-    venue?: string;
-    address?: string;
-    mapsUrl?: string;
-    quote?: string;
+
+function joinDateTime(date: string | undefined, time: string | undefined, fallback: string) {
+  if (!date) return fallback;
+  if (date.includes("T")) return date;
+  return `${date}T${time || "09:00"}:00+07:00`;
+}
+
+function createPreviewRecord(form: InvitationPreviewPayload) {
+  const groomNickname = form.groomNickname || "Rizky";
+  const brideNickname = form.brideNickname || "Amara";
+
+  return {
+    id: form.id || "demo",
+    slug: form.slug || "demo",
+    groom_full_name: form.groomFullName || groomNickname,
+    groom_nickname: groomNickname,
+    groom_father_name: form.groomFather || fallbackDemoData.groom.father,
+    groom_mother_name: form.groomMother || fallbackDemoData.groom.mother,
+    groom_photo_url: form.groomPhotoUrl || fallbackDemoData.groom.photo,
+    bride_full_name: form.brideFullName || brideNickname,
+    bride_nickname: brideNickname,
+    bride_father_name: form.brideFather || fallbackDemoData.bride.father,
+    bride_mother_name: form.brideMother || fallbackDemoData.bride.mother,
+    bride_photo_url: form.bridePhotoUrl || fallbackDemoData.bride.photo,
+    couple_photo_url: form.couplePhotoUrl || fallbackDemoData.coverPhoto,
+    background_photo_url: form.backgroundPhotoUrl || fallbackDemoData.heroPhoto,
+    akad_datetime: joinDateTime(form.akadDate, form.akadTime, fallbackDemoData.akad.date),
+    akad_time: form.akadTime,
+    akad_location_name: form.akadVenue || form.venue || fallbackDemoData.akad.venue,
+    akad_location_address: form.akadAddress || form.address || fallbackDemoData.akad.address,
+    akad_maps_url: form.akadMapsUrl || form.mapsUrl || fallbackDemoData.akad.mapsUrl,
+    resepsi_datetime: joinDateTime(form.receptionDate, form.receptionTime, fallbackDemoData.reception.date),
+    reception_time: form.receptionTime,
+    resepsi_location_name: form.receptionVenue || form.venue || fallbackDemoData.reception.venue,
+    resepsi_location_address: form.receptionAddress || form.address || fallbackDemoData.reception.address,
+    resepsi_maps_url: form.receptionMapsUrl || form.mapsUrl || fallbackDemoData.reception.mapsUrl,
+    quote_text: form.quote || fallbackDemoData.quote.text,
+    quote_source: form.quoteSource || fallbackDemoData.quote.source,
+    love_story: form.loveStory || fallbackDemoData.loveStory,
+    gallery_photos: form.galleryPhotos || fallbackDemoData.gallery,
+    gift_bank_name: form.giftBankName,
+    gift_bank_account: form.giftBankAccount,
+    gift_bank_account_name: form.giftBankAccountName,
+    gift_shipping_address: form.giftShippingAddress || fallbackDemoData.giftAddress,
+    rekening: form.giftBankName && form.giftBankAccount && form.giftBankAccountName
+      ? [{ bank: form.giftBankName, number: form.giftBankAccount, name: form.giftBankAccountName }]
+      : fallbackDemoData.bankAccounts,
+    music_url: form.musicUrl,
+    show_couple_photos: form.showCouplePhotos,
+    show_prewed_gallery: form.showPrewedGallery,
+    show_gift_section: form.showGiftSection,
+    rsvp_enabled: form.rsvpEnabled,
+    sections_order: form.sectionsOrder,
+    sections_visibility: form.sectionsVisibility,
+    rsvp_messages: fallbackDemoData.rsvpMessages.map((message) => ({
+      id: message.id,
+      guest_name: message.guestName,
+      attendance: message.attendance,
+      message: message.message,
+      created_at: message.createdAt,
+    })),
   };
-};
+}
+
+function createLegacyData(form: InvitationPreviewPayload): LegacyDemoData {
+  const groomNickname = form.groomNickname || "Rizky";
+  const brideNickname = form.brideNickname || "Amara";
+
+  return {
+    ...fallbackDemoData,
+    coupleShortName: `${groomNickname} & ${brideNickname}`,
+    groom: {
+      ...fallbackDemoData.groom,
+      fullName: form.groomFullName || groomNickname,
+      father: form.groomFather || fallbackDemoData.groom.father,
+      mother: form.groomMother || fallbackDemoData.groom.mother,
+      photo: form.groomPhotoUrl || fallbackDemoData.groom.photo,
+    },
+    bride: {
+      ...fallbackDemoData.bride,
+      fullName: form.brideFullName || brideNickname,
+      father: form.brideFather || fallbackDemoData.bride.father,
+      mother: form.brideMother || fallbackDemoData.bride.mother,
+      photo: form.bridePhotoUrl || fallbackDemoData.bride.photo,
+    },
+    coverPhoto: form.couplePhotoUrl || fallbackDemoData.coverPhoto,
+    heroPhoto: form.backgroundPhotoUrl || fallbackDemoData.heroPhoto,
+    quote: {
+      text: form.quote || fallbackDemoData.quote.text,
+      source: form.quoteSource || fallbackDemoData.quote.source,
+    },
+    akad: {
+      date: joinDateTime(form.akadDate, form.akadTime, fallbackDemoData.akad.date),
+      venue: form.akadVenue || form.venue || fallbackDemoData.akad.venue,
+      address: form.akadAddress || form.address || fallbackDemoData.akad.address,
+      mapsUrl: form.akadMapsUrl || form.mapsUrl || fallbackDemoData.akad.mapsUrl,
+    },
+    reception: {
+      date: joinDateTime(form.receptionDate, form.receptionTime, fallbackDemoData.reception.date),
+      venue: form.receptionVenue || form.venue || fallbackDemoData.reception.venue,
+      address: form.receptionAddress || form.address || fallbackDemoData.reception.address,
+      mapsUrl: form.receptionMapsUrl || form.mapsUrl || fallbackDemoData.reception.mapsUrl,
+    },
+    loveStory: (form.loveStory || fallbackDemoData.loveStory).map((story) => ({
+      year: story.year || story.date || "Momen",
+      date: story.date || story.year || "Momen",
+      title: story.title,
+      description:
+        ("description" in story && story.description) ||
+        ("desc" in story && story.desc) ||
+        "",
+      photo: fallbackDemoData.loveStory[0].photo,
+    })),
+    gallery: form.galleryPhotos || fallbackDemoData.gallery,
+    bankAccounts: form.giftBankName && form.giftBankAccount && form.giftBankAccountName
+      ? [{ bank: form.giftBankName, number: form.giftBankAccount, name: form.giftBankAccountName }]
+      : fallbackDemoData.bankAccounts,
+    giftAddress: form.giftShippingAddress || fallbackDemoData.giftAddress,
+  };
+}
 
 export function LiveDemoWrapper({ initialData, theme }: { initialData: LiveDemoData; theme: string }) {
   const [data, setData] = useState<LiveDemoData>(initialData);
+  const [themeOverride, setThemeOverride] = useState<ThemePreviewOverride>({});
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      const message = event.data as PreviewFormMessage;
-      if (message.type === "UPDATE_PREVIEW" && message.data) {
-        const form = message.data;
-        
-        // Map the InvitationForm from buat-undangan-content to the expected structure
-        // Since both legacy and fateha themes expect different data structures, we need to map them properly.
-        // For Sakinah Serenity (Fateha), it maps from the db schema, so we create a mock db object.
-        const mockDbInvitation = {
-          id: "demo",
-          slug: "demo",
-          groom_full_name: form.groomFullName || "Mempelai Pria",
-          groom_nickname: form.groomNickname || "Pria",
-          groom_father_name: form.groomFather || "Ayah Pria",
-          groom_mother_name: form.groomMother || "Ibu Pria",
-          bride_full_name: form.brideFullName || "Mempelai Wanita",
-          bride_nickname: form.brideNickname || "Wanita",
-          bride_father_name: form.brideFather || "Ayah Wanita",
-          bride_mother_name: form.brideMother || "Ibu Wanita",
-          akad_datetime: form.akadDate ? `${form.akadDate}T${form.akadTime || "09:00"}:00Z` : null,
-          akad_location_name: form.venue || "Lokasi Akad",
-          akad_location_address: form.address || "Alamat Akad",
-          akad_maps_url: form.mapsUrl || "",
-          resepsi_datetime: form.receptionDate ? `${form.receptionDate}T${form.receptionTime || "19:00"}:00Z` : null,
-          resepsi_location_name: form.venue || "Lokasi Resepsi",
-          resepsi_location_address: form.address || "Alamat Resepsi",
-          resepsi_maps_url: form.mapsUrl || "",
-          quote_text: form.quote || "Kutipan",
-          quote_source: "Mempelai",
-          love_story: fallbackDemoData.loveStory,
-          gallery_photos: fallbackDemoData.gallery,
-          rekening: fallbackDemoData.bankAccounts,
-          gift_shipping_address: fallbackDemoData.giftAddress,
-          rsvp_messages: fallbackDemoData.rsvpMessages.map((message) => ({
-            id: message.id,
-            guest_name: message.guestName,
-            attendance: message.attendance,
-            message: message.message,
-            created_at: message.createdAt,
-          })),
-        };
+    setData(initialData);
+  }, [initialData, theme]);
 
-        if (theme === "legacy") {
-            const legacyData = {
-                ...fallbackDemoData,
-                coupleShortName: `${form.groomNickname || "Pria"} & ${form.brideNickname || "Wanita"}`,
-                groom: {
-                    ...fallbackDemoData.groom,
-                    fullName: form.groomFullName || "Mempelai Pria",
-                    father: form.groomFather || "Ayah Pria",
-                    mother: form.groomMother || "Ibu Pria",
-                },
-                bride: {
-                    ...fallbackDemoData.bride,
-                    fullName: form.brideFullName || "Mempelai Wanita",
-                    father: form.brideFather || "Ayah Wanita",
-                    mother: form.brideMother || "Ibu Wanita",
-                },
-                akad: {
-                    ...fallbackDemoData.akad,
-                    date: form.akadDate || "2025-12-12",
-                    venue: form.venue || "Lokasi Akad",
-                    address: form.address || "Alamat",
-                },
-                reception: {
-                    ...fallbackDemoData.reception,
-                    date: form.receptionDate || "2025-12-12",
-                    venue: form.venue || "Lokasi Resepsi",
-                    address: form.address || "Alamat",
-                },
-                quote: {
-                    text: form.quote || fallbackDemoData.quote.text,
-                    source: "Mempelai"
-                }
-            };
-            setData(legacyData);
-        } else {
-            setData(mapInvitationToFatehaData(mockDbInvitation, { isPreview: true }));
-        }
+  useEffect(() => {
+    function handleMessage(event: MessageEvent<PreviewMessage>) {
+      if (event.origin !== window.location.origin) return;
+      const message = event.data;
+
+      if (message.type === "UPDATE_THEME_PREVIEW") {
+        setThemeOverride(message.data);
+        return;
       }
-    };
+
+      if ((message.type === "UPDATE_PREVIEW" || message.type === "UPDATE_INVITATION_PREVIEW") && message.data) {
+        setData(
+          theme === "legacy"
+            ? createLegacyData(message.data)
+            : mapInvitationToFatehaData(createPreviewRecord(message.data), { isPreview: true }),
+        );
+      }
+    }
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, [theme]);
 
-  if (theme === "legacy") {
-    return <InvitationClientWrapper data={data as LegacyDemoData} />;
-  }
+  const overrideStyle = useMemo(() => {
+    const colors = themeOverride.colors || {};
+    return Object.fromEntries(Object.entries(colors).map(([key, value]) => [`--preview-${key}`, value])) as CSSProperties;
+  }, [themeOverride.colors]);
 
-  if (theme === PETAL_SOFT_THEME_KEY) {
-    return <PetalSoftTemplate data={data as FatehaInvitationData} />;
-  }
+  let renderer;
+  if (theme === "legacy") renderer = <InvitationClientWrapper data={data as LegacyDemoData} />;
+  else if (theme === PETAL_SOFT_THEME_KEY) renderer = <PetalSoftTemplate data={data as FatehaInvitationData} />;
+  else if (theme === OBSIDIAN_LUXE_THEME_KEY) renderer = <ObsidianLuxeTemplate data={data as FatehaInvitationData} />;
+  else if (theme === JAWA_AGUNG_THEME_KEY) renderer = <JawaAgungTemplate data={data as FatehaInvitationData} />;
+  else renderer = <FatehaThemeRendererWrapper data={data as FatehaInvitationData} />;
 
-  if (theme === OBSIDIAN_LUXE_THEME_KEY) {
-    return <ObsidianLuxeTemplate data={data as FatehaInvitationData} />;
-  }
-
-  if (theme === JAWA_AGUNG_THEME_KEY) {
-    return <JawaAgungTemplate data={data as FatehaInvitationData} />;
-  }
-
-  return <FatehaThemeRendererWrapper data={data as FatehaInvitationData} />;
+  return (
+    <div
+      className="min-h-dvh w-full"
+      style={overrideStyle}
+      data-preview-theme={theme || DEFAULT_INVITATION_THEME_KEY}
+      data-theme-name={themeOverride.name}
+    >
+      {renderer}
+    </div>
+  );
 }

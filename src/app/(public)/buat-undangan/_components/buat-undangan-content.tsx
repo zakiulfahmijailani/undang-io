@@ -29,8 +29,8 @@ import { toast } from "sonner";
 import { fallbackThemes } from "@/components/landing/data";
 import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
 import type { LandingTheme } from "@/components/landing/types";
-import { InvitationPreviewRenderer } from "@/components/preview/InvitationPreviewRenderer";
-import { PreviewShell, type PreviewMode } from "@/components/preview/PreviewShell";
+import { InvitationPreviewShell } from "@/components/preview/InvitationPreviewShell";
+import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   DEFAULT_INVITATION_THEME_NAME,
@@ -275,13 +275,6 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const [selectedPrice, setSelectedPrice] = useState("Semua");
   const [form, setForm] = useState<InvitationForm>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
-
-  useEffect(() => {
-    if (window.matchMedia("(max-width: 1023px)").matches) {
-      setPreviewMode("mobile");
-    }
-  }, []);
 
   useEffect(() => {
     const themeFromUrl = searchParams.get("theme");
@@ -398,7 +391,10 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
       <WizardHeader step={step} isLoggedIn={isLoggedIn} />
 
       {step === 1 ? (
-        <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-10">
+        <LivePreviewWorkspace
+          className="min-h-[calc(100dvh-4rem)]"
+          form={
+        <main className="px-4 py-7 sm:px-6 lg:px-8">
           <div className="mb-8">
             <h1 className="font-landing-serif text-4xl font-semibold text-[#14213D]">Pilih Tema Undanganmu</h1>
             <p className="mt-1 font-ui text-lg text-gray-500">Sesuaikan tampilan undangan sesuai dengan konsep perayaan Anda.</p>
@@ -539,11 +535,14 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
                     <h3 className="mb-4 font-landing-serif text-xl font-bold text-[#14213D]">{theme.name}</h3>
 
                     <div className="mt-auto flex flex-col gap-2">
-                      <Link href={`/invite/demo?preview=true&theme=${theme.slug || theme.id}`} className="w-full" target="_blank">
-                        <Button variant="secondary" className="w-full gap-2 border border-gray-300 bg-white text-gray-600 hover:bg-gray-50">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => setSelectedThemeId(theme.id)}
+                        className="w-full gap-2 border border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
+                      >
                           <Eye className="h-4 w-4" /> Live Preview
-                        </Button>
-                      </Link>
+                      </Button>
                       <Button
                         onClick={() => {
                           setSelectedThemeId(theme.id);
@@ -581,11 +580,24 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
             )}
           </div>
         </main>
+          }
+          preview={
+            <InvitationPreviewShell
+              themeKey={selectedTheme?.slug || DEFAULT_INVITATION_THEME_KEY}
+              invitationData={{ ...form }}
+              title="Pratinjau tema"
+              url="/invite/nama-mempelai"
+              className="h-full"
+            />
+          }
+        />
       ) : null}
 
       {step === 2 ? (
-        <main className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_520px]">
-          <section className="border-r border-landing-border px-4 py-6 sm:px-6 lg:px-10">
+        <LivePreviewWorkspace
+          className="min-h-[calc(100dvh-4rem)]"
+          form={
+          <section className="px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl">
               <SectionTitle number="1" title="Identitas Pasangan" />
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
@@ -677,40 +689,24 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               </div>
             </div>
           </section>
-
-          <aside className="bg-landing-cream px-4 py-6 sm:px-6 lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start lg:py-4">
-            <div className="mb-4 flex items-center gap-2 font-ui text-xs font-bold text-landing-success">
-              <span className="h-2 w-2 rounded-full bg-landing-success" />
-              LIVE
-            </div>
-            <PreviewShell
-              mode={previewMode}
-              onModeChange={setPreviewMode}
-              label="Pratinjau undangan"
-              className="h-[720px] lg:h-[calc(100dvh-7rem)]"
-            >
-              <InvitationPreviewRenderer themeKey={selectedTheme?.slug} data={{ ...form }} />
-            </PreviewShell>
-            <p className="mt-5 text-center font-ui text-sm text-landing-muted">Tema: {selectedTheme?.name ?? DEFAULT_INVITATION_THEME_NAME}</p>
-            <p className="mt-4 border-t border-landing-border pt-4 text-center font-ui text-xs text-landing-muted">Langkah 2 dari 3</p>
-          </aside>
-        </main>
+          }
+          preview={
+            <InvitationPreviewShell
+              themeKey={selectedTheme?.slug}
+              invitationData={{ ...form }}
+              title="Pratinjau undangan"
+              url={`/invite/${generateSlug(form.groomNickname, form.brideNickname)}`}
+              className="h-full"
+            />
+          }
+        />
       ) : null}
 
       {step === 3 ? (
-        <main className="grid min-h-[calc(100vh-4rem)] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_0.95fr] lg:px-10">
-          <section className="min-w-0">
-            <PreviewShell
-              mode={previewMode}
-              onModeChange={setPreviewMode}
-              label="Pratinjau final"
-              className="h-[720px]"
-            >
-              <InvitationPreviewRenderer themeKey={selectedTheme?.slug} data={{ ...form }} />
-            </PreviewShell>
-          </section>
-
-          <section className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">
+        <LivePreviewWorkspace
+          className="min-h-[calc(100dvh-4rem)]"
+          form={
+          <section className="grid gap-5 p-4 sm:p-6 xl:grid-cols-[1fr_0.8fr]">
             <div className="rounded-xl border border-landing-border bg-white p-6 shadow-sm">
               <h1 className="font-landing-serif text-2xl font-semibold text-landing-ink">Status Penyimpanan</h1>
               <label className="mt-5 flex items-center gap-2 font-ui text-sm text-landing-muted">
@@ -789,7 +785,17 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
               </div>
             </div>
           </section>
-        </main>
+          }
+          preview={
+            <InvitationPreviewShell
+              themeKey={selectedTheme?.slug}
+              invitationData={{ ...form }}
+              title="Pratinjau final"
+              url={`/invite/${generateSlug(form.groomNickname, form.brideNickname)}`}
+              className="h-full"
+            />
+          }
+        />
       ) : null}
     </div>
   );

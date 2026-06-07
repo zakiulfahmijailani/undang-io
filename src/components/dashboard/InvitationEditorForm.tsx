@@ -8,9 +8,9 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Camera,
-  Check,
   Copy,
   Eye,
+  EyeOff,
   Gift,
   Heart,
   Image as ImageIcon,
@@ -24,12 +24,17 @@ import {
   Upload,
   Users,
   Info,
-  BookOpen
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import InvitationClientWrapper from "@/app/invite/[slug]/InvitationClientWrapper";
-import { demoData } from "@/data/demoInvitation";
+import DndSectionsEditor from "@/components/dashboard/DndSectionsEditor";
+import { SectionNavTab, type SectionItem } from "@/components/dashboard/SectionNavTab";
+import { InvitationPreviewShell } from "@/components/preview/InvitationPreviewShell";
+import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
+import { DEFAULT_INVITATION_THEME_KEY } from "@/lib/default-theme";
+import { normalizeSectionOrder } from "@/lib/preview/section-aliases";
 import { cn } from "@/lib/utils";
+import type { InvitationPreviewPayload } from "@/types/preview";
 
 // Shadcn UI components
 import { Input } from "@/components/ui/input";
@@ -50,6 +55,8 @@ type LoveStoryItem = {
 export type InvitationEditorInitialData = {
   id: string;
   slug: string;
+  theme_key?: string | null;
+  theme_id?: string | null;
   status: string | null;
   created_at: string | null;
   couple_photo_url?: string | null;
@@ -147,7 +154,7 @@ type UploadResponse = {
 
 type TabId = "info-dasar" | "foto-cover" | "mempelai" | "ayat-quote" | "kisah-cinta" | "acara" | "galeri" | "amplop" | "musik" | "publikasi";
 
-const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
   { id: "info-dasar", label: "Informasi Dasar", icon: Info },
   { id: "foto-cover", label: "Foto & Cover", icon: ImageIcon },
   { id: "mempelai", label: "Data Mempelai", icon: Users },
@@ -166,7 +173,7 @@ const defaultLoveStory: LoveStoryItem[] = [
   { year: "2026", title: "Hari Bahagia", description: "" },
 ];
 
-const defaultSections = ["hero", "couple", "quote", "lovestory", "countdown", "event", "gallery", "gift", "rsvp", "music"];
+const defaultSections = normalizeSectionOrder();
 
 function initialForm(data?: Partial<InvitationEditorInitialData>): EditorForm {
   return {
@@ -216,74 +223,74 @@ function initialForm(data?: Partial<InvitationEditorInitialData>): EditorForm {
 
 // Custom components removed in favor of Shadcn UI components.
 
-export default function InvitationEditorForm({ initialData, isCreateMode, themeId }: { initialData?: Partial<InvitationEditorInitialData>, isCreateMode?: boolean, themeId?: string }) {
+export default function InvitationEditorForm({
+  initialData,
+  isCreateMode,
+  themeId,
+  themeKey,
+}: {
+  initialData?: Partial<InvitationEditorInitialData>;
+  isCreateMode?: boolean;
+  themeId?: string;
+  themeKey?: string;
+}) {
   const router = useRouter();
   const [formData, setFormData] = useState<EditorForm>(() => initialForm(initialData));
   const [activeTab, setActiveTab] = useState<TabId>("info-dasar");
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [mobileMode, setMobileMode] = useState<"edit" | "preview">("edit");
+  const [previewVisible, setPreviewVisible] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const updateField = <K extends keyof EditorForm>(key: K, value: EditorForm[K]) => {
     setFormData((current) => ({ ...current, [key]: value }));
   };
 
-  const liveData = useMemo(() => {
-    const groomNickname = formData.groom_name || "Mempelai Pria";
-    const brideNickname = formData.bride_name || "Mempelai Wanita";
+  const previewPayload = useMemo<InvitationPreviewPayload>(() => ({
+    id: initialData?.id,
+    slug: formData.slug,
+    groomFullName: formData.groom_full_name,
+    groomNickname: formData.groom_name,
+    groomFather: formData.groom_father,
+    groomMother: formData.groom_mother,
+    groomPhotoUrl: formData.groom_photo_url,
+    brideFullName: formData.bride_full_name,
+    brideNickname: formData.bride_name,
+    brideFather: formData.bride_father,
+    brideMother: formData.bride_mother,
+    bridePhotoUrl: formData.bride_photo_url,
+    couplePhotoUrl: formData.couple_photo_url,
+    backgroundPhotoUrl: formData.background_photo_url,
+    akadDate: formData.akad_date,
+    akadVenue: formData.akad_venue,
+    akadAddress: formData.akad_address,
+    akadMapsUrl: formData.akad_maps_url,
+    receptionDate: formData.reception_date,
+    receptionVenue: formData.reception_venue,
+    receptionAddress: formData.reception_address,
+    receptionMapsUrl: formData.reception_maps_url,
+    quote: formData.greeting_text,
+    quoteSource: formData.quote_source,
+    loveStory: formData.love_story,
+    galleryPhotos: formData.gallery_photos,
+    giftBankName: formData.gift_bank_name,
+    giftBankAccount: formData.gift_bank_account,
+    giftBankAccountName: formData.gift_bank_account_name,
+    giftShippingAddress: formData.gift_shipping_address,
+    musicUrl: formData.music_url,
+    showCouplePhotos: formData.show_couple_photos,
+    showPrewedGallery: formData.show_prewed_gallery,
+    showGiftSection: formData.show_gift_section,
+    rsvpEnabled: formData.rsvp_enabled,
+    sectionsOrder: formData.sections_order,
+    sectionsVisibility: formData.sections_visibility,
+  }), [formData, initialData?.id]);
 
-    return {
-      ...demoData,
-      coupleShortName: `${groomNickname} & ${brideNickname}`,
-      coverPhoto: formData.couple_photo_url || demoData.coverPhoto,
-      heroPhoto: formData.couple_photo_url || demoData.heroPhoto,
-      groom: {
-        ...demoData.groom,
-        fullName: formData.groom_full_name || groomNickname,
-        father: formData.groom_father ? `Bapak ${formData.groom_father}` : demoData.groom.father,
-        mother: formData.groom_mother ? `Ibu ${formData.groom_mother}` : demoData.groom.mother,
-        photo: formData.couple_photo_url || demoData.groom.photo,
-      },
-      bride: {
-        ...demoData.bride,
-        fullName: formData.bride_full_name || brideNickname,
-        father: formData.bride_father ? `Bapak ${formData.bride_father}` : demoData.bride.father,
-        mother: formData.bride_mother ? `Ibu ${formData.bride_mother}` : demoData.bride.mother,
-      },
-      akad: {
-        ...demoData.akad,
-        date: formData.akad_date || demoData.akad.date,
-        venue: formData.akad_venue || demoData.akad.venue,
-        address: formData.akad_address || demoData.akad.address,
-      },
-      reception: {
-        ...demoData.reception,
-        date: formData.reception_date || demoData.reception.date,
-        venue: formData.reception_venue || demoData.reception.venue,
-        address: formData.reception_address || demoData.reception.address,
-      },
-      quote: {
-        text: formData.greeting_text || demoData.quote.text,
-        source: formData.quote_source || demoData.quote.source,
-      },
-      loveStory: formData.love_story,
-      gallery: formData.gallery_photos.length > 0 ? formData.gallery_photos : demoData.gallery,
-      bankAccounts: formData.gift_bank_account
-        ? [
-            {
-              bank: formData.gift_bank_name || "Bank",
-              number: formData.gift_bank_account,
-              name: formData.gift_bank_account_name || "Nama Pemilik Rekening",
-            },
-          ]
-        : demoData.bankAccounts,
-      giftAddress: formData.gift_shipping_address || demoData.giftAddress,
-      musicUrl: formData.music_url || null,
-      sectionsOrder: formData.sections_order,
-      sectionsVisibility: formData.sections_visibility,
-    };
-  }, [formData]);
+  const resolvedThemeKey =
+    themeKey ||
+    initialData?.theme_key ||
+    (themeId && !/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(themeId) ? themeId : undefined) ||
+    DEFAULT_INVITATION_THEME_KEY;
 
   async function handleSave(nextStatus?: string) {
     setIsSaving(true);
@@ -375,6 +382,34 @@ export default function InvitationEditorForm({ initialData, isCreateMode, themeI
     updateField("love_story", next);
   }
 
+  function togglePreviewSection(section: string, enabled: boolean) {
+    updateField("sections_visibility", { ...formData.sections_visibility, [section]: enabled });
+    if (section === "gallery") updateField("show_prewed_gallery", enabled);
+    if (section === "gift") updateField("show_gift_section", enabled);
+    if (section === "rsvp") updateField("rsvp_enabled", enabled);
+    if (section === "couple") updateField("show_couple_photos", enabled);
+  }
+
+  const sectionItems: SectionItem[] = tabs.map((tab) => {
+    const sectionByTab: Partial<Record<TabId, string>> = {
+      mempelai: "couple",
+      "ayat-quote": "quote",
+      "kisah-cinta": "story",
+      acara: "event",
+      galeri: "gallery",
+      amplop: "gift",
+    };
+    const section = sectionByTab[tab.id];
+
+    return {
+      key: tab.id,
+      label: tab.label,
+      icon: tab.icon,
+      enabled: section ? formData.sections_visibility[section] !== false : undefined,
+      onToggle: section ? (enabled: boolean) => togglePreviewSection(section, enabled) : undefined,
+    };
+  });
+
   function renderTab() {
     return (
       <div className="space-y-6">
@@ -426,7 +461,7 @@ export default function InvitationEditorForm({ initialData, isCreateMode, themeI
                         onChange={(event) => void handleUpload(event.target.files?.[0] ?? null)}
                         className="hidden"
                       />
-                      <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                      <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
                         {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                         Unggah Foto
                       </Button>
@@ -684,108 +719,86 @@ export default function InvitationEditorForm({ initialData, isCreateMode, themeI
     );
   }
 
-  return (
-    <div className="-m-5 min-h-screen bg-landing-cream md:-m-8">
-      <header className="sticky top-0 z-30 border-b border-landing-border bg-landing-paper/95 px-4 py-3 backdrop-blur-xl md:px-6">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="flex h-10 w-10 items-center justify-center rounded-md border border-landing-border bg-white text-landing-ink">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </Link>
-            <div>
-              <p className="font-ui text-xs font-bold uppercase tracking-[0.2em] text-landing-gold">Editor Undangan</p>
-              <h1 className="font-landing-serif text-2xl font-semibold text-landing-ink">
-                {formData.groom_name || "Mempelai"} & {formData.bride_name || "Pasangan"}
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setMobileMode((mode) => (mode === "edit" ? "preview" : "edit"))}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-landing-border bg-white px-4 font-ui text-sm font-semibold text-landing-ink lg:hidden"
-            >
-              <Eye className="h-4 w-4" aria-hidden="true" />
-              {mobileMode === "edit" ? "Preview" : "Edit"}
-            </button>
-            <button
-              type="button"
-              onClick={copyLink}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-landing-border bg-white px-4 font-ui text-sm font-semibold text-landing-ink"
-            >
-              <Copy className="h-4 w-4" aria-hidden="true" />
-              Salin Link
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleSave()}
-              disabled={isSaving}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-landing-maroon px-4 font-ui text-sm font-semibold text-white disabled:opacity-50"
-            >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="h-4 w-4" aria-hidden="true" />}
-              Simpan
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleSave("active")}
-              disabled={isSaving}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-landing-gold px-4 font-ui text-sm font-semibold text-white disabled:opacity-50"
-            >
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-              Publikasikan
-            </button>
-          </div>
+  const topBar = (
+    <header className="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-landing-border bg-white px-4 py-2 md:px-6">
+      <div className="flex min-w-0 items-center gap-3">
+        <Link href="/dashboard" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-landing-ink hover:bg-landing-cream">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">Kembali ke dashboard</span>
+        </Link>
+        <div className="min-w-0">
+          <h1 className="truncate font-landing-serif text-xl font-semibold text-landing-ink">
+            {isCreateMode ? "Buat Undangan Baru" : `Edit: ${formData.groom_name || "Mempelai"} & ${formData.bride_name || "Pasangan"}`}
+          </h1>
+          <button type="button" onClick={copyLink} className="flex max-w-full items-center gap-1 truncate font-ui text-xs text-landing-muted hover:text-landing-maroon">
+            undang.io/u/{formData.slug || "nama-mempelai"}
+            <Copy className="h-3 w-3 shrink-0" aria-hidden="true" />
+          </button>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto grid max-w-7xl gap-5 p-4 lg:grid-cols-[260px_minmax(0,1fr)_390px] lg:p-6">
-        <aside className={cn("rounded-3xl border border-landing-border bg-white p-3 shadow-landing-card", mobileMode === "preview" && "hidden lg:block")}>
-          <div className="mb-3 rounded-2xl bg-landing-cream p-4">
-            <p className="font-ui text-xs font-bold uppercase tracking-[0.2em] text-landing-gold">Status</p>
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button type="button" variant="secondary" size="sm" className="hidden lg:inline-flex" onClick={() => setPreviewVisible((visible) => !visible)}>
+          {previewVisible ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+          {previewVisible ? "Sembunyikan Preview" : "Tampilkan Preview"}
+        </Button>
+        <Button type="button" variant="secondary" size="sm" onClick={() => void handleSave("active")} disabled={isSaving}>
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
+          Publikasikan
+        </Button>
+        <Button type="button" size="sm" onClick={() => void handleSave()} disabled={isSaving}>
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="h-4 w-4" aria-hidden="true" />}
+          Simpan Semua
+        </Button>
+      </div>
+    </header>
+  );
+
+  const formPanel = (
+    <div className="grid min-h-full bg-landing-cream/45 md:grid-cols-[210px_minmax(0,1fr)]">
+      <aside className="border-b border-landing-border bg-white md:border-b-0 md:border-r">
+        <div className="border-b border-landing-border p-3">
+          <div className="rounded-lg bg-landing-cream p-3">
+            <p className="font-ui text-[10px] font-bold uppercase tracking-[0.2em] text-landing-gold">Status Undangan</p>
             <div className="mt-2 flex items-center gap-2 font-ui text-sm font-semibold text-landing-ink">
               <span className={cn("h-2.5 w-2.5 rounded-full", formData.status === "active" ? "bg-emerald-500" : "bg-landing-gold")} />
-              {formData.status === "active" ? "Aktif" : "Draft"}
+              {formData.status === "active" ? "Aktif (Publik)" : "Draft"}
             </div>
           </div>
-          <nav className="grid gap-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-3 font-ui text-sm font-semibold transition",
-                  activeTab === tab.id ? "bg-landing-maroon text-white" : "text-landing-ink hover:bg-landing-cream",
-                )}
-              >
-                <tab.icon className="h-4 w-4" aria-hidden="true" />
-                {tab.label}
-                {activeTab === tab.id ? <Check className="ml-auto h-4 w-4" aria-hidden="true" /> : null}
-              </button>
-            ))}
-          </nav>
-        </aside>
-
-        <div className={cn("grid content-start gap-5", mobileMode === "preview" && "hidden lg:grid")}>
-          {renderTab()}
         </div>
-
-        <aside className={cn("lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)]", mobileMode === "edit" && "hidden lg:block")}>
-          <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-landing-border bg-landing-ink p-3 shadow-landing-card">
-            <div className="mb-3 flex items-center justify-between px-2 py-1">
-              <div>
-                <p className="font-ui text-xs font-bold uppercase tracking-[0.2em] text-landing-gold">Live Preview</p>
-                <p className="font-ui text-sm text-white/70">Tampilan tamu</p>
-              </div>
-              <Music className="h-5 w-5 text-white/50" aria-hidden="true" />
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto rounded-[1.5rem] bg-white">
-              {initialData?.id ? <InvitationClientWrapper data={liveData} invitationId={initialData.id} /> : <div className="flex h-full items-center justify-center p-6 text-center text-muted-foreground">Simpan undangan terlebih dahulu untuk melihat preview lengkap.</div>}
-            </div>
-          </div>
-        </aside>
-      </main>
+        <SectionNavTab sections={sectionItems} activeSection={activeTab} onSelect={(key) => setActiveTab(key as TabId)} />
+        <div className="border-t border-landing-border p-3">
+          <p className="mb-2 font-ui text-[10px] font-bold uppercase tracking-[0.18em] text-landing-muted">Urutan Tampilan</p>
+          <DndSectionsEditor
+            sections={formData.sections_order}
+            visibility={formData.sections_visibility}
+            onSectionsChange={(sections) => updateField("sections_order", sections)}
+            onVisibilityChange={(visibility) => updateField("sections_visibility", visibility)}
+          />
+        </div>
+      </aside>
+      <div className="min-w-0 p-4 md:p-5">{renderTab()}</div>
     </div>
+  );
+
+  const preview = (
+    <InvitationPreviewShell
+      themeKey={resolvedThemeKey}
+      invitationData={previewPayload}
+      url={`/invite/${formData.slug || "nama-mempelai"}`}
+      isLive
+      className="h-full"
+    />
+  );
+
+  return (
+    <LivePreviewWorkspace
+      className="-m-5 min-h-screen bg-landing-cream md:-m-8"
+      topBar={topBar}
+      form={formPanel}
+      preview={preview}
+      previewVisible={previewVisible}
+      onPreviewVisibleChange={setPreviewVisible}
+    />
   );
 }

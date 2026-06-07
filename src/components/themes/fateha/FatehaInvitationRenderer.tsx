@@ -19,6 +19,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { toast } from "sonner";
+import { isCanonicalSectionVisible, normalizeSectionOrder, type CanonicalSectionId } from "@/lib/preview/section-aliases";
 import { cn } from "@/lib/utils";
 import { fatehaFontClassName } from "./fonts";
 import { PetalsCanvas, type PetalsCanvasHandle } from "./PetalsCanvas";
@@ -142,6 +143,10 @@ function EnvelopeIntro({
 
 function MainContent({ data }: { data: FatehaInvitationData }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const sectionOrder = useMemo(
+    () => normalizeSectionOrder(data.sections_order).filter((section) => isCanonicalSectionVisible(data.sections_visibility, section)),
+    [data.sections_order, data.sections_visibility],
+  );
 
   useEffect(() => {
     const root = rootRef.current;
@@ -158,23 +163,40 @@ function MainContent({ data }: { data: FatehaInvitationData }) {
 
     root.querySelectorAll(".fateha-reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [data]);
+
+  function renderSection(section: CanonicalSectionId) {
+    if (section === "cover") return <HeroSection key={section} data={data} />;
+    if (section === "quote") return <QuoteSection key={section} data={data} />;
+    if (section === "couple") return <MempelaiSection key={section} data={data} />;
+    if (section === "countdown") return <CountdownSection key={section} targetDate={data.wedding.date} />;
+    if (section === "event") {
+      return (
+        <div key={section}>
+          <AcaraSection data={data} />
+          <LokasiSection data={data} />
+        </div>
+      );
+    }
+    if (section === "story" && data.loveStory.length > 0) return <LoveStorySection key={section} data={data} />;
+    if (section === "gallery" && data.gallery.length > 0) return <GallerySection key={section} gallery={data.gallery} />;
+    if (section === "rsvp") return <RsvpSection key={section} data={data} />;
+    if (section === "closing") {
+      return (
+        <div key={section}>
+          <KontakSection data={data} />
+          <PenutupSection data={data} />
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
     <main ref={rootRef} className="fateha-site">
       <MusicPlayer musicUrl={data.musicUrl || DEFAULT_AUDIO} />
       <BottomNav />
-      <HeroSection data={data} />
-      <QuoteSection data={data} />
-      <MempelaiSection data={data} />
-      <CountdownSection targetDate={data.wedding.date} />
-      <AcaraSection data={data} />
-      {data.loveStory.length > 0 ? <LoveStorySection data={data} /> : null}
-      {data.gallery.length > 0 ? <GallerySection gallery={data.gallery} /> : null}
-      <LokasiSection data={data} />
-      <RsvpSection data={data} />
-      <KontakSection data={data} />
-      <PenutupSection data={data} />
+      {sectionOrder.map(renderSection)}
     </main>
   );
 }

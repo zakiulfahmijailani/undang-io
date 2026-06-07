@@ -12,15 +12,18 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 
 const SECTION_LABELS: Record<string, string> = {
+    cover: "Cover / Utama",
     hero: "Hero / Cover Foto",
     couple: "Data Mempelai",
     quote: "Ayat & Quote",
+    story: "Kisah Cinta",
     lovestory: "Kisah Cinta",
     countdown: "Hitung Mundur",
     event: "Detail Acara",
     gallery: "Galeri Foto",
     gift: "Amplop Digital",
     rsvp: "RSVP / Ucapan",
+    closing: "Penutup",
 };
 
 function SortableRow({ id, visible, onToggle }: {
@@ -42,6 +45,8 @@ function SortableRow({ id, visible, onToggle }: {
             <button
                 {...attributes}
                 {...listeners}
+                type="button"
+                aria-label={`Pindahkan ${SECTION_LABELS[id] || id}`}
                 className="text-stone-300 hover:text-stone-500 cursor-grab active:cursor-grabbing touch-none"
             >
                 <GripVertical className="w-4 h-4" />
@@ -56,6 +61,7 @@ function SortableRow({ id, visible, onToggle }: {
             <button
                 type="button"
                 onClick={onToggle}
+                aria-label={`${visible ? "Sembunyikan" : "Tampilkan"} ${SECTION_LABELS[id] || id}`}
                 className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${visible ? "bg-amber-500" : "bg-stone-200"
                     }`}
             >

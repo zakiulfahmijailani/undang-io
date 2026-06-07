@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BadgeCheck, Eye, Zap } from "lucide-react";
 import {
@@ -12,7 +12,7 @@ import {
 import type { LandingTheme } from "./types";
 import { LiveInvitationPreview } from "./LiveInvitationPreview";
 import { QuickStartForm } from "./QuickStartForm";
-import type { PreviewMode } from "@/components/preview/PreviewShell";
+import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
 
 type LandingHeroConversionProps = {
   themes: LandingTheme[];
@@ -34,13 +34,6 @@ export function LandingHeroConversion({ themes }: LandingHeroConversionProps) {
   const [groomName, setGroomName] = useState("");
   const [brideName, setBrideName] = useState("");
   const [selectedThemeKey, setSelectedThemeKey] = useState(PETAL_SOFT_THEME_KEY);
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
-
-  useEffect(() => {
-    if (window.matchMedia("(max-width: 1023px)").matches) {
-      setPreviewMode("mobile");
-    }
-  }, []);
 
   const heroThemes = useMemo(() => {
     const byKey = new Map(themes.map((theme) => [themeKey(theme), theme]));
@@ -74,14 +67,9 @@ export function LandingHeroConversion({ themes }: LandingHeroConversionProps) {
     router.push(`/buat-undangan?${params.toString()}`);
   }
 
-  return (
-    <section className="relative overflow-hidden border-b border-landing-border bg-landing-paper">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(248,218,219,0.55),transparent_28%),radial-gradient(circle_at_88%_48%,rgba(168,197,160,0.24),transparent_30%)]" aria-hidden="true" />
-      <div className="absolute -left-20 top-20 h-56 w-56 rounded-full border border-landing-maroon/8" aria-hidden="true" />
-      <div className="absolute -right-24 bottom-12 h-72 w-72 rounded-full border border-landing-gold/15" aria-hidden="true" />
-
-      <div className="relative mx-auto grid min-h-[calc(100dvh-4rem)] max-w-[1440px] items-center gap-10 px-4 py-6 sm:px-6 sm:py-12 lg:grid-cols-[0.84fr_1.16fr] lg:gap-10 lg:px-8 lg:py-10">
-        <div className="relative z-10 min-w-0">
+  const formPanel = (
+    <div className="relative z-10 flex min-h-[calc(100dvh-4rem)] items-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <div className="mx-auto w-full max-w-2xl">
           <div className="inline-flex min-h-9 items-center gap-2 rounded-full border border-landing-maroon/15 bg-white/80 px-3.5 font-ui text-[11px] font-bold uppercase tracking-[0.12em] text-landing-maroon shadow-sm backdrop-blur">
             <Zap className="h-4 w-4 fill-landing-gold text-landing-gold" aria-hidden="true" />
             Langsung buat, tanpa daftar
@@ -120,21 +108,28 @@ export function LandingHeroConversion({ themes }: LandingHeroConversionProps) {
               Tidak perlu kartu kredit
             </span>
           </div>
-        </div>
-
-        <div className="relative flex min-w-0 items-center justify-center py-4 lg:min-h-[720px]">
-          <div className="absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/80 blur-3xl" aria-hidden="true" />
-          <div className="absolute left-[8%] top-[18%] h-3 w-3 rounded-full bg-landing-gold/50 shadow-[0_0_0_8px_rgba(201,168,76,0.08)]" aria-hidden="true" />
-          <div className="absolute bottom-[24%] right-[7%] h-2.5 w-2.5 rounded-full bg-landing-maroon/35 shadow-[0_0_0_9px_rgba(139,26,43,0.06)]" aria-hidden="true" />
-          <LiveInvitationPreview
-            groomName={groomName}
-            brideName={brideName}
-            selectedThemeKey={selectedThemeKey}
-            mode={previewMode}
-            onModeChange={setPreviewMode}
-          />
-        </div>
       </div>
+    </div>
+  );
+
+  const preview = (
+    <LiveInvitationPreview
+      groomName={groomName}
+      brideName={brideName}
+      selectedThemeKey={selectedThemeKey}
+    />
+  );
+
+  return (
+    <section className="relative overflow-hidden border-b border-landing-border bg-landing-paper">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(248,218,219,0.55),transparent_28%),radial-gradient(circle_at_88%_48%,rgba(168,197,160,0.24),transparent_30%)]" aria-hidden="true" />
+      <LivePreviewWorkspace
+        className="relative mx-auto max-w-[1600px]"
+        form={formPanel}
+        preview={preview}
+        formClassName="bg-transparent"
+        previewClassName="bg-landing-cream/70"
+      />
     </section>
   );
 }

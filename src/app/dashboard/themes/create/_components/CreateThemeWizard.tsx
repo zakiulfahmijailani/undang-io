@@ -4,10 +4,11 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, ImagePlus, Layers3, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createTheme } from "@/app/dashboard/themes/actions";
 import { UniversalThemePreview } from "@/components/admin/UniversalThemePreview";
+import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
 import {
   DEFAULT_INVITATION_THEME_KEY,
   JAWA_AGUNG_THEME_KEY,
@@ -82,7 +83,10 @@ export function CreateThemeWizard() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(520px,0.9fr)]">
+    <LivePreviewWorkspace
+      className="min-h-[calc(100dvh-10rem)] overflow-hidden rounded-xl border border-landing-border"
+      form={
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6">
       <section className="rounded-3xl border border-landing-border bg-white p-6 shadow-landing-card lg:p-8">
         <div className="grid gap-5 md:grid-cols-3">
           {["Identitas", "Gaya Visual", "Aset Awal"].map((label, index) => (
@@ -172,27 +176,17 @@ export function CreateThemeWizard() {
           Simpan dan Lanjutkan
         </button>
       </section>
-
-      <aside className="min-w-0 xl:sticky xl:top-20 xl:self-start">
+      </form>
+      }
+      preview={
         <UniversalThemePreview
           themeKey={previewThemeKey}
           data={previewData}
+          themeOverrides={{ name: name || "Tema Baru", config: { category, isPremium } }}
           label={name ? `Pratinjau ${name}` : "Pratinjau tema baru"}
-          className="h-[720px]"
+          className="h-full"
         />
-        <div className="mt-5 grid gap-3">
-          {[
-            { icon: Layers3, text: "Buat struktur tema lebih dulu." },
-            { icon: ImagePlus, text: "Upload cover dan ornamen setelah tersimpan." },
-            { icon: Sparkles, text: "Aktifkan tema setelah seluruh aset siap." },
-          ].map((item) => (
-            <div key={item.text} className="flex items-center gap-3 rounded-xl bg-white p-3 font-ui text-sm text-landing-muted">
-              <item.icon className="h-4 w-4 text-landing-gold" aria-hidden="true" />
-              {item.text}
-            </div>
-          ))}
-        </div>
-      </aside>
-    </form>
+      }
+    />
   );
 }

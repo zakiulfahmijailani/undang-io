@@ -1,5 +1,62 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+
+const loveStoryItemSchema = z.object({
+    year: z.string().max(100).optional(),
+    date: z.string().max(100).optional(),
+    title: z.string().max(200),
+    description: z.string().max(2000).optional(),
+    desc: z.string().max(2000).optional(),
+    photo: z.string().max(2000).optional(),
+});
+
+const patchInvitationSchema = z.object({
+    status: z.string().max(40).optional(),
+    slug: z.string().trim().max(120).regex(/^[a-z0-9-]*$/).optional(),
+    groom_name: z.string().max(150).optional(),
+    bride_name: z.string().max(150).optional(),
+    groom_full_name: z.string().max(250).optional(),
+    bride_full_name: z.string().max(250).optional(),
+    groom_father: z.string().max(250).optional(),
+    groom_mother: z.string().max(250).optional(),
+    bride_father: z.string().max(250).optional(),
+    bride_mother: z.string().max(250).optional(),
+    groom_photo_url: z.string().max(2000).optional(),
+    bride_photo_url: z.string().max(2000).optional(),
+    couple_photo_url: z.string().max(2000).optional(),
+    background_photo_url: z.string().max(2000).optional(),
+    akad_date: z.string().max(100).optional(),
+    akad_venue: z.string().max(500).optional(),
+    akad_address: z.string().max(2000).optional(),
+    akad_maps_url: z.string().max(2000).optional(),
+    reception_date: z.string().max(100).optional(),
+    reception_venue: z.string().max(500).optional(),
+    reception_address: z.string().max(2000).optional(),
+    reception_maps_url: z.string().max(2000).optional(),
+    dresscode_colors: z.string().max(500).optional(),
+    dresscode_note: z.string().max(1000).optional(),
+    greeting_text: z.string().max(5000).optional(),
+    quote_source: z.string().max(300).optional(),
+    music_url: z.string().max(2000).optional(),
+    love_story: z.array(loveStoryItemSchema).max(30).optional(),
+    gallery_photos: z.array(z.string().max(2000)).max(100).optional(),
+    sections_order: z.array(z.string().max(80)).max(30).optional(),
+    sections_visibility: z.record(z.string(), z.boolean()).optional(),
+    gift_bank_name: z.string().max(100).optional(),
+    gift_bank_account: z.string().max(100).optional(),
+    gift_bank_account_name: z.string().max(250).optional(),
+    gift_shipping_address: z.string().max(2000).optional(),
+    qris_account: z.string().max(2000).optional(),
+    show_couple_photos: z.boolean().optional(),
+    show_prewed_gallery: z.boolean().optional(),
+    show_gift_section: z.boolean().optional(),
+    rsvp_enabled: z.boolean().optional(),
+});
+
+function errorMessage(error: unknown) {
+    return error instanceof Error ? error.message : '';
+}
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const supabase = await createServerSupabaseClient();
@@ -19,6 +76,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 id,
                 slug,
                 status,
+                theme_key,
+                theme_id,
                 created_at,
                 groom_full_name,
                 groom_nickname,
@@ -70,7 +129,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
         return NextResponse.json({ data: invitation, error: null });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[GET /api/invitations/[id]] unexpected error:', error);
         return NextResponse.json({ data: null, error: { code: 'INTERNAL', message: 'Server error' } }, { status: 500 });
     }
@@ -87,7 +146,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     try {
         const { id } = resolvedParams;
-        const body = await request.json();
+        const parsed = patchInvitationSchema.safeParse(await request.json());
+        if (!parsed.success) {
+            return NextResponse.json({
+                data: null,
+                error: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Data undangan tidak valid.',
+                    details: parsed.error.flatten().fieldErrors,
+                },
+            }, { status: 400 });
+        }
+        const body = parsed.data;
 
         // Ownership check
         const { data: inv, error: checkError } = await supabase
@@ -101,7 +171,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             return NextResponse.json({ data: null, error: { code: 'FORBIDDEN', message: 'Akses ditolak' } }, { status: 403 });
         }
 
-        const updates: Record<string, any> = {};
+        const updates: Record<string, unknown> = {};
 
         // Status
         if (body.status !== undefined) updates.status = body.status;
@@ -148,6 +218,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         // Love story
         if (body.love_story !== undefined) updates.love_story = body.love_story;
+        if (body.gallery_photos !== undefined) updates.gallery_photos = body.gallery_photos;
 
         // Cover and background photos
         if (body.couple_photo_url !== undefined) updates.couple_photo_url = body.couple_photo_url;
@@ -199,9 +270,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         return NextResponse.json({ data: { success: true }, error: null });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[PATCH /api/invitations/[id]] unexpected error:', error);
-        return NextResponse.json({ data: null, error: { code: 'INTERNAL', message: 'Gagal memperbarui undangan: ' + (error.message || '') } }, { status: 500 });
+        return NextResponse.json({ data: null, error: { code: 'INTERNAL', message: 'Gagal memperbarui undangan: ' + errorMessage(error) } }, { status: 500 });
     }
 }
 
@@ -210,7 +281,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const resolvedParams = await params;
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) return NextResponse.json({ data: null, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
 
     try {
         const { id } = resolvedParams;
@@ -224,7 +295,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         if (error) throw error;
 
         return NextResponse.json({ data: { success: true }, error: null });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[DELETE /api/invitations/[id]] error:', error);
         return NextResponse.json({ data: null, error: { code: 'INTERNAL', message: 'Gagal menghapus undangan' } }, { status: 500 });
     }

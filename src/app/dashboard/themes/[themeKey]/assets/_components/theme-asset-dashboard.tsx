@@ -6,7 +6,8 @@ import { ChevronLeft, ExternalLink, Layers, Info } from 'lucide-react'
 import { AdminTheme, AdminThemeAsset, AssetKind, SectionConfig } from '@/types/theme'
 import { useThemePreviewStore } from '@/stores/theme-preview-store'
 import { ThemeAssetRow } from '@/components/admin/theme-asset-row'
-import { ThemePreviewPanel } from '@/components/admin/theme-preview-panel'
+import { UniversalThemePreview } from '@/components/admin/UniversalThemePreview'
+import { LivePreviewWorkspace } from '@/components/preview/LivePreviewWorkspace'
 import { SectionToggleBar } from '@/components/admin/section-toggle-bar'
 import { ThemeInfoForm } from '@/components/admin/theme-info-form'
 import { toggleThemeActive, deleteThemeAsset } from '@/app/dashboard/themes/actions'
@@ -46,9 +47,21 @@ const ASSET_SLOTS: Array<{ slot: AssetKind, label: string, description: string, 
   { slot: 'music', label: 'Musik Latar', description: 'File audio .mp3', idealSize: 'Max 5MB', needsTransparent: false, group: 'Media' },
 ];
 
+const DEFAULT_SECTION_CONFIG: SectionConfig = {
+  show_foto_cover: true,
+  show_data_mempelai: true,
+  show_ayat_quote: true,
+  show_kisah_cinta: true,
+  show_acara: true,
+  show_galeri_foto: true,
+  show_amplop_digital: true,
+  show_musik: true,
+}
+
 export function ThemeAssetDashboard({ theme, assets }: Props) {
   const store = useThemePreviewStore();
   const [activeTab, setActiveTab] = useState<'info' | 'assets'>('assets')
+  const [sectionConfig, setSectionConfig] = useState<SectionConfig>(theme.section_config ?? DEFAULT_SECTION_CONFIG)
 
   // Initialize store on mount
   useEffect(() => {
@@ -89,10 +102,7 @@ export function ThemeAssetDashboard({ theme, assets }: Props) {
   }, [theme.theme_key, store]);
 
   const handleConfigChange = useCallback((newConfig: SectionConfig) => {
-    // Next.js will revalidate the server data for us,
-    // but the actual Preview Panel receives its config directly from initialTheme.
-    // In a fully controlled setup, we would read sectionStatus from Zustand.
-    // Here we will do a light router refresh if strictly needed, or just let the Action's `revalidatePath` handle it.
+    setSectionConfig(newConfig)
   }, []);
 
   const SLOT_TO_SECTION: Record<AssetKind, any> = {
@@ -181,10 +191,12 @@ export function ThemeAssetDashboard({ theme, assets }: Props) {
       </header>
 
       {/* ── Main Content ──────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <LivePreviewWorkspace
+        className="min-h-0 flex-1 overflow-hidden"
+        form={(<>
 
         {/* ── Left Panel ────────────────────────────────────── */}
-        <div className="w-[460px] shrink-0 border-r border-white/[0.06] flex flex-col bg-[#111111]">
+        <div className="flex min-h-full flex-col border-r border-white/[0.06] bg-[#111111]">
           
           {/* Tab Switcher */}
           <div className="flex items-center gap-1 px-4 pt-4 pb-3 shrink-0">
@@ -281,17 +293,35 @@ export function ThemeAssetDashboard({ theme, assets }: Props) {
         </div>
 
         {/* ── Right Panel: Preview ──────────────────────────── */}
+        </>)}
+        preview={(<>
         <div className="flex-1 flex flex-col bg-[#050505] relative overflow-hidden">
           {/* Toggle Bar */}
-          <SectionToggleBar themeKey={theme.theme_key} initialConfig={theme.section_config} onConfigChange={handleConfigChange} />
+          <SectionToggleBar themeKey={theme.theme_key} initialConfig={theme.section_config ?? DEFAULT_SECTION_CONFIG} onConfigChange={handleConfigChange} />
           
-          {/* Preview Panel Wrapper */}
-          <div className="flex-1 relative w-full h-full"> 
-            <ThemePreviewPanel initialTheme={theme} />
+          {/* Production renderer preview */}
+          <div className="flex-1 relative w-full h-full p-4 bg-slate-100">
+            <UniversalThemePreview
+              themeKey={theme.theme_key}
+              themeOverrides={{
+                name: theme.display_name,
+                colors: {
+                  primary: store.themeColors.primary,
+                  accent: store.themeColors.accent,
+                  text: store.themeColors.text,
+                  cta: store.themeColors.cta,
+                },
+                assets: store.assets,
+                config: sectionConfig as unknown as Record<string, unknown>,
+              }}
+              label={`Pratinjau ${theme.display_name}`}
+              className="h-full"
+            />
           </div>
         </div>
 
-      </div>
+        </>)}
+      />
     </div>
   )
 }

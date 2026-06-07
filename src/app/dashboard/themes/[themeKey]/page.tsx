@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Eye, Image as ImageIcon, Layers3, Music, Palette, Settings, Sparkles, Upload } from "lucide-react";
 import { UniversalThemePreview } from "@/components/admin/UniversalThemePreview";
+import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -112,7 +113,10 @@ export default async function ThemeDetailPage({ params }: { params: Promise<{ th
         </div>
       </div>
 
-      <section className="grid gap-6 xl:grid-cols-[420px_1fr]">
+      <LivePreviewWorkspace
+        className="min-h-[calc(100dvh-12rem)] overflow-hidden rounded-xl border border-landing-border"
+        form={
+        <div className="grid gap-6 p-4 sm:p-6">
         <aside className="rounded-3xl border border-landing-border bg-white p-5 shadow-landing-card">
           <div className="relative aspect-[9/12] overflow-hidden rounded-2xl bg-landing-cream">
             {coverAsset?.file_url ? (
@@ -155,14 +159,6 @@ export default async function ThemeDetailPage({ params }: { params: Promise<{ th
             ))}
           </div>
         </aside>
-
-        <div className="grid gap-6">
-          <UniversalThemePreview
-            themeKey={theme.slug || themeKey}
-            src={`/dashboard/themes/${themeKey}/preview`}
-            label={`Pratinjau ${themeName}`}
-            className="h-[calc(100dvh-7rem)] min-h-[640px] xl:sticky xl:top-20"
-          />
 
           <section className="rounded-3xl border border-landing-border bg-white p-6 shadow-landing-card">
             <div className="flex items-center gap-3">
@@ -222,7 +218,16 @@ export default async function ThemeDetailPage({ params }: { params: Promise<{ th
             </div>
           </section>
         </div>
-      </section>
+        }
+        preview={
+          <UniversalThemePreview
+            themeKey={theme.slug || themeKey}
+            src={`/dashboard/themes/${themeKey}/preview`}
+            label={`Pratinjau ${themeName}`}
+            className="h-full"
+          />
+        }
+      />
     </div>
   );
 }
