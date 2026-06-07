@@ -237,7 +237,7 @@ export default function InvitationEditorForm({
   const ActiveSection = sectionComponents[activeSection];
 
   const topBar = (
-    <div className="bg-white border-b border-border px-6 py-3 flex items-center justify-between">
+    <div className="bg-white border-b border-border px-6 py-4 min-h-[64px] flex items-center justify-between">
       <div className="flex items-center gap-3">
         {!wizardMode && (
           <Button variant="ghost" className="w-8 h-8 p-0" onClick={() => router.back()}>
@@ -245,11 +245,11 @@ export default function InvitationEditorForm({
           </Button>
         )}
         <div>
-          <h1 className="text-sm font-semibold">
+          <h1 className="text-base font-semibold leading-tight">
             {wizardMode ? "Lengkapi Data Undangan" : `Edit: ${localDraft.groom_nickname || "Pria"} & ${localDraft.bride_nickname || "Wanita"}`}
           </h1>
           {!wizardMode && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-0.5">
               undang.io/invite/{localDraft.slug || "nama-pasangan"}
             </p>
           )}
@@ -257,7 +257,7 @@ export default function InvitationEditorForm({
       </div>
       <div className="flex items-center gap-2">
         {wizardMode ? (
-          <Button size="sm" className="bg-landing-maroon text-white hover:bg-landing-maroon-dark rounded-full shadow-sm" onClick={() => onWizardNext?.(localDraft)}>
+          <Button size="sm" className="bg-landing-gold text-landing-ink hover:bg-landing-gold/90 rounded-full font-semibold shadow-sm" onClick={() => onWizardNext?.(localDraft)}>
             Lanjut Pratinjau 🚀
           </Button>
         ) : (

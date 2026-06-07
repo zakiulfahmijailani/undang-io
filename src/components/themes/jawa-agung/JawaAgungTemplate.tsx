@@ -373,8 +373,8 @@ const jawaAgungStyles = `
   100% { transform: scale(1); }
 }
 .jawa-envelope-intro {
-  position: fixed;
-  inset: 0;
+  position: relative;
+  min-height: 100svh;
   z-index: 50;
   display: flex;
   flex-direction: column;
