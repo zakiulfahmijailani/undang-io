@@ -36,7 +36,9 @@ export function AyatQuoteSection({ data, onChange }: SectionFormProps) {
       onChange({
         quote_text: selectedQuote.text,
         quote_source: selectedQuote.source,
-      });
+        quote_greeting: selectedQuote.greeting,
+        quote_arabic: selectedQuote.arabic,
+      } as any); // using any because InvitationEditorInitialData doesn't strictly have greeting/arabic typed yet, but it's a generic JSON
     }
   };
 
@@ -63,7 +65,34 @@ export function AyatQuoteSection({ data, onChange }: SectionFormProps) {
 
       <div className="space-y-4 border-t pt-4">
         <div className="space-y-2">
-          <Label>Teks Ayat / Quote</Label>
+          <Label>Salam Pembuka / Pembukaan</Label>
+          <Input 
+            placeholder="Cth: بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ, Shalom, Om Swastiastu..." 
+            value={(data as any).quote_greeting ?? ""} 
+            onChange={(e) => {
+              setSelectedValue("custom");
+              onChange({ quote_greeting: e.target.value } as any);
+            }} 
+          />
+          <p className="text-[10px] text-muted-foreground">Bisa berupa teks bahasa Indonesia, Arab, atau bahasa lainnya.</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Teks Kaligrafi / Arab (Opsional)</Label>
+          <Textarea 
+            rows={2} 
+            placeholder="Kutipan ayat dalam bahasa aslinya (jika ada)..."
+            value={(data as any).quote_arabic ?? ""} 
+            onChange={(e) => {
+              setSelectedValue("custom");
+              onChange({ quote_arabic: e.target.value } as any);
+            }} 
+            className="text-right"
+          />
+        </div>
+
+        <div className="space-y-2 pt-2">
+          <Label>Terjemahan / Teks Quote</Label>
           <Textarea 
             rows={5} 
             value={data.quote_text || ""} 

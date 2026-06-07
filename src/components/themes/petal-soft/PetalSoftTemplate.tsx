@@ -84,6 +84,7 @@ function formatTime(event: FatehaEvent) {
 }
 
 function cleanArabic(value: string | null | undefined, fallback: string) {
+  if (value === "") return ""; // explicitly empty
   if (!value || value.includes("Ù") || value.includes("Ø")) return fallback;
   return value;
 }

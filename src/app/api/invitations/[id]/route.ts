@@ -38,6 +38,8 @@ const patchInvitationSchema = z.object({
     dresscode_note: z.string().max(1000).optional(),
     greeting_text: z.string().max(5000).optional(),
     quote_source: z.string().max(300).optional(),
+    quote_greeting: z.string().max(500).optional(),
+    quote_arabic: z.string().max(5000).optional(),
     music_url: z.string().max(2000).optional(),
     love_story: z.array(loveStoryItemSchema).max(30).optional(),
     gallery_photos: z.array(z.string().max(2000)).max(100).optional(),
@@ -117,7 +119,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         // Ownership check
         const { data: inv, error: checkError } = await supabase
             .from('invitations')
-            .select('id')
+            .select('id, invitation_data')
             .eq('id', id)
             .eq('user_id', user.id)
             .single();
@@ -168,6 +170,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         // Quote / greeting
         if (body.greeting_text !== undefined) updates.quote_text = body.greeting_text;
         if (body.quote_source !== undefined) updates.quote_source = body.quote_source;
+        
+        if (body.quote_greeting !== undefined || body.quote_arabic !== undefined) {
+            const currentData = (inv.invitation_data as Record<string, unknown>) || {};
+            if (body.quote_greeting !== undefined) currentData.quote_greeting = body.quote_greeting;
+            if (body.quote_arabic !== undefined) currentData.quote_arabic = body.quote_arabic;
+            updates.invitation_data = currentData;
+        }
+
         // Music
         if (body.music_url !== undefined) updates.music_url = body.music_url || null;
 

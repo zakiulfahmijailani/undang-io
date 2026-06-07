@@ -175,8 +175,9 @@ function formatTime(event: FatehaEvent) {
   return `${new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(date)} WIB`;
 }
 
-function cleanArabic(value: string | null | undefined) {
-  if (!value || value.includes("Ã˜") || value.includes("Ã™")) return FALLBACK_ARABIC_QUOTE;
+function cleanArabic(value: string | null | undefined, fallback = FALLBACK_ARABIC_QUOTE) {
+  if (value === "") return ""; // explicitly empty
+  if (!value || value.includes("Ã˜") || value.includes("Ã™")) return fallback;
   return value;
 }
 

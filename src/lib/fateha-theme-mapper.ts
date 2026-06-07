@@ -38,6 +38,14 @@ function readString(source: LooseRecord, keys: string[]): string | null {
   return null;
 }
 
+function readStringAllowEmpty(source: LooseRecord, keys: string[]): string | null {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "string") return value.trim();
+  }
+  return null;
+}
+
 function readBoolean(source: LooseRecord, keys: string[], fallback = true): boolean {
   for (const key of keys) {
     if (typeof source[key] === "boolean") return source[key] as boolean;
@@ -305,9 +313,8 @@ function buildFatehaData(source: LooseRecord, options: { slug?: string | null; i
       },
     },
     quote: {
-      bismillah: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-      arabic:
-        "وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً",
+      bismillah: readStringAllowEmpty(source, ["quote_greeting", "quoteGreeting"]) ?? "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+      arabic: readStringAllowEmpty(source, ["quote_arabic", "quoteArabic"]) ?? "وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً",
       translation: quoteText,
       source: readString(source, ["quote_source", "quoteSource"]) ?? "QS. Ar-Rum: 21",
     },
