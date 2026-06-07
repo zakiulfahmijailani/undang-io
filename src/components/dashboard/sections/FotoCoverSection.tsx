@@ -45,21 +45,21 @@ export function FotoCoverSection({ data, onChange }: SectionFormProps) {
   <div className="space-y-6">
    <div className="space-y-4 rounded-lg border p-4">
     <Label>Foto Cover Utama</Label>
-    <div className="flex items-center gap-4">
-     <div className="relative flex h-24 w-24 shrink-0 overflow-hidden rounded-md border bg-muted">
+    <div className="flex flex-col gap-4">
+     <div className="relative flex h-32 w-32 shrink-0 overflow-hidden rounded-md border bg-muted">
       {data.couple_photo_url ? (
        <img src={data.couple_photo_url} alt="Cover" className="h-full w-full object-cover" />
       ) : (
        <ImageIcon className="m-auto h-8 w-8 text-muted-foreground" />
       )}
      </div>
-     <div>
+     <div className="flex flex-col items-start gap-2">
       <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => void handleUpload(e.target.files?.[0] ?? null)} className="hidden" />
-      <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+      <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
        {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
        Unggah Foto
       </Button>
-      <p className="mt-2 text-xs text-muted-foreground">Digunakan untuk hero, cover, dan link preview.</p>
+      <p className="text-xs text-muted-foreground">Digunakan untuk hero, cover, dan link preview.</p>
      </div>
     </div>
    </div>
