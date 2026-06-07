@@ -15,52 +15,7 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
 
     const { data: invitation, error } = await supabase
         .from('invitations')
-        .select(`
-            id,
-            slug,
-            status,
-            theme_key,
-            theme_id,
-            created_at,
-            couple_photo_url,
-            background_photo_url,
-            groom_full_name,
-            groom_nickname,
-            groom_father_name,
-            groom_mother_name,
-            groom_photo_url,
-            bride_full_name,
-            bride_nickname,
-            bride_father_name,
-            bride_mother_name,
-            bride_photo_url,
-            akad_datetime,
-            akad_location_name,
-            akad_location_address,
-            akad_maps_url,
-            resepsi_datetime,
-            resepsi_location_name,
-            resepsi_location_address,
-            resepsi_maps_url,
-            dresscode_colors,
-            dresscode_note,
-            quote_text,
-            quote_source,
-            music_url,
-            love_story,
-            gallery_photos,
-            sections_order,
-            sections_visibility,
-            gift_bank_name,
-            gift_bank_account,
-            gift_bank_account_name,
-            gift_shipping_address,
-            qris_account,
-            show_couple_photos,
-            show_prewed_gallery,
-            show_gift_section,
-            rsvp_enabled
-        `)
+        .select('*')
         .eq('id', id)
         .eq('user_id', user.id)
         .single();
