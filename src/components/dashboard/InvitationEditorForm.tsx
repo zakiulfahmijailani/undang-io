@@ -256,7 +256,7 @@ export default function InvitationEditorForm({
   );
 
   const formPanel = (
-    <div className="grid min-h-full bg-landing-cream/45 md:grid-cols-[210px_minmax(0,1fr)]">
+    <div className="grid min-h-full bg-landing-cream/45 md:grid-cols-[240px_minmax(0,1fr)]">
       <aside className="border-b border-landing-border bg-white md:border-b-0 md:border-r">
         <SectionNavTab sections={sections} activeSection={activeSection} onSelect={setActiveSection} onReorder={handleReorder} />
       </aside>

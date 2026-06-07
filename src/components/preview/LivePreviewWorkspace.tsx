@@ -45,7 +45,7 @@ export function LivePreviewWorkspace({
         className={cn(
           "grid min-w-0 lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden",
           previewVisible
-            ? "lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)] xl:grid-cols-[minmax(0,40fr)_minmax(0,60fr)] 2xl:grid-cols-[minmax(0,38fr)_minmax(0,62fr)]"
+            ? "lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] xl:grid-cols-[minmax(0,43fr)_minmax(0,57fr)] 2xl:grid-cols-[minmax(0,40fr)_minmax(0,60fr)]"
             : "lg:grid-cols-1",
         )}
       >

@@ -61,7 +61,7 @@ function SortableItem({
         transition,
       }}
       className={cn(
-        "relative flex min-h-[52px] items-center border-l-3 transition-colors",
+        "relative flex min-h-[48px] items-center border-l-3 transition-colors",
         active ? "border-landing-maroon bg-landing-maroon/5" : "border-transparent bg-white",
         isDragging && "z-50 shadow-md ring-1 ring-border"
       )}
@@ -79,17 +79,17 @@ function SortableItem({
       <button
         type="button"
         onClick={() => onSelect(section.key)}
-        className="flex min-h-[52px] min-w-0 flex-1 items-center gap-3 px-3 text-left font-ui text-sm font-semibold text-landing-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-maroon"
+        className="flex min-h-[48px] min-w-0 flex-1 items-center gap-2 px-2 text-left font-ui text-sm font-semibold text-landing-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-maroon"
       >
         <Icon className={cn("h-4 w-4 shrink-0 text-landing-muted", active && "text-landing-maroon")} aria-hidden="true" />
         <span className="truncate">{section.label}</span>
       </button>
 
       {section.locked ? (
-        <LockKeyhole className="mr-3 h-4 w-4 shrink-0 text-landing-muted" aria-label="Terkunci" />
+        <LockKeyhole className="mr-2 h-4 w-4 shrink-0 text-landing-muted" aria-label="Terkunci" />
       ) : section.enabled !== undefined && section.onToggle ? (
         <Switch
-          className="mr-3 shrink-0"
+          className="mr-2 shrink-0"
           checked={section.enabled}
           onCheckedChange={section.onToggle}
           aria-label={`${section.enabled ? "Sembunyikan" : "Tampilkan"} ${section.label}`}
@@ -144,7 +144,7 @@ export function SectionNavTab({ sections, activeSection, onSelect, onReorder, cl
               <div
                 key={section.key}
                 className={cn(
-                  "relative flex min-h-[52px] items-center border-l-3 transition-colors",
+                  "relative flex min-h-[48px] items-center border-l-3 transition-colors",
                   active ? "border-landing-maroon bg-landing-maroon/5" : "border-transparent"
                 )}
               >
@@ -152,16 +152,16 @@ export function SectionNavTab({ sections, activeSection, onSelect, onReorder, cl
                 <button
                   type="button"
                   onClick={() => onSelect(section.key)}
-                  className="flex min-h-[52px] min-w-0 flex-1 items-center gap-3 px-3 text-left font-ui text-sm font-semibold text-landing-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-maroon"
+                  className="flex min-h-[48px] min-w-0 flex-1 items-center gap-2 px-2 text-left font-ui text-sm font-semibold text-landing-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-maroon"
                 >
                   <Icon className={cn("h-4 w-4 shrink-0 text-landing-muted", active && "text-landing-maroon")} aria-hidden="true" />
                   <span className="truncate">{section.label}</span>
                 </button>
                 {section.locked ? (
-                  <LockKeyhole className="mr-3 h-4 w-4 shrink-0 text-landing-muted" aria-label="Terkunci" />
+                  <LockKeyhole className="mr-2 h-4 w-4 shrink-0 text-landing-muted" aria-label="Terkunci" />
                 ) : section.enabled !== undefined && section.onToggle ? (
                   <Switch
-                    className="mr-3 shrink-0"
+                    className="mr-2 shrink-0"
                     checked={section.enabled}
                     onCheckedChange={section.onToggle}
                     aria-label={`${section.enabled ? "Sembunyikan" : "Tampilkan"} ${section.label}`}
