@@ -378,33 +378,29 @@ const jawaAgungStyles = `
   z-index: 50;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  overflow-x: hidden;
   isolation: isolate;
-  overflow: hidden;
   background:
     radial-gradient(circle at 50% 42%, rgba(255,249,233,.98) 0 15%, rgba(245,232,200,.86) 47%, transparent 74%),
     linear-gradient(135deg, #D8BD85, #F4E4BB 48%, #CEAC6C);
-  padding: 1rem;
+  padding: 1rem 0;
   transition: opacity 1s ease-out, transform 1s ease-out, filter 1s ease-out;
 }
 .jawa-envelope-intro.is-opening {
   opacity: 0;
-  transform: translateY(-28px) scale(1.035);
-  filter: brightness(1.12);
+  transform: scale(1.02);
+  filter: blur(14px);
   pointer-events: none;
 }
 .jawa-envelope-intro::before {
   content: "";
   position: absolute;
-  inset: 1rem;
+  inset: .85rem;
   z-index: 2;
+  border: 1px solid rgba(123,63,26,.18);
+  outline: 1px solid rgba(255,255,255,.55);
+  outline-offset: -7px;
   pointer-events: none;
-  border: 1px solid rgba(123,63,26,.34);
-  box-shadow:
-    inset 0 0 0 5px rgba(255,249,233,.36),
-    inset 0 0 0 6px rgba(182,129,44,.18),
-    inset 0 0 100px rgba(123,63,26,.08);
 }
 .jawa-envelope-intro::after {
   content: "";
@@ -419,6 +415,7 @@ const jawaAgungStyles = `
 }
 .jawa-envelope-card {
   position: relative;
+  margin: auto;
   z-index: 12;
   display: flex;
   flex-direction: column;
