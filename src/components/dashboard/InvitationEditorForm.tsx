@@ -120,29 +120,72 @@ export default function InvitationEditorForm({
     setLocalDraft(prev => ({ ...prev, ...patch }));
   };
 
+  const handleReorder = (activeId: string, overId: string) => {
+    const keyToCanonical: Record<string, string> = {
+      "ayat-quote": "quote",
+      "kisah-cinta": "story",
+      "acara": "event",
+      "galeri-foto": "gallery",
+      "amplop-digital": "gift",
+    };
+
+    const currentOrder = localDraft.sections_order || normalizeSectionOrder();
+    
+    const activeCanonical = keyToCanonical[activeId];
+    const overCanonical = keyToCanonical[overId];
+
+    if (!activeCanonical || !overCanonical) return;
+
+    const oldIndex = currentOrder.indexOf(activeCanonical);
+    const newIndex = currentOrder.indexOf(overCanonical);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newOrder = [...currentOrder];
+      newOrder.splice(oldIndex, 1);
+      newOrder.splice(newIndex, 0, activeCanonical);
+      patchDraft({ sections_order: newOrder });
+    }
+  };
+
   const isPremium = true;
 
-  const sections = [
-    { key: "informasi-dasar", label: "Informasi Dasar", icon: Info },
-    { key: "foto-cover", label: "Foto & Cover", icon: ImageIcon, locked: !isPremium },
-    { key: "data-mempelai", label: "Data Mempelai", icon: Users },
-    { key: "ayat-quote", label: "Ayat & Quote", icon: BookOpen,
+  const baseSortableSections = [
+    { key: "ayat-quote", canonical: "quote", label: "Ayat & Quote", icon: BookOpen,
       enabled: localDraft.sections_visibility?.quote !== false,
       onToggle: (v: boolean) => patchDraft({ sections_visibility: { ...localDraft.sections_visibility, quote: v } }) },
-    { key: "kisah-cinta", label: "Kisah Cinta", icon: Heart,
+    { key: "kisah-cinta", canonical: "story", label: "Kisah Cinta", icon: Heart,
       enabled: localDraft.sections_visibility?.story !== false,
       onToggle: (v: boolean) => patchDraft({ sections_visibility: { ...localDraft.sections_visibility, story: v } }) },
-    { key: "acara", label: "Acara", icon: Calendar,
+    { key: "acara", canonical: "event", label: "Acara", icon: Calendar,
       enabled: localDraft.sections_visibility?.event !== false,
       onToggle: (v: boolean) => patchDraft({ sections_visibility: { ...localDraft.sections_visibility, event: v } }) },
-    { key: "galeri-foto", label: "Galeri Foto", icon: GalleryHorizontal,
+    { key: "galeri-foto", canonical: "gallery", label: "Galeri Foto", icon: GalleryHorizontal,
       enabled: localDraft.show_prewed_gallery !== false,
-      onToggle: (v: boolean) => patchDraft({ show_prewed_gallery: v }),
-      locked: !isPremium },
-    { key: "amplop-digital", label: "Amplop Digital", icon: Gift,
+      onToggle: (v: boolean) => patchDraft({ show_prewed_gallery: v }) },
+    { key: "amplop-digital", canonical: "gift", label: "Amplop Digital", icon: Gift,
       enabled: localDraft.show_gift_section !== false,
       onToggle: (v: boolean) => patchDraft({ show_gift_section: v }) },
-    { key: "musik", label: "Musik", icon: Music },
+  ];
+
+  const currentOrder = localDraft.sections_order || normalizeSectionOrder();
+  
+  const sortedSortableSections = [...baseSortableSections].sort((a, b) => {
+    const indexA = currentOrder.indexOf(a.canonical);
+    const indexB = currentOrder.indexOf(b.canonical);
+    const finalA = indexA === -1 ? 999 : indexA;
+    const finalB = indexB === -1 ? 999 : indexB;
+    return finalA - finalB;
+  });
+
+  const sections = [
+    { key: "informasi-dasar", label: "Informasi Dasar", icon: Info, draggable: false },
+    { key: "foto-cover", label: "Foto & Cover", icon: ImageIcon, locked: true, draggable: false },
+    { key: "data-mempelai", label: "Data Mempelai", icon: Users, locked: true, draggable: false },
+    ...sortedSortableSections.map(s => ({ ...s, draggable: true })),
+    { key: "musik", label: "Musik", icon: Music, draggable: false,
+      enabled: localDraft.sections_visibility?.music !== false,
+      onToggle: (v: boolean) => patchDraft({ sections_visibility: { ...localDraft.sections_visibility, music: v } })
+    },
   ];
 
   async function handleSave() {
@@ -215,7 +258,7 @@ export default function InvitationEditorForm({
   const formPanel = (
     <div className="grid min-h-full bg-landing-cream/45 md:grid-cols-[210px_minmax(0,1fr)]">
       <aside className="border-b border-landing-border bg-white md:border-b-0 md:border-r">
-        <SectionNavTab sections={sections} activeSection={activeSection} onSelect={setActiveSection} />
+        <SectionNavTab sections={sections} activeSection={activeSection} onSelect={setActiveSection} onReorder={handleReorder} />
       </aside>
       <div className="min-w-0 p-4 md:p-6 bg-white">
         {ActiveSection && <ActiveSection data={localDraft} onChange={patchDraft} />}
