@@ -25,6 +25,8 @@ export type InvitationPreviewPayload = {
   receptionMapsUrl?: string;
   quote?: string;
   quoteSource?: string;
+  quoteGreeting?: string;
+  quoteArabic?: string;
   loveStory?: Array<{ year?: string; date?: string; title: string; description?: string; desc?: string }>;
   galleryPhotos?: string[];
   giftBankName?: string;

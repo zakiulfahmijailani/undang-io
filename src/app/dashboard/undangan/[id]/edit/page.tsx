@@ -26,7 +26,12 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
         redirect("/dashboard");
     }
 
+    const initialData = {
+        ...invitation,
+        ...(typeof invitation.invitation_data === 'object' && invitation.invitation_data !== null ? invitation.invitation_data : {})
+    };
+
     return (
-        <InvitationEditorForm initialData={invitation as any} />
+        <InvitationEditorForm initialData={initialData as any} />
     );
 }

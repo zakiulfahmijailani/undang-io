@@ -52,6 +52,8 @@ function createPreviewRecord(form: InvitationPreviewPayload) {
     resepsi_maps_url: form.receptionMapsUrl || form.mapsUrl || fallbackDemoData.reception.mapsUrl,
     quote_text: form.quote || fallbackDemoData.quote.text,
     quote_source: form.quoteSource || fallbackDemoData.quote.source,
+    quote_greeting: form.quoteGreeting,
+    quote_arabic: form.quoteArabic,
     love_story: form.loveStory || fallbackDemoData.loveStory,
     gallery_photos: form.galleryPhotos || fallbackDemoData.gallery,
     gift_bank_name: form.giftBankName,

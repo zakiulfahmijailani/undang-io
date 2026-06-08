@@ -60,6 +60,8 @@ export type InvitationEditorInitialData = {
   dresscode_note?: string | null;
   quote_text: string | null;
   quote_source?: string | null;
+  quote_greeting?: string | null;
+  quote_arabic?: string | null;
   music_url?: string | null;
   love_story?: LoveStoryItem[] | null;
   gallery_photos?: string[] | null;
@@ -307,6 +309,8 @@ export default function InvitationEditorForm({
       receptionMapsUrl: localDraft.resepsi_maps_url,
       quote: localDraft.quote_text,
       quoteSource: localDraft.quote_source,
+      quoteGreeting: localDraft.quote_greeting,
+      quoteArabic: localDraft.quote_arabic,
       loveStory: localDraft.love_story as any,
       galleryPhotos: localDraft.gallery_photos,
       giftBankName: localDraft.gift_bank_name,
