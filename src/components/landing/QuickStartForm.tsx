@@ -35,7 +35,7 @@ export function QuickStartForm({
           <Sparkles className="h-4 w-4 text-landing-gold" aria-hidden="true" />
           Buat undangan sekarang, gratis
         </span>
-        <span className="hidden font-ui text-[11px] font-semibold text-landing-maroon sm:inline">Gratis 25 menit</span>
+        <span className="hidden font-ui text-[11px] font-semibold text-landing-maroon sm:inline">Gratis 5 menit</span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -84,7 +84,7 @@ export function QuickStartForm({
 
       <p className="mt-3 flex items-center justify-center gap-1.5 text-center font-ui text-[11px] font-medium text-landing-muted">
         <CheckCircle2 className="h-3.5 w-3.5 text-landing-success" aria-hidden="true" />
-        Tanpa login · preview langsung jadi · gratis 25 menit
+        Tanpa login · preview langsung jadi · gratis 5 menit
       </p>
     </section>
   );

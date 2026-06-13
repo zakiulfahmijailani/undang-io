@@ -31,6 +31,7 @@ import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
 import type { LandingTheme } from "@/components/landing/types";
 import { InvitationPreviewShell } from "@/components/preview/InvitationPreviewShell";
 import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
+import { TrialCountdownBar } from "@/components/trial/TrialCountdownBar";
 import InvitationEditorForm, { type InvitationEditorInitialData } from "@/components/dashboard/InvitationEditorForm";
 import {
   DEFAULT_INVITATION_THEME_KEY,
@@ -55,7 +56,6 @@ type WizardStep = 1 | 2 | 3;
 
 
 
-const PREVIEW_DURATION_MS = 25 * 60 * 1000;
 
 import { demoData } from "@/data/demoInvitation";
 
@@ -268,6 +268,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const [selectedPrice, setSelectedPrice] = useState("Semua");
   const [form, setForm] = useState<Partial<InvitationEditorInitialData>>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const resumeSlug = searchParams.get("resume");
 
   useEffect(() => {
     const themeFromUrl = searchParams.get("theme");
@@ -308,6 +309,40 @@ if (groomFromUrl || brideFromUrl) {
     }
   }, [searchParams, themeOptions]);
 
+  useEffect(() => {
+    if (!resumeSlug) return;
+    let isMounted = true;
+
+    async function loadClaimedDraft() {
+      try {
+        const response = await fetch("/api/guest-session", { cache: "no-store" });
+        const json = (await response.json()) as {
+          data?: {
+            status: string;
+            slug?: string;
+            themeId?: string | null;
+            invitationData?: Partial<InvitationEditorInitialData>;
+          };
+        };
+        if (!isMounted || !response.ok || json.data?.slug !== resumeSlug || !json.data.invitationData) return;
+
+        setForm((previous) => ({ ...previous, ...json.data?.invitationData }));
+        const draftTheme = themeOptions.find(
+          (theme) => theme.id === json.data?.themeId || theme.slug === json.data?.themeId,
+        );
+        if (draftTheme) setSelectedThemeId(draftTheme.id);
+        setStep(2);
+      } catch (error) {
+        console.error("[buat-undangan] Failed to resume claimed draft:", error);
+      }
+    }
+
+    void loadClaimedDraft();
+    return () => {
+      isMounted = false;
+    };
+  }, [resumeSlug, themeOptions]);
+
   const selectedTheme = useMemo(
     () => themeOptions.find((theme) => theme.id === selectedThemeId),
     [selectedThemeId, themeOptions],
@@ -315,25 +350,51 @@ if (groomFromUrl || brideFromUrl) {
 
 
 
-  async function handleGuestPublish(slug: string) {
-    const sessionToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + PREVIEW_DURATION_MS).toISOString();
-
-    const response = await fetch("/api/guest-sessions", {
+  async function handleGuestPublish() {
+    const response = await fetch("/api/guest-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionToken, slug, themeId: selectedTheme ? themeSelectionValue(selectedTheme) : null, expiresAt, invitationData: form }),
+      body: JSON.stringify({
+        groomName: form.groom_nickname || form.groom_full_name,
+        brideName: form.bride_nickname || form.bride_full_name,
+        themeId: selectedTheme ? themeSelectionValue(selectedTheme) : null,
+        invitationData: form,
+      }),
     });
 
-    const json = (await response.json()) as { error?: { message?: string } };
+    const json = (await response.json()) as {
+      data?: { sessionId: string; slug: string; expiresAt: string };
+      error?: { message?: string };
+    };
     if (!response.ok) throw new Error(json.error?.message || "Gagal mempublikasikan undangan.");
+    if (!json.data) throw new Error("Sesi undangan tidak berhasil dibuat.");
 
-    localStorage.setItem("guest_session", JSON.stringify({ sessionToken, slug, expiresAt }));
-    localStorage.setItem("guest_return_slug", slug);
+    localStorage.setItem("guest_session", JSON.stringify({
+      sessionToken: json.data.sessionId,
+      slug: json.data.slug,
+      expiresAt: json.data.expiresAt,
+    }));
+    localStorage.setItem("guest_return_slug", json.data.slug);
     toast.success("Undangan berhasil dipublikasikan!", {
-      description: "Undangan kamu live selama 25 menit. Daftar untuk simpan selamanya.",
+      description: "Undangan kamu live selama 5 menit. Daftar untuk total waktu 15 menit.",
     });
-    router.push(`/u/${slug}`);
+    router.push(`/invite/${json.data.slug}`);
+  }
+
+  async function handleClaimedGuestUpdate(slug: string) {
+    const response = await fetch("/api/guest-session", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        themeId: selectedTheme ? themeSelectionValue(selectedTheme) : null,
+        invitationData: form,
+      }),
+    });
+    const json = (await response.json()) as { error?: { message?: string } };
+    if (!response.ok) throw new Error(json.error?.message || "Gagal memperbarui undangan.");
+
+    toast.success("Perubahan undangan sementara tersimpan.");
+    router.push(`/invite/${slug}`);
   }
 
   async function handlePublish() {
@@ -341,6 +402,11 @@ if (groomFromUrl || brideFromUrl) {
     const slug = generateSlug(form.groom_nickname || form.groom_full_name || "", form.bride_nickname || form.bride_full_name || "");
 
     try {
+      if (resumeSlug) {
+        await handleClaimedGuestUpdate(resumeSlug);
+        return;
+      }
+
       if (isLoggedIn) {
         const response = await fetch("/api/invitations", {
           method: "POST",
@@ -357,7 +423,7 @@ if (groomFromUrl || brideFromUrl) {
         }
       }
 
-      await handleGuestPublish(slug);
+      await handleGuestPublish();
     } catch (error) {
       console.error("[buat-undangan] Publish error:", error);
       toast.error("Gagal publikasi", {
@@ -371,6 +437,7 @@ if (groomFromUrl || brideFromUrl) {
   return (
     <div className="min-h-screen bg-landing-paper text-landing-ink">
       <WizardHeader step={step} isLoggedIn={isLoggedIn} />
+      {resumeSlug ? <TrialCountdownBar /> : null}
 
       {step === 1 ? (
         <LivePreviewWorkspace
@@ -605,7 +672,7 @@ if (groomFromUrl || brideFromUrl) {
                 <div className="flex gap-3">
                   <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden="true" />
                   <p>
-                    Undangan ini bersifat sementara <strong>(25 menit)</strong>. Daftar atau masuk untuk menyimpan permanen.
+                    Undangan ini aktif sementara selama <strong>5 menit</strong>. Daftar atau masuk untuk total waktu 15 menit.
                   </p>
                 </div>
               </div>

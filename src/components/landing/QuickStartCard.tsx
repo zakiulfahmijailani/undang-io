@@ -72,7 +72,7 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
           </svg>
           <Zap className="h-4 w-4 fill-landing-gold text-landing-gold" aria-hidden="true" />
           <span className="font-display text-[1.1rem] tracking-wide text-landing-maroon -mb-1">
-            Mulai sekarang, gratis 25 menit!
+            Mulai sekarang, gratis 5 menit!
           </span>
         </div>
       </div>
@@ -138,7 +138,7 @@ export function QuickStartCard({ themes }: QuickStartCardProps) {
       </button>
 
       <p className="mt-3 text-center font-ui text-xs font-medium text-landing-muted">
-        Tanpa login <span aria-hidden="true">-</span> live dalam 5 menit <span aria-hidden="true">-</span> gratis 25 menit
+        Tanpa login <span aria-hidden="true">-</span> langsung live <span aria-hidden="true">-</span> gratis 5 menit
       </p>
     </section>
   );

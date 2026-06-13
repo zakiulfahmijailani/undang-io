@@ -1,0 +1,4 @@
+project_id = "undang-io"
+
+[functions.purge-expired-sessions]
+verify_jwt = false

@@ -132,7 +132,7 @@ export const testimonials = [
 ] as const;
 
 export const pricingBullets = {
-  free: ["Preview undangan 25 menit", "1 tema pilihan", "Tanpa RSVP"],
+  free: ["Preview undangan 5 menit", "1 tema pilihan", "Tanpa RSVP"],
   premium: ["Undangan permanen", "Semua tema premium", "RSVP digital", "Musik latar & animasi", "Prioritas support"],
 } as const;
 
@@ -150,7 +150,7 @@ export const microFeatures = [
   },
   {
     title: "Waktu fleksibel",
-    description: "Mulai gratis 25 menit, upgrade saat siap.",
+    description: "Mulai gratis 5 menit, upgrade saat siap.",
     icon: Clock3,
   },
   {

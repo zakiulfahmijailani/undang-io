@@ -13,6 +13,7 @@ import { AuthTabs } from "@/components/auth/AuthTabs";
 import { SocialButtons } from "@/components/auth/SocialButtons";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { claimCurrentGuestSession, hasCookieGuestSession } from "@/lib/guest-session-client";
 
 function RegisterForm() {
   const [loading, setLoading] = useState(false);
@@ -23,11 +24,13 @@ function RegisterForm() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
+  const [hasGuestCookie, setHasGuestCookie] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
 
   useEffect(() => {
+    void hasCookieGuestSession().then(setHasGuestCookie);
     try {
       const raw = localStorage.getItem("guest_session");
       if (raw) {
@@ -86,29 +89,30 @@ function RegisterForm() {
     }
 
     if (data.session) {
-      if (guestSessionToken) {
+      const shouldClaim =
+        searchParams.get("claim") === "true" ||
+        hasGuestCookie ||
+        Boolean(guestSessionToken) ||
+        (await hasCookieGuestSession());
+      let claimedSlug: string | null = null;
+      if (shouldClaim) {
         try {
-          const claimRes = await fetch(`/api/guest-sessions/${guestSessionToken}/claim`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${data.session.access_token}`,
-              "Content-Type": "application/json",
-            },
-          });
-          const json = (await claimRes.json()) as { data?: unknown; error?: { message?: string } };
-
-          if (!claimRes.ok || !json.data) {
-            toast.error("Gagal menyimpan undangan.", {
-              description: json?.error?.message || `Status: ${claimRes.status}`,
-            });
-            setLoading(false);
-            return;
+          const json = await claimCurrentGuestSession(data.session.access_token, guestSessionToken);
+          if (!json.data) {
+            if (json.error?.code !== "SESSION_NOT_FOUND") {
+              toast.error("Gagal menyimpan undangan.", {
+                description: json?.error?.message || "Sesi undangan tidak ditemukan.",
+              });
+              setLoading(false);
+              return;
+            }
+          } else {
+            claimedSlug = json.data.slug;
+            localStorage.removeItem("guest_session");
+            localStorage.removeItem("guest_return_slug");
+            localStorage.removeItem("pending_claim_token");
+            toast.success("Undangan tersimpan! Total waktu aktif menjadi 15 menit.");
           }
-
-          localStorage.removeItem("guest_session");
-          localStorage.removeItem("guest_return_slug");
-          localStorage.removeItem("pending_claim_token");
-          toast.success("Undangan tersimpan!");
         } catch (error) {
           console.error("[REGISTER] Claim fetch exception:", error);
           toast.error("Sistem sedang sibuk. Gagal mengklaim undangan.");
@@ -116,7 +120,7 @@ function RegisterForm() {
           return;
         }
       }
-      router.push("/dashboard");
+      router.push(claimedSlug ? `/invite/${claimedSlug}/edit` : "/dashboard");
     } else {
       if (guestSessionToken) {
         localStorage.setItem("pending_claim_token", guestSessionToken);

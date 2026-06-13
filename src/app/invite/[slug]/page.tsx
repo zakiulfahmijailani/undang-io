@@ -13,12 +13,69 @@ import { mapInvitationToFatehaData } from '@/lib/fateha-theme-mapper';
 import { JawaAgungTemplate } from '@/components/themes/jawa-agung';
 import { ObsidianLuxeTemplate } from '@/components/themes/obsidian-luxe';
 import { PetalSoftTemplate } from '@/components/themes/petal-soft';
+import { getAdminClient } from '@/lib/supabase/admin';
 
 export const revalidate = 0;
 
 interface InvitePageProps {
     params: Promise<{ slug: string }>;
     searchParams: Promise<{ preview?: string; theme?: string; to?: string }>;
+}
+
+type GuestSessionInvite = {
+    id: string;
+    slug: string;
+    status: string;
+    expires_at: string;
+    theme_id: string | null;
+    invitation_data: Record<string, unknown>;
+};
+
+function ExpiredInvitePage() {
+    return (
+        <div className="flex min-h-screen items-center justify-center bg-landing-cream p-4 font-ui">
+            <div className="w-full max-w-md rounded-3xl border border-landing-border bg-white p-8 text-center shadow-landing-card">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-stone-100 text-2xl" aria-hidden="true">
+                    ⏱
+                </div>
+                <h1 className="mt-5 font-landing-serif text-3xl font-semibold text-landing-ink">Undangan ini sudah tidak aktif</h1>
+                <p className="mt-3 text-sm leading-6 text-landing-muted">
+                    Waktu pratinjau undangan ini telah berakhir.
+                </p>
+                <a
+                    href="/"
+                    className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-landing-maroon px-6 text-sm font-semibold text-white"
+                >
+                    Buat undanganmu sendiri →
+                </a>
+            </div>
+        </div>
+    );
+}
+
+function renderGuestSessionInvitation(
+    session: GuestSessionInvite,
+    guestName: string | undefined,
+    isPreview: boolean,
+) {
+    const data = mapInvitationToFatehaData(session, { guestName, isPreview });
+    const themeKey = session.theme_id || DEFAULT_INVITATION_THEME_KEY;
+    const renderer = themeKey === PETAL_SOFT_THEME_KEY ? (
+        <PetalSoftTemplate data={data} />
+    ) : themeKey === OBSIDIAN_LUXE_THEME_KEY ? (
+        <ObsidianLuxeTemplate data={data} />
+    ) : themeKey === JAWA_AGUNG_THEME_KEY ? (
+        <JawaAgungTemplate data={data} />
+    ) : (
+        <FatehaThemeRendererWrapper data={data} />
+    );
+
+    return (
+        <>
+            {renderer}
+            <ViewTracker slug={session.slug} isPreview={isPreview} />
+        </>
+    );
 }
 
 export async function generateMetadata({ params }: InvitePageProps): Promise<Metadata> {
@@ -239,13 +296,17 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     }
 
     const supabase = await createServerSupabaseClient();
+    const admin = getAdminClient();
+    const invitationSource = admin ?? supabase;
 
-    const { data: invitation, error } = await supabase
+    const { data: invitation, error } = await invitationSource
         .from('invitations')
         .select(`
             id,
             slug,
             status,
+            is_paid,
+            trial_expires_at,
             theme_key,
             created_at,
             active_theme_id,
@@ -281,14 +342,41 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
             sections_visibility
         `)
         .eq('slug', slug)
-        .single();
+        .maybeSingle();
 
     if (error || !invitation) {
-        console.error('[invite/[slug]] fetch error:', error?.code, error?.message);
-        notFound();
+        const guestSource = admin ?? supabase;
+        const { data: guestSession } = await guestSource
+            .from('guest_sessions')
+            .select('id, slug, status, expires_at, theme_id, invitation_data')
+            .eq('slug', slug)
+            .maybeSingle();
+
+        if (!guestSession) {
+            console.error('[invite/[slug]] fetch error:', error?.code, error?.message);
+            notFound();
+        }
+
+        const guest = guestSession as GuestSessionInvite;
+        if (guest.status === 'expired' || new Date(guest.expires_at).getTime() <= Date.now()) {
+            return <ExpiredInvitePage />;
+        }
+
+        return renderGuestSessionInvitation(guest, guestName, isPreview);
     }
 
-    const isLive = invitation.status === 'active' || invitation.status === 'paid';
+    const trialExpired =
+        invitation.status === 'trial' &&
+        (!invitation.trial_expires_at || new Date(invitation.trial_expires_at).getTime() <= Date.now());
+    if ((invitation.status === 'expired' || trialExpired) && !isPreview) {
+        return <ExpiredInvitePage />;
+    }
+
+    const isLive =
+        invitation.is_paid === true ||
+        invitation.status === 'active' ||
+        invitation.status === 'paid' ||
+        (invitation.status === 'trial' && !trialExpired);
     if (!isLive && !isPreview) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-stone-50 p-4 font-sans">

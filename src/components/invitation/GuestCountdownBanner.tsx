@@ -90,7 +90,7 @@ export default function GuestCountdownBanner({
             asChild
           >
             <Link href={`/pembayaran/${slug}`}>
-              Publikasikan permanen seharga Rp 45.000
+              Publikasikan permanen mulai Rp49.000
             </Link>
           </Button>
         </div>

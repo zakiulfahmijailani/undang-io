@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import InvitationEditorForm from "@/components/dashboard/InvitationEditorForm";
+import { TrialCountdownBar } from "@/components/trial/TrialCountdownBar";
 
 export default async function EditInvitationPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
@@ -32,6 +33,9 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
     };
 
     return (
-        <InvitationEditorForm initialData={initialData as any} />
+        <>
+            <TrialCountdownBar invitationId={id} />
+            <InvitationEditorForm initialData={initialData as any} />
+        </>
     );
 }

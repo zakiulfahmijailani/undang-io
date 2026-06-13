@@ -149,15 +149,15 @@ function useCountdown(expiresAt: string | null) {
 function statusContent(mode: ViewerMode) {
   const map: Record<ViewerMode, { label: string; title: string; body: string; icon: typeof Clock3; className: string }> = {
     guest: {
-      label: "Preview Tamu 15 Menit",
+      label: "Preview Tamu 5 Menit",
       title: "Undangan sementara aktif",
-      body: "Bagikan untuk pratinjau cepat. Masuk dan aktifkan agar waktunya lebih panjang.",
+      body: "Bagikan untuk pratinjau cepat. Masuk untuk mendapatkan total waktu 15 menit.",
       icon: Clock3,
       className: "border-landing-gold/40 bg-landing-gold text-white",
     },
     "logged-in": {
-      label: "Preview Login 25 Menit",
-      title: "Waktu preview diperpanjang",
+      label: "Preview Login Total 15 Menit",
+      title: "Undangan tersimpan di akun",
       body: "Akun sudah terhubung. Publikasikan permanen sebelum waktu preview habis.",
       icon: CheckCircle2,
       className: "border-emerald-300 bg-emerald-600 text-white",

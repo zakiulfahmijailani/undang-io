@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { normalizeThemeSelection } from '@/lib/default-theme'
+import { getGuestExpiry } from '@/lib/guest-session-server'
 
 const createGuestSessionSchema = z.object({
   sessionToken: z.string().uuid(),
@@ -30,7 +31,8 @@ export async function POST(request: Request) {
       )
     }
 
-    const { sessionToken, slug, themeId, expiresAt, invitationData } = parsed.data
+    const { sessionToken, slug, themeId, invitationData } = parsed.data
+    const expiresAt = getGuestExpiry()
     const normalizedThemeId = normalizeThemeSelection(themeId)
 
     const supabaseAdmin = getAdminClient()

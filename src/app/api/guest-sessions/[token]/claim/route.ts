@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { claimGuestSession } from '@/lib/guest-session-server'
 
 export async function PATCH(
   request: Request,
@@ -52,72 +53,20 @@ export async function PATCH(
       )
     }
 
-    // Find the guest session
-    const { data: session, error: fetchError } = await supabaseAdmin
-      .from('guest_sessions')
-      .select('*')
-      .eq('session_token', token)
-      .single()
-
-    if (fetchError || !session) {
+    const result = await claimGuestSession(supabaseAdmin, token, user.id)
+    if (result.error) {
       return NextResponse.json(
-        { data: null, error: { code: 'SESSION_NOT_FOUND', message: 'Sesi undangan tidak ditemukan.' } },
-        { status: 404 }
-      )
-    }
-
-    // Check if already converted
-    if (session.converted_to_invitation_id) {
-      return NextResponse.json(
-        { data: null, error: { code: 'ALREADY_CONVERTED', message: 'Sesi sudah dikonversi menjadi undangan permanen.' } },
-        { status: 409 }
-      )
-    }
-
-    // Check if expired
-    if (new Date(session.expires_at) < new Date()) {
-      return NextResponse.json(
-        { data: null, error: { code: 'SESSION_EXPIRED', message: 'Sesi undangan sudah habis. Silakan buat undangan baru.' } },
-        { status: 410 }
-      )
-    }
-
-    // Extend timer by 10 minutes from now
-    const extendedExpiry = new Date(Date.now() + 10 * 60 * 1000).toISOString()
-
-    // Update: attach user_id, extend timer, set status to 'claimed'
-    const { data: updatedSession, error: updateError } = await supabaseAdmin
-      .from('guest_sessions')
-      .update({
-        user_id: user.id,
-        status: 'claimed',
-        expires_at: extendedExpiry,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', session.id)
-      .select('id, session_token, slug, status, expires_at, user_id')
-      .single()
-
-    if (updateError) {
-      console.error('[PATCH /api/guest-sessions/[token]/claim] Update error:', updateError)
-      return NextResponse.json(
-        {
-          data: null,
-          error: { code: 'UPDATE_FAILED', message: 'Gagal mengklaim sesi undangan.', details: updateError.message },
-        },
-        { status: 500 }
+        { data: null, error: result.error },
+        { status: result.error.code === 'SESSION_EXPIRED' ? 410 : 404 }
       )
     }
 
     return NextResponse.json({
       data: {
-        id: updatedSession.id,
-        sessionToken: updatedSession.session_token,
-        slug: updatedSession.slug,
-        status: updatedSession.status,
-        expiresAt: updatedSession.expires_at,
-        userId: updatedSession.user_id,
-        timeRemainingMs: Math.max(0, new Date(updatedSession.expires_at).getTime() - Date.now()),
+        slug: result.data.slug,
+        status: 'claimed',
+        expiresAt: result.data.expiresAt,
+        timeRemainingMs: result.data.remainingSeconds * 1000,
       },
       error: null,
     })
