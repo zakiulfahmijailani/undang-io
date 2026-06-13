@@ -42,14 +42,7 @@ async function authCallback(request: Request) {
         }
       }
 
-      const forwardedHost = request.headers.get('x-forwarded-host')
-      const isLocalhost = origin.includes('localhost')
-
-      const destination = isLocalhost
-        ? `${origin}${next}`
-        : forwardedHost
-          ? `https://${forwardedHost}${next}`
-          : `${origin}${next}`
+      const destination = new URL(next, origin)
       const response = NextResponse.redirect(destination)
       if (claimedToken) {
         response.cookies.set(GUEST_SESSION_COOKIE, claimedToken, {

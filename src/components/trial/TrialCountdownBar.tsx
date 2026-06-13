@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 
 type TrialCountdownBarProps = {
-  invitationId?: string;
   onExpire?: () => void;
 };
 
@@ -19,7 +18,7 @@ function formatCountdown(totalSeconds: number) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function TrialCountdownBar({ invitationId, onExpire }: TrialCountdownBarProps) {
+export function TrialCountdownBar({ onExpire }: TrialCountdownBarProps) {
   const { remainingSeconds, status, slug, isExpired, isExpiringSoon } = useTrialTimer({ onExpire });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(false);
@@ -34,8 +33,7 @@ export function TrialCountdownBar({ invitationId, onExpire }: TrialCountdownBarP
   if (status === "none" || status === "converted") return null;
 
   const showRegisterModal = !isLoggedIn && remainingSeconds > 0 && remainingSeconds < 120 && !modalDismissed;
-  const paymentTarget = slug ?? invitationId;
-  const paymentHref = paymentTarget ? `/pembayaran/${paymentTarget}` : "/dashboard";
+  const paymentHref = slug ? `/pembayaran/${slug}` : null;
 
   return (
     <>
@@ -58,10 +56,10 @@ export function TrialCountdownBar({ invitationId, onExpire }: TrialCountdownBarP
           </span>
           {isExpired && !isLoggedIn ? (
             <Link href="/register?claim=true" className="underline underline-offset-4">
-              →
+              Daftar →
             </Link>
           ) : null}
-          {isLoggedIn && isExpiringSoon && !isExpired && paymentTarget ? (
+          {isLoggedIn && isExpiringSoon && !isExpired && paymentHref ? (
             <Link href={paymentHref} className="underline underline-offset-4">
               Jadikan Permanen — Rp49.000 →
             </Link>

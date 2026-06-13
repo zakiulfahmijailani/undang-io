@@ -22,11 +22,12 @@ export function getGuestTokenFromStorage(searchParams: URLSearchParams): string 
         }
       }
     }
+
+    return localStorage.getItem("pending_claim_token") ?? searchParams.get("guest_token");
   } catch (error) {
     console.error("[getGuestTokenFromStorage] Failed:", error);
+    return searchParams.get("guest_token");
   }
-
-  return localStorage.getItem("pending_claim_token") ?? searchParams.get("guest_token");
 }
 
 export async function hasCookieGuestSession() {

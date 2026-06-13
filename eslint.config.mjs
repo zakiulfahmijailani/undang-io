@@ -47,7 +47,7 @@ const eslintConfig = [
       "react/no-unknown-property": "off",
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",
-      "react-hooks/rules-of-hooks": "warn",
+      "react-hooks/rules-of-hooks": "error",
     },
   },
 ];

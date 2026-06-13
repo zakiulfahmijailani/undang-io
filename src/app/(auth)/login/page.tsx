@@ -85,7 +85,7 @@ function LoginForm() {
       const supabase = createBrowserSupabaseClient();
       const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
       const redirectTo = token
-        ? `${window.location.origin}/api/auth/callback?guest_session_token=${token}`
+        ? `${window.location.origin}/api/auth/callback?guest_session_token=${encodeURIComponent(token)}`
         : `${window.location.origin}/api/auth/callback`;
 
       const { error } = await supabase.auth.signInWithOAuth({
