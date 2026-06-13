@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clock3 } from "lucide-react";
 import { useTrialTimer } from "@/hooks/useTrialTimer";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -21,7 +20,7 @@ function formatCountdown(totalSeconds: number) {
 }
 
 export function TrialCountdownBar({ invitationId, onExpire }: TrialCountdownBarProps) {
-  const { remainingSeconds, status, isExpired, isExpiringSoon } = useTrialTimer({ onExpire });
+  const { remainingSeconds, status, slug, isExpired, isExpiringSoon } = useTrialTimer({ onExpire });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(false);
 
@@ -35,35 +34,36 @@ export function TrialCountdownBar({ invitationId, onExpire }: TrialCountdownBarP
   if (status === "none" || status === "converted") return null;
 
   const showRegisterModal = !isLoggedIn && remainingSeconds > 0 && remainingSeconds < 120 && !modalDismissed;
-  const paymentHref = invitationId ? `/dashboard/checkout/${invitationId}` : "/dashboard";
+  const paymentTarget = slug ?? invitationId;
+  const paymentHref = paymentTarget ? `/pembayaran/${paymentTarget}` : "/dashboard";
 
   return (
     <>
       <div
         className={cn(
-          "sticky top-0 z-50 flex min-h-12 items-center justify-center border-b px-4 py-2 font-ui text-sm font-semibold shadow-sm",
+          "fixed inset-x-0 top-0 z-50 flex min-h-12 items-center justify-center border-b px-4 py-2 font-ui text-sm font-semibold shadow-sm",
           isExpired
-            ? "border-stone-300 bg-stone-200 text-stone-700"
+            ? "border-gray-300 bg-gray-200 text-gray-600"
             : isExpiringSoon
-              ? "animate-pulse border-red-300 bg-red-600 text-white"
-              : "border-amber-300 bg-amber-100 text-amber-950",
+              ? "animate-pulse border-red-400 bg-red-500 text-white"
+              : "border-amber-500 bg-amber-400 text-amber-900",
         )}
       >
         <div className="flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center">
           <span className="inline-flex items-center gap-2">
-            <Clock3 className="h-4 w-4" aria-hidden="true" />
+            <span aria-hidden="true">⏱️</span>
             {isExpired
               ? "Waktu habis. Daftar untuk menyimpan"
               : `Undangan aktif ${formatCountdown(remainingSeconds)} lagi`}
           </span>
           {isExpired && !isLoggedIn ? (
             <Link href="/register?claim=true" className="underline underline-offset-4">
-              Daftar sekarang →
+              →
             </Link>
           ) : null}
-          {isLoggedIn && isExpiringSoon && !isExpired ? (
+          {isLoggedIn && isExpiringSoon && !isExpired && paymentTarget ? (
             <Link href={paymentHref} className="underline underline-offset-4">
-              Jadikan permanen selamanya mulai Rp49.000 →
+              Jadikan Permanen — Rp49.000 →
             </Link>
           ) : null}
         </div>
@@ -72,15 +72,15 @@ export function TrialCountdownBar({ invitationId, onExpire }: TrialCountdownBarP
       <Modal
         isOpen={showRegisterModal}
         onClose={() => setModalDismissed(true)}
-        title="Simpan undanganmu"
-        description="Daftar gratis sekarang dan hemat sisa undanganmu — total 15 menit!"
+        title="Simpan undanganmu sebelum hilang!"
+        description="Daftar gratis dan dapatkan total 15 menit untuk melengkapi undangan."
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button asChild fullWidth>
             <Link href="/register?claim=true">Daftar Sekarang</Link>
           </Button>
           <Button variant="secondary" fullWidth onClick={() => setModalDismissed(true)}>
-            Tutup
+            Lanjut dulu
           </Button>
         </div>
       </Modal>

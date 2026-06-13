@@ -21,7 +21,7 @@ Deno.serve(async () => {
     .from("guest_sessions")
     .update({ status: "expired" })
     .lt("expires_at", now)
-    .eq("status", "preview");
+    .in("status", ["preview", "claimed"]);
 
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { error: deleteError } = await supabase

@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { claimGuestSession, GUEST_SESSION_COOKIE } from '@/lib/guest-session-server'
 
-export async function GET(request: Request) {
+async function authCallback(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const guestSessionToken = searchParams.get('guest_session_token')
@@ -14,6 +14,9 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return NextResponse.redirect(`${origin}/login?message=Layanan autentikasi tidak tersedia`)
+    }
     const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!sessionError) {
@@ -61,5 +64,15 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?message=Could not login with provider`)
+  return NextResponse.redirect(`${origin}/login?message=Gagal masuk dengan penyedia akun`)
+}
+
+export async function GET(request: Request) {
+  try {
+    return await authCallback(request)
+  } catch (error) {
+    console.error('[GET /api/auth/callback] Unexpected error:', error)
+    const { origin } = new URL(request.url)
+    return NextResponse.redirect(`${origin}/login?message=Terjadi kesalahan. Silakan coba lagi.`)
+  }
 }

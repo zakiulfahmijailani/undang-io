@@ -9,6 +9,26 @@ type ClaimResult = {
   remainingSeconds: number;
 };
 
+export function getGuestTokenFromStorage(searchParams: URLSearchParams): string | null {
+  try {
+    const raw = localStorage.getItem("guest_session");
+    if (raw) {
+      const parsed = JSON.parse(raw) as { sessionToken?: string; expiresAt?: string };
+      if (parsed.sessionToken) {
+        if (parsed.expiresAt && new Date(parsed.expiresAt).getTime() <= Date.now()) {
+          localStorage.removeItem("guest_session");
+        } else {
+          return parsed.sessionToken;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[getGuestTokenFromStorage] Failed:", error);
+  }
+
+  return localStorage.getItem("pending_claim_token") ?? searchParams.get("guest_token");
+}
+
 export async function hasCookieGuestSession() {
   try {
     const response = await fetch("/api/guest-session", { cache: "no-store" });

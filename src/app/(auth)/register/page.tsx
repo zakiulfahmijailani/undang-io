@@ -13,7 +13,7 @@ import { AuthTabs } from "@/components/auth/AuthTabs";
 import { SocialButtons } from "@/components/auth/SocialButtons";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { claimCurrentGuestSession, hasCookieGuestSession } from "@/lib/guest-session-client";
+import { claimCurrentGuestSession, getGuestTokenFromStorage, hasCookieGuestSession } from "@/lib/guest-session-client";
 
 function RegisterForm() {
   const [loading, setLoading] = useState(false);
@@ -31,21 +31,7 @@ function RegisterForm() {
 
   useEffect(() => {
     void hasCookieGuestSession().then(setHasGuestCookie);
-    try {
-      const raw = localStorage.getItem("guest_session");
-      if (raw) {
-        const parsed = JSON.parse(raw) as { sessionToken?: string };
-        if (parsed.sessionToken) {
-          setGuestSessionToken(parsed.sessionToken);
-          return;
-        }
-      }
-    } catch (error) {
-      console.error("[register] Failed to read guest session:", error);
-    }
-
-    const urlToken = searchParams.get("guest_token");
-    if (urlToken) setGuestSessionToken(urlToken);
+    setGuestSessionToken(getGuestTokenFromStorage(new URLSearchParams(window.location.search)));
   }, [searchParams]);
 
   const passwordRules = useMemo(
@@ -138,8 +124,9 @@ function RegisterForm() {
     try {
       setLoading(true);
       const supabase = createBrowserSupabaseClient();
-      const redirectTo = guestSessionToken
-        ? `${window.location.origin}/api/auth/callback?guest_session_token=${guestSessionToken}`
+      const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
+      const redirectTo = token
+        ? `${window.location.origin}/api/auth/callback?guest_session_token=${token}`
         : `${window.location.origin}/api/auth/callback`;
 
       const { error } = await supabase.auth.signInWithOAuth({
