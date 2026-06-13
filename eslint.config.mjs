@@ -7,7 +7,7 @@ import reactHooksPlugin from "eslint-plugin-react-hooks";
 
 const eslintConfig = [
   {
-    ignores: [".next/**", "node_modules/**", "joy-knot/**", "undang-io/**", "supabase/functions/**"],
+    ignores: [".next/**", "node_modules/**", "joy-knot/**", "undang-io/**"],
   },
   {
     files: ["**/*.{js,mjs,cjs,ts,tsx}"],
