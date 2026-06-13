@@ -21,8 +21,8 @@ type UseTrialTimerOptions = {
 
 export function useTrialTimer({ onExpire, pollIntervalMs = 10_000 }: UseTrialTimerOptions = {}) {
   const [status, setStatus] = useState<TrialStatus>("none");
-  const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [slug, setSlug] = useState<string | null>(null);
   const expiredCallbackSent = useRef(false);
 
   const syncWithServer = useCallback(async () => {
@@ -30,15 +30,15 @@ export function useTrialTimer({ onExpire, pollIntervalMs = 10_000 }: UseTrialTim
       const response = await fetch("/api/guest-session", { cache: "no-store" });
       const json = (await response.json()) as GuestSessionResponse;
       const nextStatus = json.data?.status ?? "none";
-      const nextExpiresAt = json.data?.expiresAt ?? null;
 
       setStatus((previousStatus) =>
-        nextStatus === "none" && (previousStatus === "preview" || previousStatus === "claimed")
+        nextStatus === "none" &&
+        (previousStatus === "preview" || previousStatus === "claimed" || previousStatus === "expired")
           ? "expired"
           : nextStatus,
       );
-      setExpiresAt(nextExpiresAt);
       setRemainingSeconds(json.data?.remainingSeconds ?? 0);
+      setSlug(json.data?.slug ?? null);
     } catch (error) {
       console.error("[useTrialTimer] Failed to synchronize timer:", error);
     }
@@ -51,12 +51,12 @@ export function useTrialTimer({ onExpire, pollIntervalMs = 10_000 }: UseTrialTim
   }, [pollIntervalMs, syncWithServer]);
 
   useEffect(() => {
-    if (!expiresAt) return;
-    const tick = () => setRemainingSeconds(Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)));
-    tick();
-    const timer = window.setInterval(tick, 1000);
+    if (status !== "preview" && status !== "claimed") return;
+    const timer = window.setInterval(() => {
+      setRemainingSeconds((previous) => Math.max(0, previous - 1));
+    }, 1000);
     return () => window.clearInterval(timer);
-  }, [expiresAt]);
+  }, [status]);
 
   const isExpired = status === "expired" || (status !== "none" && status !== "converted" && remainingSeconds <= 0);
 
@@ -72,6 +72,7 @@ export function useTrialTimer({ onExpire, pollIntervalMs = 10_000 }: UseTrialTim
   return {
     remainingSeconds,
     status,
+    slug,
     isExpired,
     isExpiringSoon: remainingSeconds > 0 && remainingSeconds < 60,
   };

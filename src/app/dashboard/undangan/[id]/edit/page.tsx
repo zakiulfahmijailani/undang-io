@@ -34,7 +34,7 @@ export default async function EditInvitationPage({ params }: { params: Promise<{
 
     return (
         <>
-            <TrialCountdownBar invitationId={id} />
+            <TrialCountdownBar />
             <InvitationEditorForm initialData={initialData as any} />
         </>
     );

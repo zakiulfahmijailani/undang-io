@@ -1,0 +1,18 @@
+language: "en-US"
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!**/*.md"
+    - "!pnpm-lock.yaml"
+    - "!*.py"
+  tools:
+    eslint:
+      enabled: true
+    typescript:
+      enabled: true
+chat:
+  auto_reply: true

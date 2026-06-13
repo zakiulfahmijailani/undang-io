@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { demoData } from "@/data/demoInvitation";
@@ -40,14 +41,14 @@ function ExpiredInvitePage() {
                 </div>
                 <h1 className="mt-5 font-landing-serif text-3xl font-semibold text-landing-ink">Undangan ini sudah tidak aktif</h1>
                 <p className="mt-3 text-sm leading-6 text-landing-muted">
-                    Waktu pratinjau undangan ini telah berakhir.
+                    Masa percobaan undangan ini telah berakhir.
                 </p>
-                <a
+                <Link
                     href="/"
                     className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-landing-maroon px-6 text-sm font-semibold text-white"
                 >
-                    Buat undanganmu sendiri →
-                </a>
+                    Buat Undanganmu Sendiri →
+                </Link>
             </div>
         </div>
     );
@@ -390,7 +391,7 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     }
 
     // ── Classic Theme Route ─────────────────────────────────────────────
-    const themeKey = (invitation as any).theme_key as string | null;
+    const themeKey = invitation.theme_key as string | null;
 
     if (themeKey === PETAL_SOFT_THEME_KEY) {
         const petalSoftData = mapInvitationToFatehaData(invitation, { guestName, isPreview });

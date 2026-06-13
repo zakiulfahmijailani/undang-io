@@ -70,8 +70,8 @@ function setGuestCookie(response: NextResponse, token: string, maxAge: number) {
   });
 }
 
-export async function POST(request: NextRequest) {
-  const parsed = createGuestSessionSchema.safeParse(await request.json());
+async function postGuestSession(request: NextRequest) {
+  const parsed = createGuestSessionSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return responseError("VALIDATION_ERROR", "Data undangan tidak valid.", 400, parsed.error.flatten().fieldErrors);
   }
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
   return response;
 }
 
-export async function PATCH(request: NextRequest) {
+async function patchGuestSession(request: NextRequest) {
   const patchBody = updateGuestSessionSchema.safeParse(await request.json().catch(() => ({})));
   if (!patchBody.success) {
     return responseError("VALIDATION_ERROR", "Perubahan undangan tidak valid.", 400, patchBody.error.flatten().fieldErrors);
@@ -140,9 +140,16 @@ export async function PATCH(request: NextRequest) {
   if (!token) return responseError("SESSION_NOT_FOUND", "Sesi undangan tidak ditemukan.", 404);
 
   const supabase = await createServerSupabaseClient();
-  let {
-    data: { user },
+  if (!supabase) return responseError("AUTH_ERROR", "Layanan autentikasi tidak tersedia.", 500);
+
+  const {
+    data: { user: cookieUser },
+    error: userError,
   } = await supabase.auth.getUser();
+  if (userError) {
+    console.error("[PATCH /api/guest-session] Cookie auth failed:", userError);
+  }
+  let user = cookieUser;
   if (!user) {
     const authHeader = request.headers.get("authorization");
     if (authHeader?.startsWith("Bearer ")) {
@@ -186,7 +193,7 @@ export async function PATCH(request: NextRequest) {
   return response;
 }
 
-export async function GET(request: NextRequest) {
+async function getGuestSession(request: NextRequest) {
   const token = request.cookies.get(GUEST_SESSION_COOKIE)?.value;
   if (!token) return NextResponse.json({ data: { status: "none" }, error: null });
 
@@ -200,9 +207,17 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
   const session = data as GuestSessionRow | null;
 
-  if (error || !session || getRemainingSeconds(session.expires_at) <= 0) {
-    if (session?.status === "preview") {
-      await admin.from("guest_sessions").update({ status: "expired" }).eq("id", session.id);
+  if (error) {
+    console.error("[GET /api/guest-session] Fetch failed:", error);
+    return responseError("SESSION_FETCH_FAILED", "Gagal mengambil sesi undangan.", 500);
+  }
+
+  if (!session || getRemainingSeconds(session.expires_at) <= 0) {
+    if (session && (session.status === "preview" || session.status === "claimed")) {
+      const { error: updateError } = await admin.from("guest_sessions").update({ status: "expired" }).eq("id", session.id);
+      if (updateError) {
+        console.error("[GET /api/guest-session] Expiry update failed:", updateError);
+      }
     }
     const response = NextResponse.json({ data: { status: "none" }, error: null });
     response.cookies.delete(GUEST_SESSION_COOKIE);
@@ -220,4 +235,31 @@ export async function GET(request: NextRequest) {
     },
     error: null,
   });
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    return await postGuestSession(request);
+  } catch (error) {
+    console.error("[POST /api/guest-session] Unexpected error:", error);
+    return responseError("INTERNAL_ERROR", "Terjadi kesalahan. Silakan coba lagi.", 500);
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    return await patchGuestSession(request);
+  } catch (error) {
+    console.error("[PATCH /api/guest-session] Unexpected error:", error);
+    return responseError("INTERNAL_ERROR", "Terjadi kesalahan. Silakan coba lagi.", 500);
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    return await getGuestSession(request);
+  } catch (error) {
+    console.error("[GET /api/guest-session] Unexpected error:", error);
+    return responseError("INTERNAL_ERROR", "Terjadi kesalahan. Silakan coba lagi.", 500);
+  }
 }

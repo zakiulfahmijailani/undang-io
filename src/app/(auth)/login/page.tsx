@@ -12,30 +12,7 @@ import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthTabs } from "@/components/auth/AuthTabs";
 import { SocialButtons } from "@/components/auth/SocialButtons";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { claimCurrentGuestSession, hasCookieGuestSession } from "@/lib/guest-session-client";
-
-function getGuestTokenFromStorage(searchParams: URLSearchParams): string | null {
-  try {
-    const raw = localStorage.getItem("guest_session");
-    if (raw) {
-      const parsed = JSON.parse(raw) as { sessionToken?: string; expiresAt?: string };
-      if (parsed?.sessionToken) {
-        if (parsed.expiresAt && new Date(parsed.expiresAt) < new Date()) {
-          localStorage.removeItem("guest_session");
-        } else {
-          return parsed.sessionToken;
-        }
-      }
-    }
-  } catch (error) {
-    console.error("[login] Failed to read guest session:", error);
-  }
-
-  const pending = localStorage.getItem("pending_claim_token");
-  if (pending) return pending;
-
-  return searchParams.get("guest_token");
-}
+import { claimCurrentGuestSession, getGuestTokenFromStorage, hasCookieGuestSession } from "@/lib/guest-session-client";
 
 function LoginForm() {
   const [loading, setLoading] = useState(false);
@@ -108,7 +85,7 @@ function LoginForm() {
       const supabase = createBrowserSupabaseClient();
       const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
       const redirectTo = token
-        ? `${window.location.origin}/api/auth/callback?guest_session_token=${token}`
+        ? `${window.location.origin}/api/auth/callback?guest_session_token=${encodeURIComponent(token)}`
         : `${window.location.origin}/api/auth/callback`;
 
       const { error } = await supabase.auth.signInWithOAuth({
