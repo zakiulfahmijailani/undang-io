@@ -96,12 +96,26 @@ export async function POST(request: Request) {
         expires_at: expiresAt,
         invitation_data: invitationData,
         status: 'preview',
+        ip_address: request.headers.get('x-client-ip'),
+        user_agent: request.headers.get('user-agent'),
       })
       .select('id, session_token, slug, expires_at')
       .single()
 
     if (insertError) {
       console.error('[POST /api/guest-sessions] Insert error:', insertError)
+      if (insertError.message.includes('RATE_LIMIT_IP')) {
+        return NextResponse.json(
+          {
+            data: null,
+            error: {
+              code: 'RATE_LIMIT_IP',
+              message: 'Terlalu banyak percobaan dari jaringan ini. Silakan coba lagi dalam 1 jam.',
+            },
+          },
+          { status: 429 }
+        )
+      }
       return NextResponse.json(
         {
           data: null,
@@ -127,7 +141,7 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[POST /api/guest-sessions] Unexpected error:', error)
     return NextResponse.json(
       {

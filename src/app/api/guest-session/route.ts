@@ -17,6 +17,8 @@ const createGuestSessionSchema = z.object({
   brideName: z.string().trim().max(100).optional(),
   themeId: z.string().trim().nullable().optional(),
   invitationData: z.record(z.string(), z.unknown()).default({}),
+  fingerprint: z.string().trim().max(200).nullable().optional(),
+  website: z.string().max(2048).optional(),
 });
 
 const updateGuestSessionSchema = z.object({
@@ -76,6 +78,17 @@ async function postGuestSession(request: NextRequest) {
     return responseError("VALIDATION_ERROR", "Data undangan tidak valid.", 400, parsed.error.flatten().fieldErrors);
   }
 
+  if (parsed.data.website) {
+    return NextResponse.json({
+      data: {
+        sessionId: randomUUID(),
+        slug: `fake-slug-${randomUUID().replace(/-/g, "").slice(0, 8)}`,
+        expiresAt: getGuestExpiry(),
+      },
+      error: null,
+    });
+  }
+
   const admin = getAdminClient();
   if (!admin) return responseError("DATABASE_ERROR", "Database client tidak tersedia.", 500);
 
@@ -106,12 +119,29 @@ async function postGuestSession(request: NextRequest) {
       theme_id: normalizeThemeSelection(parsed.data.themeId),
       expires_at: expiresAt,
       status: "preview",
+      ip_address: request.headers.get("x-client-ip"),
+      device_fingerprint: parsed.data.fingerprint || null,
+      user_agent: request.headers.get("user-agent"),
     })
     .select("id, session_token, slug, expires_at")
     .single();
 
   if (error || !data) {
     console.error("[POST /api/guest-session] Insert failed:", error);
+    if (error?.message.includes("RATE_LIMIT_IP")) {
+      return responseError(
+        "RATE_LIMIT_IP",
+        "Terlalu banyak percobaan dari jaringan ini. Silakan coba lagi dalam 1 jam.",
+        429,
+      );
+    }
+    if (error?.message.includes("RATE_LIMIT_FP")) {
+      return responseError(
+        "RATE_LIMIT_FP",
+        "Terlalu banyak percobaan dari perangkat ini. Silakan coba lagi dalam 1 jam.",
+        429,
+      );
+    }
     return responseError("INSERT_FAILED", "Gagal membuat undangan sementara.", 500, error?.message);
   }
 
