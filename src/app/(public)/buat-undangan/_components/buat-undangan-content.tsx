@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -41,7 +41,9 @@ import {
   PETAL_SOFT_THEME_KEY,
   isCodeRenderedThemeKey,
 } from "@/lib/default-theme";
+import { createGuestSession } from "@/lib/guest-session-client";
 import { cn } from "@/lib/utils";
+import { useDeviceFingerprint } from "@/hooks/useDeviceFingerprint";
 
 export type ActiveTheme = {
   id: string;
@@ -268,6 +270,8 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const [selectedPrice, setSelectedPrice] = useState("Semua");
   const [form, setForm] = useState<Partial<InvitationEditorInitialData>>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const honeypotRef = useRef<HTMLInputElement>(null);
+  const deviceFingerprint = useDeviceFingerprint();
   const resumeSlug = searchParams.get("resume");
 
   useEffect(() => {
@@ -351,21 +355,24 @@ if (groomFromUrl || brideFromUrl) {
 
 
   async function handleGuestPublish() {
-    const response = await fetch("/api/guest-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        groomName: form.groom_nickname || form.groom_full_name,
-        brideName: form.bride_nickname || form.bride_full_name,
-        themeId: selectedTheme ? themeSelectionValue(selectedTheme) : null,
-        invitationData: form,
-      }),
+    const { response, json } = await createGuestSession({
+      groomName: form.groom_nickname || form.groom_full_name || undefined,
+      brideName: form.bride_nickname || form.bride_full_name || undefined,
+      themeId: selectedTheme ? themeSelectionValue(selectedTheme) : null,
+      invitationData: form,
+      fingerprint: deviceFingerprint,
+      website: honeypotRef.current?.value ?? "",
     });
 
-    const json = (await response.json()) as {
-      data?: { sessionId: string; slug: string; expiresAt: string };
-      error?: { message?: string };
-    };
+    if (response.status === 429) {
+      toast.error(
+        json.error?.code === "RATE_LIMIT_GUEST_SESSION"
+          ? "Kamu sudah terlalu sering mencoba. Silakan coba lagi dalam 1 jam."
+          : "Terlalu banyak permintaan. Tunggu sebentar ya.",
+      );
+      return;
+    }
+
     if (!response.ok) throw new Error(json.error?.message || "Gagal mempublikasikan undangan.");
     if (!json.data) throw new Error("Sesi undangan tidak berhasil dibuat.");
 
@@ -679,6 +686,15 @@ if (groomFromUrl || brideFromUrl) {
               <p className="mt-5 font-ui text-sm text-landing-muted">Sisa waktu:</p>
               <div className="mt-1 font-ui text-5xl font-bold text-orange-600">25:00</div>
 
+              <input
+                ref={honeypotRef}
+                type="text"
+                name="website"
+                autoComplete="off"
+                tabIndex={-1}
+                aria-hidden="true"
+                className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
+              />
               <button
                 type="button"
                 onClick={handlePublish}

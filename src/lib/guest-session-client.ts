@@ -9,6 +9,42 @@ type ClaimResult = {
   remainingSeconds: number;
 };
 
+export type CreateGuestSessionPayload = {
+  groomName?: string;
+  brideName?: string;
+  themeId?: string | null;
+  invitationData: Record<string, unknown>;
+  website?: string;
+  fingerprint?: string | null;
+};
+
+export type CreateGuestSessionResult = {
+  sessionId: string;
+  slug: string;
+  expiresAt: string;
+};
+
+export async function createGuestSession(payload: CreateGuestSessionPayload) {
+  let fingerprint = payload.fingerprint;
+
+  if (!fingerprint && typeof window !== "undefined") {
+    try {
+      fingerprint = sessionStorage.getItem("device_fp");
+    } catch (error) {
+      console.error("[createGuestSession] Failed to read device fingerprint:", error);
+    }
+  }
+
+  const response = await fetch("/api/guest-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...payload, fingerprint }),
+  });
+  const json = (await response.json()) as ApiResponse<CreateGuestSessionResult>;
+
+  return { response, json };
+}
+
 export function getGuestTokenFromStorage(searchParams: URLSearchParams): string | null {
   try {
     const raw = localStorage.getItem("guest_session");
