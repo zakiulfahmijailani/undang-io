@@ -39,7 +39,7 @@ const ContentSecurityPolicy = `
     https://openrouter.ai;
   frame-src 'self'
     https://challenges.cloudflare.com;
-  frame-ancestors 'none';
+  frame-ancestors 'self';
   object-src 'none';
   base-uri 'self';
   form-action 'self';
@@ -50,10 +50,6 @@ const securityHeaders = [
     {
         key: "Content-Security-Policy",
         value: ContentSecurityPolicy,
-    },
-    {
-        key: "X-Frame-Options",
-        value: "DENY",
     },
     {
         key: "X-Content-Type-Options",
