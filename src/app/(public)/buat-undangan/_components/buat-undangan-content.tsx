@@ -32,6 +32,7 @@ import type { LandingTheme } from "@/components/landing/types";
 import { InvitationPreviewShell } from "@/components/preview/InvitationPreviewShell";
 import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
 import { TrialCountdownBar } from "@/components/trial/TrialCountdownBar";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 import InvitationEditorForm, { type InvitationEditorInitialData } from "@/components/dashboard/InvitationEditorForm";
 import {
   DEFAULT_INVITATION_THEME_KEY,
@@ -44,6 +45,7 @@ import {
 import { createGuestSession } from "@/lib/guest-session-client";
 import { cn } from "@/lib/utils";
 import { useDeviceFingerprint } from "@/hooks/useDeviceFingerprint";
+import { useTurnstile } from "@/hooks/useTurnstile";
 
 export type ActiveTheme = {
   id: string;
@@ -273,6 +275,7 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const honeypotRef = useRef<HTMLInputElement>(null);
   const deviceFingerprint = useDeviceFingerprint();
   const resumeSlug = searchParams.get("resume");
+  const { getToken, isError, onSuccess, onError, onExpire } = useTurnstile();
 
   useEffect(() => {
     const themeFromUrl = searchParams.get("theme");
@@ -362,6 +365,7 @@ if (groomFromUrl || brideFromUrl) {
       invitationData: form,
       fingerprint: deviceFingerprint,
       website: honeypotRef.current?.value ?? "",
+      cf_turnstile_token: getToken(),
     });
 
     if (response.status === 429) {
@@ -370,6 +374,11 @@ if (groomFromUrl || brideFromUrl) {
           ? "Kamu sudah terlalu sering mencoba. Silakan coba lagi dalam 1 jam."
           : "Terlalu banyak permintaan. Tunggu sebentar ya.",
       );
+      return;
+    }
+
+    if (response.status === 403 && json.error?.code === "TURNSTILE_FAILED") {
+      toast.error("Verifikasi keamanan gagal. Silakan refresh halaman lalu coba lagi.");
       return;
     }
 
@@ -695,6 +704,12 @@ if (groomFromUrl || brideFromUrl) {
                 aria-hidden="true"
                 className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
               />
+              {isError ? (
+                <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 font-ui text-sm font-semibold text-landing-maroon">
+                  Verifikasi keamanan gagal. Silakan refresh halaman.
+                </p>
+              ) : null}
+              <TurnstileWidget onSuccess={onSuccess} onError={onError} onExpire={onExpire} />
               <button
                 type="button"
                 onClick={handlePublish}

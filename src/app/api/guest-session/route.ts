@@ -11,6 +11,7 @@ import {
 } from "@/lib/guest-session-server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const createGuestSessionSchema = z.object({
   groomName: z.string().trim().max(100).optional(),
@@ -19,6 +20,7 @@ const createGuestSessionSchema = z.object({
   invitationData: z.record(z.string(), z.unknown()).default({}),
   fingerprint: z.string().trim().max(200).nullable().optional(),
   website: z.string().max(2048).optional(),
+  cf_turnstile_token: z.string().trim().nullable().optional(),
 });
 
 const updateGuestSessionSchema = z.object({
@@ -87,6 +89,14 @@ async function postGuestSession(request: NextRequest) {
       },
       error: null,
     });
+  }
+
+  const turnstile = await verifyTurnstileToken(
+    parsed.data.cf_turnstile_token,
+    request.headers.get("x-client-ip") ?? undefined,
+  );
+  if (!turnstile.success) {
+    return responseError("TURNSTILE_FAILED", "Verifikasi keamanan gagal. Coba refresh halaman.", 403);
   }
 
   const admin = getAdminClient();

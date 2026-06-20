@@ -11,6 +11,9 @@ import { AuthInput } from "@/components/auth/AuthInput";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthTabs } from "@/components/auth/AuthTabs";
 import { SocialButtons } from "@/components/auth/SocialButtons";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
+import { useTurnstile } from "@/hooks/useTurnstile";
+import { verifyCaptchaToken } from "@/lib/captcha-client";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { claimCurrentGuestSession, getGuestTokenFromStorage, hasCookieGuestSession } from "@/lib/guest-session-client";
 
@@ -21,6 +24,8 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [guestSessionToken, setGuestSessionToken] = useState<string | null>(null);
   const [hasGuestCookie, setHasGuestCookie] = useState(false);
+  const [turnstileKey, setTurnstileKey] = useState(0);
+  const { getToken, isError, onSuccess, onError, onExpire, reset } = useTurnstile();
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
@@ -29,6 +34,22 @@ function LoginForm() {
     setGuestSessionToken(getGuestTokenFromStorage(new URLSearchParams(window.location.search)));
     void hasCookieGuestSession().then(setHasGuestCookie);
   }, []);
+
+  function resetCaptcha() {
+    reset();
+    setTurnstileKey((key) => key + 1);
+  }
+
+  async function verifyCaptchaOrToast() {
+    const result = await verifyCaptchaToken(getToken());
+    if (!result.success) {
+      toast.error(result.message);
+      resetCaptcha();
+      return false;
+    }
+
+    return true;
+  }
 
   async function claimGuestSession(accessToken: string) {
     const shouldClaim =
@@ -64,12 +85,18 @@ function LoginForm() {
   async function handleEmailLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
+    const captchaVerified = await verifyCaptchaOrToast();
+    if (!captchaVerified) {
+      setLoading(false);
+      return;
+    }
 
     const supabase = createBrowserSupabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error || !data.session) {
       toast.error("Login gagal", { description: "Email atau kata sandi salah." });
+      resetCaptcha();
       setLoading(false);
       return;
     }
@@ -82,6 +109,12 @@ function LoginForm() {
   async function handleGoogleLogin() {
     try {
       setLoading(true);
+      const captchaVerified = await verifyCaptchaOrToast();
+      if (!captchaVerified) {
+        setLoading(false);
+        return;
+      }
+
       const supabase = createBrowserSupabaseClient();
       const token = getGuestTokenFromStorage(new URLSearchParams(window.location.search));
       const redirectTo = token
@@ -95,6 +128,7 @@ function LoginForm() {
 
       if (error) {
         toast.error("Login Google gagal", { description: "Silakan coba lagi." });
+        resetCaptcha();
         setLoading(false);
       }
     } catch (error) {
@@ -152,6 +186,13 @@ function LoginForm() {
               Lupa kata sandi?
             </Link>
           </div>
+
+          {isError ? (
+            <p className="rounded-lg border border-red-200 bg-red-50 p-3 font-ui text-sm font-semibold text-landing-maroon">
+              Verifikasi keamanan gagal. Silakan refresh halaman.
+            </p>
+          ) : null}
+          <TurnstileWidget key={turnstileKey} onSuccess={onSuccess} onError={onError} onExpire={onExpire} />
 
           <button
             type="submit"

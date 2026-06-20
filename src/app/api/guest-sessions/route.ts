@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { normalizeThemeSelection } from '@/lib/default-theme'
 import { getGuestExpiry } from '@/lib/guest-session-server'
+import { verifyTurnstileToken } from '@/lib/turnstile'
 
 const createGuestSessionSchema = z.object({
   sessionToken: z.string().uuid(),
@@ -10,6 +11,7 @@ const createGuestSessionSchema = z.object({
   themeId: z.string().trim().nullable().optional(),
   expiresAt: z.string(),
   invitationData: z.record(z.string(), z.unknown()),
+  cf_turnstile_token: z.string().trim().nullable().optional(),
 })
 
 export async function POST(request: Request) {
@@ -31,9 +33,20 @@ export async function POST(request: Request) {
       )
     }
 
-    const { sessionToken, slug, themeId, invitationData } = parsed.data
+    const { sessionToken, slug, themeId, invitationData, cf_turnstile_token } = parsed.data
     const expiresAt = getGuestExpiry()
     const normalizedThemeId = normalizeThemeSelection(themeId)
+
+    const turnstile = await verifyTurnstileToken(cf_turnstile_token, request.headers.get('x-client-ip') ?? undefined)
+    if (!turnstile.success) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: { code: 'TURNSTILE_FAILED', message: 'Verifikasi keamanan gagal. Coba refresh halaman.' },
+        },
+        { status: 403 }
+      )
+    }
 
     const supabaseAdmin = getAdminClient()
     if (!supabaseAdmin) {

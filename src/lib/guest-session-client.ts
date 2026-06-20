@@ -16,6 +16,7 @@ export type CreateGuestSessionPayload = {
   invitationData: Record<string, unknown>;
   website?: string;
   fingerprint?: string | null;
+  cf_turnstile_token?: string | null;
 };
 
 export type CreateGuestSessionResult = {
