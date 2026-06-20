@@ -242,10 +242,14 @@ function HeroSection({ data }: { data: FatehaInvitationData }) {
 }
 
 function QuoteSection({ data }: { data: FatehaInvitationData }) {
+  const openingGreeting = data.quote.bismillah.trim();
+  const quoteArabic = data.quote.arabic.trim();
+
   return (
     <SectionShell id="quote" tone="pearl" narrow>
       <div className="fateha-panel fateha-reveal fateha-quote">
-        <p className="fateha-arabic">{data.quote.arabic}</p>
+        {openingGreeting ? <p className="fateha-arabic">{openingGreeting}</p> : null}
+        {quoteArabic ? <p className="fateha-arabic">{quoteArabic}</p> : null}
         <OrnamentDivider />
         <p>{data.quote.translation}</p>
         <span>{data.quote.source}</span>

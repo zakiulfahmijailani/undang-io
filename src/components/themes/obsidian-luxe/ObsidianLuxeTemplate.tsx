@@ -338,9 +338,11 @@ function CoverSection({ data }: { data: FatehaInvitationData }) {
 }
 
 function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
+  const openingGreeting = data.quote.bismillah.trim();
+  const quoteArabic = cleanArabic(data.quote.arabic);
   const quoteText = data.quote.translation.trim();
 
-  if (!quoteText && !data.quote.source) return null;
+  if (!openingGreeting && !quoteArabic && !quoteText && !data.quote.source) return null;
 
   return (
     <section id="quote" className="relative isolate overflow-hidden bg-[#111111] px-5 py-20 text-center">
@@ -351,9 +353,16 @@ function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
         <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#F3D889]/70 to-transparent" />
         <div className="absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-[#F3D889]/60 to-transparent" />
         <GoldFloralSpray className="mx-auto mb-8 h-14 w-64 text-[#D9B457]" />
-        <p className="mx-auto max-w-2xl text-3xl leading-[2.1] text-[#D9B457] [font-family:var(--font-obsidian-arabic)] sm:text-4xl">
-          {cleanArabic(data.quote.arabic)}
-        </p>
+        {openingGreeting ? (
+          <p className="mx-auto mb-8 max-w-2xl [font-family:var(--font-obsidian-heading)] text-xl leading-relaxed text-[#F6EBD1] sm:text-2xl">
+            {openingGreeting}
+          </p>
+        ) : null}
+        {quoteArabic ? (
+          <p className="mx-auto max-w-2xl text-3xl leading-[2.1] text-[#D9B457] [font-family:var(--font-obsidian-arabic)] sm:text-4xl">
+            {quoteArabic}
+          </p>
+        ) : null}
         {quoteText ? (
           <p className="mx-auto mt-8 max-w-2xl [font-family:var(--font-obsidian-heading)] text-lg italic leading-8 text-[#F6EBD1] sm:text-xl sm:leading-9">
             &ldquo;{quoteText}&rdquo;

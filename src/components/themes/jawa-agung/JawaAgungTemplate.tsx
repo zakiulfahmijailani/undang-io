@@ -816,6 +816,7 @@ function CoverSection({ data }: { data: FatehaInvitationData }) {
 }
 
 function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
+  const openingGreeting = data.quote.bismillah.trim();
   const arabic = safeArabic(data.quote.arabic);
 
   return (
@@ -824,6 +825,7 @@ function OpeningQuoteSection({ data }: { data: FatehaInvitationData }) {
       <JasmineGarland color="#8A5518" opacity={0.24} className="absolute bottom-8 left-1/2 z-[2] w-[min(520px,88vw)] -translate-x-1/2" />
       <div className="jawa-stagger relative z-10 flex flex-col items-center gap-7">
         <DividerOrnament color="#D4A843" width={320} className="w-[min(320px,78vw)]" />
+        {openingGreeting ? <p className="jawa-display max-w-2xl text-center text-base font-semibold tracking-[0.08em] text-[#7B3F1A] sm:text-lg">{openingGreeting}</p> : null}
         {arabic ? <p className="jawa-arabic max-w-3xl text-center text-[1.8rem] leading-[2.2] text-[#7B3F1A] sm:text-[2.2rem]">{arabic}</p> : null}
         {data.quote.translation ? <p className="mx-auto max-w-[52ch] text-center text-base italic leading-[1.9] text-[#2A1A0E]">{data.quote.translation}</p> : null}
         {data.quote.source ? <p className="jawa-display text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#7A5C3A]">{data.quote.source}</p> : null}
