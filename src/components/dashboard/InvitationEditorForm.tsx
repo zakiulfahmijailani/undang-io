@@ -333,6 +333,8 @@ export default function InvitationEditorForm({
     <InvitationPreviewShell
       themeKey={resolvedThemeKey}
       invitationData={previewPayload as any}
+      sendNamePreviewUpdate={wizardMode}
+      previewReloadKey={resolvedThemeKey}
       url={`/invite/${localDraft.slug || "nama-pasangan"}`}
       isLive
       className="h-full"
