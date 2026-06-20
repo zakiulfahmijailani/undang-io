@@ -137,6 +137,10 @@ function createLegacyData(form: InvitationPreviewPayload): LegacyDemoData {
   };
 }
 
+function createMonogram(groomName: string, brideName: string) {
+  return `${brideName.trim().charAt(0) || "M"} ${groomName.trim().charAt(0) || "P"}`.toUpperCase();
+}
+
 export function LiveDemoWrapper({ initialData, theme }: { initialData: LiveDemoData; theme: string }) {
   const [data, setData] = useState<LiveDemoData>(initialData);
   const [themeOverride, setThemeOverride] = useState<ThemePreviewOverride>({});
@@ -155,6 +159,47 @@ export function LiveDemoWrapper({ initialData, theme }: { initialData: LiveDemoD
         return;
       }
 
+      if (message.type === "PREVIEW_UPDATE") {
+        const groomName = message.groomName.trim();
+        const brideName = message.brideName.trim();
+        setData((currentData) => {
+          if (theme === "legacy") {
+            const current = currentData as LegacyDemoData;
+            const initial = initialData as LegacyDemoData;
+            const nextGroomName = groomName || initial.groom.fullName;
+            const nextBrideName = brideName || initial.bride.fullName;
+
+            return {
+              ...current,
+              coupleShortName: `${nextGroomName} & ${nextBrideName}`,
+              groom: { ...current.groom, fullName: nextGroomName },
+              bride: { ...current.bride, fullName: nextBrideName },
+            };
+          }
+
+          const current = currentData as FatehaInvitationData;
+          const initial = initialData as FatehaInvitationData;
+          const nextGroomName = groomName || initial.groom.nickname || initial.groom.fullName;
+          const nextBrideName = brideName || initial.bride.nickname || initial.bride.fullName;
+
+          return {
+            ...current,
+            monogram: createMonogram(nextGroomName, nextBrideName),
+            groom: {
+              ...current.groom,
+              fullName: nextGroomName,
+              nickname: nextGroomName,
+            },
+            bride: {
+              ...current.bride,
+              fullName: nextBrideName,
+              nickname: nextBrideName,
+            },
+          };
+        });
+        return;
+      }
+
       if ((message.type === "UPDATE_PREVIEW" || message.type === "UPDATE_INVITATION_PREVIEW") && message.data) {
         setData(
           theme === "legacy"
@@ -166,7 +211,7 @@ export function LiveDemoWrapper({ initialData, theme }: { initialData: LiveDemoD
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [theme]);
+  }, [initialData, theme]);
 
   const overrideStyle = useMemo(() => {
     const colors = themeOverride.colors || {};

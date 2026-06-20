@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { DEFAULT_INVITATION_THEME_KEY } from "@/lib/default-theme";
 import { cn } from "@/lib/utils";
 import type { InvitationPreviewPayload, PreviewMessage, ThemePreviewOverride } from "@/types/preview";
@@ -12,6 +12,7 @@ export type InvitationPreviewShellProps = {
   src?: string;
   url?: string;
   isLive?: boolean;
+  sendNamePreviewUpdate?: boolean;
   title?: string;
   className?: string;
 };
@@ -23,23 +24,36 @@ export function InvitationPreviewShell({
   src,
   url = "/invite/nama-mempelai",
   isLive = true,
+  sendNamePreviewUpdate = false,
   title = "Pratinjau undangan",
   className,
 }: InvitationPreviewShellProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const previewSrc = src || `/invite/demo?preview=true&theme=${encodeURIComponent(themeKey || DEFAULT_INVITATION_THEME_KEY)}`;
 
-  function send(message: PreviewMessage) {
+  const send = useCallback((message: PreviewMessage) => {
     iframeRef.current?.contentWindow?.postMessage(message, window.location.origin);
-  }
+  }, []);
+
+  const sendInvitationPreview = useCallback(() => {
+    if (!invitationData) return;
+    send({ type: "UPDATE_INVITATION_PREVIEW", data: invitationData });
+    if (sendNamePreviewUpdate) {
+      send({
+        type: "PREVIEW_UPDATE",
+        groomName: invitationData.groomNickname || invitationData.groomFullName || "",
+        brideName: invitationData.brideNickname || invitationData.brideFullName || "",
+      });
+    }
+  }, [invitationData, send, sendNamePreviewUpdate]);
 
   useEffect(() => {
-    if (invitationData) send({ type: "UPDATE_INVITATION_PREVIEW", data: invitationData });
-  }, [invitationData, previewSrc]);
+    sendInvitationPreview();
+  }, [previewSrc, sendInvitationPreview]);
 
   useEffect(() => {
     if (themeOverrides) send({ type: "UPDATE_THEME_PREVIEW", data: themeOverrides });
-  }, [previewSrc, themeOverrides]);
+  }, [previewSrc, send, themeOverrides]);
 
   return (
     <section
@@ -73,7 +87,7 @@ export function InvitationPreviewShell({
           src={previewSrc}
           title={title}
           onLoad={() => {
-            if (invitationData) send({ type: "UPDATE_INVITATION_PREVIEW", data: invitationData });
+            sendInvitationPreview();
             if (themeOverrides) send({ type: "UPDATE_THEME_PREVIEW", data: themeOverrides });
           }}
           className="block h-full min-h-full w-full border-0 bg-white"
@@ -83,4 +97,3 @@ export function InvitationPreviewShell({
     </section>
   );
 }
-

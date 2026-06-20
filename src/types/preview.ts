@@ -57,5 +57,5 @@ export type ThemePreviewOverride = {
 export type PreviewMessage =
   | { type: "UPDATE_INVITATION_PREVIEW"; data: InvitationPreviewPayload }
   | { type: "UPDATE_THEME_PREVIEW"; data: ThemePreviewOverride }
+  | { type: "PREVIEW_UPDATE"; groomName: string; brideName: string }
   | { type: "UPDATE_PREVIEW"; data: InvitationPreviewPayload };
-
