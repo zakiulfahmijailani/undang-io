@@ -35,10 +35,16 @@ function isRateLimitExempt(pathname: string) {
 }
 
 function errorResponse(code: string, message: string, status: number, headers?: HeadersInit, details?: unknown) {
-    return NextResponse.json(
+    return applyEdgeSecurityHeaders(NextResponse.json(
         { data: null, error: { code, message, ...(details === undefined ? {} : { details }) } },
         { status, headers },
-    )
+    ))
+}
+
+function applyEdgeSecurityHeaders(response: NextResponse) {
+    response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    return response
 }
 
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
@@ -101,10 +107,10 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
             }
         }
 
-        return await updateSession(request, requestHeaders)
+        return applyEdgeSecurityHeaders(await updateSession(request, requestHeaders))
     }
 
-    return await updateSession(request)
+    return applyEdgeSecurityHeaders(await updateSession(request))
 }
 
 export const config = {
