@@ -31,6 +31,7 @@ import { ThemePreviewCard } from "@/components/landing/ThemePreviewCard";
 import type { LandingTheme } from "@/components/landing/types";
 import { InvitationPreviewShell } from "@/components/preview/InvitationPreviewShell";
 import { LivePreviewWorkspace } from "@/components/preview/LivePreviewWorkspace";
+import type { InvitationPreviewPayload } from "@/types/preview";
 import { TrialCountdownBar } from "@/components/trial/TrialCountdownBar";
 import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 import InvitationEditorForm, { type InvitationEditorInitialData } from "@/components/dashboard/InvitationEditorForm";
@@ -57,6 +58,16 @@ export type ActiveTheme = {
 };
 
 type WizardStep = 1 | 2 | 3;
+
+type LandingDraft = {
+  themeId?: string | null;
+  groom_name?: string | null;
+  bride_name?: string | null;
+  groom_full_name?: string | null;
+  bride_full_name?: string | null;
+  groom_nickname?: string | null;
+  bride_nickname?: string | null;
+};
 
 
 
@@ -137,6 +148,54 @@ function mergeActiveThemes(primary: ActiveTheme[], secondary: ActiveTheme[]) {
 
 function themeSelectionValue(theme: ActiveTheme) {
   return isCodeRenderedThemeKey(theme.slug) ? theme.slug : theme.id;
+}
+
+function cleanDraftValue(value: string | null | undefined) {
+  return value?.trim() || "";
+}
+
+function toInvitationPreviewPayload(form: Partial<InvitationEditorInitialData>): InvitationPreviewPayload {
+  return {
+    id: form.id,
+    slug: form.slug,
+    groomFullName: form.groom_full_name ?? undefined,
+    groomNickname: form.groom_nickname ?? undefined,
+    groomFather: form.groom_father_name ?? undefined,
+    groomMother: form.groom_mother_name ?? undefined,
+    groomPhotoUrl: form.groom_photo_url ?? undefined,
+    brideFullName: form.bride_full_name ?? undefined,
+    brideNickname: form.bride_nickname ?? undefined,
+    brideFather: form.bride_father_name ?? undefined,
+    brideMother: form.bride_mother_name ?? undefined,
+    bridePhotoUrl: form.bride_photo_url ?? undefined,
+    couplePhotoUrl: form.couple_photo_url ?? undefined,
+    backgroundPhotoUrl: form.background_photo_url ?? undefined,
+    akadDate: form.akad_datetime ?? undefined,
+    akadVenue: form.akad_location_name ?? undefined,
+    akadAddress: form.akad_location_address ?? undefined,
+    akadMapsUrl: form.akad_maps_url ?? undefined,
+    receptionDate: form.resepsi_datetime ?? undefined,
+    receptionVenue: form.resepsi_location_name ?? undefined,
+    receptionAddress: form.resepsi_location_address ?? undefined,
+    receptionMapsUrl: form.resepsi_maps_url ?? undefined,
+    quote: form.quote_text ?? undefined,
+    quoteSource: form.quote_source ?? undefined,
+    quoteGreeting: form.quote_greeting ?? undefined,
+    quoteArabic: form.quote_arabic ?? undefined,
+    loveStory: form.love_story ?? undefined,
+    galleryPhotos: form.gallery_photos ?? undefined,
+    giftBankName: form.gift_bank_name ?? undefined,
+    giftBankAccount: form.gift_bank_account ?? undefined,
+    giftBankAccountName: form.gift_bank_account_name ?? undefined,
+    giftShippingAddress: form.gift_shipping_address ?? undefined,
+    musicUrl: form.music_url ?? undefined,
+    showCouplePhotos: form.show_couple_photos ?? undefined,
+    showPrewedGallery: form.show_prewed_gallery ?? undefined,
+    showGiftSection: form.show_gift_section ?? undefined,
+    rsvpEnabled: form.rsvp_enabled ?? undefined,
+    sectionsOrder: form.sections_order ?? undefined,
+    sectionsVisibility: form.sections_visibility ?? undefined,
+  };
 }
 
 function normalizeCategory(category: string | null) {
@@ -273,46 +332,54 @@ export function BuatUndanganContent({ themes, isLoggedIn = false }: { themes: Ac
   const [form, setForm] = useState<Partial<InvitationEditorInitialData>>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const honeypotRef = useRef<HTMLInputElement>(null);
+  const hasAppliedInitialDraftRef = useRef(false);
   const deviceFingerprint = useDeviceFingerprint();
   const resumeSlug = searchParams.get("resume");
   const { getToken, isError, onSuccess, onError, onExpire } = useTurnstile();
 
   useEffect(() => {
-    const themeFromUrl = searchParams.get("theme");
-    const groomFromUrl = searchParams.get("groom")?.trim();
-    const brideFromUrl = searchParams.get("bride")?.trim();
-    const match = themeOptions.find((theme) => theme.id === themeFromUrl || theme.slug === themeFromUrl);
+    if (hasAppliedInitialDraftRef.current) return;
+    hasAppliedInitialDraftRef.current = true;
+
+    const themeFromUrl = searchParams.get("theme")?.trim() || "";
+    const groomFromUrl = searchParams.get("groom")?.trim() || "";
+    const brideFromUrl = searchParams.get("bride")?.trim() || "";
+    let draft: LandingDraft | null = null;
+
+    try {
+      const raw = sessionStorage.getItem("undang_draft");
+      if (raw) {
+        draft = JSON.parse(raw) as LandingDraft;
+        sessionStorage.removeItem("undang_draft");
+      }
+    } catch (error) {
+      console.error("[buat-undangan] Failed to read draft:", error);
+    }
+
+    const themeFromDraft = cleanDraftValue(draft?.themeId);
+    const match = themeOptions.find((theme) => theme.id === (themeFromUrl || themeFromDraft) || theme.slug === (themeFromUrl || themeFromDraft));
     if (match) {
       setSelectedThemeId(match.id);
       setStep(2);
     }
 
-if (groomFromUrl || brideFromUrl) {
+    const groomFromDraft =
+      cleanDraftValue(draft?.groom_nickname) ||
+      cleanDraftValue(draft?.groom_name) ||
+      cleanDraftValue(draft?.groom_full_name);
+    const brideFromDraft =
+      cleanDraftValue(draft?.bride_nickname) ||
+      cleanDraftValue(draft?.bride_name) ||
+      cleanDraftValue(draft?.bride_full_name);
+    const groomNickname = groomFromUrl || groomFromDraft;
+    const brideNickname = brideFromUrl || brideFromDraft;
+
+    if (groomNickname || brideNickname) {
       setForm((previous) => ({
         ...previous,
-        groom_full_name: groomFromUrl || previous.groom_full_name,
-        groom_nickname: groomFromUrl || previous.groom_nickname,
-        bride_full_name: brideFromUrl || previous.bride_full_name,
-        bride_nickname: brideFromUrl || previous.bride_nickname,
+        groom_nickname: groomNickname || previous.groom_nickname,
+        bride_nickname: brideNickname || previous.bride_nickname,
       }));
-    }
-
-    try {
-      const raw = sessionStorage.getItem("undang_draft");
-      if (raw) {
-        const draft = JSON.parse(raw) as any;
-        setForm((previous) => ({
-          ...previous,
-          ...draft,
-        }));
-        if (draft.themeId) {
-          const draftTheme = themeOptions.find((theme) => theme.id === draft.themeId || theme.slug === draft.themeId);
-          if (draftTheme) setSelectedThemeId(draftTheme.id);
-        }
-        sessionStorage.removeItem("undang_draft");
-      }
-    } catch (error) {
-      console.error("[buat-undangan] Failed to read draft:", error);
     }
   }, [searchParams, themeOptions]);
 
@@ -354,6 +421,8 @@ if (groomFromUrl || brideFromUrl) {
     () => themeOptions.find((theme) => theme.id === selectedThemeId),
     [selectedThemeId, themeOptions],
   );
+  const previewPayload = useMemo(() => toInvitationPreviewPayload(form), [form]);
+  const previewReloadKey = selectedTheme?.slug || selectedThemeId || DEFAULT_INVITATION_THEME_KEY;
 
 
 
@@ -649,7 +718,9 @@ if (groomFromUrl || brideFromUrl) {
           preview={
             <InvitationPreviewShell
               themeKey={selectedTheme?.slug || DEFAULT_INVITATION_THEME_KEY}
-              invitationData={{ ...form }}
+              invitationData={previewPayload}
+              sendNamePreviewUpdate
+              previewReloadKey={previewReloadKey}
               title="Pratinjau tema"
               url="/invite/nama-mempelai"
               className="h-full"
@@ -775,7 +846,9 @@ if (groomFromUrl || brideFromUrl) {
           preview={
             <InvitationPreviewShell
               themeKey={selectedTheme?.slug}
-              invitationData={{ ...form }}
+              invitationData={previewPayload}
+              sendNamePreviewUpdate
+              previewReloadKey={previewReloadKey}
               title="Pratinjau final"
               url={`/invite/${generateSlug(form.groom_nickname || form.groom_full_name || "", form.bride_nickname || form.bride_full_name || "")}`}
               className="h-full"
