@@ -36,6 +36,7 @@ export function LiveInvitationPreview({ groomName, brideName, selectedThemeKey }
       invitationData={previewData}
       isLive={false}
       sendNamePreviewUpdate
+      previewReloadKey={selectedThemeKey}
       url="/invite/rizky-amara"
       className="h-full min-h-[520px] w-full"
     />

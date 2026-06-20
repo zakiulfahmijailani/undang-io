@@ -13,6 +13,7 @@ export type InvitationPreviewShellProps = {
   url?: string;
   isLive?: boolean;
   sendNamePreviewUpdate?: boolean;
+  previewReloadKey?: string | number | null;
   title?: string;
   className?: string;
 };
@@ -25,6 +26,7 @@ export function InvitationPreviewShell({
   url = "/invite/nama-mempelai",
   isLive = true,
   sendNamePreviewUpdate = false,
+  previewReloadKey,
   title = "Pratinjau undangan",
   className,
 }: InvitationPreviewShellProps) {
@@ -54,6 +56,15 @@ export function InvitationPreviewShell({
   useEffect(() => {
     if (themeOverrides) send({ type: "UPDATE_THEME_PREVIEW", data: themeOverrides });
   }, [previewSrc, send, themeOverrides]);
+
+  useEffect(() => {
+    if (!sendNamePreviewUpdate || previewReloadKey === undefined) return;
+    const timer = window.setTimeout(() => {
+      sendInvitationPreview();
+    }, 800);
+
+    return () => window.clearTimeout(timer);
+  }, [previewReloadKey, sendInvitationPreview, sendNamePreviewUpdate]);
 
   return (
     <section
